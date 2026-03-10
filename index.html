@@ -515,9 +515,14 @@
         </div>
 
         <!-- 인벤토리 탭 -->
-        <div class="grid grid-cols-2 gap-2 mb-4">
-            <button onclick="UIManager.switchInvTab('gear')" id="inv-tab-gear" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">장비 (스탯 증가)</button>
-            <button onclick="UIManager.switchInvTab('skin')" id="inv-tab-skin" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">치장품 (프로필)</button>
+       <div class="flex justify-between items-center mb-4 gap-2 border-b border-slate-800 pb-3">
+            <div class="flex gap-2 w-2/3">
+                <button onclick="UIManager.switchInvTab('gear')" id="inv-tab-gear" class="w-full py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors">장비(스탯)</button>
+                <button onclick="UIManager.switchInvTab('skin')" id="inv-tab-skin" class="w-full py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors">치장품</button>
+            </div>
+            <button onclick="GameSystem.Synthesis.openModal()" class="w-1/3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-lg text-xs shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all active:scale-95 flex items-center justify-center gap-1 border border-purple-400 animate-pulse">
+                <span>🔮</span> 연금술
+            </button>
         </div>
 
         <!-- 장비 목록 영역 -->
@@ -602,6 +607,7 @@
 </script>
 </body>
 </html>
+
 
 
 
