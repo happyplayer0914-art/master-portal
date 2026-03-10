@@ -241,58 +241,73 @@ const GameSystem = {
             };
         },
 
-        updateUI() {
-            const selected = UIManager.selectedItems;
-            const count = selected.length;
-            const conf = this.config[this.currentTier];
-            const cost = this.getCost();
+     updateUI() {
+    const selected = UIManager.selectedItems;
+    const count = selected.length;
+    const conf = this.config[this.currentTier];
 
-            // 슬롯 렌더링
-            const borderClass = this.currentTier === 'common' ? 'border-slate-500' : this.currentTier === 'rare' ? 'border-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.3)]' : 'border-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.3)]';
+    // 1. 가마솥 슬롯 업데이트 (위에 3개 구멍)
+    for (let i = 1; i <= 3; i++) {
+        const slot = document.getElementById(`synth-slot-${i}`);
+        if (i <= count) {
+            const itemObj = GameData.items[selected[i-1]];
+            slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
+            slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-purple-500 flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer shadow-lg`;
+            slot.onclick = () => this.selectItem(selected[i-1]);
+        } else {
+            slot.innerHTML = '';
+            slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
+            slot.onclick = null;
+        }
+    }
 
-            for (let i = 1; i <= 3; i++) {
-                const slot = document.getElementById(`synth-slot-${i}`);
-                if (i <= count) {
-                    const itemObj = GameData.items[selected[i-1]];
-                    slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
-                    slot.className = `w-16 h-16 rounded-xl border-2 border-solid ${borderClass} flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer`;
-                    slot.onclick = () => this.selectItem(selected[i-1]);
-                } else {
-                    slot.innerHTML = count === 2 && i === 3 ? `<i class="fa-solid fa-plus text-yellow-400 text-xl animate-pulse"></i>` : '';
-                    slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
-                    slot.onclick = null;
-                }
+    // 2. 🔥 모달 내부 재료 목록 갱신 (선택 불가 문제 해결!)
+    const listArea = document.getElementById('synth-material-list');
+    if (listArea) {
+        listArea.innerHTML = "";
+        // 현재 선택한 등급(Tier)과 일치하고, 장착 중이지 않은 장비만 필터링
+        const eligibleItems = GameState.inventory.filter(id => {
+            const item = GameData.items[id];
+            return item && item.type === 'gear' && item.rarity === this.currentTier && id !== GameState.equippedGear;
+        });
+
+        // 중복 제거하여 목록화
+        [...new Set(eligibleItems)].forEach(id => {
+            const item = GameData.items[id];
+            const hasCount = eligibleItems.filter(iid => iid === id).length;
+            const usedCount = selected.filter(sid => sid === id).length;
+            const remain = hasCount - usedCount;
+
+            if (hasCount > 0) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `p-2 bg-slate-800 rounded-lg flex flex-col items-center justify-center border ${usedCount > 0 ? 'border-purple-500 ring-1 ring-purple-500' : 'border-slate-700'} relative`;
+                itemDiv.innerHTML = `
+                    <div class="text-xl">${item.emoji}</div>
+                    <div class="text-[9px] mt-1 text-slate-400">${remain}개</div>
+                    ${usedCount > 0 ? `<div class="absolute -top-1 -right-1 bg-purple-600 text-[8px] px-1.5 py-0.5 rounded-full font-bold">+${usedCount}</div>` : ''}
+                `;
+                itemDiv.onclick = () => this.selectItem(id);
+                listArea.appendChild(itemDiv);
             }
+        });
+    }
 
-            // 확률 및 마일리지
-            const pityWrap = document.getElementById('synth-pity-wrap');
-            let bonusPity = 0;
-            if (this.currentTier !== 'common') {
-                bonusPity = GameState.synthPity[this.currentTier] || 0;
-                pityWrap.classList.remove('hidden');
-                document.getElementById('synth-pity-text').innerText = `${Math.min(100, bonusPity)}%`;
-                document.getElementById('synth-pity-bar').style.width = `${Math.min(100, bonusPity)}%`;
-            } else { pityWrap.classList.add('hidden'); }
-
-            const finalRate = Math.min(100, conf.rate + bonusPity);
-            const rateText = document.getElementById('synth-rate-text');
-            rateText.innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-[12px] text-pink-400">(+${bonusPity}%)</span>` : '');
-
-            // 버튼 제어
-            const btn = document.getElementById('btn-synth-execute');
-            const costStr = `🪙 ${cost.gold.toLocaleString()}` + (cost.gem > 0 ? ` & 💎 ${cost.gem}` : '');
-            
-            if (count === 3) {
-                btn.disabled = false;
-                btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-black shadow-lg active:scale-95 flex flex-col items-center justify-center gap-1";
-                document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
-            } else {
-                btn.disabled = true;
-                btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black disabled:opacity-50 flex flex-col items-center justify-center gap-1";
-                document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
-            }
-            document.getElementById('synth-btn-cost').innerText = costStr;
-        },
+    // 3. 버튼 및 확률 텍스트 업데이트 (기존 로직 유지)
+    const bonusPity = GameState.synthPity[this.currentTier] || 0;
+    const finalRate = Math.min(100, conf.rate + bonusPity);
+    document.getElementById('synth-rate-text').innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-xs text-pink-400">(+${bonusPity}%)</span>` : '');
+    
+    const btn = document.getElementById('btn-synth-execute');
+    if (count === 3) {
+        btn.disabled = false;
+        btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-black shadow-lg";
+        document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
+    } else {
+        btn.disabled = true;
+        btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black opacity-50";
+        document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
+    }
+}
 
         execute() {
             if (UIManager.selectedItems.length < 3) return;
@@ -631,3 +646,4 @@ const GameSystem = {
         }
     }
 };
+
