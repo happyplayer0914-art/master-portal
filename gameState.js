@@ -3,7 +3,7 @@
 // =========================================================================
 const GameState = {
     nickname: "위대한 길드장",
-    deviceId: "", // 🔥 기기 식별자
+    deviceId: "", 
     gold: 10000, gem: 10000, lastCheckIn: "",
     lastIdleCheck: Date.now(),
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
@@ -30,8 +30,13 @@ const GameState = {
         this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
         this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
-        this.equippedGear = localStorage.getItem('master_equipped_gear');
-        this.equippedSkin = localStorage.getItem('master_equipped_skin');
+        
+        // 🔥 "null" 문자열 방지 로직 보강
+        const storedGear = localStorage.getItem('master_equipped_gear');
+        this.equippedGear = (storedGear === "null" || !storedGear) ? null : storedGear;
+        
+        const storedSkin = localStorage.getItem('master_equipped_skin');
+        this.equippedSkin = (storedSkin === "null" || !storedSkin) ? null : storedSkin;
 
         this.checkAndRevive();
     },
@@ -47,8 +52,13 @@ const GameState = {
         localStorage.setItem('master_current_hp', this.currentHp);
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
-        if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
-        if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
+        
+        // 🔥 null일 경우 확실하게 제거하거나 null 저장
+        if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); 
+        else localStorage.removeItem('master_equipped_gear');
+        
+        if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); 
+        else localStorage.removeItem('master_equipped_skin');
     },
 
     checkAndRevive() {
@@ -61,7 +71,6 @@ const GameState = {
 
     getTotalStats() {
         let mult = 1.0;
-        // 🔥 Bug #4 수정: 장착된 아이템이 'gear' 타입인 경우에만 스탯 배율을 적용하도록 보안 강화
         if(this.equippedGear && GameData.items[this.equippedGear] && GameData.items[this.equippedGear].type === 'gear') {
             mult = GameData.items[this.equippedGear].statMult || 1.0;
         }
