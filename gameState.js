@@ -4,7 +4,9 @@
 const GameState = {
     nickname: "위대한 길드장",
     deviceId: "", 
-    gold: 10000, gem: 10000, lastCheckIn: "",
+    gold: 10000, gem: 10000, 
+    lastCheckIn: "",
+    lastPlayRewards: {}, // 🔥 여러 테스트의 보상 날짜를 저장하기 위해 객체(Object)로 변경
     lastIdleCheck: Date.now(),
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
@@ -23,6 +25,14 @@ const GameState = {
         this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
         this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
+        
+        // 🔥 객체 데이터 로드
+        try {
+            this.lastPlayRewards = JSON.parse(localStorage.getItem('master_play_rewards_map') || "{}");
+        } catch(e) {
+            this.lastPlayRewards = {};
+        }
+
         this.lastIdleCheck = parseInt(localStorage.getItem('master_last_idle') || Date.now());
         this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
         this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
@@ -31,7 +41,6 @@ const GameState = {
         this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
         
-        // 🔥 "null" 문자열 방지 로직 보강
         const storedGear = localStorage.getItem('master_equipped_gear');
         this.equippedGear = (storedGear === "null" || !storedGear) ? null : storedGear;
         
@@ -45,7 +54,11 @@ const GameState = {
         localStorage.setItem('master_nickname', this.nickname);
         localStorage.setItem('master_gold', this.gold);
         localStorage.setItem('master_gem', this.gem);
-        localStorage.setItem('last_checkin', this.lastCheckIn); // 🔥 데일리 퀘스트 저장 로직 추가
+        localStorage.setItem('last_checkin', this.lastCheckIn);
+        
+        // 🔥 객체 데이터 저장
+        localStorage.setItem('master_play_rewards_map', JSON.stringify(this.lastPlayRewards));
+        
         localStorage.setItem('master_last_idle', this.lastIdleCheck);
         localStorage.setItem('master_stage', this.rpgStage);
         localStorage.setItem('master_atk', this.rpgAtk);
@@ -54,7 +67,6 @@ const GameState = {
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
         
-        // 🔥 null일 경우 확실하게 제거하거나 null 저장
         if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); 
         else localStorage.removeItem('master_equipped_gear');
         
