@@ -73,7 +73,7 @@
         .hp-fill { height: 100%; background: linear-gradient(90deg, #ef4444, #b91c1c); border-radius: 99px; transition: width 0.2s ease; }
         .monster-hp-fill { height: 100%; background: linear-gradient(90deg, #a855f7, #7e22ce); border-radius: 99px; transition: width 0.2s ease; }
 
-        /* 보스 경고창 (부드러운 애니메이션 복구) */
+        /* 보스 경고창 */
         #boss-warning-overlay {
             position: fixed; inset: 0; z-index: 999; background: rgba(5, 0, 0, 0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -175,13 +175,13 @@
                 <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-[40px]"></div>
                 <h2 class="text-xs text-indigo-400 font-bold tracking-widest mb-1">DAILY QUEST</h2>
                 <h1 class="text-2xl font-black text-white mb-2 break-keep leading-tight">마스터님, 반가워요!<br>오늘의 <span class="text-gradient">지원금</span> 받으세요</h1>
-                <button id="btn-checkin" onclick="claimDailyReward()" class="mt-4 w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-bold shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2">
+                <button id="btn-checkin" onclick="GameSystem.Lobby.claimDailyReward()" class="mt-4 w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-bold shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2">
                     <span>💰</span> 100G 출석 보상 받기
                 </button>
             </div>
         </section>
 
-        <!-- 인기 폭발 테스트 (플러팅, RPG, 수호령 모두 복구 완료) -->
+        <!-- 인기 폭발 테스트 -->
         <section class="mb-10">
             <div class="flex justify-between items-end mb-4">
                 <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> 인기 폭발 테스트</h2>
@@ -189,7 +189,7 @@
             </div>
             <div class="space-y-4">
                 <!-- 플러팅 테스트 -->
-                <a href="https://flirting-mbti.vercel.app/" target="_blank" onclick="rewardForPlay()" class="block glass-card p-4 hover:border-pink-500/50 transition-colors relative overflow-hidden">
+                <a href="https://flirting-mbti.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-pink-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-pink-900 to-purple-900 flex items-center justify-center text-4xl shadow-inner border border-pink-500/30">💘</div>
                         <div class="flex flex-col justify-center flex-1">
@@ -201,7 +201,7 @@
                 </a>
                 
                 <!-- 전설의 길드장 (RPG) -->
-                <a href="https://rpg-mbti-test.vercel.app/" target="_blank" onclick="rewardForPlay()" class="block glass-card p-4 hover:border-indigo-500/50 transition-colors relative overflow-hidden">
+                <a href="https://rpg-mbti-test.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-indigo-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-800 to-indigo-900 flex items-center justify-center text-4xl shadow-inner border border-indigo-500/30">👑</div>
                         <div class="flex flex-col justify-center flex-1">
@@ -212,8 +212,8 @@
                     </div>
                 </a>
 
-                <!-- 내 지갑 수호령 (복구됨!) -->
-                <a href="https://wealth-mbti.vercel.app/" target="_blank" onclick="rewardForPlay()" class="block glass-card p-4 hover:border-yellow-500/50 transition-colors relative overflow-hidden">
+                <!-- 내 지갑 수호령 -->
+                <a href="https://wealth-mbti.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-yellow-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-900 to-slate-900 flex items-center justify-center text-4xl shadow-inner border border-yellow-500/30">🪙</div>
                         <div class="flex flex-col justify-center flex-1">
@@ -252,8 +252,8 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 mb-4">
-            <button onclick="switchTab('forge')" id="tab-forge" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">대장간 (기본강화)</button>
-            <button onclick="switchTab('shop')" id="tab-shop" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">잡화점 (아이템)</button>
+            <button onclick="UIManager.switchTab('forge')" id="tab-forge" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">대장간 (기본강화)</button>
+            <button onclick="UIManager.switchTab('shop')" id="tab-shop" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">잡화점 (아이템)</button>
         </div>
 
         <!-- 대장간 탭 -->
@@ -263,7 +263,7 @@
                     <p class="text-xs text-slate-400 font-bold mb-1">순수 공격력 (ATK)</p>
                     <p class="text-xl font-black text-red-400" id="stat-atk-display">10</p>
                 </div>
-                <button onclick="upgradeStat('atk')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[100px]">
+                <button onclick="GameSystem.Lobby.upgradeStat('atk')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[100px]">
                     <span class="text-xs text-slate-300">업그레이드</span>
                     <span class="text-yellow-400">🪙 <span id="cost-atk-display">50</span></span>
                 </button>
@@ -273,7 +273,7 @@
                     <p class="text-xs text-slate-400 font-bold mb-1">순수 체력 (Max HP)</p>
                     <p class="text-xl font-black text-emerald-400" id="stat-hp-display">100</p>
                 </div>
-                <button onclick="upgradeStat('hp')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[100px]">
+                <button onclick="GameSystem.Lobby.upgradeStat('hp')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[100px]">
                     <span class="text-xs text-slate-300">업그레이드</span>
                     <span class="text-yellow-400">🪙 <span id="cost-hp-display">50</span></span>
                 </button>
@@ -290,7 +290,7 @@
                         <p class="text-xs text-slate-400">전투 중 체력을 50% 회복합니다.</p>
                     </div>
                 </div>
-                <button onclick="buyItem('potion')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[90px]">
+                <button onclick="GameSystem.Lobby.buyItem('potion')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[90px]">
                     <span class="text-xs text-slate-300">구매</span>
                     <span class="text-yellow-400">🪙 30</span>
                 </button>
@@ -303,26 +303,26 @@
                         <p class="text-xs text-slate-400">즉시 체력을 100% 회복합니다.</p>
                     </div>
                 </div>
-                <button onclick="buyItem('inn')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[90px]">
+                <button onclick="GameSystem.Lobby.buyItem('inn')" class="py-2 px-4 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold text-sm border border-slate-600 transition-colors flex flex-col items-center min-w-[90px]">
                     <span class="text-xs text-slate-300">휴식</span>
                     <span class="text-yellow-400">🪙 20</span>
                 </button>
             </div>
         </div>
 
-        <button onclick="enterDungeon()" class="w-full py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2">
+        <button onclick="GameSystem.Battle.enterDungeon()" class="w-full py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2">
             <span>🚪</span> 심연으로 전진하기
         </button>
     </main>
 
-    <!-- [전투 및 이벤트 화면 (중복 코드 제거 완료)] -->
+    <!-- [전투 및 이벤트 화면] -->
     <main id="screen-rpg-event" class="screen pt-24 px-5">
         <div class="glass-card p-8 text-center border border-indigo-500/50 relative overflow-hidden mt-10">
             <p class="text-indigo-400 font-bold text-xs tracking-widest uppercase mb-4">Random Encounter</p>
             <div id="event-icon" class="text-8xl mb-6">🎁</div>
             <h2 id="event-title" class="text-2xl font-black text-white mb-4">이벤트!</h2>
             <p id="event-desc" class="text-slate-300 text-sm leading-relaxed mb-8 break-keep"></p>
-            <button onclick="endEvent()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all">돌아가기</button>
+            <button onclick="GameSystem.Battle.endEvent()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all">돌아가기</button>
         </div>
     </main>
 
@@ -353,8 +353,8 @@
             <div class="progress-track h-4"><div id="battle-player-hp-bar" class="hp-fill" style="width: 100%"></div></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
-            <button id="btn-attack" onclick="playerAttack()" class="col-span-2 py-6 bg-slate-800 border border-slate-500 rounded-2xl font-black text-xl shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] disabled:opacity-50">⚔️ 공격 (TAP!)</button>
-            <button onclick="usePotionInBattle()" class="col-span-1 py-4 bg-slate-800 border border-slate-600 rounded-2xl font-bold text-sm flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px]">
+            <button id="btn-attack" onclick="GameSystem.Battle.playerAttack()" class="col-span-2 py-6 bg-slate-800 border border-slate-500 rounded-2xl font-black text-xl shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] disabled:opacity-50">⚔️ 공격 (TAP!)</button>
+            <button onclick="GameSystem.Battle.usePotionInBattle()" class="col-span-1 py-4 bg-slate-800 border border-slate-600 rounded-2xl font-bold text-sm flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px]">
                 <span class="text-xl mb-1">❤️</span><span class="text-[10px] text-slate-300">포션 (<span id="battle-potion-count">0</span>)</span>
             </button>
         </div>
@@ -386,11 +386,11 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <button onclick="performGacha(1)" class="py-6 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all">
+            <button onclick="GameSystem.Gacha.performGacha(1)" class="py-6 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all">
                 <span class="text-white mb-1">1회 소환</span>
                 <span class="text-cyan-400 text-sm font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 50</span>
             </button>
-            <button onclick="performGacha(10)" class="py-6 bg-gradient-to-br from-indigo-900 to-purple-900 hover:from-indigo-800 hover:to-purple-800 border border-purple-500 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(49,46,129,1)] active:shadow-[0_0px_0_rgba(49,46,129,1)] active:translate-y-[6px] transition-all">
+            <button onclick="GameSystem.Gacha.performGacha(10)" class="py-6 bg-gradient-to-br from-indigo-900 to-purple-900 hover:from-indigo-800 hover:to-purple-800 border border-purple-500 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(49,46,129,1)] active:shadow-[0_0px_0_rgba(49,46,129,1)] active:translate-y-[6px] transition-all">
                 <span class="text-white mb-1">10회 연속 소환</span>
                 <span class="text-cyan-400 text-sm font-bold bg-black/30 px-3 py-1 rounded-full border border-purple-400/50">💎 500</span>
             </button>
@@ -417,18 +417,14 @@
 
         <!-- 인벤토리 탭 -->
         <div class="grid grid-cols-2 gap-2 mb-4">
-            <button onclick="switchInvTab('gear')" id="inv-tab-gear" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">장비 (스탯 증가)</button>
-            <button onclick="switchInvTab('skin')" id="inv-tab-skin" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">치장품 (프로필)</button>
+            <button onclick="UIManager.switchInvTab('gear')" id="inv-tab-gear" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">장비 (스탯 증가)</button>
+            <button onclick="UIManager.switchInvTab('skin')" id="inv-tab-skin" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">치장품 (프로필)</button>
         </div>
 
         <!-- 장비 목록 영역 -->
         <div class="glass-card p-4 min-h-[300px]">
-            <div id="inv-panel-gear" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <!-- JS 렌더링 -->
-            </div>
-            <div id="inv-panel-skin" class="grid grid-cols-2 sm:grid-cols-3 gap-3 hidden">
-                <!-- JS 렌더링 -->
-            </div>
+            <div id="inv-panel-gear" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            <div id="inv-panel-skin" class="grid grid-cols-2 sm:grid-cols-3 gap-3 hidden"></div>
             
             <div id="inv-empty-state" class="hidden text-center py-10">
                 <div class="text-5xl mb-3 opacity-50">🕸️</div>
@@ -439,23 +435,23 @@
 
     <!-- 하단 고정 내비게이션 바 (GNB) -->
     <nav id="bottom-nav" class="bottom-nav">
-        <div class="nav-item active" onclick="navTo('screen-home', this)">
+        <div class="nav-item active" onclick="UIManager.navTo('screen-home', this)">
             <i class="fa-solid fa-house"></i><span>홈</span>
         </div>
-        <div class="nav-item" onclick="navTo('screen-arena', this)">
+        <div class="nav-item" onclick="UIManager.navTo('screen-arena', this)">
             <i class="fa-solid fa-khanda"></i><span>투기장</span>
         </div>
-        <div class="nav-item" onclick="navTo('screen-gacha-shop', this)">
+        <div class="nav-item" onclick="UIManager.navTo('screen-gacha-shop', this)">
             <i class="fa-solid fa-store"></i><span>가챠샵</span>
         </div>
-        <div class="nav-item" onclick="navTo('screen-profile', this)">
+        <div class="nav-item" onclick="UIManager.navTo('screen-profile', this)">
             <i class="fa-solid fa-user"></i><span>내 정보</span>
         </div>
     </nav>
 
 </div>
 
-<!-- 보스 경고 오버레이 (복구 및 수정 완료) -->
+<!-- 보스 경고 오버레이 -->
 <div id="boss-warning-overlay">
     <div class="warning-content">
         <div class="text-7xl mb-6 text-center">⚠️</div>
@@ -469,455 +465,577 @@
     <h2 class="text-2xl font-black text-white mb-10 tracking-widest" id="gacha-title">소환의식 진행 중...</h2>
     <div id="gacha-animation" class="text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🎁</div>
     <div id="gacha-results-container" class="w-full max-w-sm grid grid-cols-2 gap-3 hidden"></div>
-    <button id="gacha-close-btn" onclick="closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
+    <button id="gacha-close-btn" onclick="GameSystem.Gacha.closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
 </div>
 
 <!-- 토스트 -->
 <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[100] border border-indigo-500/50 shadow-2xl whitespace-nowrap"></div>
 
 <script>
-    // ==========================================
-    // 오디오 및 유틸 설정
-    // ==========================================
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx; let soundEnabled = false;
-    document.body.addEventListener('touchstart', initAudio, { once: true });
-    document.body.addEventListener('click', initAudio, { once: true });
-
-    function initAudio() { if(!audioCtx) { audioCtx = new AudioContext(); soundEnabled = true; } if(audioCtx.state === 'suspended') audioCtx.resume(); }
-    function playTone(freq, type, duration, vol) {
-        if(!soundEnabled || !audioCtx) return;
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
-    const sfx = {
-        click: () => playTone(600, 'sine', 0.1, 0.05), equip: () => playTone(800, 'triangle', 0.15, 0.1),
-        coin: () => { playTone(987, 'sine', 0.1, 0.1); setTimeout(()=>playTone(1318, 'sine', 0.2, 0.1), 100); },
-        hit: () => playTone(150, 'sawtooth', 0.15, 0.15), boss: () => { playTone(50, 'square', 1.0, 0.2); playTone(60, 'sawtooth', 1.5, 0.2); },
-        gacha_build: () => { playTone(400, 'sine', 0.1, 0.1); setTimeout(() => playTone(500, 'sine', 0.1, 0.1), 200); setTimeout(() => playTone(600, 'sine', 0.1, 0.1), 400); },
-        gacha_reveal: () => { playTone(880, 'sine', 0.2, 0.1); setTimeout(()=>playTone(1760, 'sine', 0.4, 0.15), 150); }
-    };
-    function triggerHaptic() { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); }
-    function triggerHeavyHaptic() { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); }
-    function showToast(message) { const toast = document.getElementById('toast'); toast.innerText = message; toast.style.opacity = '1'; setTimeout(() => { toast.style.opacity = '0'; }, 2500); }
-
-    const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
-    let width, height; let particles = [];
-    function resizeBg() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-    window.addEventListener('resize', resizeBg); resizeBg();
-    for(let i=0; i<40; i++) { particles.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 2 + 0.5, vy: Math.random() * 0.5 + 0.2, alpha: Math.random() * 0.5 + 0.1 }); }
-    function drawBg() {
-        ctx.clearRect(0, 0, width, height);
-        particles.forEach(p => {
-            p.y -= p.vy; if(p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(168, 85, 247, ${p.alpha})`; ctx.fill();
-        }); requestAnimationFrame(drawBg);
-    } drawBg();
-
-    let isBattling = false;
-    function navTo(screenId, el) {
-        if (isBattling) { showToast("⚔️ 전투 중에는 벗어날 수 없습니다!"); return; }
-        sfx.click(); triggerHaptic();
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active'); window.scrollTo(0, 0);
-        if(el) { document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); el.classList.add('active'); }
-        if(screenId === 'screen-arena') updateRpgLobbyUI();
-        if(screenId === 'screen-profile') renderInventory();
-    }
-
-    // ==========================================
-    // 🎒 데이터 관리 & 인벤토리 시스템
-    // ==========================================
-    
-    // 테스트 지원금 (기본 10000골드, 10000다이아 세팅 유지)
-    let userGold = localStorage.getItem('master_gold');
-    if(userGold === null) userGold = 10000; else userGold = parseInt(userGold);
-    
-    let userGem = localStorage.getItem('master_gem');
-    if(userGem === null) userGem = 10000; else userGem = parseInt(userGem);
-
-    let lastCheckIn = localStorage.getItem('last_checkin') || "";
-    let rpgStage = parseInt(localStorage.getItem('master_stage')) || 1;
-    let rpgAtk = parseInt(localStorage.getItem('master_atk')) || 10;
-    let rpgMaxHp = parseInt(localStorage.getItem('master_max_hp')) || 100;
-    let currentHp = parseInt(localStorage.getItem('master_current_hp')) || rpgMaxHp;
-    let userPotions = parseInt(localStorage.getItem('master_potions')) || 1; 
-    
-    let userInventory = JSON.parse(localStorage.getItem('master_inventory')) || []; 
-    let equippedGear = localStorage.getItem('master_equipped_gear') || null;
-    let equippedSkin = localStorage.getItem('master_equipped_skin') || null;
-
-    // 누락되었던 부활 및 도주 방지 함수 복구
-    function checkAndRevive() {
-        const lastReviveDate = localStorage.getItem('master_last_revive_date') || "";
-        const todayString = new Date().toLocaleDateString(); 
-        if (isNaN(currentHp)) { currentHp = rpgMaxHp; localStorage.setItem('master_last_revive_date', todayString); } 
-        else if (currentHp <= 0 && lastReviveDate !== todayString) {
-            currentHp = rpgMaxHp; localStorage.setItem('master_last_revive_date', todayString);
-            showToast("✨ 새로운 아침! 체력이 완벽히 회복되었습니다.");
-        }
-    }
-
-    if (localStorage.getItem('master_in_battle') === 'true') {
-        localStorage.removeItem('master_in_battle');
-        setTimeout(() => alert(`🚨 비겁하게 도망치다니! 전투는 처음부터 다시 시작해야 합니다.`), 500);
-    }
-
-    const itemDB = {
-        'c1': { id: 'c1', type: 'gear', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
-        'c2': { id: 'c2', type: 'gear', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
-        'c3': { id: 'c3', type: 'gear', name: '평범한 반지', emoji: '💍', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
-        'r1': { id: 'r1', type: 'gear', name: '기사단의 롱소드', emoji: '⚔️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
-        'r2': { id: 'r2', type: 'gear', name: '강철 대방패', emoji: '🛡️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
-        'r3': { id: 'r3', type: 'skin', name: '은빛 테두리', emoji: '✨', rarity: 'rare', color: 'text-blue-400' },
-        'e1': { id: 'e1', type: 'gear', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
-        'e2': { id: 'e2', type: 'gear', name: '심연의 단검', emoji: '🔪', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
-        'e3': { id: 'e3', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
-        'l1': { id: 'l1', type: 'gear', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
-        'l2': { id: 'l2', type: 'gear', name: '군주의 절대 왕관', emoji: '👑', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
-        'l3': { id: 'l3', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' }
-    };
-
-    function saveData() {
-        localStorage.setItem('master_gold', userGold); localStorage.setItem('master_gem', userGem);
-        localStorage.setItem('master_stage', rpgStage); localStorage.setItem('master_atk', rpgAtk);
-        localStorage.setItem('master_max_hp', rpgMaxHp); localStorage.setItem('master_current_hp', currentHp);
-        localStorage.setItem('master_potions', userPotions);
-        localStorage.setItem('master_inventory', JSON.stringify(userInventory));
-        if(equippedGear) localStorage.setItem('master_equipped_gear', equippedGear); else localStorage.removeItem('master_equipped_gear');
-        if(equippedSkin) localStorage.setItem('master_equipped_skin', equippedSkin); else localStorage.removeItem('master_equipped_skin');
-        updateCurrencyUI(); applyAvatarSkin();
-    }
-
-    function updateCurrencyUI() {
-        document.getElementById('gold-display').innerText = userGold.toLocaleString();
-        document.getElementById('gem-display').innerText = userGem.toLocaleString();
-    }
-
-    // 누락된 함수 복구
-    function rewardForPlay() { 
-        sfx.coin(); userGold += 10; saveData(); showToast("탐험 지원금 10G 획득 🪙"); 
-    }
-
-    function getTotalStats() {
-        let mult = 1.0;
-        if(equippedGear && itemDB[equippedGear]) mult = itemDB[equippedGear].statMult;
-        return { atk: Math.floor(rpgAtk * mult), hp: Math.floor(rpgMaxHp * mult) };
-    }
-
-    function applyAvatarSkin() {
-        const avatars = document.querySelectorAll('.master-avatar');
-        avatars.forEach(el => {
-            el.className = 'master-avatar w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md'; 
-            if(el.id === 'profile-big-icon') el.classList.add('w-20', 'h-20', 'text-3xl', 'shadow-xl'); 
-
-            if (equippedSkin && itemDB[equippedSkin]) {
-                el.classList.add(`skin-${itemDB[equippedSkin].rarity}`);
-            } else {
-                el.classList.add('bg-gradient-to-tr', 'from-slate-600', 'to-slate-400');
+    // =========================================================================
+    // 1. GAME DATA (게임 데이터베이스)
+    // =========================================================================
+    const GameData = {
+        items: {
+            'c1': { id: 'c1', type: 'gear', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+            'c2': { id: 'c2', type: 'gear', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+            'c3': { id: 'c3', type: 'gear', name: '평범한 반지', emoji: '💍', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+            'r1': { id: 'r1', type: 'gear', name: '기사단의 롱소드', emoji: '⚔️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
+            'r2': { id: 'r2', type: 'gear', name: '강철 대방패', emoji: '🛡️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
+            'r3': { id: 'r3', type: 'skin', name: '은빛 테두리', emoji: '✨', rarity: 'rare', color: 'text-blue-400' },
+            'e1': { id: 'e1', type: 'gear', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
+            'e2': { id: 'e2', type: 'gear', name: '심연의 단검', emoji: '🔪', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
+            'e3': { id: 'e3', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
+            'l1': { id: 'l1', type: 'gear', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
+            'l2': { id: 'l2', type: 'gear', name: '군주의 절대 왕관', emoji: '👑', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
+            'l3': { id: 'l3', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' }
+        },
+        monsters: {
+            normal: [
+                {e:'🦠',n:'슬라임'},{e:'🦇',n:'흡혈박쥐'},{e:'👺',n:'고블린'},{e:'🐺',n:'마수늑대'},{e:'💀',n:'해골병사'}
+            ],
+            boss: {
+                5:{e:'🐉',n:'심연의 드래곤'}, 10:{e:'🐙',n:'크라켄'}, 15:{e:'🦖',n:'폭군 렉스'}
             }
-        });
-    }
-
-    function switchInvTab(tab) {
-        sfx.click(); triggerHaptic();
-        document.getElementById('inv-panel-gear').classList.add('hidden'); document.getElementById('inv-panel-skin').classList.add('hidden');
-        document.getElementById('inv-tab-gear').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        document.getElementById('inv-tab-skin').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        document.getElementById(`inv-panel-${tab}`).classList.remove('hidden');
-        document.getElementById(`inv-tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
-    }
-
-    function toggleEquip(itemId) {
-        const item = itemDB[itemId];
-        sfx.equip(); triggerHaptic();
-        if (item.type === 'gear') {
-            if (equippedGear === itemId) equippedGear = null; else equippedGear = itemId; 
-        } else if (item.type === 'skin') {
-            if (equippedSkin === itemId) equippedSkin = null; else equippedSkin = itemId;
         }
-        saveData(); renderInventory();
-        showToast(equippedGear === itemId || equippedSkin === itemId ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
-    }
+    };
 
-    function renderInventory() {
-        const pGear = document.getElementById('inv-panel-gear'); const pSkin = document.getElementById('inv-panel-skin');
-        const emptyState = document.getElementById('inv-empty-state');
-        pGear.innerHTML = ''; pSkin.innerHTML = '';
-        let hasGear = false; let hasSkin = false;
-
-        const invCounts = {};
-        userInventory.forEach(id => { invCounts[id] = (invCounts[id] || 0) + 1; });
-
-        for (const [id, count] of Object.entries(invCounts)) {
-            const item = itemDB[id];
-            if(!item) continue;
-            const isEquipped = (equippedGear === id || equippedSkin === id);
-            const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
-            const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
-            const effectHTML = item.type === 'gear' ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
-
-            const cardHTML = `
-                <div onclick="toggleEquip('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} cursor-pointer hover:scale-105 transition-transform">
-                    ${badgeHTML}
-                    <div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[11px] text-center break-keep leading-tight">${item.name}</h4>
-                    ${effectHTML}
-                    ${countHTML}
-                </div>
-            `;
-            if (item.type === 'gear') { pGear.innerHTML += cardHTML; hasGear = true; }
-            else if (item.type === 'skin') { pSkin.innerHTML += cardHTML; hasSkin = true; }
+    // =========================================================================
+    // 2. AUDIO ENGINE (사운드 시스템)
+    // =========================================================================
+    const AudioEngine = {
+        ctx: null,
+        enabled: false,
+        init() {
+            if(!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.enabled = true;
+            }
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+        },
+        playTone(freq, type, duration, vol) {
+            if(!this.enabled || !this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        },
+        sfx: {
+            click: () => AudioEngine.playTone(600, 'sine', 0.1, 0.05),
+            equip: () => AudioEngine.playTone(800, 'triangle', 0.15, 0.1),
+            coin: () => { AudioEngine.playTone(987, 'sine', 0.1, 0.1); setTimeout(()=>AudioEngine.playTone(1318, 'sine', 0.2, 0.1), 100); },
+            hit: () => AudioEngine.playTone(150, 'sawtooth', 0.15, 0.15),
+            boss: () => { AudioEngine.playTone(50, 'square', 1.0, 0.2); AudioEngine.playTone(60, 'sawtooth', 1.5, 0.2); },
+            gacha_build: () => { AudioEngine.playTone(400, 'sine', 0.1, 0.1); setTimeout(() => AudioEngine.playTone(500, 'sine', 0.1, 0.1), 200); setTimeout(() => AudioEngine.playTone(600, 'sine', 0.1, 0.1), 400); },
+            gacha_reveal: () => { AudioEngine.playTone(880, 'sine', 0.2, 0.1); setTimeout(()=>AudioEngine.playTone(1760, 'sine', 0.4, 0.15), 150); }
         }
+    };
 
-        const currentTab = document.getElementById('inv-panel-gear').classList.contains('hidden') ? 'skin' : 'gear';
-        if ((currentTab === 'gear' && !hasGear) || (currentTab === 'skin' && !hasSkin)) emptyState.classList.remove('hidden');
-        else emptyState.classList.add('hidden');
+    document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
+    document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
 
-        const stats = getTotalStats();
-        document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString();
-        document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
-    }
 
-    // ==========================================
-    // 가챠(뽑기) 로직
-    // ==========================================
-    function performGacha(times) {
-        const cost = times * 50;
-        if (userGem < cost) { showToast("젬(💎)이 부족합니다! 보스를 토벌해 획득하세요."); triggerHeavyHaptic(); return; }
+    // =========================================================================
+    // 3. GAME STATE (데이터 저장 및 관리)
+    // =========================================================================
+    const GameState = {
+        gold: 10000, gem: 10000, lastCheckIn: "",
+        rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
+        potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
+        isBattling: false,
 
-        userGem -= cost; saveData();
-        document.getElementById('bottom-nav').style.display = 'none'; 
-        const overlay = document.getElementById('gacha-overlay'); const anim = document.getElementById('gacha-animation');
-        const resultsBox = document.getElementById('gacha-results-container'); const closeBtn = document.getElementById('gacha-close-btn');
-        const title = document.getElementById('gacha-title');
+        load() {
+            let sGold = localStorage.getItem('master_gold');
+            this.gold = sGold !== null ? parseInt(sGold) : 10000;
+            let sGem = localStorage.getItem('master_gem');
+            this.gem = sGem !== null ? parseInt(sGem) : 10000;
+            
+            this.lastCheckIn = localStorage.getItem('last_checkin') || "";
+            this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
+            this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
+            this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
+            this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
+            this.potions = parseInt(localStorage.getItem('master_potions') || "1");
+            
+            this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
+            this.equippedGear = localStorage.getItem('master_equipped_gear') || null;
+            this.equippedSkin = localStorage.getItem('master_equipped_skin') || null;
+
+            this.checkAndRevive();
+
+            if (localStorage.getItem('master_in_battle') === 'true') {
+                localStorage.removeItem('master_in_battle');
+                setTimeout(() => alert(`🚨 비겁하게 도망치다니! 전투는 처음부터 다시 시작해야 합니다.`), 500);
+            }
+        },
+
+        save() {
+            localStorage.setItem('master_gold', this.gold);
+            localStorage.setItem('master_gem', this.gem);
+            localStorage.setItem('master_stage', this.rpgStage);
+            localStorage.setItem('master_atk', this.rpgAtk);
+            localStorage.setItem('master_max_hp', this.rpgMaxHp);
+            localStorage.setItem('master_current_hp', this.currentHp);
+            localStorage.setItem('master_potions', this.potions);
+            localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
+            
+            if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
+            if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
+        },
+
+        checkAndRevive() {
+            const lastReviveDate = localStorage.getItem('master_last_revive_date') || "";
+            const todayString = new Date().toLocaleDateString(); 
+            if (isNaN(this.currentHp)) { 
+                this.currentHp = this.rpgMaxHp; 
+                localStorage.setItem('master_last_revive_date', todayString); 
+            } else if (this.currentHp <= 0 && lastReviveDate !== todayString) {
+                this.currentHp = this.rpgMaxHp; 
+                localStorage.setItem('master_last_revive_date', todayString);
+                setTimeout(() => UIManager.showToast("✨ 새로운 아침! 체력이 완벽히 회복되었습니다."), 1000);
+            }
+        },
+
+        getTotalStats() {
+            let mult = 1.0;
+            if(this.equippedGear && GameData.items[this.equippedGear]) {
+                mult = GameData.items[this.equippedGear].statMult;
+            }
+            return { 
+                atk: Math.floor(this.rpgAtk * mult), 
+                hp: Math.floor(this.rpgMaxHp * mult) 
+            };
+        }
+    };
+
+
+    // =========================================================================
+    // 4. UI MANAGER (화면 업데이트 및 네비게이션)
+    // =========================================================================
+    const UIManager = {
+        init() {
+            this.initBackground();
+            this.updateCurrencyUI();
+            this.applyAvatarSkin();
+            this.initCheckinButton();
+        },
+
+        triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
+        triggerHeavyHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); },
         
-        overlay.classList.add('active'); anim.classList.remove('hidden'); resultsBox.classList.add('hidden');
-        resultsBox.innerHTML = ''; closeBtn.classList.add('hidden'); title.innerText = "소환의식 진행 중...";
+        showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+        },
 
-        sfx.gacha_build(); triggerHeavyHaptic();
+        navTo(screenId, el) {
+            if (GameState.isBattling) { this.showToast("⚔️ 전투 중에는 벗어날 수 없습니다!"); return; }
+            AudioEngine.sfx.click(); this.triggerHaptic();
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+            
+            if(el) {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                el.classList.add('active');
+            }
+            if(screenId === 'screen-arena') this.updateRpgLobbyUI();
+            if(screenId === 'screen-profile') this.renderInventory();
+        },
 
-        let results = [];
-        for(let i=0; i<times; i++) {
-            let roll = Math.random(); let rarity = 'common';
-            if (roll < 0.05) rarity = 'legendary'; else if (roll < 0.20) rarity = 'epic'; else if (roll < 0.50) rarity = 'rare';
-            let pool = Object.values(itemDB).filter(item => item.rarity === rarity);
-            let pulledItem = pool[Math.floor(Math.random() * pool.length)];
-            results.push(pulledItem); userInventory.push(pulledItem.id); 
-        }
-        saveData(); 
+        switchTab(tab) {
+            AudioEngine.sfx.click(); this.triggerHaptic();
+            document.getElementById('panel-forge').classList.add('hidden'); 
+            document.getElementById('panel-shop').classList.add('hidden');
+            document.getElementById('tab-forge').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById('tab-shop').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
+        },
 
-        setTimeout(() => {
-            sfx.gacha_reveal(); triggerHaptic();
-            anim.classList.add('hidden'); resultsBox.classList.remove('hidden'); title.innerText = "소환 결과!";
-            resultsBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10";
+        switchInvTab(tab) {
+            AudioEngine.sfx.click(); this.triggerHaptic();
+            document.getElementById('inv-panel-gear').classList.add('hidden'); 
+            document.getElementById('inv-panel-skin').classList.add('hidden');
+            document.getElementById('inv-tab-gear').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById('inv-tab-skin').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById(`inv-panel-${tab}`).classList.remove('hidden');
+            document.getElementById(`inv-tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
+        },
 
-            results.forEach((item, index) => {
-                setTimeout(() => {
-                    const card = document.createElement('div'); card.className = `gacha-item-card item-card rarity-${item.rarity}`;
-                    let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                    card.innerHTML = `<span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>`;
-                    resultsBox.appendChild(card);
-                    if(item.rarity === 'legendary' || item.rarity === 'epic') triggerHaptic(); 
-                }, index * 100); 
+        updateCurrencyUI() {
+            document.getElementById('gold-display').innerText = GameState.gold.toLocaleString();
+            document.getElementById('gem-display').innerText = GameState.gem.toLocaleString();
+        },
+
+        initCheckinButton() {
+            const btn = document.getElementById('btn-checkin');
+            if (GameState.lastCheckIn === new Date().toDateString()) { 
+                btn.innerHTML = '<span>✅</span> 내일 다시 오세요'; 
+                btn.classList.replace('from-indigo-600', 'from-slate-600'); 
+                btn.classList.replace('to-purple-600', 'to-slate-700'); 
+            }
+        },
+
+        updateRpgLobbyUI() {
+            const stats = GameState.getTotalStats(); 
+            document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
+            document.getElementById('lobby-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
+            document.getElementById('lobby-hp-bar').style.width = `${Math.max(0, (GameState.currentHp / stats.hp) * 100)}%`;
+            
+            const atkBuff = stats.atk - GameState.rpgAtk; 
+            const hpBuff = stats.hp - GameState.rpgMaxHp;
+            document.getElementById('stat-atk-display').innerHTML = `${GameState.rpgAtk.toLocaleString()} ${atkBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${atkBuff})</span>` : ''}`;
+            document.getElementById('stat-hp-display').innerHTML = `${GameState.rpgMaxHp.toLocaleString()} ${hpBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${hpBuff})</span>` : ''}`;
+            
+            document.getElementById('cost-atk-display').innerText = GameSystem.Lobby.getUpgradeCost('atk').toLocaleString();
+            document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
+            document.getElementById('potion-count-display').innerText = GameState.potions;
+        },
+
+        applyAvatarSkin() {
+            const avatars = document.querySelectorAll('.master-avatar');
+            avatars.forEach(el => {
+                el.className = 'master-avatar w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md'; 
+                if(el.id === 'profile-big-icon') el.classList.add('w-20', 'h-20', 'text-3xl', 'shadow-xl'); 
+
+                if (GameState.equippedSkin && GameData.items[GameState.equippedSkin]) {
+                    el.classList.add(`skin-${GameData.items[GameState.equippedSkin].rarity}`);
+                } else {
+                    el.classList.add('bg-gradient-to-tr', 'from-slate-600', 'to-slate-400');
+                }
             });
-            setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 100 + 300);
-        }, 1500);
-    }
+        },
 
-    function closeGacha() { sfx.click(); document.getElementById('gacha-overlay').classList.remove('active'); document.getElementById('bottom-nav').style.display = 'flex'; }
+        renderInventory() {
+            const pGear = document.getElementById('inv-panel-gear'); 
+            const pSkin = document.getElementById('inv-panel-skin');
+            const emptyState = document.getElementById('inv-empty-state');
+            pGear.innerHTML = ''; pSkin.innerHTML = '';
+            let hasGear = false; let hasSkin = false;
 
-    // ==========================================
-    // 기존 로비 및 전투 로직 수정 (부드러운 애니메이션 복구)
-    // ==========================================
-    function claimDailyReward() {
-        if (lastCheckIn === new Date().toDateString()) { showToast("오늘 이미 보상을 받았습니다! ⏱️"); return; }
-        sfx.coin(); triggerHaptic(); userGold += 100; lastCheckIn = new Date().toDateString(); saveData();
-        showToast("출석체크 완료! 100G 획득 🪙"); initCheckinButton();
-    }
-    function initCheckinButton() {
-        const btn = document.getElementById('btn-checkin');
-        if (lastCheckIn === new Date().toDateString()) { btn.innerHTML = '<span>✅</span> 내일 다시 오세요'; btn.classList.replace('from-indigo-600', 'from-slate-600'); btn.classList.replace('to-purple-600', 'to-slate-700'); }
-    }
-    
-    function switchTab(tab) {
-        sfx.click(); triggerHaptic();
-        document.getElementById('panel-forge').classList.add('hidden'); document.getElementById('panel-shop').classList.add('hidden');
-        document.getElementById('tab-forge').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        document.getElementById('tab-shop').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        document.getElementById(`panel-${tab}`).classList.remove('hidden');
-        document.getElementById(`tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
-    }
+            const invCounts = {};
+            GameState.inventory.forEach(id => { invCounts[id] = (invCounts[id] || 0) + 1; });
 
-    function getUpgradeCost(type) { return type === 'atk' ? Math.floor(rpgAtk * 5) : Math.floor(rpgMaxHp * 0.5); }
-    function updateRpgLobbyUI() {
-        const stats = getTotalStats(); 
-        document.getElementById('rpg-stage-display').innerText = rpgStage;
-        document.getElementById('lobby-hp-text').innerText = `${Math.max(0, currentHp)} / ${stats.hp}`;
-        document.getElementById('lobby-hp-bar').style.width = `${Math.max(0, (currentHp / stats.hp) * 100)}%`;
-        
-        const atkBuff = stats.atk - rpgAtk; const hpBuff = stats.hp - rpgMaxHp;
-        document.getElementById('stat-atk-display').innerHTML = `${rpgAtk.toLocaleString()} ${atkBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${atkBuff})</span>` : ''}`;
-        document.getElementById('stat-hp-display').innerHTML = `${rpgMaxHp.toLocaleString()} ${hpBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${hpBuff})</span>` : ''}`;
-        
-        document.getElementById('cost-atk-display').innerText = getUpgradeCost('atk').toLocaleString();
-        document.getElementById('cost-hp-display').innerText = getUpgradeCost('hp').toLocaleString();
-        document.getElementById('potion-count-display').innerText = userPotions;
-    }
+            for (const [id, count] of Object.entries(invCounts)) {
+                const item = GameData.items[id];
+                if(!item) continue;
+                const isEquipped = (GameState.equippedGear === id || GameState.equippedSkin === id);
+                const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
+                const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
+                const effectHTML = item.type === 'gear' 
+                    ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` 
+                    : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
 
-    function upgradeStat(type) {
-        const cost = getUpgradeCost(type);
-        if (userGold < cost) { showToast("골드가 부족합니다! 🪙"); return; }
-        sfx.coin(); triggerHaptic(); userGold -= cost;
-        if (type === 'atk') { rpgAtk += Math.floor(rpgAtk * 0.2) + 2; } 
-        else if (type === 'hp') { const hpIncrease = Math.floor(rpgMaxHp * 0.2) + 20; rpgMaxHp += hpIncrease; currentHp += hpIncrease; }
-        saveData(); updateRpgLobbyUI(); showToast("스탯 강화 성공! ✨");
-    }
+                const cardHTML = `
+                    <div onclick="GameSystem.Lobby.toggleEquip('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} cursor-pointer hover:scale-105 transition-transform">
+                        ${badgeHTML}
+                        <div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>
+                        <h4 class="text-white font-bold text-[11px] text-center break-keep leading-tight">${item.name}</h4>
+                        ${effectHTML}
+                        ${countHTML}
+                    </div>
+                `;
+                if (item.type === 'gear') { pGear.innerHTML += cardHTML; hasGear = true; }
+                else if (item.type === 'skin') { pSkin.innerHTML += cardHTML; hasSkin = true; }
+            }
 
-    function buyItem(itemType) {
-        if (itemType === 'potion') {
-            if (userGold < 30) { showToast("골드가 부족합니다! 🪙"); return; }
-            sfx.coin(); triggerHaptic(); userGold -= 30; userPotions += 1; saveData(); updateRpgLobbyUI(); showToast("물약을 구매했습니다! ❤️");
-        } else if (itemType === 'inn') {
-            const maxHp = getTotalStats().hp;
-            if (currentHp >= maxHp) { showToast("이미 체력이 가득 차 있습니다."); return; }
-            if (userGold < 20) { showToast("골드가 부족합니다! 🪙"); return; }
-            sfx.coin(); triggerHaptic(); userGold -= 20; currentHp = maxHp; saveData(); updateRpgLobbyUI(); showToast("여관에서 푹 쉬었습니다. 체력 100% 회복! ⛺");
+            const currentTab = document.getElementById('inv-panel-gear').classList.contains('hidden') ? 'skin' : 'gear';
+            if ((currentTab === 'gear' && !hasGear) || (currentTab === 'skin' && !hasSkin)) emptyState.classList.remove('hidden');
+            else emptyState.classList.add('hidden');
+
+            const stats = GameState.getTotalStats();
+            document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString();
+            document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
+        },
+
+        initBackground() {
+            const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
+            let width, height; let particles = [];
+            const resizeBg = () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; };
+            window.addEventListener('resize', resizeBg); resizeBg();
+            for(let i=0; i<40; i++) { particles.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 2 + 0.5, vy: Math.random() * 0.5 + 0.2, alpha: Math.random() * 0.5 + 0.1 }); }
+            const drawBg = () => {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.y -= p.vy; if(p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(168, 85, 247, ${p.alpha})`; ctx.fill();
+                }); requestAnimationFrame(drawBg);
+            };
+            drawBg();
         }
-    }
+    };
 
-    function enterDungeon() {
-        if (currentHp <= 0) { showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺"); return; }
-        sfx.click(); triggerHaptic(); document.getElementById('bottom-nav').style.display = 'none'; 
-        const isBoss = (rpgStage % 5 === 0);
-        let stageRoll = localStorage.getItem('master_stage_roll_' + rpgStage) || Math.random(); localStorage.setItem('master_stage_roll_' + rpgStage, stageRoll);
-        if (!isBoss && parseFloat(stageRoll) < 0.3) triggerRandomEvent(parseFloat(stageRoll)); else startBattleSequence(isBoss);
-    }
 
-    function triggerRandomEvent(roll) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-rpg-event').classList.add('active');
-        const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
-        if (roll < 0.12) { titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; sfx.coin(); userGold += 30; } 
-        else if (roll < 0.21) { titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; let dmg = Math.floor(getTotalStats().hp * 0.15); descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; currentHp = Math.max(1, currentHp - dmg); sfx.hit(); triggerHeavyHaptic(); } 
-        else { titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; let heal = Math.floor(getTotalStats().hp * 0.3); descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; sfx.coin(); userGem += 5; currentHp = Math.min(getTotalStats().hp, currentHp + heal); }
-    }
+    // =========================================================================
+    // 5. GAME SYSTEM (게임 로직 및 상호작용)
+    // =========================================================================
+    const GameSystem = {
+        Lobby: {
+            claimDailyReward() {
+                if (GameState.lastCheckIn === new Date().toDateString()) { UIManager.showToast("오늘 이미 보상을 받았습니다! ⏱️"); return; }
+                AudioEngine.sfx.coin(); UIManager.triggerHaptic(); 
+                GameState.gold += 100; GameState.lastCheckIn = new Date().toDateString(); 
+                GameState.save(); UIManager.updateCurrencyUI(); UIManager.showToast("출석체크 완료! 100G 획득 🪙"); UIManager.initCheckinButton();
+            },
+            rewardForPlay() { 
+                AudioEngine.sfx.coin(); GameState.gold += 10; GameState.save(); UIManager.updateCurrencyUI(); UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
+            },
+            getUpgradeCost(type) { 
+                return type === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); 
+            },
+            upgradeStat(type) {
+                const cost = this.getUpgradeCost(type);
+                if (GameState.gold < cost) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
+                AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= cost;
+                if (type === 'atk') { GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; } 
+                else if (type === 'hp') { 
+                    const hpIncrease = Math.floor(GameState.rpgMaxHp * 0.2) + 20; 
+                    GameState.rpgMaxHp += hpIncrease; GameState.currentHp += hpIncrease; 
+                }
+                GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("스탯 강화 성공! ✨");
+            },
+            buyItem(itemType) {
+                if (itemType === 'potion') {
+                    if (GameState.gold < 30) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
+                    AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= 30; GameState.potions += 1; 
+                    GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("물약을 구매했습니다! ❤️");
+                } else if (itemType === 'inn') {
+                    const maxHp = GameState.getTotalStats().hp;
+                    if (GameState.currentHp >= maxHp) { UIManager.showToast("이미 체력이 가득 차 있습니다."); return; }
+                    if (GameState.gold < 20) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
+                    AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= 20; GameState.currentHp = maxHp; 
+                    GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("여관에서 푹 쉬었습니다. 체력 100% 회복! ⛺");
+                }
+            },
+            toggleEquip(itemId) {
+                const item = GameData.items[itemId];
+                AudioEngine.sfx.equip(); UIManager.triggerHaptic();
+                if (item.type === 'gear') {
+                    if (GameState.equippedGear === itemId) GameState.equippedGear = null; else GameState.equippedGear = itemId; 
+                } else if (item.type === 'skin') {
+                    if (GameState.equippedSkin === itemId) GameState.equippedSkin = null; else GameState.equippedSkin = itemId;
+                }
+                GameState.save(); UIManager.renderInventory();
+                UIManager.showToast(GameState.equippedGear === itemId || GameState.equippedSkin === itemId ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
+            }
+        },
 
-    function endEvent() { rpgStage++; saveData(); document.getElementById('bottom-nav').style.display = 'flex'; navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); }
+        Gacha: {
+            performGacha(times) {
+                const cost = times * 50;
+                if (GameState.gem < cost) { UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌해 획득하세요."); UIManager.triggerHeavyHaptic(); return; }
 
-    let monsterMaxHp = 0, monsterCurrentHp = 0, monsterAtkObj = 0, battleInterval = null, lastAttackTime = 0;
-    const ATTACK_COOLDOWN = 600; 
-    const nMonsters = [{e:'🦠',n:'슬라임'},{e:'🦇',n:'흡혈박쥐'},{e:'👺',n:'고블린'},{e:'🐺',n:'마수늑대'},{e:'💀',n:'해골병사'}];
-    const bMonsters = {5:{e:'🐉',n:'심연의 드래곤'},10:{e:'🐙',n:'크라켄'},15:{e:'🦖',n:'폭군 렉스'}};
+                GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
+                document.getElementById('bottom-nav').style.display = 'none'; 
+                const overlay = document.getElementById('gacha-overlay'); const anim = document.getElementById('gacha-animation');
+                const resultsBox = document.getElementById('gacha-results-container'); const closeBtn = document.getElementById('gacha-close-btn');
+                const title = document.getElementById('gacha-title');
+                
+                overlay.classList.add('active'); anim.classList.remove('hidden'); resultsBox.classList.add('hidden');
+                resultsBox.innerHTML = ''; closeBtn.classList.add('hidden'); title.innerText = "소환의식 진행 중...";
 
-    function startBattleSequence(isBoss) {
-        if(isBattling) return; isBattling = true; localStorage.setItem('master_in_battle', 'true');
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-rpg-battle').classList.add('active');
-        if (isBoss) {
-            sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
-            let shakes = 0; let shakeInt = setInterval(() => { 
-                const appCont = document.querySelector('.app-container');
-                appCont.classList.add('shake'); // 바디 대신 컨테이너만 흔들기! (경고창 분리)
-                triggerHeavyHaptic(); 
-                setTimeout(() => appCont.classList.remove('shake'), 150); 
-                if(++shakes >= 4) clearInterval(shakeInt); 
-            }, 500);
-            setTimeout(() => { overlay.classList.remove('active'); initBattle(true); }, 3000);
-        } else initBattle(false);
-    }
+                AudioEngine.sfx.gacha_build(); UIManager.triggerHeavyHaptic();
 
-    function initBattle(isBoss) {
-        monsterMaxHp = rpgStage * 40 + (isBoss ? 200 : 0); monsterCurrentHp = monsterMaxHp;
-        monsterAtkObj = Math.floor(rpgStage * 3) + (isBoss ? 15 : 0);
-        let mInfo = isBoss ? (bMonsters[rpgStage] || {e:'👑',n:'고대의 왕'}) : nMonsters[(rpgStage - 1) % nMonsters.length];
-        
-        document.getElementById('battle-stage-title').innerText = `STAGE ${rpgStage} ${isBoss ? '🔥' : ''}`;
-        document.getElementById('battle-monster-name').innerText = mInfo.n; document.getElementById('monster-sprite').innerText = mInfo.e;
-        document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative boss-theme" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
-        document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
-        document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
-        
-        document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
-        document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
-        lastAttackTime = 0; updateBattleUI();
-        clearInterval(battleInterval); battleInterval = setInterval(monsterAttack, 1500); 
-    }
+                let results = [];
+                for(let i=0; i<times; i++) {
+                    let roll = Math.random(); let rarity = 'common';
+                    if (roll < 0.05) rarity = 'legendary'; else if (roll < 0.20) rarity = 'epic'; else if (roll < 0.50) rarity = 'rare';
+                    let pool = Object.values(GameData.items).filter(item => item.rarity === rarity);
+                    let pulledItem = pool[Math.floor(Math.random() * pool.length)];
+                    results.push(pulledItem); GameState.inventory.push(pulledItem.id); 
+                }
+                GameState.save(); 
 
-    function updateBattleUI() {
-        const stats = getTotalStats(); // 장착 장비 반영
-        document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, currentHp)} / ${stats.hp}`;
-        document.getElementById('battle-player-hp-bar').style.width = `${Math.max(0, (currentHp / stats.hp) * 100)}%`;
-        document.getElementById('battle-player-buff-text').innerText = equippedGear ? `[장비 버프 ON]` : ''; // 버프 표시
-        
-        document.getElementById('battle-monster-hp-text').innerText = `${Math.max(0, Math.floor(monsterCurrentHp))} / ${monsterMaxHp}`;
-        document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (monsterCurrentHp / monsterMaxHp) * 100)}%`;
-        document.getElementById('battle-potion-count').innerText = userPotions;
-    }
+                setTimeout(() => {
+                    AudioEngine.sfx.gacha_reveal(); UIManager.triggerHaptic();
+                    anim.classList.add('hidden'); resultsBox.classList.remove('hidden'); title.innerText = "소환 결과!";
+                    resultsBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10";
 
-    function usePotionInBattle() {
-        const stats = getTotalStats();
-        if(currentHp <= 0 || monsterCurrentHp <= 0 || userPotions <= 0 || currentHp >= stats.hp) return;
-        sfx.click(); triggerHaptic(); userPotions -= 1;
-        let healAmt = Math.floor(stats.hp * 0.5); currentHp = Math.min(stats.hp, currentHp + healAmt);
-        saveData(); updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
-    }
+                    results.forEach((item, index) => {
+                        setTimeout(() => {
+                            const card = document.createElement('div'); card.className = `gacha-item-card item-card rarity-${item.rarity}`;
+                            let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
+                            card.innerHTML = `<span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>`;
+                            resultsBox.appendChild(card);
+                            if(item.rarity === 'legendary' || item.rarity === 'epic') UIManager.triggerHaptic(); 
+                        }, index * 100); 
+                    });
+                    setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 100 + 300);
+                }, 1500);
+            },
+            closeGacha() { 
+                AudioEngine.sfx.click(); 
+                document.getElementById('gacha-overlay').classList.remove('active'); 
+                document.getElementById('bottom-nav').style.display = 'flex'; 
+            }
+        },
 
-    function playerAttack() {
-        if(monsterCurrentHp <= 0 || currentHp <= 0) return;
-        if (Date.now() - lastAttackTime < ATTACK_COOLDOWN) return;
-        lastAttackTime = Date.now();
-        
-        sfx.hit(); triggerHaptic();
-        let myAtk = getTotalStats().atk; // 장착 무기 데미지 적용
-        let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
-        monsterCurrentHp -= damage;
-        
-        const sprite = document.getElementById('monster-sprite');
-        sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
-        document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
+        Battle: {
+            monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
+            
+            enterDungeon() {
+                if (GameState.currentHp <= 0) { UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺"); return; }
+                AudioEngine.sfx.click(); UIManager.triggerHaptic(); document.getElementById('bottom-nav').style.display = 'none'; 
+                const isBoss = (GameState.rpgStage % 5 === 0);
+                let stageRoll = localStorage.getItem('master_stage_roll_' + GameState.rpgStage) || Math.random(); 
+                localStorage.setItem('master_stage_roll_' + GameState.rpgStage, stageRoll);
+                if (!isBoss && parseFloat(stageRoll) < 0.3) this.triggerRandomEvent(parseFloat(stageRoll)); 
+                else this.startBattleSequence(isBoss);
+            },
 
-        const btn = document.getElementById('btn-attack'); btn.disabled = true; btn.innerHTML = "⏳ 쿨타임...";
-        setTimeout(() => { if(currentHp > 0 && monsterCurrentHp > 0) { btn.disabled = false; btn.innerHTML = "⚔️ 공격 (TAP!)"; } }, ATTACK_COOLDOWN);
-        updateBattleUI(); if (monsterCurrentHp <= 0) setTimeout(() => endBattle(true), 300);
-    }
+            triggerRandomEvent(roll) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+                document.getElementById('screen-rpg-event').classList.add('active');
+                const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
+                if (roll < 0.12) { 
+                    titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
+                    descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; 
+                } else if (roll < 0.21) { 
+                    titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
+                    let dmg = Math.floor(GameState.getTotalStats().hp * 0.15); 
+                    descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
+                    AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
+                } else { 
+                    titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; 
+                    let heal = Math.floor(GameState.getTotalStats().hp * 0.3); 
+                    descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); GameState.gem += 5; 
+                    GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); 
+                }
+            },
 
-    function monsterAttack() {
-        if(monsterCurrentHp <= 0 || currentHp <= 0) return;
-        sfx.hit(); triggerHeavyHaptic();
-        let damage = Math.floor(monsterAtkObj * (0.8 + Math.random() * 0.4));
-        currentHp -= damage; saveData(); 
-        
-        document.querySelector('.app-container').classList.add('shake'); setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
-        document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
+            endEvent() { 
+                GameState.rpgStage++; GameState.save(); 
+                document.getElementById('bottom-nav').style.display = 'flex'; 
+                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
+            },
 
-        updateBattleUI(); if (currentHp <= 0) setTimeout(() => endBattle(false), 300);
-    }
+            startBattleSequence(isBoss) {
+                if(GameState.isBattling) return; 
+                GameState.isBattling = true; localStorage.setItem('master_in_battle', 'true');
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+                document.getElementById('screen-rpg-battle').classList.add('active');
+                if (isBoss) {
+                    AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
+                    let shakes = 0; let shakeInt = setInterval(() => { 
+                        const appCont = document.querySelector('.app-container');
+                        appCont.classList.add('shake'); 
+                        UIManager.triggerHeavyHaptic(); 
+                        setTimeout(() => appCont.classList.remove('shake'), 150); 
+                        if(++shakes >= 4) clearInterval(shakeInt); 
+                    }, 500);
+                    setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
+                } else this.initBattle(false);
+            },
 
-    function endBattle(isWin) {
-        clearInterval(battleInterval); isBattling = false; localStorage.removeItem('master_in_battle'); 
-        document.getElementById('bottom-nav').style.display = 'flex'; 
-        const isBoss = (rpgStage % 5 === 0);
-        
-        if (isWin) {
-            sfx.coin(); triggerHaptic();
-            let rewardGold = isBoss ? (rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
-            userGold += rewardGold; userGem += rewardGem; rpgStage++; saveData();
-            alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
-        } else {
-            triggerHeavyHaptic(); currentHp = 0; saveData();
-            alert(`💀 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활합니다.`);
+            initBattle(isBoss) {
+                this.monsterMaxHp = GameState.rpgStage * 40 + (isBoss ? 200 : 0); 
+                this.monsterCurrentHp = this.monsterMaxHp;
+                this.monsterAtkObj = Math.floor(GameState.rpgStage * 3) + (isBoss ? 15 : 0);
+                let mInfo = isBoss ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) : GameData.monsters.normal[(GameState.rpgStage - 1) % GameData.monsters.normal.length];
+                
+                document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
+                document.getElementById('battle-monster-name').innerText = mInfo.n; 
+                document.getElementById('monster-sprite').innerText = mInfo.e;
+                document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative boss-theme" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
+                document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
+                document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
+                
+                document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
+                document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
+                this.lastAttackTime = 0; this.updateBattleUI();
+                clearInterval(this.battleInterval); 
+                this.battleInterval = setInterval(() => this.monsterAttack(), 1500); 
+            },
+
+            updateBattleUI() {
+                const stats = GameState.getTotalStats(); 
+                document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
+                document.getElementById('battle-player-hp-bar').style.width = `${Math.max(0, (GameState.currentHp / stats.hp) * 100)}%`;
+                document.getElementById('battle-player-buff-text').innerText = GameState.equippedGear ? `[장비 버프 ON]` : ''; 
+                
+                document.getElementById('battle-monster-hp-text').innerText = `${Math.max(0, Math.floor(this.monsterCurrentHp))} / ${this.monsterMaxHp}`;
+                document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (this.monsterCurrentHp / this.monsterMaxHp) * 100)}%`;
+                document.getElementById('battle-potion-count').innerText = GameState.potions;
+            },
+
+            usePotionInBattle() {
+                const stats = GameState.getTotalStats();
+                if(GameState.currentHp <= 0 || this.monsterCurrentHp <= 0 || GameState.potions <= 0 || GameState.currentHp >= stats.hp) return;
+                AudioEngine.sfx.click(); UIManager.triggerHaptic(); GameState.potions -= 1;
+                let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
+                GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
+            },
+
+            playerAttack() {
+                if(this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
+                const ATTACK_COOLDOWN = 600;
+                if (Date.now() - this.lastAttackTime < ATTACK_COOLDOWN) return;
+                this.lastAttackTime = Date.now();
+                
+                AudioEngine.sfx.hit(); UIManager.triggerHaptic();
+                let myAtk = GameState.getTotalStats().atk; 
+                let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
+                this.monsterCurrentHp -= damage;
+                
+                const sprite = document.getElementById('monster-sprite');
+                sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+                document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
+
+                const btn = document.getElementById('btn-attack'); btn.disabled = true; btn.innerHTML = "⏳ 쿨타임...";
+                setTimeout(() => { if(GameState.currentHp > 0 && this.monsterCurrentHp > 0) { btn.disabled = false; btn.innerHTML = "⚔️ 공격 (TAP!)"; } }, ATTACK_COOLDOWN);
+                this.updateBattleUI(); if (this.monsterCurrentHp <= 0) setTimeout(() => this.endBattle(true), 300);
+            },
+
+            monsterAttack() {
+                if(this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
+                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
+                let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
+                GameState.currentHp -= damage; GameState.save(); 
+                
+                document.querySelector('.app-container').classList.add('shake'); setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
+                document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
+
+                this.updateBattleUI(); if (GameState.currentHp <= 0) setTimeout(() => this.endBattle(false), 300);
+            },
+
+            endBattle(isWin) {
+                clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
+                document.getElementById('bottom-nav').style.display = 'flex'; 
+                const isBoss = (GameState.rpgStage % 5 === 0);
+                
+                if (isWin) {
+                    AudioEngine.sfx.coin(); UIManager.triggerHaptic();
+                    let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
+                    GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
+                    alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
+                } else {
+                    UIManager.triggerHeavyHaptic(); GameState.currentHp = 0; GameState.save();
+                    alert(`💀 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활합니다.`);
+                }
+                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+            }
         }
-        navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
-    }
+    };
 
-    // 초기화 실행
-    function init() {
-        checkAndRevive();
-        saveData();
-        initCheckinButton();
-    }
-    init();
+
+    // =========================================================================
+    // 6. INITIALIZATION (앱 초기화)
+    // =========================================================================
+    window.onload = function() {
+        GameState.load();
+        UIManager.init();
+    };
+
 </script>
 </body>
 </html>
