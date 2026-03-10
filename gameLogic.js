@@ -165,6 +165,211 @@ const UIManager = {
 };
 
 const GameSystem = {
+    // ==========================================
+    // 🔥 연금술(장비 합성) 시스템 모듈
+    // ==========================================
+    Synthesis: {
+        currentTier: 'common',
+        // 기획 데이터: [다음 등급, 기본 확률, 실패시 보정치, 기본 골드, 층수당 인플레이션, 소모 젬]
+        config: {
+            'common': { next: 'rare', rate: 100, pityAdd: 0, baseGold: 300, inflation: 15, gem: 0 },
+            'rare':   { next: 'epic', rate: 65, pityAdd: 15, baseGold: 1500, inflation: 50, gem: 0 },
+            'epic':   { next: 'legendary', rate: 25, pityAdd: 20, baseGold: 5000, inflation: 100, gem: 50 }
+        },
+
+        openModal() {
+            AudioEngine.sfx.click();
+            UIManager.triggerHaptic();
+            document.getElementById('synth-modal').classList.add('active');
+            this.selectTier('common');
+        },
+
+        closeModal() {
+            AudioEngine.sfx.click();
+            document.getElementById('synth-modal').classList.remove('active');
+        },
+
+        selectTier(tier) {
+            AudioEngine.sfx.click();
+            this.currentTier = tier;
+            
+            ['common', 'rare', 'epic'].forEach(t => {
+                const btn = document.getElementById(`synth-tab-${t}`);
+                if (t === tier) btn.className = "flex-1 py-2 bg-slate-600 text-white border border-slate-400 text-xs font-bold rounded shadow-inner transition-all";
+                else btn.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all";
+            });
+            this.updateUI();
+        },
+
+        getAvailableItems() {
+            // 장착 중인 장비는 연성 재료에서 배제하여 안전하게 보호
+            return GameState.inventory.filter(id => {
+                const item = GameData.items[id];
+                return item && item.type === 'gear' && item.rarity === this.currentTier && GameState.equippedGear !== id;
+            });
+        },
+
+        getCost() {
+            const conf = this.config[this.currentTier];
+            return {
+                gold: conf.baseGold + (GameState.rpgStage * conf.inflation),
+                gem: conf.gem
+            };
+        },
+
+        updateUI() {
+            const items = this.getAvailableItems();
+            const count = items.length;
+            const conf = this.config[this.currentTier];
+            const cost = this.getCost();
+
+            // 1. 슬롯 렌더링 & 💡 심리적 장치(빈자리 펄스)
+            const borderClass = this.currentTier === 'common' ? 'border-slate-500' : this.currentTier === 'rare' ? 'border-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.3)]' : 'border-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.3)]';
+
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.getElementById(`synth-slot-${i}`);
+                if (i <= count) {
+                    const itemObj = GameData.items[items[i-1]];
+                    slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
+                    slot.className = `w-16 h-16 rounded-xl border-2 border-solid ${borderClass} flex items-center justify-center text-3xl bg-slate-800 transition-all`;
+                    slot.onclick = null;
+                } else {
+                    if (i === 3 && count === 2) {
+                        // 2개가 모였을 때 즉각적인 가챠(과금) 유도
+                        slot.innerHTML = `<i class="fa-solid fa-plus text-yellow-400 text-xl mb-1 drop-shadow-md"></i><span class="text-[8px] text-yellow-400 font-bold bg-black/50 px-1 rounded">가챠 가기</span>`;
+                        slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-yellow-500/80 animate-pulse flex flex-col items-center justify-center cursor-pointer hover:bg-slate-700 transition-all shadow-[inset_0_0_15px_rgba(251,191,36,0.3)]`;
+                        slot.onclick = () => { this.closeModal(); UIManager.navTo('screen-gacha-shop', document.querySelectorAll('.nav-item')[2]); };
+                    } else {
+                        slot.innerHTML = '';
+                        slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
+                        slot.onclick = null;
+                    }
+                }
+            }
+
+            // 2. 확률 및 천장 마일리지 렌더링
+            const pityWrap = document.getElementById('synth-pity-wrap');
+            let bonusPity = 0;
+            if (this.currentTier !== 'common') {
+                bonusPity = GameState.synthPity[this.currentTier] || 0;
+                pityWrap.classList.remove('hidden');
+                document.getElementById('synth-pity-text').innerText = `${Math.min(100, bonusPity)}%`;
+                document.getElementById('synth-pity-bar').style.width = `${Math.min(100, bonusPity)}%`;
+            } else {
+                pityWrap.classList.add('hidden');
+            }
+
+            const finalRate = conf.rate + bonusPity;
+            const isGuaranteed = finalRate >= 100;
+            const rateText = document.getElementById('synth-rate-text');
+            
+            if (isGuaranteed) {
+                rateText.innerHTML = `100% <span class="text-[12px] text-yellow-400 mt-1">(확정 연성 대기중!)</span>`;
+                rateText.className = "text-4xl font-black text-yellow-400 animate-pulse drop-shadow-[0_0_15px_rgba(251,191,36,0.8)] flex flex-col items-center justify-center min-h-[50px]";
+            } else {
+                rateText.innerHTML = `${conf.rate}%` + (bonusPity > 0 ? ` <span class="text-[13px] text-pink-400 mt-1 animate-pulse">(+${bonusPity}% 보정됨)</span>` : '');
+                rateText.className = "text-4xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] flex flex-col items-center justify-center min-h-[50px]";
+            }
+
+            // 3. 버튼 상태 제어
+            const btn = document.getElementById('btn-synth-execute');
+            const costStr = `🪙 ${cost.gold.toLocaleString()}` + (cost.gem > 0 ? ` & 💎 ${cost.gem}` : '');
+            
+            if (count >= 3) {
+                btn.disabled = false;
+                btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-black shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all active:scale-95 flex flex-col items-center justify-center gap-1";
+                document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
+                document.getElementById('synth-btn-cost').innerText = costStr;
+                document.getElementById('synth-btn-cost').className = "text-[11px] text-yellow-300 font-bold";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 disabled:opacity-50";
+                document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
+                document.getElementById('synth-btn-cost').innerText = costStr;
+                document.getElementById('synth-btn-cost').className = "text-[11px] text-slate-500 font-bold";
+            }
+        },
+
+        execute() {
+            const items = this.getAvailableItems();
+            if (items.length < 3) return;
+
+            const conf = this.config[this.currentTier];
+            const cost = this.getCost();
+
+            if (GameState.gold < cost.gold) return UIManager.showToast("골드가 부족합니다! 🪙");
+            if (GameState.gem < cost.gem) return UIManager.showToast("젬이 부족합니다! 💎");
+
+            // 1. 재화 소모
+            GameState.gold -= cost.gold;
+            GameState.gem -= cost.gem;
+
+            // 2. 인벤토리에서 재료 정확히 3개만 차감 (안전 장치 포함)
+            const baseItem = items[0]; 
+            const materialsToConsume = [items[0], items[1], items[2]];
+            let removed = 0;
+
+            for (let i = GameState.inventory.length - 1; i >= 0; i--) {
+                const invId = GameState.inventory[i];
+                const matchIndex = materialsToConsume.indexOf(invId);
+                
+                // 장착 중인 아이템은 절대 소모하지 않음
+                if (matchIndex > -1 && invId !== GameState.equippedGear) {
+                    materialsToConsume.splice(matchIndex, 1);
+                    GameState.inventory.splice(i, 1);
+                    removed++;
+                }
+                if (removed === 3) break;
+            }
+
+            UIManager.triggerHeavyHaptic();
+            AudioEngine.sfx.gacha_build();
+            
+            // UI 흔들림 연출
+            const modalCard = document.querySelector('#synth-modal .glass-card');
+            modalCard.classList.add('shake');
+            setTimeout(() => modalCard.classList.remove('shake'), 300);
+
+            document.getElementById('btn-synth-execute').disabled = true;
+
+            setTimeout(() => {
+                const bonusPity = GameState.synthPity[this.currentTier] || 0;
+                const finalRate = conf.rate + bonusPity;
+                const isSuccess = (finalRate >= 100) || (Math.random() * 100 < finalRate);
+
+                if (isSuccess) {
+                    AudioEngine.sfx.gacha_reveal();
+                    UIManager.triggerHaptic();
+
+                    // 대성공! 상위 등급 무작위 지급
+                    const nextPool = Object.values(GameData.items).filter(it => it.type === 'gear' && it.rarity === conf.next);
+                    const resultItem = nextPool[Math.floor(Math.random() * nextPool.length)];
+                    GameState.inventory.push(resultItem.id);
+                    
+                    if (this.currentTier !== 'common') GameState.synthPity[this.currentTier] = 0; // 마일리지 초기화
+
+                    alert(`🎉 연성 대성공!\n영롱한 빛과 함께 [${resultItem.name}] 획득!`);
+                } else {
+                    AudioEngine.sfx.hit();
+                    UIManager.triggerHeavyHaptic();
+
+                    // 실패: 베이스 1개 반환, 골드 환급, 마일리지 누적
+                    GameState.inventory.push(baseItem);
+                    const refund = Math.floor(cost.gold * 0.3);
+                    GameState.gold += refund;
+
+                    GameState.synthPity[this.currentTier] = bonusPity + conf.pityAdd;
+
+                    alert(`💥 연성 실패...\n가마솥이 폭발하여 장비가 파괴되었습니다.\n\n하지만 잔해 속에서 베이스 장비 1개를 건지고 위로금 ${refund}G를 회수했습니다.\n(다음 성공을 위한 마일리지 +${conf.pityAdd}%)`);
+                }
+
+                GameState.save();
+                UIManager.updateCurrencyUI();
+                this.updateUI();
+                UIManager.renderInventory(); 
+            }, 1000);
+        }
+    }
     Lobby: {
         calculateIdleReward() {
             const now = Date.now();
@@ -451,3 +656,4 @@ const GameSystem = {
         }
     }
 };
+
