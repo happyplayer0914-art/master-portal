@@ -1,60 +1,64 @@
-// gameState.js
 const GameState = {
     nickname: "위대한 길드장",
     deviceId: "",
-    pendingIdleGold: 0,
-    gold: 10000,
-    gem: 10000,
+    pendingIdleGold: 0, 
+    gold: 10000, 
+    gem: 10000, 
     lastCheckIn: "",
-    rpgStage: 1,
-    rpgAtk: 10,
-    rpgMaxHp: 100,
+    rpgStage: 1, 
+    rpgAtk: 10, 
+    rpgMaxHp: 100, 
     currentHp: 100,
-    potions: 1,
-    inventory: [],
-    equippedGear: null,
+    potions: 1, 
+    inventory: [], 
+    equippedGear: null, 
     equippedSkin: null,
     isBattling: false,
 
     load() {
         this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
-        let sId = localStorage.getItem('master_device_id');
-        if(!sId) {
-            sId = 'dev_' + Math.random().toString(36).substring(2, 11) + Date.now();
-            localStorage.setItem('master_device_id', sId);
+        
+        let storedId = localStorage.getItem('master_device_id');
+        if(!storedId) {
+            storedId = 'dev_' + Math.random().toString(36).substring(2, 11) + Date.now();
+            localStorage.setItem('master_device_id', storedId);
         }
-        this.deviceId = sId;
+        this.deviceId = storedId;
 
-        this.gold = parseInt(localStorage.getItem('master_gold')) || 10000;
-        this.gem = parseInt(localStorage.getItem('master_gem')) || 10000;
+        this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
+        this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
-        this.rpgStage = parseInt(localStorage.getItem('master_stage')) || 1;
-        this.rpgAtk = parseInt(localStorage.getItem('master_atk')) || 10;
-        this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp')) || 100;
-        this.currentHp = parseInt(localStorage.getItem('master_current_hp')) || this.rpgMaxHp;
-        this.potions = parseInt(localStorage.getItem('master_potions')) || 1;
+        this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
+        this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
+        this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
+        this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
+        this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
         this.equippedGear = localStorage.getItem('master_equipped_gear');
         this.equippedSkin = localStorage.getItem('master_equipped_skin');
 
-        // 🔥 방치형 보상 정산 (8시간=480분 당 최대 100G 제한)
+        // 🔥 [울트라 수정] 방치형 보상 정산 (8시간=480분 당 최대 100G)
         this.pendingIdleGold = parseFloat(localStorage.getItem('master_pending_idle_gold')) || 0;
         let lastSave = parseInt(localStorage.getItem('master_last_save')) || Date.now();
         let now = Date.now();
         let diffMins = (now - lastSave) / 60000;
         
         if (diffMins > 0) {
-            // 1분당 0.2083G 누적 (480분 지나면 정확히 100G)
-            this.pendingIdleGold += diffMins * (100 / 480);
+            // 1분당 약 0.2083G 씩 쌓임 (480분 지나면 딱 100G)
+            this.pendingIdleGold += diffMins * (100 / 480); 
             if (this.pendingIdleGold > 100) this.pendingIdleGold = 100;
             localStorage.setItem('master_last_save', now.toString());
         }
 
         this.checkAndRevive();
-        this.isBattling = false; // 새로고침 시 무조건 해제
+        if (localStorage.getItem('master_in_battle') === 'true') {
+            localStorage.removeItem('master_in_battle');
+            this.isBattling = false;
+        }
     },
 
     save() {
+        // 🔥 세이브 시점에도 방치 보상 실시간 누적
         let lastSave = parseInt(localStorage.getItem('master_last_save')) || Date.now();
         let now = Date.now();
         let diffMins = (now - lastSave) / 60000;
@@ -75,10 +79,8 @@ const GameState = {
         localStorage.setItem('master_pending_idle_gold', this.pendingIdleGold);
         localStorage.setItem('master_last_save', now.toString());
         
-        if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear);
-        else localStorage.removeItem('master_equipped_gear');
-        if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin);
-        else localStorage.removeItem('master_equipped_skin');
+        if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
+        if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
     },
 
     checkAndRevive() {
@@ -90,23 +92,8 @@ const GameState = {
     },
 
     getTotalStats() {
-        const gear = GameData.items[this.equippedGear];
-        const skin = GameData.items[this.equippedSkin];
-        let mult = gear ? gear.statMult : 1.0;
-        let crit = (gear ? gear.crit : 0) + (skin ? skin.crit : 0);
-        let dodge = (gear ? gear.dodge : 0) + (skin ? skin.dodge : 0);
-        
-        // 세트 보너스
-        if (gear && skin && gear.rarity === skin.rarity) {
-            mult += 0.05;
-            crit += 0.03;
-        }
-        
-        return { 
-            atk: Math.floor(this.rpgAtk * mult), 
-            hp: Math.floor(this.rpgMaxHp), 
-            crit: Math.min(crit, 0.8), 
-            dodge: Math.min(dodge, 0.5) 
-        };
+        let mult = 1.0;
+        if(this.equippedGear && GameData.items[this.equippedGear]) mult = GameData.items[this.equippedGear].statMult;
+        return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
