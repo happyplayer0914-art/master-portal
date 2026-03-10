@@ -250,7 +250,6 @@ const GameSystem = {
                 results.forEach((item, index) => {
                     setTimeout(() => {
                         let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                        // 🔥 Bug Fix: innerHTML += 대신 insertAdjacentHTML을 사용하여 UI 반짝임(Flicker) 현상 해결
                         const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
                         resBox.insertAdjacentHTML('beforeend', cardHtml);
                         if(item.rarity === 'legendary' || item.rarity === 'epic') UIManager.triggerHaptic(); 
@@ -304,7 +303,7 @@ const GameSystem = {
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; if(d.skin && d.skin !== 'none' && GameData.items[d.skin]) skinClass = `skin-${GameData.items[d.skin].rarity}`;
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
+                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
@@ -325,9 +324,22 @@ const GameSystem = {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
-            if (roll < 0.12) { titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; } 
-            else if (roll < 0.21) { titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; let dmg = Math.floor(GameState.getTotalStats().hp * 0.15); descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); } 
-            else { titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; let heal = Math.floor(GameState.getTotalStats().hp * 0.3); descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); GameState.gem += 5; GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); }
+            if (roll < 0.12) { 
+                titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
+                descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); 
+                GameState.gold += 30; UIManager.updateCurrencyUI(); // 🔥 버그 수정: 재화 즉시 반영
+            } else if (roll < 0.21) { 
+                titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
+                let dmg = Math.floor(GameState.getTotalStats().hp * 0.15); 
+                descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
+                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
+            } else { 
+                titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; 
+                let heal = Math.floor(GameState.getTotalStats().hp * 0.3); 
+                descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); 
+                GameState.gem += 5; GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); 
+                UIManager.updateCurrencyUI(); // 🔥 버그 수정: 재화 즉시 반영
+            }
         },
         endEvent() { GameState.rpgStage++; GameState.save(); document.getElementById('bottom-nav').style.display = 'flex'; UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); },
         startBattleSequence(isBoss) {
@@ -417,13 +429,25 @@ const GameSystem = {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
                 GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
+                
+                // 🔥 버그 수정: 보상 획득 시 UI 즉시 반영
+                UIManager.updateCurrencyUI(); 
+                
                 GameSystem.Ranking.updateRankingSilently();
-                alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
+                
+                // 🚨 alert() 대신 Toast 알림 사용 (시스템 규칙 준수)
+                UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
+                
+                // 전투 결과를 로그에 더 명확히 표시
+                document.getElementById('battle-log').innerText = `토벌 성공! 보상을 획득했습니다.`;
             } else {
                 UIManager.triggerHeavyHaptic(); GameState.currentHp = 0; GameState.save();
-                alert(`💀 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활합니다.`);
+                UIManager.showToast(`💀 쓰러졌습니다... 여관에서 휴식하세요.`);
             }
-            UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+            // 약간의 딜레이 후 화면 전환하여 유저가 결과를 인지하게 함
+            setTimeout(() => {
+                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+            }, 1500);
         }
     }
 };
