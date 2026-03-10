@@ -174,7 +174,13 @@ const UIManager = {
 };
 
 const GameSystem = {
-    // 🔥 연금술(장비 합성) 시스템 모듈
+    // =========================================================================
+// 5. GAME SYSTEM - Synthesis (연금술 시스템 부분 수정)
+// =========================================================================
+
+// 📍 찾을 위치: gameLogic.js 파일 내의 GameSystem = { Synthesis: { ... } } 부분을 찾으세요.
+// 아래의 Synthesis 객체 전체를 교체하시면 됩니다.
+
     Synthesis: {
         currentTier: 'common',
         config: {
@@ -187,7 +193,7 @@ const GameSystem = {
             AudioEngine.sfx.click();
             UIManager.triggerHaptic();
             document.getElementById('synth-modal').classList.add('active');
-            UIManager.selectedItems = []; // 모달 열 때 선택 초기화
+            UIManager.selectedItems = []; // 선택 초기화
             this.selectTier('common');
         },
 
@@ -200,125 +206,141 @@ const GameSystem = {
         selectTier(tier) {
             AudioEngine.sfx.click();
             this.currentTier = tier;
-            UIManager.selectedItems = []; // 등급 바꿀 때 선택 초기화
+            UIManager.selectedItems = []; // 등급 변경 시 선택 초기화
             
             ['common', 'rare', 'epic'].forEach(t => {
                 const btn = document.getElementById(`synth-tab-${t}`);
-                if (t === tier) btn.className = "flex-1 py-2 bg-slate-600 text-white border border-slate-400 text-xs font-bold rounded shadow-inner transition-all";
-                else btn.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all";
+                if (btn) {
+                    if (t === tier) btn.className = "flex-1 py-2 bg-slate-600 text-white border border-slate-400 text-xs font-bold rounded shadow-inner transition-all";
+                    else btn.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all";
+                }
             });
             this.updateUI();
         },
 
-        // 🔥 누락되었던 핵심 함수: 인벤토리 아이템 클릭 시 선택 로직
+        // 🔥 아이템 선택/해제 핵심 로직
         selectItem(id) {
             const item = GameData.items[id];
             if (!item || item.type !== 'gear' || item.rarity !== this.currentTier) {
                 return UIManager.showToast("동일 등급의 장비만 연성 가능합니다.");
             }
             if (GameState.equippedGear === id) {
-                return UIManager.showToast("장착 중인 장비는 연성할 수 없습니다.");
+                return UIManager.showToast("장착 중인 장비는 안전을 위해 연성할 수 없습니다.");
             }
 
-            // 중복 클릭 시 선택 해제, 아니면 추가
             const idx = UIManager.selectedItems.indexOf(id);
             if (idx > -1) {
+                // 이미 선택된 경우 제거 (해제)
                 UIManager.selectedItems.splice(idx, 1);
+                AudioEngine.sfx.click();
             } else {
-                if (UIManager.selectedItems.length >= 3) return UIManager.showToast("재료는 최대 3개까지만 가능합니다.");
+                // 새로 선택하는 경우
+                if (UIManager.selectedItems.length >= 3) return UIManager.showToast("재료는 3개까지만 넣을 수 있습니다.");
+                
+                // 인벤토리 내 실제 보유 수량 체크
+                const hasCount = GameState.inventory.filter(iid => iid === id).length;
+                const usedCount = UIManager.selectedItems.filter(sid => sid === id).length;
+                
+                if (usedCount >= hasCount) return UIManager.showToast("보유한 아이템 수량이 부족합니다.");
+                
                 UIManager.selectedItems.push(id);
+                AudioEngine.sfx.click();
             }
             
-            AudioEngine.sfx.click();
             this.updateUI();
         },
 
-        getCost() {
+        updateUI() {
+            const selected = UIManager.selectedItems;
+            const count = selected.length;
             const conf = this.config[this.currentTier];
-            return {
-                gold: conf.baseGold + (GameState.rpgStage * conf.inflation),
-                gem: conf.gem
-            };
-        },
 
-     updateUI() {
-    const selected = UIManager.selectedItems;
-    const count = selected.length;
-    const conf = this.config[this.currentTier];
-
-    // 1. 가마솥 슬롯 업데이트 (위에 3개 구멍)
-    for (let i = 1; i <= 3; i++) {
-        const slot = document.getElementById(`synth-slot-${i}`);
-        if (i <= count) {
-            const itemObj = GameData.items[selected[i-1]];
-            slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
-            slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-purple-500 flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer shadow-lg`;
-            slot.onclick = () => this.selectItem(selected[i-1]);
-        } else {
-            slot.innerHTML = '';
-            slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
-            slot.onclick = null;
-        }
-    }
-
-    // 2. 🔥 모달 내부 재료 목록 갱신 (선택 불가 문제 해결!)
-    const listArea = document.getElementById('synth-material-list');
-    if (listArea) {
-        listArea.innerHTML = "";
-        // 현재 선택한 등급(Tier)과 일치하고, 장착 중이지 않은 장비만 필터링
-        const eligibleItems = GameState.inventory.filter(id => {
-            const item = GameData.items[id];
-            return item && item.type === 'gear' && item.rarity === this.currentTier && id !== GameState.equippedGear;
-        });
-
-        // 중복 제거하여 목록화
-        [...new Set(eligibleItems)].forEach(id => {
-            const item = GameData.items[id];
-            const hasCount = eligibleItems.filter(iid => iid === id).length;
-            const usedCount = selected.filter(sid => sid === id).length;
-            const remain = hasCount - usedCount;
-
-            if (hasCount > 0) {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `p-2 bg-slate-800 rounded-lg flex flex-col items-center justify-center border ${usedCount > 0 ? 'border-purple-500 ring-1 ring-purple-500' : 'border-slate-700'} relative`;
-                itemDiv.innerHTML = `
-                    <div class="text-xl">${item.emoji}</div>
-                    <div class="text-[9px] mt-1 text-slate-400">${remain}개</div>
-                    ${usedCount > 0 ? `<div class="absolute -top-1 -right-1 bg-purple-600 text-[8px] px-1.5 py-0.5 rounded-full font-bold">+${usedCount}</div>` : ''}
-                `;
-                itemDiv.onclick = () => this.selectItem(id);
-                listArea.appendChild(itemDiv);
+            // 1. 가마솥 슬롯(위에 3개) 업데이트
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.getElementById(`synth-slot-${i}`);
+                if (!slot) continue;
+                if (i <= count) {
+                    const itemObj = GameData.items[selected[i-1]];
+                    slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
+                    slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-purple-500 flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer shadow-lg`;
+                    slot.onclick = () => this.selectItem(selected[i-1]);
+                } else {
+                    slot.innerHTML = '';
+                    slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
+                    slot.onclick = null;
+                }
             }
-        });
-    }
 
-    // 3. 버튼 및 확률 텍스트 업데이트 (기존 로직 유지)
-    const bonusPity = GameState.synthPity[this.currentTier] || 0;
-    const finalRate = Math.min(100, conf.rate + bonusPity);
-    document.getElementById('synth-rate-text').innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-xs text-pink-400">(+${bonusPity}%)</span>` : '');
-    
-    const btn = document.getElementById('btn-synth-execute');
-    if (count === 3) {
-        btn.disabled = false;
-        btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-black shadow-lg";
-        document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
-    } else {
-        btn.disabled = true;
-        btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black opacity-50";
-        document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
-    }
-}
+            // 2. 하단 재료 목록 업데이트 (필터링 및 렌더링)
+            const listArea = document.getElementById('synth-material-list');
+            if (listArea) {
+                listArea.innerHTML = "";
+                const eligibleItems = GameState.inventory.filter(id => {
+                    const item = GameData.items[id];
+                    return item && item.type === 'gear' && item.rarity === this.currentTier && id !== GameState.equippedGear;
+                });
+
+                [...new Set(eligibleItems)].forEach(id => {
+                    const item = GameData.items[id];
+                    const hasCount = eligibleItems.filter(iid => iid === id).length;
+                    const usedCount = selected.filter(sid => sid === id).length;
+                    const remain = hasCount - usedCount;
+
+                    if (hasCount > 0) {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = `p-2 bg-slate-800 rounded-lg flex flex-col items-center justify-center border transition-all cursor-pointer ${usedCount > 0 ? 'border-purple-500 ring-2 ring-purple-500/50 bg-slate-700' : 'border-slate-700'}`;
+                        itemDiv.innerHTML = `
+                            <div class="text-2xl">${item.emoji}</div>
+                            <div class="text-[9px] mt-1 ${remain > 0 ? 'text-slate-300' : 'text-slate-500'} font-bold">${remain}개 남음</div>
+                            ${usedCount > 0 ? `<div class="absolute -top-1 -right-1 bg-purple-600 text-[8px] px-1.5 py-0.5 rounded-full font-bold text-white shadow-sm">+${usedCount}</div>` : ''}
+                        `;
+                        itemDiv.onclick = () => this.selectItem(id);
+                        listArea.appendChild(itemDiv);
+                    }
+                });
+            }
+
+            // 3. 버튼 및 확률 텍스트 업데이트
+            const bonusPity = GameState.synthPity[this.currentTier] || 0;
+            const finalRate = Math.min(100, conf.rate + bonusPity);
+            document.getElementById('synth-rate-text').innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-xs text-pink-400">(+${bonusPity}%)</span>` : '');
+            
+            const btn = document.getElementById('btn-synth-execute');
+            const cost = conf.baseGold + (GameState.rpgStage * conf.inflation);
+            document.getElementById('synth-btn-cost').innerText = `🪙 ${cost.toLocaleString()}`;
+
+            if (count === 3) {
+                btn.disabled = false;
+                btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-black shadow-lg animate-pulse";
+                document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black opacity-50";
+                document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
+            }
+
+            // 마일리지 바 업데이트
+            const pityWrap = document.getElementById('synth-pity-wrap');
+            if (this.currentTier !== 'common' && bonusPity > 0) {
+                pityWrap.classList.remove('hidden');
+                document.getElementById('synth-pity-text').innerText = `${bonusPity}%`;
+                document.getElementById('synth-pity-bar').style.width = `${Math.min(100, bonusPity)}%`;
+            } else {
+                pityWrap.classList.add('hidden');
+            }
+        },
 
         execute() {
             if (UIManager.selectedItems.length < 3) return;
             const conf = this.config[this.currentTier];
-            const cost = this.getCost();
+            const cost = conf.baseGold + (GameState.rpgStage * conf.inflation);
+            const gemCost = conf.gem || 0;
 
-            if (GameState.gold < cost.gold) return UIManager.showToast("골드가 부족합니다! 🪙");
-            if (GameState.gem < cost.gem) return UIManager.showToast("젬이 부족합니다! 💎");
+            if (GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
+            if (GameState.gem < gemCost) return UIManager.showToast("젬이 부족합니다! 💎");
 
-            GameState.gold -= cost.gold;
-            GameState.gem -= cost.gem;
+            GameState.gold -= cost;
+            GameState.gem -= gemCost;
 
             // 재료 제거
             UIManager.selectedItems.forEach(id => {
@@ -337,27 +359,26 @@ const GameSystem = {
 
                 if (isSuccess) {
                     AudioEngine.sfx.gacha_reveal();
-                    const nextPool = Object.values(GameData.items).filter(it => it.type === 'gear' && it.rarity === conf.next);
-                    const resultItem = nextPool[Math.floor(Math.random() * nextPool.length)];
-                    GameState.inventory.push(resultItem.id);
-                    if (this.currentTier !== 'common') GameState.synthPity[this.currentTier] = 0;
-                    UIManager.showToast(`🎉 연성 대성공! [${resultItem.name}] 획득!`);
+                    const nextRarity = conf.next;
+                    const pool = Object.values(GameData.items).filter(it => it.type === 'gear' && it.rarity === nextRarity);
+                    const result = pool[Math.floor(Math.random() * pool.length)];
+                    GameState.inventory.push(result.id);
+                    GameState.synthPity[this.currentTier] = 0;
+                    UIManager.showToast(`🎉 연성 성공! [${result.name}] 획득!`);
                 } else {
                     AudioEngine.sfx.hit();
-                    const refund = Math.floor(cost.gold * 0.3);
-                    GameState.gold += refund;
-                    GameState.synthPity[this.currentTier] = bonusPity + conf.pityAdd;
-                    UIManager.showToast(`💥 연성 실패... 위로금 ${refund}G 획득`);
+                    GameState.synthPity[this.currentTier] = (GameState.synthPity[this.currentTier] || 0) + conf.pityAdd;
+                    UIManager.showToast(`💥 연성 실패... 마일리지가 쌓였습니다.`);
                 }
 
                 GameState.save();
                 UIManager.updateCurrencyUI();
                 UIManager.selectedItems = [];
                 this.updateUI();
-                UIManager.renderInventory(); 
+                UIManager.renderInventory();
             }, 1000);
         }
-    }, // 🔥 여기 쉼표가 없어서 오류가 났었습니다!
+    }
 
     Lobby: {
         // 🔥 인벤토리 클릭 시 합성 중이면 선택, 아니면 장착을 수행하도록 변경
@@ -646,4 +667,5 @@ const GameSystem = {
         }
     }
 };
+
 
