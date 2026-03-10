@@ -59,7 +59,7 @@ const UIManager = {
         document.getElementById(`inv-panel-${t}`).classList.remove('hidden');
         document.getElementById('inv-tab-gear').className = t === 'gear' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
         document.getElementById('inv-tab-skin').className = t === 'skin' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        this.renderInventory(); // 탭 전환 시 인벤토리 다시 그리기
+        this.renderInventory();
     },
     
     updateCurrencyUI() {
@@ -118,8 +118,6 @@ const UIManager = {
         const counts = {}; GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
         for(const [id, count] of Object.entries(counts)) {
             const item = GameData.items[id]; if(!item) continue;
-            
-            // 🔥 장착 상태 판단 로직 강화: 타입까지 확인하여 엉뚱한 칸에 배지가 뜨는 것을 방지
             const isEquipped = (item.type === 'gear' && GameState.equippedGear === id) || 
                               (item.type === 'skin' && GameState.equippedSkin === id);
             
@@ -191,7 +189,20 @@ const GameSystem = {
             UIManager.updateCurrencyUI(); UIManager.initCheckinButton(); AudioEngine.sfx.coin(); UIManager.triggerHaptic();
             UIManager.showToast("출석체크 완료! 100G 획득 🪙");
         },
-        rewardForPlay() { GameState.gold += 10; GameState.save(); UIManager.updateCurrencyUI(); AudioEngine.sfx.coin(); UIManager.showToast("탐험 지원금 10G 획득 🪙"); },
+        rewardForPlay() { 
+            // 🔥 오늘 보상을 이미 받았는지 체크
+            const today = new Date().toDateString();
+            if (GameState.lastPlayReward === today) {
+                return UIManager.showToast("테스트 플레이 보상은 하루에 한 번만 받을 수 있습니다! ⏱️");
+            }
+            
+            GameState.gold += 10; 
+            GameState.lastPlayReward = today; // 수령 날짜 기록
+            GameState.save(); 
+            UIManager.updateCurrencyUI(); 
+            AudioEngine.sfx.coin(); 
+            UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
+        },
         getUpgradeCost(t) { return t === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); },
         upgradeStat(t) {
             const cost = this.getUpgradeCost(t); if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
@@ -303,7 +314,7 @@ const GameSystem = {
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; if(d.skin && d.skin !== 'none' && GameData.items[d.skin]) skinClass = `skin-${GameData.items[d.skin].rarity}`;
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
+                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
@@ -349,7 +360,6 @@ const GameSystem = {
             if (isBoss) {
                 AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
                 
-                // 🔥 헤더 제외 몬스터 카드만 흔들리도록 수정
                 const battleCard = document.getElementById('battle-card');
                 let shakes = 0; 
                 let shakeInt = setInterval(() => { 
@@ -451,7 +461,6 @@ const GameSystem = {
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             GameState.currentHp -= damage; GameState.save(); 
             
-            // 🔥 헤더 제외 몬스터 카드만 흔들리도록 수정
             const battleCard = document.getElementById('battle-card');
             if(battleCard) {
                 battleCard.classList.add('shake'); 
