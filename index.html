@@ -155,11 +155,19 @@
         }
         #gacha-overlay.active { opacity: 1; pointer-events: all; }
         
-        .item-card {
-            background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 15px 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 2px solid; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.2s;
-        }
+        /* 🔥 버그 수정: 카드 높이 고정 및 내부 정렬 최적화 */
+.item-card {
+    background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 12px 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    border: 2px solid; position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s;
+    height: 125px !important; /* 높이를 125px로 고정 */
+    width: 100%;
+}
+.item-card:active { transform: scale(0.96); }
+.item-card h4 { 
+    font-size: 11px; font-weight: 700; text-align: center; margin-top: 4px; 
+    line-height: 1.2; height: 28px; display: flex; align-items: center; justify-content: center; 
+}
         .item-card:hover { transform: scale(1.05); }
         .gacha-item-card { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: scale(0.5); }
         @keyframes popIn { to { opacity: 1; transform: scale(1); } }
@@ -637,6 +645,11 @@
                     <span>실패 보정 마일리지</span>
                     <span id="synth-pity-text">0%</span>
                 </div>
+                <!-- 연성 확률 안내 바로 아래에 추가하세요 -->
+<p class="text-[11px] font-bold text-amber-400 mb-2 px-1 uppercase tracking-tighter text-left">보유 중인 재료 (탭하여 넣기/빼기)</p>
+<div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-4 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[120px]">
+    <!-- 여기에 재료 아이템들이 자동으로 나타납니다 -->
+</div>
                 <div class="progress-track h-2"><div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300" style="width: 0%"></div></div>
                 <p class="text-[9px] text-slate-500 mt-1.5 break-keep">실패할 때마다 확률이 상승하여 100% 도달 시 확정 성공합니다.</p>
             </div>
@@ -650,6 +663,7 @@
 </div>
 </body>
 </html>
+
 
 
 
