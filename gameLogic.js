@@ -10,6 +10,19 @@ const UIManager = {
         this.updateIdleUI(); // 🔥 방치형 UI 초기화
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
         
+        // 🔥 전투 이탈 페널티 체크 (Bug #2 수정)
+        if (localStorage.getItem('master_in_battle') === 'true') {
+            localStorage.removeItem('master_in_battle');
+            GameState.currentHp = 0; // 패배 처리 페널티
+            GameState.isBattling = false;
+            GameState.save();
+            setTimeout(() => {
+                this.triggerHeavyHaptic();
+                this.showToast("🚨 탈주 페널티: 전투 이탈로 체력이 0이 되었습니다.");
+                this.updateRpgLobbyUI();
+            }, 1000);
+        }
+
         // 1분마다 방치 보상 UI 갱신 (홈 화면에 있을 때)
         setInterval(() => {
             if (document.getElementById('screen-home').classList.contains('active')) {
