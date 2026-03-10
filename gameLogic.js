@@ -665,7 +665,8 @@ const GameSystem = {
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
             }, 1500);
         }
-    }
+    
 };
+
 
 
