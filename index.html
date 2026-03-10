@@ -684,16 +684,30 @@
 </script>
 
 <style>
-    /* 모달 활성화 시 클릭 가능하게 설정 */
-    #synth-modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
-        /* 🏆 여기에 삽입: 퀘스트 모달 및 스크롤바 커스텀 */
-    #quest-modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+    /* 모든 모달의 기본 상태: 클릭 통과 */
+    #synth-modal, #quest-modal, #nickname-modal, #gacha-overlay, #boss-warning-overlay {
+        pointer-events: none;
+    }
+
+    /* .active 클래스가 붙었을 때만 클릭 가능 */
+    #synth-modal.active, 
+    #quest-modal.active, 
+    #nickname-modal.active, 
+    #gacha-overlay.active, 
+    #boss-warning-overlay.active { 
+        opacity: 1; 
+        pointer-events: auto !important; 
+        transform: scale(1); 
+    }
+
+    /* 스크롤바 커스텀 */
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
 </style>
 
 </body>
 </html>
+
 
 
 
