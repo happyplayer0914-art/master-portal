@@ -7,13 +7,12 @@ const UIManager = {
         this.updateCurrencyUI(); 
         this.applyAvatarSkin(); 
         this.initCheckinButton(); 
-        this.updateIdleUI(); // 🔥 방치형 UI 초기화
+        this.updateIdleUI(); 
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
         
-        // 🔥 전투 이탈 페널티 체크 (Bug #2 수정)
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
-            GameState.currentHp = 0; // 패배 처리 페널티
+            GameState.currentHp = 0; 
             GameState.isBattling = false;
             GameState.save();
             setTimeout(() => {
@@ -23,7 +22,6 @@ const UIManager = {
             }, 1000);
         }
 
-        // 1분마다 방치 보상 UI 갱신 (홈 화면에 있을 때)
         setInterval(() => {
             if (document.getElementById('screen-home').classList.contains('active')) {
                 this.updateIdleUI();
@@ -41,7 +39,7 @@ const UIManager = {
         document.getElementById(s).classList.add('active'); window.scrollTo(0,0);
         if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
         
-        if(s === 'screen-home') this.updateIdleUI(); // 🔥 홈 이동 시 갱신
+        if(s === 'screen-home') this.updateIdleUI(); 
         if(s === 'screen-arena') this.updateRpgLobbyUI();
         if(s === 'screen-profile') { this.renderInventory(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; }
         if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
@@ -77,7 +75,6 @@ const UIManager = {
         }
     },
 
-    // 🔥 방치형 보상 UI 업데이트 로직 추가
     updateIdleUI() {
         const amount = GameSystem.Lobby.calculateIdleReward();
         const display = document.getElementById('idle-amount-display');
@@ -169,17 +166,14 @@ const GameSystem = {
         calculateIdleReward() {
             const now = Date.now();
             const elapsedHours = (now - GameState.lastIdleCheck) / (1000 * 60 * 60);
-            // 8시간에 100G -> 시간당 12.5G
             return Math.min(100, Math.floor(elapsedHours * 12.5));
         },
         claimIdleReward() {
             const amount = this.calculateIdleReward();
             if (amount <= 0) return UIManager.showToast("누적된 지원금이 없습니다. 💤");
-            
             GameState.gold += amount;
             GameState.lastIdleCheck = Date.now();
             GameState.save();
-            
             UIManager.updateCurrencyUI();
             UIManager.updateIdleUI();
             AudioEngine.sfx.coin();
@@ -267,15 +261,36 @@ const GameSystem = {
             try { await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: GameState.nickname, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', timestamp: window.serverTimestamp() }); } catch(e) { console.error("Silent rank update failed", e); }
         },
         async loadRanking() {
-            const list = document.getElementById('ranking-list'); list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
+            const list = document.getElementById('ranking-list'); 
+            list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
             if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
+            
             try {
-                const q = window.query(window.collection(window.db, "rankings")); const snap = await window.getDocs(q);
+                const q = window.query(
+                    window.collection(window.db, "rankings"),
+                    window.limit(50) 
+                ); 
+                const snap = await window.getDocs(q);
                 let all = []; snap.forEach(d => all.push(d.data()));
-                all.sort((a,b) => { if (b.stage !== a.stage) return b.stage - a.stage; const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); return timeA - timeB; });
+                
+                all.sort((a,b) => { 
+                    if (b.stage !== a.stage) return b.stage - a.stage; 
+                    const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
+                    const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
+                    return timeA - timeB; 
+                });
+
                 let unique = []; let seen = new Set();
-                all.forEach(d => { const id = d.deviceId || d.nickname; if(!seen.has(id) && unique.length < 10) { seen.add(id); unique.push(d); } });
+                all.forEach(d => { 
+                    const id = d.deviceId || d.nickname; 
+                    if(!seen.has(id) && unique.length < 10) { 
+                        seen.add(id); 
+                        unique.push(d); 
+                    } 
+                });
+
                 if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
+                
                 list.innerHTML = '';
                 unique.forEach((d, i) => {
                     let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
@@ -290,28 +305,19 @@ const GameSystem = {
 
     Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
-        
         enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
-            
             const isBoss = (GameState.rpgStage % 5 === 0);
             let stageRoll = localStorage.getItem('master_stage_roll_' + GameState.rpgStage) || Math.random(); 
             localStorage.setItem('master_stage_roll_' + GameState.rpgStage, stageRoll);
-            
-            if (!isBoss && parseFloat(stageRoll) < 0.3) {
-                this.triggerRandomEvent(parseFloat(stageRoll)); 
-            } else {
-                this.startBattleSequence(isBoss);
-            }
+            if (!isBoss && parseFloat(stageRoll) < 0.3) { this.triggerRandomEvent(parseFloat(stageRoll)); } else { this.startBattleSequence(isBoss); }
         },
-
         triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
-            
             if (roll < 0.12) { 
                 titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
                 descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; 
@@ -327,21 +333,13 @@ const GameSystem = {
                 GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); 
             }
         },
-
-        endEvent() { 
-            GameState.rpgStage++; GameState.save(); 
-            document.getElementById('bottom-nav').style.display = 'flex'; 
-            UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
-        },
-
+        endEvent() { GameState.rpgStage++; GameState.save(); document.getElementById('bottom-nav').style.display = 'flex'; UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); },
         startBattleSequence(isBoss) {
             if(GameState.isBattling) return; 
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-battle').classList.add('active');
-            
             GameState.isBattling = true; 
             localStorage.setItem('master_in_battle', 'true');
-            
             if (isBoss) {
                 AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
                 let shakes = 0; let shakeInt = setInterval(() => { 
@@ -352,94 +350,126 @@ const GameSystem = {
                     if(++shakes >= 4) clearInterval(shakeInt); 
                 }, 500);
                 setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
-            } else {
-                this.initBattle(false);
-            }
+            } else { this.initBattle(false); }
         },
-
         initBattle(isBoss) {
             this.monsterMaxHp = GameState.rpgStage * 40 + (isBoss ? 200 : 0); 
             this.monsterCurrentHp = this.monsterMaxHp;
             this.monsterAtkObj = Math.floor(GameState.rpgStage * 3) + (isBoss ? 15 : 0);
             let mInfo = isBoss ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) : GameData.monsters.normal[(GameState.rpgStage - 1) % GameData.monsters.normal.length];
-            
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             document.getElementById('monster-sprite').innerText = mInfo.e;
             document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
             document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
-            
             document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
             document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
             this.lastAttackTime = 0; this.updateBattleUI();
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500); 
         },
-
         updateBattleUI() {
             const stats = GameState.getTotalStats(); 
             document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
             document.getElementById('battle-player-hp-bar').style.width = `${Math.max(0, (GameState.currentHp / stats.hp) * 100)}%`;
             document.getElementById('battle-player-buff-text').innerText = GameState.equippedGear ? `[장비 버프 ON]` : ''; 
-            
             document.getElementById('battle-monster-hp-text').innerText = `${Math.max(0, Math.floor(this.monsterCurrentHp))} / ${this.monsterMaxHp}`;
             document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (this.monsterCurrentHp / this.monsterMaxHp) * 100)}%`;
             document.getElementById('battle-potion-count').innerText = GameState.potions;
         },
-
         usePotionInBattle() {
             const stats = GameState.getTotalStats();
-            if(GameState.currentHp <= 0 || this.monsterCurrentHp <= 0 || GameState.potions <= 0 || GameState.currentHp >= stats.hp) return;
+            if(!GameState.isBattling || GameState.currentHp <= 0 || this.monsterCurrentHp <= 0 || GameState.potions <= 0 || GameState.currentHp >= stats.hp) return;
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); GameState.potions -= 1;
             let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
             GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
         },
-
         playerAttack() {
-            if(this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
+            if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
             const ATTACK_COOLDOWN = 600;
-            if (Date.now() - this.lastAttackTime < ATTACK_COOLDOWN) return;
-            this.lastAttackTime = Date.now();
+            const now = Date.now();
+            if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
             
+            this.lastAttackTime = now;
             AudioEngine.sfx.hit(); UIManager.triggerHaptic();
+            
             let myAtk = GameState.getTotalStats().atk; 
-            let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
+            let isCrit = Math.random() < 0.2; 
+            let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
             this.monsterCurrentHp -= damage;
             
             const sprite = document.getElementById('monster-sprite');
-            sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+            sprite.classList.remove('damage-flash'); 
+            void sprite.offsetWidth; 
+            sprite.classList.add('damage-flash');
+            
             document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
 
-            const btn = document.getElementById('btn-attack'); btn.disabled = true; btn.innerHTML = "⏳ 쿨타임...";
-            setTimeout(() => { if(GameState.currentHp > 0 && this.monsterCurrentHp > 0) { btn.disabled = false; btn.innerHTML = "⚔️ 공격 (TAP!)"; } }, ATTACK_COOLDOWN);
-            this.updateBattleUI(); if (this.monsterCurrentHp <= 0) setTimeout(() => this.endBattle(true), 300);
-        },
+            // 🔥 UI 불일치 수정: 즉시 버튼 비활성화 및 쿨타임 표시
+            const btn = document.getElementById('btn-attack');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            
+            let timeLeft = ATTACK_COOLDOWN;
+            const cooldownTimer = setInterval(() => {
+                timeLeft -= 100;
+                if (timeLeft <= 0 || this.monsterCurrentHp <= 0) {
+                    clearInterval(cooldownTimer);
+                    if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50');
+                        btn.innerHTML = "⚔️ 공격 (TAP!)";
+                    }
+                } else {
+                    btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`;
+                }
+            }, 100);
 
+            this.updateBattleUI(); 
+            if (this.monsterCurrentHp <= 0) {
+                clearInterval(cooldownTimer); // 몬스터 사망 시 쿨타임 타이머 즉시 종료
+                setTimeout(() => this.endBattle(true), 300);
+            }
+        },
         monsterAttack() {
-            if(this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
+            if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) {
+                clearInterval(this.battleInterval);
+                return;
+            }
             AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             GameState.currentHp -= damage; GameState.save(); 
             
-            document.querySelector('.app-container').classList.add('shake'); setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
+            document.querySelector('.app-container').classList.add('shake'); 
+            setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
             document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
 
-            this.updateBattleUI(); if (GameState.currentHp <= 0) setTimeout(() => this.endBattle(false), 300);
+            this.updateBattleUI(); 
+            if (GameState.currentHp <= 0) {
+                clearInterval(this.battleInterval);
+                setTimeout(() => this.endBattle(false), 300);
+            }
         },
-
         endBattle(isWin) {
-            clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
+            clearInterval(this.battleInterval); 
+            GameState.isBattling = false; 
+            localStorage.removeItem('master_in_battle'); 
+            
+            const btnAtk = document.getElementById('btn-attack');
+            btnAtk.disabled = true; // 전투 종료 시 버튼 비활성화
+            btnAtk.innerHTML = "⚔️ 전투 종료";
+
             document.getElementById('bottom-nav').style.display = 'flex'; 
             const isBoss = (GameState.rpgStage % 5 === 0);
             
             if (isWin) {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
-                let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
-                GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
-                
+                let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; 
+                let rewardGem = isBoss ? 50 : 0;
+                GameState.gold += rewardGold; GameState.gem += rewardGem; 
+                GameState.rpgStage++; GameState.save();
                 GameSystem.Ranking.updateRankingSilently();
-
                 alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
             } else {
                 UIManager.triggerHeavyHaptic(); GameState.currentHp = 0; GameState.save();
