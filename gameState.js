@@ -11,7 +11,13 @@ const GameState = {
     lastIdleCheck: Date.now(),
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
+    // [추가] 14행 isBattling: false 아래
     isBattling: false,
+    questData: {
+        daily: { date: "", progress: {} }, // { d1: 0, d2: 0, d3: 0 }
+        achievements: { progress: {}, completed: [] } // { a3: 12 }, [ 'a1' ]
+    },
+    
 
     load() {
         this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
@@ -51,6 +57,11 @@ const GameState = {
         const storedSkin = localStorage.getItem('master_equipped_skin');
         this.equippedSkin = (storedSkin === "null" || !storedSkin) ? null : storedSkin;
 
+        try {
+            this.questData = JSON.parse(localStorage.getItem('master_quest_data') || '{"daily":{"date":"","progress":{}},"achievements":{"progress":{},"completed":[]}}');
+            this.checkDailyReset();
+        } catch(e) { console.error("Quest data load error"); }
+
         this.checkAndRevive();
     },
 
@@ -71,6 +82,7 @@ const GameState = {
         localStorage.setItem('master_current_hp', this.currentHp);
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
+        localStorage.setItem('master_quest_data', JSON.stringify(this.questData));
         
         if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); 
         else localStorage.removeItem('master_equipped_gear');
@@ -79,6 +91,14 @@ const GameState = {
         else localStorage.removeItem('master_equipped_skin');
     },
 
+    checkDailyReset() {
+        const today = new Date().toDateString();
+        if (this.questData.daily.date !== today) {
+            this.questData.daily.date = today;
+            this.questData.daily.progress = {};
+            this.save();
+        }
+    },
     checkAndRevive() {
         const today = new Date().toLocaleDateString();
         if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
@@ -95,4 +115,5 @@ const GameState = {
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
+
 
