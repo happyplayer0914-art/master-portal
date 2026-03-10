@@ -545,7 +545,7 @@
         </div>
     </main>
 
-    <!-- 하단 고정 내비게이션 바 (GNB) -->
+   <!-- 하단 고정 내비게이션 바 (GNB) -->
     <nav id="bottom-nav" class="bottom-nav">
         <div class="nav-item active" onclick="UIManager.navTo('screen-home', this)">
             <i class="fa-solid fa-house"></i><span>홈</span>
@@ -565,8 +565,9 @@
     </nav>
 </div> <!-- app-container 닫음 -->
 
-<!-- [오버레이 레이어들] -->
-<!-- 보스 경고 -->
+<!-- [오버레이 레이어 - app-container 외부에 위치해야 클릭 간섭이 없음] -->
+
+<!-- 1. 보스 경고 -->
 <div id="boss-warning-overlay">
     <div class="warning-content">
         <div class="text-7xl mb-6 text-center">⚠️</div>
@@ -575,7 +576,7 @@
     </div>
 </div>
 
-<!-- 가챠 결과 -->
+<!-- 2. 가챠 결과 -->
 <div id="gacha-overlay">
     <h2 class="text-2xl font-black text-white mb-10 tracking-widest" id="gacha-title">소환의식 진행 중...</h2>
     <div id="gacha-animation" class="text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🎁</div>
@@ -583,12 +584,12 @@
     <button id="gacha-close-btn" onclick="GameSystem.Gacha.closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
 </div>
 
-<!-- 닉네임 등록 -->
+<!-- 3. 닉네임 등록 -->
 <div id="nickname-modal">
-    <div class="glass-card p-6 w-full max-w-sm m-4 border-t-4 border-t-indigo-500">
+    <div class="glass-card p-6 w-full max-w-sm m-4 border-t-4 border-t-indigo-500 text-center">
         <h3 class="text-xl font-bold text-white mb-2">명예의 전당 등록</h3>
-        <p class="text-xs text-slate-400 mb-6 break-keep">현재까지 도달한 <span class="text-yellow-400 font-bold" id="modal-current-stage">1</span>층 기록이 저장됩니다.</p>
-        <input type="text" id="nickname-input" placeholder="마스터 닉네임 (최대 8자)" maxlength="8" class="w-full bg-slate-900 border border-slate-600 text-white px-4 py-3 rounded-xl mb-4 focus:outline-none focus:border-indigo-500 transition-colors">
+        <p class="text-xs text-slate-400 mb-6 break-keep">기록이 서버에 저장됩니다. 닉네임을 적어주세요.</p>
+        <input type="text" id="nickname-input" placeholder="마스터 닉네임" maxlength="8" class="w-full bg-slate-900 border border-slate-600 text-white px-4 py-3 rounded-xl mb-4 focus:outline-none focus:border-indigo-500 transition-colors">
         <div class="flex gap-2">
             <button onclick="GameSystem.Ranking.closeModal()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold">취소</button>
             <button onclick="GameSystem.Ranking.submitRanking()" id="btn-submit-ranking" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold">등록</button>
@@ -596,14 +597,14 @@
     </div>
 </div>
 
-<!-- 연금술 모달 (구조 최종 복구) -->
+<!-- 4. 연금술 모달 (구조 정밀 복구본) -->
 <div id="synth-modal" class="fixed inset-0 z-[1200] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-purple-500">
         <button onclick="GameSystem.Synthesis.closeModal()" class="absolute top-3 right-4 text-slate-400 hover:text-white text-3xl font-light">&times;</button>
         
         <div class="text-center mb-5 mt-2">
             <h3 class="text-2xl font-black text-white mb-1"><span class="text-gradient">연금술 가마솥</span></h3>
-            <p class="text-xs text-slate-400 break-keep leading-relaxed">같은 등급의 장비 3개를 융합합니다.<br><span class="text-emerald-400 font-bold">(장착 장비는 안전하게 보호됩니다)</span></p>
+            <p class="text-xs text-slate-400 break-keep leading-relaxed">장비 3개를 융합합니다.<br><span class="text-emerald-400 font-bold">(장착 중인 장비는 안전하게 보호됩니다)</span></p>
         </div>
 
         <div class="flex gap-2 mb-4">
@@ -614,9 +615,9 @@
 
         <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-700 relative overflow-hidden text-center mb-4">
             <div class="flex justify-center items-center gap-3 mb-5">
-                <div id="synth-slot-1" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center text-3xl"></div>
-                <div id="synth-slot-2" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center text-3xl"></div>
-                <div id="synth-slot-3" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center text-3xl"></div>
+                <div id="synth-slot-1" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
+                <div id="synth-slot-2" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
+                <div id="synth-slot-3" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
             </div>
             
             <p class="text-[11px] text-slate-400 mb-1 font-bold">성공 확률</p>
@@ -624,26 +625,29 @@
             
             <div id="synth-pity-wrap" class="mt-4 hidden bg-slate-800/50 p-2 rounded-lg border border-slate-700">
                 <div class="flex justify-between text-[10px] font-bold text-yellow-400 mb-1.5 px-1">
-                    <span>실패 보정 마일리지</span>
+                    <span>실패 보정</span>
                     <span id="synth-pity-text">0%</span>
                 </div>
                 <div class="progress-track h-2"><div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500" style="width: 0%"></div></div>
             </div>
 
-            <p class="text-[11px] font-bold text-amber-400 mt-5 mb-2 px-1 text-left uppercase">보유 중인 재료 (탭하여 등록)</p>
-            <div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-2 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[140px] max-h-[160px]"></div>
+            <p class="text-[11px] font-bold text-amber-400 mt-5 mb-2 px-1 text-left uppercase tracking-tighter">보유 중인 재료 (탭하여 등록)</p>
+            <div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-2 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[140px] max-h-[180px]"></div>
+            
+            <p class="text-[9px] text-slate-500 mt-2 break-keep">실패할 때마다 확률이 상승하여 100% 도달 시 확정 성공합니다.</p>
         </div>
 
-        <button id="btn-synth-execute" onclick="GameSystem.Synthesis.execute()" disabled class="w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black flex flex-col items-center justify-center">
+        <button id="btn-synth-execute" onclick="GameSystem.Synthesis.execute()" disabled class="w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1">
             <span class="text-sm" id="synth-btn-title">재료 부족 (0/3)</span>
             <span class="text-[10px]" id="synth-btn-cost">🪙 0</span>
         </button>
     </div>
 </div>
 
-<div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[1300] border border-indigo-500/50"></div>
+<!-- 알림 토스트 -->
+<div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[2000] border border-indigo-500/50 shadow-2xl"></div>
 
-<!-- [스크립트 로드 - 맨 아래 고정] -->
+<!-- [스크립트 로드 - 중복 제거 및 순서 보장] -->
 <script src="gameData.js"></script>
 <script src="gameState.js"></script>
 <script src="gameLogic.js"></script>
@@ -652,11 +656,12 @@
         try {
             GameState.load();
             UIManager.init();
-        } catch(e) { console.error("Initialization Error:", e); }
+        } catch(e) { console.error("초기화 오류:", e); }
     };
 </script>
 
 <style>
+    /* 모달 활성화 시 클릭 가능하게 설정 */
     #synth-modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
 </style>
 
