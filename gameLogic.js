@@ -185,6 +185,47 @@ const GameSystem = {
             GameState.save(); UIManager.renderInventory(); UIManager.applyAvatarSkin(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.equip(); UIManager.triggerHaptic();
             UIManager.showToast(GameState.equippedGear === id || GameState.equippedSkin === id ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
         }
+       // 🔥 여기서부터 새로 추가되는 [장비 합성] 로직입니다!
+        synthesizeItem(id) {
+            const item = GameData.items[id];
+            let count = GameState.inventory.filter(i => i === id).length;
+            
+            if (count < 3) return UIManager.showToast("합성에는 같은 아이템 3개가 필요합니다!");
+            if (item.rarity === 'legendary') return UIManager.showToast("이미 최고 등급입니다!");
+
+            // 1. 인벤토리에서 제물 3개 삭제
+            let removed = 0;
+            GameState.inventory = GameState.inventory.filter(i => {
+                if (i === id && removed < 3) { removed++; return false; }
+                return true;
+            });
+
+            // 2. 장착 중이던 템을 합성해서 아예 사라졌다면 장착 해제 처리
+            if (GameState.equippedGear === id && !GameState.inventory.includes(id)) GameState.equippedGear = null;
+            if (GameState.equippedSkin === id && !GameState.inventory.includes(id)) GameState.equippedSkin = null;
+
+            // 3. 다음 등급 결정
+            const tiers = ['common', 'rare', 'epic', 'legendary'];
+            const currentIdx = tiers.indexOf(item.rarity);
+            const nextRarity = tiers[currentIdx + 1];
+
+            // 4. 동일한 타입(장비or스킨)의 상위 등급 아이템 중 랜덤 1개 획득
+            const pool = Object.values(GameData.items).filter(it => it.rarity === nextRarity && it.type === item.type);
+            const resultItem = pool[Math.floor(Math.random() * pool.length)];
+
+            // 5. 결과 저장 및 UI 최신화
+            GameState.inventory.push(resultItem.id);
+            GameState.save();
+            UIManager.renderInventory();
+            UIManager.applyAvatarSkin();
+            UIManager.updateRpgLobbyUI();
+
+            // 6. 짜릿한 연출!
+            AudioEngine.sfx.gacha_reveal(); // 가챠 뽑기 효과음 재활용
+            UIManager.triggerHeavyHaptic();
+            alert(`✨ 합성 대성공!\n\n[${item.name}] 3개가 융합되어...\n🎉 [ ${resultItem.name} ] (이)가 되었습니다!`);
+        },
+        // 🔥 여기까지 추가 끝!
     },
     
     Gacha: {
@@ -424,6 +465,7 @@ const GameSystem = {
     }
 
 };
+
 
 
 
