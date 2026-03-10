@@ -211,6 +211,7 @@ const GameSystem = {
             this.updateUI();
         },
 
+      // [수정된 부분] 154행 부근
         selectItem(id) {
             const item = GameData.items[id];
             if (!item || item.type !== 'gear' || item.rarity !== this.currentTier) {
@@ -220,28 +221,30 @@ const GameSystem = {
                 return UIManager.showToast("장착 중인 장비는 안전을 위해 연성할 수 없습니다.");
             }
 
-            const idx = UIManager.selectedItems.indexOf(id);
-            if (idx > -1) {
-                // 이미 선택된 경우 제거 (해제)
-                UIManager.selectedItems.splice(idx, 1);
-                AudioEngine.sfx.click();
-            } else {
-                // 새로 선택하는 경우
-                if (UIManager.selectedItems.length >= 3) return UIManager.showToast("재료는 3개까지만 넣을 수 있습니다.");
-                
-                // 인벤토리 내 실제 보유 수량 체크
-                const hasCount = GameState.inventory.filter(iid => iid === id).length;
-                const usedCount = UIManager.selectedItems.filter(sid => sid === id).length;
-                
-                if (usedCount >= hasCount) return UIManager.showToast("보유한 아이템 수량이 부족합니다.");
-                
-                UIManager.selectedItems.push(id);
-                AudioEngine.sfx.click();
-            }
+            // 가마솥이 꽉 찼는지 확인
+            if (UIManager.selectedItems.length >= 3) return UIManager.showToast("재료는 3개까지만 넣을 수 있습니다.");
+            
+            // 인벤토리 내 실제 보유 수량과 현재 선택된 수량 비교 (같은 아이템 중복 선택 가능)
+            const hasCount = GameState.inventory.filter(iid => iid === id).length;
+            const usedCount = UIManager.selectedItems.filter(sid => sid === id).length;
+            
+            if (usedCount >= hasCount) return UIManager.showToast("보유한 아이템 수량이 부족합니다.");
+            
+            // 제거 로직을 없애고 무조건 추가하도록 변경
+            UIManager.selectedItems.push(id);
+            AudioEngine.sfx.click();
             
             this.updateUI();
         },
 
+        // [신규 추가] 가마솥 슬롯 클릭 시 해당 위치의 아이템만 제거
+        removeItem(index) {
+            if (index > -1 && index < UIManager.selectedItems.length) {
+                UIManager.selectedItems.splice(index, 1);
+                AudioEngine.sfx.click();
+                this.updateUI();
+            }
+        },
         updateUI() {
             const selected = UIManager.selectedItems;
             const count = selected.length;
@@ -255,7 +258,7 @@ const GameSystem = {
                     const itemObj = GameData.items[selected[i-1]];
                     slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
                     slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-purple-500 flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer shadow-lg`;
-                    slot.onclick = () => this.selectItem(selected[i-1]);
+                   slot.onclick = () => this.removeItem(i-1);
                 } else {
                     slot.innerHTML = '';
                     slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
@@ -658,6 +661,7 @@ const GameSystem = {
         }
     } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
