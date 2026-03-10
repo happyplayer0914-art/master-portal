@@ -32,8 +32,10 @@ const GameState = {
             localStorage.setItem('master_last_save', now);
         }
 
-        this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
-        this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
+        //this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
+        //this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
+        this.gold = 10000;
+        this.gem = 10000;
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
         this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
         this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
@@ -90,3 +92,4 @@ const GameState = {
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
+
