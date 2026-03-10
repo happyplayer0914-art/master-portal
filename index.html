@@ -156,12 +156,12 @@
             <div id="master-profile-icon" class="master-avatar w-8 h-8 rounded-full bg-gradient-to-tr from-slate-600 to-slate-400 flex items-center justify-center font-black text-sm text-white shadow-md">M</div>
             <span class="font-bold text-lg tracking-wide">MASTER LAB</span>
         </div>
-        <div class="flex gap-3">
-            <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span class="text-sm">🪙</span><span id="gold-display" class="font-bold text-yellow-400 text-sm w-10 text-right">0</span>
+        <div class="flex gap-2">
+            <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 min-w-[75px]">
+                <span class="text-sm">🪙</span><span id="gold-display" class="font-bold text-yellow-400 text-sm">0</span>
             </div>
-            <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span class="text-sm">💎</span><span id="gem-display" class="font-bold text-cyan-400 text-sm w-8 text-right">0</span>
+            <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 min-w-[75px]">
+                <span class="text-sm">💎</span><span id="gem-display" class="font-bold text-cyan-400 text-sm">0</span>
             </div>
         </div>
     </header>
@@ -673,8 +673,10 @@
         },
 
         updateCurrencyUI() {
-            document.getElementById('gold-display').innerText = GameState.gold.toLocaleString();
-            document.getElementById('gem-display').innerText = GameState.gem.toLocaleString();
+            const displayGold = Math.min(GameState.gold, 99999);
+            const displayGem = Math.min(GameState.gem, 99999);
+            document.getElementById('gold-display').innerText = displayGold.toLocaleString();
+            document.getElementById('gem-display').innerText = displayGem.toLocaleString();
         },
 
         initCheckinButton() {
@@ -825,7 +827,10 @@
                 } else if (item.type === 'skin') {
                     if (GameState.equippedSkin === itemId) GameState.equippedSkin = null; else GameState.equippedSkin = itemId;
                 }
-                GameState.save(); UIManager.renderInventory();
+                GameState.save(); 
+                UIManager.renderInventory();
+                UIManager.applyAvatarSkin(); // 스킨 장착 시 화면 즉시 새로고침
+                UIManager.updateRpgLobbyUI(); // 장비 장착 시 아레나 스탯 즉시 새로고침
                 UIManager.showToast(GameState.equippedGear === itemId || GameState.equippedSkin === itemId ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
             }
         },
