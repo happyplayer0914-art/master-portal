@@ -174,13 +174,6 @@ const UIManager = {
 };
 
 const GameSystem = {
-    // =========================================================================
-// 5. GAME SYSTEM - Synthesis (연금술 시스템 부분 수정)
-// =========================================================================
-
-// 📍 찾을 위치: gameLogic.js 파일 내의 GameSystem = { Synthesis: { ... } } 부분을 찾으세요.
-// 아래의 Synthesis 객체 전체를 교체하시면 됩니다.
-
     Synthesis: {
         currentTier: 'common',
         config: {
@@ -218,7 +211,6 @@ const GameSystem = {
             this.updateUI();
         },
 
-        // 🔥 아이템 선택/해제 핵심 로직
         selectItem(id) {
             const item = GameData.items[id];
             if (!item || item.type !== 'gear' || item.rarity !== this.currentTier) {
@@ -271,7 +263,7 @@ const GameSystem = {
                 }
             }
 
-            // 2. 하단 재료 목록 업데이트 (필터링 및 렌더링)
+            // 2. 하단 재료 목록 업데이트
             const listArea = document.getElementById('synth-material-list');
             if (listArea) {
                 listArea.innerHTML = "";
@@ -300,7 +292,7 @@ const GameSystem = {
                 });
             }
 
-            // 3. 버튼 및 확률 텍스트 업데이트
+            // 3. 버튼 및 확률 업데이트
             const bonusPity = GameState.synthPity[this.currentTier] || 0;
             const finalRate = Math.min(100, conf.rate + bonusPity);
             document.getElementById('synth-rate-text').innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-xs text-pink-400">(+${bonusPity}%)</span>` : '');
@@ -378,10 +370,9 @@ const GameSystem = {
                 UIManager.renderInventory();
             }, 1000);
         }
-    }
+    }, // 🔴 FIX 1: 누락되었던 쉼표(,) 추가 완료!
 
     Lobby: {
-        // 🔥 인벤토리 클릭 시 합성 중이면 선택, 아니면 장착을 수행하도록 변경
         handleItemClick(id) {
             const synthModal = document.getElementById('synth-modal');
             if (synthModal && synthModal.classList.contains('active')) {
@@ -665,8 +656,9 @@ const GameSystem = {
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
             }, 1500);
         }
-    
+    } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
