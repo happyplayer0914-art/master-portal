@@ -1,18 +1,13 @@
+// =========================================================================
+// 3. GAME STATE (데이터 관리)
+// =========================================================================
 const GameState = {
     nickname: "위대한 길드장",
-    deviceId: "",
-    pendingIdleGold: 0, 
-    gold: 10000, 
-    gem: 10000, 
-    lastCheckIn: "",
-    rpgStage: 1, 
-    rpgAtk: 10, 
-    rpgMaxHp: 100, 
-    currentHp: 100,
-    potions: 1, 
-    inventory: [], 
-    equippedGear: null, 
-    equippedSkin: null,
+    deviceId: "", // 🔥 기기 식별자
+    gold: 10000, gem: 10000, lastCheckIn: "",
+    lastIdleCheck: Date.now(), // 🔥 방치형 보상 체크 시간 추가
+    rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
+    potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
     isBattling: false,
 
     load() {
@@ -28,6 +23,7 @@ const GameState = {
         this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
         this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
+        this.lastIdleCheck = parseInt(localStorage.getItem('master_last_idle') || Date.now()); // 불러오기
         this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
         this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
         this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
@@ -37,48 +33,25 @@ const GameState = {
         this.equippedGear = localStorage.getItem('master_equipped_gear');
         this.equippedSkin = localStorage.getItem('master_equipped_skin');
 
-        // 🔥 [울트라 수정] 방치형 보상 정산 (8시간=480분 당 최대 100G)
-        this.pendingIdleGold = parseFloat(localStorage.getItem('master_pending_idle_gold')) || 0;
-        let lastSave = parseInt(localStorage.getItem('master_last_save')) || Date.now();
-        let now = Date.now();
-        let diffMins = (now - lastSave) / 60000;
-        
-        if (diffMins > 0) {
-            // 1분당 약 0.2083G 씩 쌓임 (480분 지나면 딱 100G)
-            this.pendingIdleGold += diffMins * (100 / 480); 
-            if (this.pendingIdleGold > 100) this.pendingIdleGold = 100;
-            localStorage.setItem('master_last_save', now.toString());
-        }
-
         this.checkAndRevive();
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
             this.isBattling = false;
+            setTimeout(() => alert(`🚨 전투 도중 이탈하여 처음 위치로 돌아왔습니다.`), 500);
         }
     },
 
     save() {
-        // 🔥 세이브 시점에도 방치 보상 실시간 누적
-        let lastSave = parseInt(localStorage.getItem('master_last_save')) || Date.now();
-        let now = Date.now();
-        let diffMins = (now - lastSave) / 60000;
-        if (diffMins > 0) {
-            this.pendingIdleGold += diffMins * (100 / 480);
-            if (this.pendingIdleGold > 100) this.pendingIdleGold = 100;
-        }
-
         localStorage.setItem('master_nickname', this.nickname);
         localStorage.setItem('master_gold', this.gold);
         localStorage.setItem('master_gem', this.gem);
+        localStorage.setItem('master_last_idle', this.lastIdleCheck); // 저장하기
         localStorage.setItem('master_stage', this.rpgStage);
         localStorage.setItem('master_atk', this.rpgAtk);
         localStorage.setItem('master_max_hp', this.rpgMaxHp);
         localStorage.setItem('master_current_hp', this.currentHp);
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
-        localStorage.setItem('master_pending_idle_gold', this.pendingIdleGold);
-        localStorage.setItem('master_last_save', now.toString());
-        
         if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
         if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
     },
@@ -96,4 +69,5 @@ const GameState = {
         if(this.equippedGear && GameData.items[this.equippedGear]) mult = GameData.items[this.equippedGear].statMult;
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
-};
+};;
+
