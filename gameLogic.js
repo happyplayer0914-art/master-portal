@@ -567,6 +567,55 @@ const GameSystem = {
             UIManager.updateCurrencyUI();
             AudioEngine.sfx.coin();
         }
+        // [추가] GameSystem.Quest.giveReward 함수 아래에 삽입
+        openModal() {
+            AudioEngine.sfx.click();
+            UIManager.triggerHaptic();
+            document.getElementById('quest-modal').classList.add('active');
+            this.switchTab('daily');
+        },
+        closeModal() {
+            AudioEngine.sfx.click();
+            document.getElementById('quest-modal').classList.remove('active');
+        },
+        switchTab(t) {
+            AudioEngine.sfx.click();
+            const isDaily = (t === 'daily');
+            document.getElementById('quest-tab-daily').className = isDaily ? "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded" : "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
+            document.getElementById('quest-tab-achieve').className = !isDaily ? "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded" : "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
+            this.renderList(t);
+        },
+        renderList(type) {
+            const container = document.getElementById('quest-list-container');
+            container.innerHTML = '';
+            const list = (type === 'daily') ? GameData.quests.daily : GameData.quests.achievements;
+
+            list.forEach(q => {
+                const progress = (type === 'daily') ? (GameState.questData.daily.progress[q.id] || 0) : (GameState.questData.achievements.progress[q.id] || 0);
+                const isCompleted = (type === 'daily') ? (progress >= q.goal) : GameState.questData.achievements.completed.includes(q.id);
+                const percent = Math.min(100, (progress / q.goal) * 100);
+
+                container.innerHTML += `
+                    <div class="p-4 bg-slate-900/60 rounded-xl border ${isCompleted ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/5'}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-bold ${isCompleted ? 'text-emerald-400' : 'text-white'}">${q.name} ${isCompleted ? '✅' : ''}</h4>
+                                <p class="text-[10px] text-slate-400">${q.desc}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-cyan-400">💎 ${q.rewardGem}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="progress-track h-1.5 flex-1">
+                                <div class="progress-fill ${isCompleted ? 'bg-emerald-500' : ''}" style="width: ${percent}%"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500 whitespace-nowrap">${progress} / ${q.goal}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     },
     Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
@@ -713,6 +762,7 @@ const GameSystem = {
         }
     } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
