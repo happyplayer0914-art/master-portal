@@ -5,6 +5,7 @@ const GameState = {
     nickname: "위대한 길드장",
     deviceId: "", 
     gold: 10000, gem: 10000, 
+    synthPity: { rare: 0, epic: 0 }, // 🔥 신규: 등급별 실패 마일리지 스택
     lastCheckIn: "",
     lastPlayRewards: {}, // 🔥 여러 테스트의 보상 날짜를 저장하기 위해 객체(Object)로 변경
     lastIdleCheck: Date.now(),
@@ -21,6 +22,9 @@ const GameState = {
             localStorage.setItem('master_device_id', storedId);
         }
         this.deviceId = storedId;
+        try { // 🔥 신규 로드 로직
+            this.synthPity = JSON.parse(localStorage.getItem('master_synth_pity') || '{"rare":0, "epic":0}');
+        } catch(e) { this.synthPity = { rare: 0, epic: 0 }; }
 
         this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
         this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
@@ -55,6 +59,7 @@ const GameState = {
         localStorage.setItem('master_gold', this.gold);
         localStorage.setItem('master_gem', this.gem);
         localStorage.setItem('last_checkin', this.lastCheckIn);
+        localStorage.setItem('master_synth_pity', JSON.stringify(this.synthPity)); // 🔥 신규 저장 로직
         
         // 🔥 객체 데이터 저장
         localStorage.setItem('master_play_rewards_map', JSON.stringify(this.lastPlayRewards));
@@ -90,3 +95,4 @@ const GameState = {
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
+
