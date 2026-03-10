@@ -2,7 +2,7 @@
 // 4. UI MANAGER & 5. GAME SYSTEM
 // =========================================================================
 const UIManager = {
-    init() { this.initBackground(); this.updateCurrencyUI(); this.applyAvatarSkin(); this.initCheckinButton(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; },
+   init() { this.initBackground(); this.updateCurrencyUI(); this.applyAvatarSkin(); this.initCheckinButton(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; this.updateIdleUI(); },
     triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
     triggerHeavyHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); },
     showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); },
@@ -16,6 +16,7 @@ const UIManager = {
         if(s === 'screen-arena') this.updateRpgLobbyUI();
         if(s === 'screen-profile') { this.renderInventory(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; }
         if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
+        if(s === 'screen-home') this.updateIdleUI(); // 🔥 이 줄 추가!
     },
     
     switchTab(t) {
@@ -35,8 +36,19 @@ const UIManager = {
     },
     
     updateCurrencyUI() {
-        document.getElementById('gold-display').innerText = Math.min(GameState.gold, 99999).toLocaleString();
-        document.getElementById('gem-display').innerText = Math.min(GameState.gem, 99999).toLocaleString();
+    // 🔥 updateCurrencyUI() 함수 바로 밑에 아래 함수를 통째로 끼워넣어주세요
+    updateIdleUI() {
+        const display = document.getElementById('idle-amount-display');
+        if (display) {
+            const amount = Math.floor(GameState.pendingIdleGold);
+            display.innerText = `${amount} / 100 G`;
+            if (amount >= 100) {
+                display.classList.replace('text-slate-400', 'text-yellow-400');
+            } else {
+                display.classList.replace('text-yellow-400', 'text-slate-400');
+            }
+        }
+    },
     },
     
     initCheckinButton() { 
@@ -421,3 +433,4 @@ const GameSystem = {
     }
 
 };
+
