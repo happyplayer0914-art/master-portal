@@ -4,19 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>마스터의 놀이터 | 프리미엄 테스트 & 미니게임 포털</title>
-    <!-- 🌐 SNS 공유용 메타 태그 (여기에 삽입!) -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://master-portal-xi.vercel.app/">
-    <meta property="og:title" content="마스터의 놀이터 | 프리미엄 MBTI & 미니게임">
-    <meta property="og:description" content="나의 플러팅 무기 확인하고, 심연의 탑을 정복하세요! 지금 접속 시 100G 지급!">
-    <!-- 🚨 아래 content에 깃허브에서 복사한 'Raw' 이미지 주소를 넣으세요 -->
-    <meta property="og:image" content="https://raw.githubusercontent.com/happyplayer0914-art/master-portal/refs/heads/main/og-image-portal.png">
-    
-    <!-- 트위터용 설정 -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://raw.githubusercontent.com/happyplayer0914-art/master-portal/refs/heads/main/og-image-portal.png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -87,7 +74,7 @@
         .text-gradient { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .text-gradient-gold { background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* 하단 GNB 네비게이션 바 (5개 메뉴로 변경) */
+        /* 하단 GNB 네비게이션 바 (5개 메뉴) */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 70px;
             background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -157,8 +144,9 @@
         .item-card {
             background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 15px 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 2px solid; position: relative; overflow: hidden;
+            border: 2px solid; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.2s;
         }
+        .item-card:hover { transform: scale(1.05); }
         .gacha-item-card { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: scale(0.5); }
         @keyframes popIn { to { opacity: 1; transform: scale(1); } }
         
@@ -249,38 +237,30 @@
                 <span class="text-xs text-slate-400 font-medium">플레이 시 +10G</span>
             </div>
             <div class="space-y-4">
-                <!-- 플러팅 테스트 -->
                 <a href="https://flirting-mbti.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-pink-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-pink-900 to-purple-900 flex items-center justify-center text-4xl shadow-inner border border-pink-500/30">💘</div>
                         <div class="flex flex-col justify-center flex-1">
                             <span class="text-[10px] text-pink-400 font-bold px-2 py-0.5 bg-pink-500/10 rounded-full w-max mb-1.5">연애/심리 1위</span>
                             <h3 class="font-bold text-[15px] mb-1 leading-snug">나의 플러팅 무기 테스트</h3>
-                            <p class="text-xs text-slate-400">내가 썸 탈 때 쓰는 무기는?</p>
                         </div>
                     </div>
                 </a>
-                
-                <!-- 전설의 길드장 (RPG) -->
                 <a href="https://rpg-mbti-test.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-indigo-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-800 to-indigo-900 flex items-center justify-center text-4xl shadow-inner border border-indigo-500/30">👑</div>
                         <div class="flex flex-col justify-center flex-1">
                             <span class="text-[10px] text-indigo-400 font-bold px-2 py-0.5 bg-indigo-500/10 rounded-full w-max mb-1.5">서브컬처 1위</span>
                             <h3 class="font-bold text-[15px] mb-1 leading-snug">전설의 길드장 소환</h3>
-                            <p class="text-xs text-slate-400">내 영혼에 각인된 RPG 클래스는?</p>
                         </div>
                     </div>
                 </a>
-
-                <!-- 내 지갑 수호령 -->
                 <a href="https://wealth-mbti.vercel.app/" target="_blank" onclick="GameSystem.Lobby.rewardForPlay()" class="block glass-card p-4 hover:border-yellow-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-900 to-slate-900 flex items-center justify-center text-4xl shadow-inner border border-yellow-500/30">🪙</div>
                         <div class="flex flex-col justify-center flex-1">
                             <span class="text-[10px] text-yellow-400 font-bold px-2 py-0.5 bg-yellow-500/10 rounded-full w-max mb-1.5">재테크 1위</span>
                             <h3 class="font-bold text-[15px] mb-1 leading-snug">내 지갑 수호령 소환</h3>
-                            <p class="text-xs text-slate-400">나의 소비/저축 습관 정밀 분석</p>
                         </div>
                     </div>
                 </a>
@@ -300,15 +280,12 @@
         <div class="glass-card p-6 mb-6 text-center border-t-4 border-t-purple-500">
             <p class="text-purple-400 font-bold text-xs tracking-widest uppercase mb-1">Current Stage</p>
             <h2 class="text-4xl font-black text-white mb-6">층수: <span id="rpg-stage-display" class="text-gradient-gold">1</span>층</h2>
-            
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-2">
                 <div class="flex justify-between text-xs font-bold text-emerald-400 mb-2 px-1">
                     <span>마스터의 체력 (HP)</span>
                     <span id="lobby-hp-text">100 / 100</span>
                 </div>
-                <div class="progress-track h-3">
-                    <div id="lobby-hp-bar" class="hp-fill" style="width: 100%"></div>
-                </div>
+                <div class="progress-track h-3"><div id="lobby-hp-bar" class="hp-fill"></div></div>
             </div>
         </div>
 
@@ -317,7 +294,6 @@
             <button onclick="UIManager.switchTab('shop')" id="tab-shop" class="py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700">잡화점 (아이템)</button>
         </div>
 
-        <!-- 대장간 탭 -->
         <div id="panel-forge" class="space-y-3 mb-6">
             <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div class="text-left">
@@ -341,7 +317,6 @@
             </div>
         </div>
 
-        <!-- 잡화점 탭 -->
         <div id="panel-shop" class="space-y-3 mb-6 hidden">
             <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div class="text-left flex items-center gap-3">
@@ -376,7 +351,7 @@
         </button>
     </main>
 
-    <!-- [전투 및 이벤트 화면] -->
+    <!-- [전투 및 이벤트 화면 (복구 완료)] -->
     <main id="screen-rpg-event" class="screen pt-24 px-5">
         <div class="glass-card p-8 text-center border border-indigo-500/50 relative overflow-hidden mt-10">
             <p class="text-indigo-400 font-bold text-xs tracking-widest uppercase mb-4">Random Encounter</p>
@@ -459,7 +434,7 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 🔥 4. [랭킹] 명예의 전당 화면 (새로 추가됨)    -->
+    <!-- 4. [랭킹] 명예의 전당 화면                     -->
     <!-- ============================================== -->
     <main id="screen-ranking" class="screen pt-24 px-5">
         <div class="text-center mb-6">
@@ -524,7 +499,7 @@
         </div>
     </main>
 
-    <!-- 하단 고정 내비게이션 바 (GNB) - 랭킹 탭 추가됨 -->
+    <!-- 하단 고정 내비게이션 바 (GNB) -->
     <nav id="bottom-nav" class="bottom-nav">
         <div class="nav-item active" onclick="UIManager.navTo('screen-home', this)">
             <i class="fa-solid fa-house"></i><span>홈</span>
@@ -535,7 +510,6 @@
         <div class="nav-item" onclick="UIManager.navTo('screen-gacha-shop', this)">
             <i class="fa-solid fa-store"></i><span>가챠샵</span>
         </div>
-        <!-- 새로 추가된 랭킹 탭 -->
         <div class="nav-item" onclick="UIManager.navTo('screen-ranking', this)">
             <i class="fa-solid fa-trophy"></i><span>랭킹</span>
         </div>
@@ -546,7 +520,7 @@
 
 </div>
 
-<!-- 보스 경고 오버레이 -->
+<!-- 보스 경고 오버레이 (복구 완료) -->
 <div id="boss-warning-overlay">
     <div class="warning-content">
         <div class="text-7xl mb-6 text-center">⚠️</div>
@@ -555,7 +529,7 @@
     </div>
 </div>
 
-<!-- 가챠 결과 오버레이 -->
+<!-- 가챠 결과 오버레이 (복구 완료) -->
 <div id="gacha-overlay">
     <h2 class="text-2xl font-black text-white mb-10 tracking-widest" id="gacha-title">소환의식 진행 중...</h2>
     <div id="gacha-animation" class="text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🎁</div>
@@ -563,23 +537,20 @@
     <button id="gacha-close-btn" onclick="GameSystem.Gacha.closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
 </div>
 
-<!-- 🔥 랭킹 닉네임 입력 모달 -->
+<!-- 닉네임 모달 (복구 완료) -->
 <div id="nickname-modal">
     <div class="glass-card p-6 w-full max-w-sm m-4 border-t-4 border-t-indigo-500">
         <h3 class="text-xl font-bold text-white mb-2">명예의 전당 등록</h3>
-        <p class="text-xs text-slate-400 mb-6 break-keep">현재까지 도달한 <span class="text-yellow-400 font-bold" id="modal-current-stage">1</span>층 기록이 서버에 저장됩니다. 역사에 남길 닉네임을 적어주세요.</p>
+        <p class="text-xs text-slate-400 mb-6 break-keep">현재까지 도달한 <span class="text-yellow-400 font-bold" id="modal-current-stage">1</span>층 기록이 서버에 저장됩니다. 닉네임을 적어주세요.</p>
         <input type="text" id="nickname-input" placeholder="마스터 닉네임 (최대 8자)" maxlength="8" class="w-full bg-slate-900 border border-slate-600 text-white px-4 py-3 rounded-xl mb-4 focus:outline-none focus:border-indigo-500 transition-colors">
         <div class="flex gap-2">
-            <button onclick="GameSystem.Ranking.closeModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-colors">취소</button>
-            <button onclick="GameSystem.Ranking.submitRanking()" id="btn-submit-ranking" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2">
-                <span>등록하기</span>
-            </button>
+            <button onclick="GameSystem.Ranking.closeModal()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold hover:bg-slate-700 transition-colors">취소</button>
+            <button onclick="GameSystem.Ranking.submitRanking()" id="btn-submit-ranking" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">등록</button>
         </div>
     </div>
 </div>
 
-<!-- 토스트 -->
-<div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[100] border border-indigo-500/50 shadow-2xl whitespace-nowrap"></div>
+<div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[100] border border-indigo-500/50 shadow-2xl"></div>
 
 <script>
     // =========================================================================
@@ -614,27 +585,14 @@
     // 2. AUDIO ENGINE (사운드 시스템)
     // =========================================================================
     const AudioEngine = {
-        ctx: null,
-        enabled: false,
-        init() {
-            if(!this.ctx) {
-                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                this.enabled = true;
-            }
-            if(this.ctx.state === 'suspended') this.ctx.resume();
-        },
+        ctx: null, enabled: false,
+        init() { if(!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); this.enabled = true; } if(this.ctx.state === 'suspended') this.ctx.resume(); },
         playTone(freq, type, duration, vol) {
             if(!this.enabled || !this.ctx) return;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start();
-            osc.stop(this.ctx.currentTime + duration);
+            const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
         },
         sfx: {
             click: () => AudioEngine.playTone(600, 'sine', 0.1, 0.05),
@@ -642,7 +600,7 @@
             coin: () => { AudioEngine.playTone(987, 'sine', 0.1, 0.1); setTimeout(()=>AudioEngine.playTone(1318, 'sine', 0.2, 0.1), 100); },
             hit: () => AudioEngine.playTone(150, 'sawtooth', 0.15, 0.15),
             boss: () => { AudioEngine.playTone(50, 'square', 1.0, 0.2); AudioEngine.playTone(60, 'sawtooth', 1.5, 0.2); },
-            gacha_build: () => { AudioEngine.playTone(400, 'sine', 0.1, 0.1); setTimeout(() => AudioEngine.playTone(500, 'sine', 0.1, 0.1), 200); setTimeout(() => AudioEngine.playTone(600, 'sine', 0.1, 0.1), 400); },
+            gacha_build: () => { AudioEngine.playTone(400, 'sine', 0.1, 0.1); setTimeout(()=>AudioEngine.playTone(500, 'sine', 0.1, 0.1), 200); setTimeout(()=>AudioEngine.playTone(600, 'sine', 0.1, 0.1), 400); },
             gacha_reveal: () => { AudioEngine.playTone(880, 'sine', 0.2, 0.1); setTimeout(()=>AudioEngine.playTone(1760, 'sine', 0.4, 0.15), 150); }
         }
     };
@@ -650,12 +608,12 @@
     document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
     document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
 
-
     // =========================================================================
-    // 3. GAME STATE (데이터 저장 및 관리)
+    // 3. GAME STATE (데이터 관리 - 기기 ID 오류 수정 완료 버전)
     // =========================================================================
     const GameState = {
         nickname: "위대한 길드장",
+        deviceId: "", // 🔥 기기 식별자
         gold: 10000, gem: 10000, lastCheckIn: "",
         rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
         potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
@@ -663,27 +621,32 @@
 
         load() {
             this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
-            let sGold = localStorage.getItem('master_gold');
-            this.gold = sGold !== null ? parseInt(sGold) : 10000;
-            let sGem = localStorage.getItem('master_gem');
-            this.gem = sGem !== null ? parseInt(sGem) : 10000;
             
+            // 🔥 기기 고유 ID 복구 및 생성 로직
+            let storedId = localStorage.getItem('master_device_id');
+            if(!storedId) {
+                storedId = 'dev_' + Math.random().toString(36).substring(2, 11) + Date.now();
+                localStorage.setItem('master_device_id', storedId);
+            }
+            this.deviceId = storedId;
+
+            this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
+            this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
             this.lastCheckIn = localStorage.getItem('last_checkin') || "";
             this.rpgStage = parseInt(localStorage.getItem('master_stage') || "1");
             this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
             this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
             this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
             this.potions = parseInt(localStorage.getItem('master_potions') || "1");
-            
             this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
-            this.equippedGear = localStorage.getItem('master_equipped_gear') || null;
-            this.equippedSkin = localStorage.getItem('master_equipped_skin') || null;
+            this.equippedGear = localStorage.getItem('master_equipped_gear');
+            this.equippedSkin = localStorage.getItem('master_equipped_skin');
 
             this.checkAndRevive();
-
             if (localStorage.getItem('master_in_battle') === 'true') {
                 localStorage.removeItem('master_in_battle');
-                setTimeout(() => alert(`🚨 비겁하게 도망치다니! 전투는 처음부터 다시 시작해야 합니다.`), 500);
+                this.isBattling = false; // 강제 초기화
+                setTimeout(() => alert(`🚨 전투 도중 이탈하여 처음 위치로 돌아왔습니다.`), 500);
             }
         },
 
@@ -697,125 +660,81 @@
             localStorage.setItem('master_current_hp', this.currentHp);
             localStorage.setItem('master_potions', this.potions);
             localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
-            
             if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
             if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
         },
 
         checkAndRevive() {
-            const lastReviveDate = localStorage.getItem('master_last_revive_date') || "";
-            const todayString = new Date().toLocaleDateString(); 
-            if (isNaN(this.currentHp)) { 
-                this.currentHp = this.rpgMaxHp; 
-                localStorage.setItem('master_last_revive_date', todayString); 
-            } else if (this.currentHp <= 0 && lastReviveDate !== todayString) {
-                this.currentHp = this.rpgMaxHp; 
-                localStorage.setItem('master_last_revive_date', todayString);
-                setTimeout(() => UIManager.showToast("✨ 새로운 아침! 체력이 완벽히 회복되었습니다."), 1000);
+            const today = new Date().toLocaleDateString();
+            if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
+                this.currentHp = this.rpgMaxHp;
+                localStorage.setItem('master_last_revive', today);
             }
         },
 
         getTotalStats() {
             let mult = 1.0;
-            if(this.equippedGear && GameData.items[this.equippedGear]) {
-                mult = GameData.items[this.equippedGear].statMult;
-            }
-            return { 
-                atk: Math.floor(this.rpgAtk * mult), 
-                hp: Math.floor(this.rpgMaxHp * mult) 
-            };
+            if(this.equippedGear && GameData.items[this.equippedGear]) mult = GameData.items[this.equippedGear].statMult;
+            return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
         }
     };
 
-
     // =========================================================================
-    // 4. UI MANAGER (화면 업데이트 및 네비게이션)
+    // 4. UI MANAGER
     // =========================================================================
     const UIManager = {
-        init() {
-            this.initBackground();
-            this.updateCurrencyUI();
-            this.applyAvatarSkin();
-            this.initCheckinButton();
-            document.getElementById('profile-nickname-display').innerText = GameState.nickname;
-        },
-
+        init() { this.initBackground(); this.updateCurrencyUI(); this.applyAvatarSkin(); this.initCheckinButton(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; },
         triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
         triggerHeavyHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); },
+        showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); },
         
-        showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.opacity = '1';
-            setTimeout(() => { toast.style.opacity = '0'; }, 2500);
-        },
-
-        navTo(screenId, el) {
-            if (GameState.isBattling) { this.showToast("⚔️ 전투 중에는 벗어날 수 없습니다!"); return; }
+        navTo(s, el) {
+            if (GameState.isBattling) { this.showToast("⚔️ 전투 중에는 이동할 수 없습니다!"); return; }
             AudioEngine.sfx.click(); this.triggerHaptic();
-            
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            window.scrollTo(0, 0);
-            
-            if(el) {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                el.classList.add('active');
-            }
-            if(screenId === 'screen-arena') this.updateRpgLobbyUI();
-            if(screenId === 'screen-profile') {
-                this.renderInventory();
-                document.getElementById('profile-nickname-display').innerText = GameState.nickname;
-            }
-            if(screenId === 'screen-ranking') {
-                GameSystem.Ranking.loadRanking(); // 랭킹 화면 들어갈 때마다 서버에서 데이터 로드
-            }
+            document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active'));
+            document.getElementById(s).classList.add('active'); window.scrollTo(0,0);
+            if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+            if(s === 'screen-arena') this.updateRpgLobbyUI();
+            if(s === 'screen-profile') { this.renderInventory(); document.getElementById('profile-nickname-display').innerText = GameState.nickname; }
+            if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
         },
-
-        switchTab(tab) {
+        
+        switchTab(t) {
             AudioEngine.sfx.click(); this.triggerHaptic();
-            document.getElementById('panel-forge').classList.add('hidden'); 
-            document.getElementById('panel-shop').classList.add('hidden');
-            document.getElementById('tab-forge').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-            document.getElementById('tab-shop').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-            document.getElementById(`panel-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
+            document.getElementById('panel-forge').classList.add('hidden'); document.getElementById('panel-shop').classList.add('hidden');
+            document.getElementById(`panel-${t}`).classList.remove('hidden');
+            document.getElementById('tab-forge').className = t === 'forge' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById('tab-shop').className = t === 'shop' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
         },
-
-        switchInvTab(tab) {
+        
+        switchInvTab(t) {
             AudioEngine.sfx.click(); this.triggerHaptic();
-            document.getElementById('inv-panel-gear').classList.add('hidden'); 
-            document.getElementById('inv-panel-skin').classList.add('hidden');
-            document.getElementById('inv-tab-gear').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-            document.getElementById('inv-tab-skin').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-            document.getElementById(`inv-panel-${tab}`).classList.remove('hidden');
-            document.getElementById(`inv-tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
+            document.getElementById('inv-panel-gear').classList.add('hidden'); document.getElementById('inv-panel-skin').classList.add('hidden');
+            document.getElementById(`inv-panel-${t}`).classList.remove('hidden');
+            document.getElementById('inv-tab-gear').className = t === 'gear' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+            document.getElementById('inv-tab-skin').className = t === 'skin' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
         },
-
+        
         updateCurrencyUI() {
-            const displayGold = Math.min(GameState.gold, 99999);
-            const displayGem = Math.min(GameState.gem, 99999);
-            document.getElementById('gold-display').innerText = displayGold.toLocaleString();
-            document.getElementById('gem-display').innerText = displayGem.toLocaleString();
+            document.getElementById('gold-display').innerText = Math.min(GameState.gold, 99999).toLocaleString();
+            document.getElementById('gem-display').innerText = Math.min(GameState.gem, 99999).toLocaleString();
         },
-
-        initCheckinButton() {
-            const btn = document.getElementById('btn-checkin');
-            if (GameState.lastCheckIn === new Date().toDateString()) { 
+        
+        initCheckinButton() { 
+            if(GameState.lastCheckIn === new Date().toDateString()) {
+                const btn = document.getElementById('btn-checkin');
                 btn.innerHTML = '<span>✅</span> 내일 다시 오세요'; 
                 btn.classList.replace('from-indigo-600', 'from-slate-600'); 
                 btn.classList.replace('to-purple-600', 'to-slate-700'); 
             }
         },
-
+        
         updateRpgLobbyUI() {
-            const stats = GameState.getTotalStats(); 
-            document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
+            const stats = GameState.getTotalStats(); document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
             document.getElementById('lobby-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
-            document.getElementById('lobby-hp-bar').style.width = `${Math.max(0, (GameState.currentHp / stats.hp) * 100)}%`;
+            document.getElementById('lobby-hp-bar').style.width = (GameState.currentHp / stats.hp * 100) + "%";
             
-            const atkBuff = stats.atk - GameState.rpgAtk; 
-            const hpBuff = stats.hp - GameState.rpgMaxHp;
+            const atkBuff = stats.atk - GameState.rpgAtk; const hpBuff = stats.hp - GameState.rpgMaxHp;
             document.getElementById('stat-atk-display').innerHTML = `${GameState.rpgAtk.toLocaleString()} ${atkBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${atkBuff})</span>` : ''}`;
             document.getElementById('stat-hp-display').innerHTML = `${GameState.rpgMaxHp.toLocaleString()} ${hpBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${hpBuff})</span>` : ''}`;
             
@@ -823,43 +742,33 @@
             document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
             document.getElementById('potion-count-display').innerText = GameState.potions;
         },
-
+        
         applyAvatarSkin() {
+            const skin = GameState.equippedSkin;
             const avatars = document.querySelectorAll('.master-avatar');
-            avatars.forEach(el => {
-                el.className = 'master-avatar w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md'; 
-                if(el.id === 'profile-big-icon') el.classList.add('w-20', 'h-20', 'text-3xl', 'shadow-xl'); 
-
-                if (GameState.equippedSkin && GameData.items[GameState.equippedSkin]) {
-                    el.classList.add(`skin-${GameData.items[GameState.equippedSkin].rarity}`);
-                } else {
-                    el.classList.add('bg-gradient-to-tr', 'from-slate-600', 'to-slate-400');
-                }
+            avatars.forEach(a => {
+                a.className = "master-avatar rounded-full flex items-center justify-center font-black text-white shadow-md transition-all " + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-3xl' : 'w-8 h-8 text-sm');
+                if(skin && GameData.items[skin]) a.classList.add('skin-' + GameData.items[skin].rarity);
+                else a.classList.add('bg-gradient-to-tr', 'from-slate-600', 'to-slate-400');
             });
         },
-
+        
         renderInventory() {
-            const pGear = document.getElementById('inv-panel-gear'); 
-            const pSkin = document.getElementById('inv-panel-skin');
+            const pGear = document.getElementById('inv-panel-gear'); const pSkin = document.getElementById('inv-panel-skin');
             const emptyState = document.getElementById('inv-empty-state');
             pGear.innerHTML = ''; pSkin.innerHTML = '';
             let hasGear = false; let hasSkin = false;
-
-            const invCounts = {};
-            GameState.inventory.forEach(id => { invCounts[id] = (invCounts[id] || 0) + 1; });
-
-            for (const [id, count] of Object.entries(invCounts)) {
-                const item = GameData.items[id];
-                if(!item) continue;
-                const isEquipped = (GameState.equippedGear === id || GameState.equippedSkin === id);
+            
+            const counts = {}; GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
+            for(const [id, count] of Object.entries(counts)) {
+                const item = GameData.items[id]; if(!item) continue;
+                const isEquipped = GameState.equippedGear === id || GameState.equippedSkin === id;
                 const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
                 const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
-                const effectHTML = item.type === 'gear' 
-                    ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` 
-                    : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
-
-                const cardHTML = `
-                    <div onclick="GameSystem.Lobby.toggleEquip('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} cursor-pointer hover:scale-105 transition-transform">
+                const effectHTML = item.type === 'gear' ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
+                
+                const card = `
+                    <div onclick="GameSystem.Lobby.toggleEquip('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''}">
                         ${badgeHTML}
                         <div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>
                         <h4 class="text-white font-bold text-[11px] text-center break-keep leading-tight">${item.name}</h4>
@@ -867,20 +776,20 @@
                         ${countHTML}
                     </div>
                 `;
-                if (item.type === 'gear') { pGear.innerHTML += cardHTML; hasGear = true; }
-                else if (item.type === 'skin') { pSkin.innerHTML += cardHTML; hasSkin = true; }
+                if(item.type === 'gear') { pGear.innerHTML += card; hasGear = true; } 
+                else { pSkin.innerHTML += card; hasSkin = true; }
             }
-
-            const currentTab = document.getElementById('inv-panel-gear').classList.contains('hidden') ? 'skin' : 'gear';
+            
+            const currentTab = pGear.classList.contains('hidden') ? 'skin' : 'gear';
             if ((currentTab === 'gear' && !hasGear) || (currentTab === 'skin' && !hasSkin)) emptyState.classList.remove('hidden');
             else emptyState.classList.add('hidden');
-
-            const stats = GameState.getTotalStats();
-            document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString();
+            
+            const stats = GameState.getTotalStats(); 
+            document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
             document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
         },
-
-        initBackground() {
+        
+        initBackground() { 
             const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
             let width, height; let particles = [];
             const resizeBg = () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; };
@@ -897,111 +806,110 @@
         }
     };
 
-
     // =========================================================================
-    // 5. GAME SYSTEM (게임 로직 및 상호작용)
+    // 5. GAME SYSTEM (복구된 완벽한 원본 로직)
     // =========================================================================
     const GameSystem = {
         Lobby: {
             claimDailyReward() {
-                if (GameState.lastCheckIn === new Date().toDateString()) { UIManager.showToast("오늘 이미 보상을 받았습니다! ⏱️"); return; }
-                AudioEngine.sfx.coin(); UIManager.triggerHaptic(); 
-                GameState.gold += 100; GameState.lastCheckIn = new Date().toDateString(); 
-                GameState.save(); UIManager.updateCurrencyUI(); UIManager.showToast("출석체크 완료! 100G 획득 🪙"); UIManager.initCheckinButton();
+                if (GameState.lastCheckIn === new Date().toDateString()) return UIManager.showToast("오늘 이미 보상을 받았습니다! ⏱️");
+                GameState.gold += 100; GameState.lastCheckIn = new Date().toDateString(); GameState.save();
+                UIManager.updateCurrencyUI(); UIManager.initCheckinButton(); AudioEngine.sfx.coin(); UIManager.triggerHaptic();
+                UIManager.showToast("출석체크 완료! 100G 획득 🪙");
             },
-            rewardForPlay() { 
-                AudioEngine.sfx.coin(); GameState.gold += 10; GameState.save(); UIManager.updateCurrencyUI(); UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
+            rewardForPlay() { GameState.gold += 10; GameState.save(); UIManager.updateCurrencyUI(); AudioEngine.sfx.coin(); UIManager.showToast("탐험 지원금 10G 획득 🪙"); },
+            getUpgradeCost(t) { return t === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); },
+            upgradeStat(t) {
+                const cost = this.getUpgradeCost(t); if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
+                GameState.gold -= cost; if(t==='atk') GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; else { const h = Math.floor(GameState.rpgMaxHp * 0.2) + 20; GameState.rpgMaxHp += h; GameState.currentHp += h; }
+                GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.coin(); UIManager.triggerHaptic(); UIManager.showToast("스탯 강화 성공! ✨");
             },
-            getUpgradeCost(type) { 
-                return type === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); 
+            buyItem(t) {
+                if(t==='potion') { if(GameState.gold < 30) return UIManager.showToast("골드가 부족합니다! 🪙"); GameState.gold -= 30; GameState.potions++; UIManager.showToast("물약을 구매했습니다! ❤️"); }
+                else { const m = GameState.getTotalStats().hp; if(GameState.currentHp >= m) return UIManager.showToast("이미 체력이 가득 찼습니다."); if(GameState.gold < 20) return UIManager.showToast("골드가 부족합니다! 🪙"); GameState.gold -= 20; GameState.currentHp = m; UIManager.showToast("여관에서 푹 쉬었습니다. ⛺"); }
+                GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.coin(); UIManager.triggerHaptic();
             },
-            upgradeStat(type) {
-                const cost = this.getUpgradeCost(type);
-                if (GameState.gold < cost) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
-                AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= cost;
-                if (type === 'atk') { GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; } 
-                else if (type === 'hp') { 
-                    const hpIncrease = Math.floor(GameState.rpgMaxHp * 0.2) + 20; 
-                    GameState.rpgMaxHp += hpIncrease; GameState.currentHp += hpIncrease; 
-                }
-                GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("스탯 강화 성공! ✨");
-            },
-            buyItem(itemType) {
-                if (itemType === 'potion') {
-                    if (GameState.gold < 30) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
-                    AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= 30; GameState.potions += 1; 
-                    GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("물약을 구매했습니다! ❤️");
-                } else if (itemType === 'inn') {
-                    const maxHp = GameState.getTotalStats().hp;
-                    if (GameState.currentHp >= maxHp) { UIManager.showToast("이미 체력이 가득 차 있습니다."); return; }
-                    if (GameState.gold < 20) { UIManager.showToast("골드가 부족합니다! 🪙"); return; }
-                    AudioEngine.sfx.coin(); UIManager.triggerHaptic(); GameState.gold -= 20; GameState.currentHp = maxHp; 
-                    GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); UIManager.showToast("여관에서 푹 쉬었습니다. 체력 100% 회복! ⛺");
-                }
-            },
-            toggleEquip(itemId) {
-                const item = GameData.items[itemId];
-                AudioEngine.sfx.equip(); UIManager.triggerHaptic();
-                if (item.type === 'gear') {
-                    if (GameState.equippedGear === itemId) GameState.equippedGear = null; else GameState.equippedGear = itemId; 
-                } else if (item.type === 'skin') {
-                    if (GameState.equippedSkin === itemId) GameState.equippedSkin = null; else GameState.equippedSkin = itemId;
-                }
-                GameState.save(); 
-                UIManager.renderInventory();
-                UIManager.applyAvatarSkin(); // 스킨 장착 시 화면 즉시 새로고침
-                UIManager.updateRpgLobbyUI(); // 장비 장착 시 아레나 스탯 즉시 새로고침
-                UIManager.showToast(GameState.equippedGear === itemId || GameState.equippedSkin === itemId ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
+            toggleEquip(id) {
+                const item = GameData.items[id]; 
+                if(item.type === 'gear') GameState.equippedGear = GameState.equippedGear === id ? null : id;
+                else GameState.equippedSkin = GameState.equippedSkin === id ? null : id;
+                GameState.save(); UIManager.renderInventory(); UIManager.applyAvatarSkin(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.equip(); UIManager.triggerHaptic();
+                UIManager.showToast(GameState.equippedGear === id || GameState.equippedSkin === id ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
             }
         },
-
+        
         Gacha: {
             performGacha(times) {
-                const cost = times * 50;
-                if (GameState.gem < cost) { UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌해 획득하세요."); UIManager.triggerHeavyHaptic(); return; }
-
+                const cost = times * 50; if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
                 GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
                 document.getElementById('bottom-nav').style.display = 'none'; 
-                const overlay = document.getElementById('gacha-overlay'); const anim = document.getElementById('gacha-animation');
-                const resultsBox = document.getElementById('gacha-results-container'); const closeBtn = document.getElementById('gacha-close-btn');
-                const title = document.getElementById('gacha-title');
-                
-                overlay.classList.add('active'); anim.classList.remove('hidden'); resultsBox.classList.add('hidden');
-                resultsBox.innerHTML = ''; closeBtn.classList.add('hidden'); title.innerText = "소환의식 진행 중...";
-
+                const over = document.getElementById('gacha-overlay'); const resBox = document.getElementById('gacha-results-container'); const anim = document.getElementById('gacha-animation');
+                over.classList.add('active'); resBox.classList.add('hidden'); resBox.innerHTML = ''; anim.classList.remove('hidden'); document.getElementById('gacha-title').innerText = "소환의식 진행 중...";
+                document.getElementById('gacha-close-btn').classList.add('hidden');
                 AudioEngine.sfx.gacha_build(); UIManager.triggerHeavyHaptic();
-
+                
                 let results = [];
                 for(let i=0; i<times; i++) {
-                    let roll = Math.random(); let rarity = 'common';
-                    if (roll < 0.05) rarity = 'legendary'; else if (roll < 0.20) rarity = 'epic'; else if (roll < 0.50) rarity = 'rare';
-                    let pool = Object.values(GameData.items).filter(item => item.rarity === rarity);
-                    let pulledItem = pool[Math.floor(Math.random() * pool.length)];
-                    results.push(pulledItem); GameState.inventory.push(pulledItem.id); 
+                    const roll = Math.random(); let rarity = 'common'; if(roll < 0.05) rarity = 'legendary'; else if(roll < 0.2) rarity = 'epic'; else if(roll < 0.5) rarity = 'rare';
+                    const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
+                    const item = pool[Math.floor(Math.random() * pool.length)];
+                    results.push(item); GameState.inventory.push(item.id);
                 }
-                GameState.save(); 
-
+                GameState.save();
+                
                 setTimeout(() => {
                     AudioEngine.sfx.gacha_reveal(); UIManager.triggerHaptic();
-                    anim.classList.add('hidden'); resultsBox.classList.remove('hidden'); title.innerText = "소환 결과!";
-                    resultsBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10";
-
+                    anim.classList.add('hidden'); resBox.classList.remove('hidden'); document.getElementById('gacha-title').innerText = "소환 결과!";
+                    resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10";
+                    
                     results.forEach((item, index) => {
                         setTimeout(() => {
-                            const card = document.createElement('div'); card.className = `gacha-item-card item-card rarity-${item.rarity}`;
                             let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                            card.innerHTML = `<span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>`;
-                            resultsBox.appendChild(card);
+                            resBox.innerHTML += `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
                             if(item.rarity === 'legendary' || item.rarity === 'epic') UIManager.triggerHaptic(); 
                         }, index * 100); 
                     });
-                    setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 100 + 300);
+                    setTimeout(() => { document.getElementById('gacha-close-btn').classList.remove('hidden'); }, results.length * 100 + 300);
                 }, 1500);
             },
-            closeGacha() { 
-                AudioEngine.sfx.click(); 
-                document.getElementById('gacha-overlay').classList.remove('active'); 
-                document.getElementById('bottom-nav').style.display = 'flex'; 
+            closeGacha() { AudioEngine.sfx.click(); document.getElementById('gacha-overlay').classList.remove('active'); document.getElementById('bottom-nav').style.display = 'flex'; }
+        },
+        
+        Ranking: {
+            openRegisterModal() { document.getElementById('modal-current-stage').innerText = GameState.rpgStage; document.getElementById('nickname-modal').classList.add('active'); },
+            closeModal() { document.getElementById('nickname-modal').classList.remove('active'); },
+            async submitRanking() {
+                const nick = document.getElementById('nickname-input').value.trim(); if(!nick) return alert("닉네임을 입력해주세요!");
+                GameState.nickname = nick; GameState.save(); document.getElementById('profile-nickname-display').innerText = nick;
+                const btn = document.getElementById('btn-submit-ranking'); btn.disabled = true; btn.innerHTML = '<div class="loader" style="width:16px;height:16px;"></div> 등록 중...';
+                try {
+                    await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: nick, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', timestamp: window.serverTimestamp() });
+                    UIManager.showToast("명예의 전당에 기록되었습니다! 🏆"); this.closeModal(); this.loadRanking();
+                } catch(e) { console.error(e); UIManager.showToast("서버 통신에 실패했습니다."); } finally { btn.disabled = false; btn.innerHTML = '등록'; }
+            },
+            async updateRankingSilently() {
+                if(GameState.nickname === "위대한 길드장" || !window.db) return;
+                try { await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: GameState.nickname, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', timestamp: window.serverTimestamp() }); } catch(e) { console.error("Silent rank update failed", e); }
+            },
+            async loadRanking() {
+                const list = document.getElementById('ranking-list'); list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
+                if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
+                try {
+                    const q = window.query(window.collection(window.db, "rankings")); const snap = await window.getDocs(q);
+                    let all = []; snap.forEach(d => all.push(d.data()));
+                    all.sort((a,b) => { if (b.stage !== a.stage) return b.stage - a.stage; const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); return timeA - timeB; });
+                    let unique = []; let seen = new Set();
+                    all.forEach(d => { const id = d.deviceId || d.nickname; if(!seen.has(id) && unique.length < 10) { seen.add(id); unique.push(d); } });
+                    if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
+                    list.innerHTML = '';
+                    unique.forEach((d, i) => {
+                        let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
+                        if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+                        let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; if(d.skin && d.skin !== 'none' && GameData.items[d.skin]) skinClass = `skin-${GameData.items[d.skin].rarity}`;
+                        const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
+                        list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
+                    });
+                } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
             }
         },
 
@@ -1009,19 +917,26 @@
             monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
             
             enterDungeon() {
-                if (GameState.currentHp <= 0) { UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺"); return; }
-                AudioEngine.sfx.click(); UIManager.triggerHaptic(); document.getElementById('bottom-nav').style.display = 'none'; 
+                if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
+                AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
+                document.getElementById('bottom-nav').style.display = 'none'; 
+                
                 const isBoss = (GameState.rpgStage % 5 === 0);
                 let stageRoll = localStorage.getItem('master_stage_roll_' + GameState.rpgStage) || Math.random(); 
                 localStorage.setItem('master_stage_roll_' + GameState.rpgStage, stageRoll);
-                if (!isBoss && parseFloat(stageRoll) < 0.3) this.triggerRandomEvent(parseFloat(stageRoll)); 
-                else this.startBattleSequence(isBoss);
+                
+                if (!isBoss && parseFloat(stageRoll) < 0.3) {
+                    this.triggerRandomEvent(parseFloat(stageRoll)); 
+                } else {
+                    this.startBattleSequence(isBoss);
+                }
             },
 
             triggerRandomEvent(roll) {
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
                 document.getElementById('screen-rpg-event').classList.add('active');
                 const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
+                
                 if (roll < 0.12) { 
                     titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
                     descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; 
@@ -1046,9 +961,13 @@
 
             startBattleSequence(isBoss) {
                 if(GameState.isBattling) return; 
-                GameState.isBattling = true; localStorage.setItem('master_in_battle', 'true');
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
                 document.getElementById('screen-rpg-battle').classList.add('active');
+                
+                // 화면 전환 후 전투 상태로 돌입! (버그 수정됨)
+                GameState.isBattling = true; 
+                localStorage.setItem('master_in_battle', 'true');
+                
                 if (isBoss) {
                     AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
                     let shakes = 0; let shakeInt = setInterval(() => { 
@@ -1059,7 +978,9 @@
                         if(++shakes >= 4) clearInterval(shakeInt); 
                     }, 500);
                     setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
-                } else this.initBattle(false);
+                } else {
+                    this.initBattle(false);
+                }
             },
 
             initBattle(isBoss) {
@@ -1071,7 +992,7 @@
                 document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
                 document.getElementById('battle-monster-name').innerText = mInfo.n; 
                 document.getElementById('monster-sprite').innerText = mInfo.e;
-                document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative boss-theme" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
+                document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
                 document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
                 document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
                 
@@ -1143,10 +1064,7 @@
                     let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
                     GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
                     
-                    // 전투 승리 시 랭킹 자동 갱신 시도 (닉네임이 기본값이 아닐 때만 조용히 갱신)
-                    if(GameState.nickname !== "위대한 길드장" && window.db) {
-                         GameSystem.Ranking.updateRankingSilently();
-                    }
+                    GameSystem.Ranking.updateRankingSilently();
 
                     alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
                 } else {
@@ -1155,155 +1073,8 @@
                 }
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
             }
-        },
-
-        // 🔥 새롭게 추가된 랭킹 시스템 (Firebase 연동)
-        Ranking: {
-            openRegisterModal() {
-                document.getElementById('modal-current-stage').innerText = GameState.rpgStage;
-                document.getElementById('nickname-input').value = GameState.nickname === "위대한 길드장" ? "" : GameState.nickname;
-                document.getElementById('nickname-modal').classList.add('active');
-            },
-            
-            closeModal() {
-                document.getElementById('nickname-modal').classList.remove('active');
-            },
-
-            async submitRanking() {
-                const input = document.getElementById('nickname-input').value.trim();
-                if(input.length < 1) { alert("닉네임을 입력해주세요!"); return; }
-                
-                GameState.nickname = input;
-                GameState.save();
-                document.getElementById('profile-nickname-display').innerText = input;
-                
-                const btn = document.getElementById('btn-submit-ranking');
-                btn.disabled = true; btn.innerHTML = '<div class="loader" style="width:16px;height:16px;"></div> 등록 중...';
-
-                try {
-                    // 🔥 기기 ID(deviceId)를 함께 저장
-                    await window.addDoc(window.collection(window.db, "rankings"), {
-                        deviceId: GameState.deviceId,
-                        nickname: GameState.nickname,
-                        stage: GameState.rpgStage,
-                        skin: GameState.equippedSkin || 'none',
-                        timestamp: window.serverTimestamp()
-                    });
-                    UIManager.showToast("명예의 전당에 기록되었습니다! 🏆");
-                    this.closeModal();
-                    this.loadRanking(); 
-                } catch (e) {
-                    console.error("Error adding document: ", e);
-                    UIManager.showToast("서버 통신에 실패했습니다.");
-                } finally {
-                    btn.disabled = false; btn.innerHTML = '<span>등록하기</span>';
-                }
-            },
-
-            async updateRankingSilently() {
-                try {
-                    await window.addDoc(window.collection(window.db, "rankings"), {
-                        deviceId: GameState.deviceId, // 🔥 기기 ID 추가
-                        nickname: GameState.nickname,
-                        stage: GameState.rpgStage,
-                        skin: GameState.equippedSkin || 'none',
-                        timestamp: window.serverTimestamp()
-                    });
-                } catch (e) { console.error("Silent rank update failed", e); }
-            },
-
-            async loadRanking() {
-                const listContainer = document.getElementById('ranking-list');
-                listContainer.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
-                
-                if(!window.db) {
-                    listContainer.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>';
-                    return;
-                }
-
-                try {
-                    const q = window.query(window.collection(window.db, "rankings"));
-                    const querySnapshot = await window.getDocs(q);
-                    
-                    let allRankings = [];
-                    querySnapshot.forEach((doc) => {
-                        allRankings.push(doc.data());
-                    });
-
-                    // 1. 층수 내림차순, 2. 시간 오름차순 정렬
-                    allRankings.sort((a, b) => {
-                        if (b.stage !== a.stage) return b.stage - a.stage;
-                        const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now();
-                        const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now();
-                        return timeA - timeB;
-                    });
-                    
-                    // 🔥 닉네임이 아닌 기기 ID(deviceId) 기준으로 중복 제거 (한 기기당 최고 기록 1개만)
-                    let uniqueRankings = [];
-                    let seenDevices = new Set();
-                    
-                    allRankings.forEach((data) => {
-                        // deviceId가 없는 예전 데이터 호환성을 위해 fallback 처리
-                        const identifier = data.deviceId || data.nickname; 
-                        
-                        if(!seenDevices.has(identifier) && uniqueRankings.length < 10) {
-                            seenDevices.add(identifier);
-                            uniqueRankings.push(data);
-                        }
-                    });
-
-                    if(uniqueRankings.length === 0) {
-                        listContainer.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.<br>첫 번째 전설이 되어보세요!</div>';
-                        return;
-                    }
-
-                    listContainer.innerHTML = '';
-                    uniqueRankings.forEach((data, index) => {
-                        let rankIcon = `${index + 1}위`;
-                        let bgClass = "bg-slate-900";
-                        if(index === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; }
-                        else if(index === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; }
-                        else if(index === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
-
-                        // 스킨 테두리 클래스 구하기
-                        let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400";
-                        if(data.skin && data.skin !== 'none' && GameData.items[data.skin]) {
-                            skinClass = `skin-${GameData.items[data.skin].rarity}`;
-                        }
-
-                        // 내 기록 하이라이트
-                        const isMe = (data.nickname === GameState.nickname);
-                        const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-
-                        listContainer.innerHTML += `
-                            <div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 text-center font-black ${index < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div>
-                                    <div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">
-                                        ${data.nickname.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-white text-sm flex items-center gap-2">
-                                            ${data.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xs text-slate-400">도달 층수</p>
-                                    <p class="text-lg font-black text-gradient-gold">${data.stage}F</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                } catch (e) {
-                    console.error("Error loading rankings: ", e);
-                    listContainer.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>';
-                }
-            }
         }
     };
-
 
     // =========================================================================
     // 6. INITIALIZATION (앱 초기화)
@@ -1316,4 +1087,3 @@
 </script>
 </body>
 </html>
-
