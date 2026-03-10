@@ -117,7 +117,11 @@ const UIManager = {
         const counts = {}; GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
         for(const [id, count] of Object.entries(counts)) {
             const item = GameData.items[id]; if(!item) continue;
-            const isEquipped = GameState.equippedGear === id || GameState.equippedSkin === id;
+            
+            // 🔥 장착 상태 판단 로직 보강 (undefined/null 방어 코드)
+            const isEquipped = (GameState.equippedGear && GameState.equippedGear === id) || 
+                              (GameState.equippedSkin && GameState.equippedSkin === id);
+            
             const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
             const effectHTML = item.type === 'gear' ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
@@ -406,7 +410,6 @@ const GameSystem = {
             
             document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
 
-            // 🔥 UI 불일치 수정: 즉시 버튼 비활성화 및 쿨타임 표시
             const btn = document.getElementById('btn-attack');
             btn.disabled = true;
             btn.classList.add('opacity-50');
@@ -428,7 +431,7 @@ const GameSystem = {
 
             this.updateBattleUI(); 
             if (this.monsterCurrentHp <= 0) {
-                clearInterval(cooldownTimer); // 몬스터 사망 시 쿨타임 타이머 즉시 종료
+                clearInterval(cooldownTimer); 
                 setTimeout(() => this.endBattle(true), 300);
             }
         },
@@ -441,8 +444,13 @@ const GameSystem = {
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             GameState.currentHp -= damage; GameState.save(); 
             
-            document.querySelector('.app-container').classList.add('shake'); 
-            setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
+            // 🔥 헤더 제외 몬스터 카드만 흔들리도록 수정
+            const battleCard = document.getElementById('battle-card');
+            if(battleCard) {
+                battleCard.classList.add('shake'); 
+                setTimeout(() => battleCard.classList.remove('shake'), 200);
+            }
+            
             document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
 
             this.updateBattleUI(); 
@@ -457,7 +465,7 @@ const GameSystem = {
             localStorage.removeItem('master_in_battle'); 
             
             const btnAtk = document.getElementById('btn-attack');
-            btnAtk.disabled = true; // 전투 종료 시 버튼 비활성화
+            btnAtk.disabled = true; 
             btnAtk.innerHTML = "⚔️ 전투 종료";
 
             document.getElementById('bottom-nav').style.display = 'flex'; 
