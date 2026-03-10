@@ -45,6 +45,7 @@ const GameState = {
         localStorage.setItem('master_nickname', this.nickname);
         localStorage.setItem('master_gold', this.gold);
         localStorage.setItem('master_gem', this.gem);
+        localStorage.setItem('last_checkin', this.lastCheckIn); // 🔥 데일리 퀘스트 저장 로직 추가
         localStorage.setItem('master_last_idle', this.lastIdleCheck);
         localStorage.setItem('master_stage', this.rpgStage);
         localStorage.setItem('master_atk', this.rpgAtk);
