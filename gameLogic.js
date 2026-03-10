@@ -566,7 +566,7 @@ const GameSystem = {
             UIManager.showToast(`💎 ${msg} (+${gem})`);
             UIManager.updateCurrencyUI();
             AudioEngine.sfx.coin();
-        }
+        },
         // [추가] GameSystem.Quest.giveReward 함수 아래에 삽입
         openModal() {
             AudioEngine.sfx.click();
@@ -762,6 +762,7 @@ const GameSystem = {
         }
     } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
