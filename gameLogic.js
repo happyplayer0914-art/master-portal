@@ -84,7 +84,7 @@ const UIManager = {
         });
     },
     
-    renderInventory() {
+   renderInventory() {
         const pGear = document.getElementById('inv-panel-gear'); const pSkin = document.getElementById('inv-panel-skin');
         const emptyState = document.getElementById('inv-empty-state');
         pGear.innerHTML = ''; pSkin.innerHTML = '';
@@ -98,12 +98,18 @@ const UIManager = {
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
             const effectHTML = item.type === 'gear' ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
             
+            // 🔥 추가된 부분: 최고 등급이 아니고, 개수가 3개 이상이면 합성 버튼 생성!
+            const isMaxTier = item.rarity === 'legendary';
+            const canSynth = count >= 3 && !isMaxTier;
+            const synthBtn = canSynth ? `<button onclick="event.stopPropagation(); GameSystem.Lobby.synthesizeItem('${id}')" class="mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-[10px] font-black py-1.5 px-2 rounded-lg w-full shadow-lg transition-transform active:scale-95 border border-purple-400/50 flex items-center justify-center gap-1"><span>✨</span> 3개 합성</button>` : '';
+            
             const card = `
                 <div onclick="GameSystem.Lobby.toggleEquip('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''}">
                     ${badgeHTML}
                     <div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>
                     <h4 class="text-white font-bold text-[11px] text-center break-keep leading-tight">${item.name}</h4>
                     ${effectHTML}
+                    ${synthBtn}
                     ${countHTML}
                 </div>
             `;
@@ -418,5 +424,6 @@ const GameSystem = {
     }
 
 };
+
 
 
