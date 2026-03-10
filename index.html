@@ -8,6 +8,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- 🔥 Firebase SDK 추가 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBPROuMKd8xQ20wUvo6ZJ2FxPp5taY1zj8",
+            authDomain: "master-portal-db.firebaseapp.com",
+            projectId: "master-portal-db",
+            storageBucket: "master-portal-db.firebasestorage.app",
+            messagingSenderId: "767344912957",
+            appId: "1:767344912957:web:112216b03aee5312c79854"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 전역 변수로 할당하여 다른 스크립트에서 사용 가능하게 함
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.serverTimestamp = serverTimestamp;
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700;800;900&display=swap');
         
@@ -45,7 +74,7 @@
         .text-gradient { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .text-gradient-gold { background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* 하단 GNB 네비게이션 바 */
+        /* 하단 GNB 네비게이션 바 (5개 메뉴로 변경) */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 70px;
             background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -54,7 +83,7 @@
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 25%; height: 100%; color: #64748b; font-size: 10px; font-weight: 700; transition: all 0.3s ease; cursor: pointer;
+            width: 20%; height: 100%; color: #64748b; font-size: 10px; font-weight: 700; transition: all 0.3s ease; cursor: pointer;
         }
         .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-item.active { color: #c084fc; text-shadow: 0 0 10px rgba(192,132,252,0.5); }
@@ -141,6 +170,25 @@
         .skin-epic { box-shadow: 0 0 15px #c084fc, inset 0 0 10px #c084fc; border: 2px solid #c084fc; background: linear-gradient(45deg, #4c1d95, #d8b4fe); }
         .skin-rare { box-shadow: 0 0 10px #60a5fa; border: 2px solid #60a5fa; background: linear-gradient(45deg, #1e3a8a, #93c5fd); }
 
+        /* 랭킹 로딩 스피너 */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #c084fc;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 닉네임 입력 모달 */
+        #nickname-modal {
+            position: fixed; inset: 0; z-index: 1100; background: rgba(0,0,0,0.9);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        #nickname-modal.active { opacity: 1; pointer-events: all; }
     </style>
 </head>
 <body>
@@ -398,7 +446,37 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 4. [내 정보] 인벤토리 화면 (screen-profile)    -->
+    <!-- 🔥 4. [랭킹] 명예의 전당 화면 (새로 추가됨)    -->
+    <!-- ============================================== -->
+    <main id="screen-ranking" class="screen pt-24 px-5">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">명예의 전당</span></h1>
+            <p class="text-slate-400 text-sm">심연의 탑을 가장 높이 올라간 위대한 마스터들입니다.</p>
+        </div>
+
+        <div class="glass-card p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-400"></i> Top 10 마스터</h3>
+                <button onclick="GameSystem.Ranking.loadRanking()" class="text-xs text-indigo-300 hover:text-white transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-right"></i> 새로고침
+                </button>
+            </div>
+            
+            <div id="ranking-list" class="space-y-3">
+                <div class="text-center py-8">
+                    <div class="loader"></div>
+                    <p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="GameSystem.Ranking.openRegisterModal()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all active:scale-95 flex justify-center items-center gap-2">
+            <span>✍️</span> 내 기록 명예의 전당에 올리기
+        </button>
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 5. [내 정보] 인벤토리 화면 (screen-profile)    -->
     <!-- ============================================== -->
     <main id="screen-profile" class="screen pt-20 px-5">
         
@@ -407,7 +485,7 @@
             <div id="profile-big-icon" class="master-avatar w-20 h-20 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center font-black text-3xl text-white shadow-xl">M</div>
             <div>
                 <p class="text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1">Master Profile</p>
-                <h2 class="text-2xl font-black text-white mb-1">위대한 길드장</h2>
+                <h2 class="text-2xl font-black text-white mb-1" id="profile-nickname-display">위대한 길드장</h2>
                 <div class="flex gap-2 text-xs font-bold text-slate-300">
                     <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">전투력: <span id="profile-total-power" class="text-red-400">0</span></span>
                     <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">생존력: <span id="profile-total-hp" class="text-emerald-400">0</span></span>
@@ -433,7 +511,7 @@
         </div>
     </main>
 
-    <!-- 하단 고정 내비게이션 바 (GNB) -->
+    <!-- 하단 고정 내비게이션 바 (GNB) - 랭킹 탭 추가됨 -->
     <nav id="bottom-nav" class="bottom-nav">
         <div class="nav-item active" onclick="UIManager.navTo('screen-home', this)">
             <i class="fa-solid fa-house"></i><span>홈</span>
@@ -443,6 +521,10 @@
         </div>
         <div class="nav-item" onclick="UIManager.navTo('screen-gacha-shop', this)">
             <i class="fa-solid fa-store"></i><span>가챠샵</span>
+        </div>
+        <!-- 새로 추가된 랭킹 탭 -->
+        <div class="nav-item" onclick="UIManager.navTo('screen-ranking', this)">
+            <i class="fa-solid fa-trophy"></i><span>랭킹</span>
         </div>
         <div class="nav-item" onclick="UIManager.navTo('screen-profile', this)">
             <i class="fa-solid fa-user"></i><span>내 정보</span>
@@ -466,6 +548,21 @@
     <div id="gacha-animation" class="text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🎁</div>
     <div id="gacha-results-container" class="w-full max-w-sm grid grid-cols-2 gap-3 hidden"></div>
     <button id="gacha-close-btn" onclick="GameSystem.Gacha.closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
+</div>
+
+<!-- 🔥 랭킹 닉네임 입력 모달 -->
+<div id="nickname-modal">
+    <div class="glass-card p-6 w-full max-w-sm m-4 border-t-4 border-t-indigo-500">
+        <h3 class="text-xl font-bold text-white mb-2">명예의 전당 등록</h3>
+        <p class="text-xs text-slate-400 mb-6 break-keep">현재까지 도달한 <span class="text-yellow-400 font-bold" id="modal-current-stage">1</span>층 기록이 서버에 저장됩니다. 역사에 남길 닉네임을 적어주세요.</p>
+        <input type="text" id="nickname-input" placeholder="마스터 닉네임 (최대 8자)" maxlength="8" class="w-full bg-slate-900 border border-slate-600 text-white px-4 py-3 rounded-xl mb-4 focus:outline-none focus:border-indigo-500 transition-colors">
+        <div class="flex gap-2">
+            <button onclick="GameSystem.Ranking.closeModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-colors">취소</button>
+            <button onclick="GameSystem.Ranking.submitRanking()" id="btn-submit-ranking" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2">
+                <span>등록하기</span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- 토스트 -->
@@ -545,12 +642,14 @@
     // 3. GAME STATE (데이터 저장 및 관리)
     // =========================================================================
     const GameState = {
+        nickname: "위대한 길드장",
         gold: 10000, gem: 10000, lastCheckIn: "",
         rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
         potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
         isBattling: false,
 
         load() {
+            this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
             let sGold = localStorage.getItem('master_gold');
             this.gold = sGold !== null ? parseInt(sGold) : 10000;
             let sGem = localStorage.getItem('master_gem');
@@ -576,6 +675,7 @@
         },
 
         save() {
+            localStorage.setItem('master_nickname', this.nickname);
             localStorage.setItem('master_gold', this.gold);
             localStorage.setItem('master_gem', this.gem);
             localStorage.setItem('master_stage', this.rpgStage);
@@ -624,6 +724,7 @@
             this.updateCurrencyUI();
             this.applyAvatarSkin();
             this.initCheckinButton();
+            document.getElementById('profile-nickname-display').innerText = GameState.nickname;
         },
 
         triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
@@ -649,7 +750,13 @@
                 el.classList.add('active');
             }
             if(screenId === 'screen-arena') this.updateRpgLobbyUI();
-            if(screenId === 'screen-profile') this.renderInventory();
+            if(screenId === 'screen-profile') {
+                this.renderInventory();
+                document.getElementById('profile-nickname-display').innerText = GameState.nickname;
+            }
+            if(screenId === 'screen-ranking') {
+                GameSystem.Ranking.loadRanking(); // 랭킹 화면 들어갈 때마다 서버에서 데이터 로드
+            }
         },
 
         switchTab(tab) {
@@ -1022,12 +1129,164 @@
                     AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                     let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
                     GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
+                    
+                    // 전투 승리 시 랭킹 자동 갱신 시도 (닉네임이 기본값이 아닐 때만 조용히 갱신)
+                    if(GameState.nickname !== "위대한 길드장" && window.db) {
+                         GameSystem.Ranking.updateRankingSilently();
+                    }
+
                     alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
                 } else {
                     UIManager.triggerHeavyHaptic(); GameState.currentHp = 0; GameState.save();
                     alert(`💀 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활합니다.`);
                 }
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+            }
+        },
+
+        // 🔥 새롭게 추가된 랭킹 시스템 (Firebase 연동)
+        Ranking: {
+            openRegisterModal() {
+                document.getElementById('modal-current-stage').innerText = GameState.rpgStage;
+                document.getElementById('nickname-input').value = GameState.nickname === "위대한 길드장" ? "" : GameState.nickname;
+                document.getElementById('nickname-modal').classList.add('active');
+            },
+            
+            closeModal() {
+                document.getElementById('nickname-modal').classList.remove('active');
+            },
+
+            async submitRanking() {
+                const input = document.getElementById('nickname-input').value.trim();
+                if(input.length < 1) { alert("닉네임을 입력해주세요!"); return; }
+                
+                GameState.nickname = input;
+                GameState.save();
+                document.getElementById('profile-nickname-display').innerText = input;
+                
+                const btn = document.getElementById('btn-submit-ranking');
+                btn.disabled = true; btn.innerHTML = '<div class="loader" style="width:16px;height:16px;"></div> 등록 중...';
+
+                try {
+                    // 🔥 기기 ID(deviceId)를 함께 저장
+                    await window.addDoc(window.collection(window.db, "rankings"), {
+                        deviceId: GameState.deviceId,
+                        nickname: GameState.nickname,
+                        stage: GameState.rpgStage,
+                        skin: GameState.equippedSkin || 'none',
+                        timestamp: window.serverTimestamp()
+                    });
+                    UIManager.showToast("명예의 전당에 기록되었습니다! 🏆");
+                    this.closeModal();
+                    this.loadRanking(); 
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    UIManager.showToast("서버 통신에 실패했습니다.");
+                } finally {
+                    btn.disabled = false; btn.innerHTML = '<span>등록하기</span>';
+                }
+            },
+
+            async updateRankingSilently() {
+                try {
+                    await window.addDoc(window.collection(window.db, "rankings"), {
+                        deviceId: GameState.deviceId, // 🔥 기기 ID 추가
+                        nickname: GameState.nickname,
+                        stage: GameState.rpgStage,
+                        skin: GameState.equippedSkin || 'none',
+                        timestamp: window.serverTimestamp()
+                    });
+                } catch (e) { console.error("Silent rank update failed", e); }
+            },
+
+            async loadRanking() {
+                const listContainer = document.getElementById('ranking-list');
+                listContainer.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
+                
+                if(!window.db) {
+                    listContainer.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>';
+                    return;
+                }
+
+                try {
+                    const q = window.query(window.collection(window.db, "rankings"));
+                    const querySnapshot = await window.getDocs(q);
+                    
+                    let allRankings = [];
+                    querySnapshot.forEach((doc) => {
+                        allRankings.push(doc.data());
+                    });
+
+                    // 1. 층수 내림차순, 2. 시간 오름차순 정렬
+                    allRankings.sort((a, b) => {
+                        if (b.stage !== a.stage) return b.stage - a.stage;
+                        const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now();
+                        const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now();
+                        return timeA - timeB;
+                    });
+                    
+                    // 🔥 닉네임이 아닌 기기 ID(deviceId) 기준으로 중복 제거 (한 기기당 최고 기록 1개만)
+                    let uniqueRankings = [];
+                    let seenDevices = new Set();
+                    
+                    allRankings.forEach((data) => {
+                        // deviceId가 없는 예전 데이터 호환성을 위해 fallback 처리
+                        const identifier = data.deviceId || data.nickname; 
+                        
+                        if(!seenDevices.has(identifier) && uniqueRankings.length < 10) {
+                            seenDevices.add(identifier);
+                            uniqueRankings.push(data);
+                        }
+                    });
+
+                    if(uniqueRankings.length === 0) {
+                        listContainer.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.<br>첫 번째 전설이 되어보세요!</div>';
+                        return;
+                    }
+
+                    listContainer.innerHTML = '';
+                    uniqueRankings.forEach((data, index) => {
+                        let rankIcon = `${index + 1}위`;
+                        let bgClass = "bg-slate-900";
+                        if(index === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; }
+                        else if(index === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; }
+                        else if(index === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+
+                        // 스킨 테두리 클래스 구하기
+                        let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400";
+                        if(data.skin && data.skin !== 'none' && GameData.items[data.skin]) {
+                            skinClass = `skin-${GameData.items[data.skin].rarity}`;
+                        }
+
+                        // 내 기록 하이라이트
+                        const isMe = (data.nickname === GameState.nickname);
+                        const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
+
+                        listContainer.innerHTML += `
+                            <div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 text-center font-black ${index < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div>
+                                    <div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">
+                                        ${data.nickname.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-white text-sm flex items-center gap-2">
+                                            ${data.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400">도달 층수</p>
+                                    <p class="text-lg font-black text-gradient-gold">${data.stage}F</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                } catch (e) {
+                    console.error("Error loading rankings: ", e);
+                    listContainer.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>';
+                }
             }
         }
     };
