@@ -190,14 +190,16 @@ const GameSystem = {
             UIManager.showToast("출석체크 완료! 100G 획득 🪙");
         },
         rewardForPlay() { 
-            // 🔥 오늘 보상을 이미 받았는지 체크
+            // 🔥 클릭된 링크의 href를 키로 사용하여 각각의 보상 여부를 판단합니다.
+            const testUrl = window.event?.currentTarget?.href || "default_test";
             const today = new Date().toDateString();
-            if (GameState.lastPlayReward === today) {
-                return UIManager.showToast("테스트 플레이 보상은 하루에 한 번만 받을 수 있습니다! ⏱️");
+            
+            if (GameState.lastPlayRewards[testUrl] === today) {
+                return UIManager.showToast("이 테스트 보상은 오늘 이미 받았습니다! ⏱️");
             }
             
             GameState.gold += 10; 
-            GameState.lastPlayReward = today; // 수령 날짜 기록
+            GameState.lastPlayRewards[testUrl] = today; // 해당 링크의 수령 날짜 기록
             GameState.save(); 
             UIManager.updateCurrencyUI(); 
             AudioEngine.sfx.coin(); 
