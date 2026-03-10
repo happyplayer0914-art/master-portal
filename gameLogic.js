@@ -139,36 +139,21 @@ const UIManager = {
 
 const GameSystem = {
     Lobby: {
-        // 🔥 여기서부터 아래 코드를 통째로 추가하세요!
-        calculateIdleReward() {
-            const now = Date.now();
-            const lastLogin = GameState.lastLoginTime;
-            const diffMs = now - lastLogin;
-            const diffMinutes = Math.floor(diffMs / (1000 * 60)); // 분 단위로 변환
+     // 🔥 Lobby 객체 맨 위에 보상 수령 함수 추가
+        claimIdleReward() {
+            const reward = Math.floor(GameState.pendingIdleGold);
+            if (reward < 1) return UIManager.showToast("아직 쌓인 보상이 없습니다! ⏳ (약 5분당 1G 누적)");
 
-            // 10분 이상 오프라인이었을 때만 보상 지급 (최대 24시간=1440분 누적)
-            if (diffMinutes >= 10) {
-                const offlineMinutes = Math.min(diffMinutes, 1440);
-                const rewardGold = offlineMinutes * 5; // 1분에 5G씩 (1시간 300G)
+            GameState.gold += reward;
+            GameState.pendingIdleGold -= reward; // 받은 만큼만 차감 (소수점은 남겨둠)
+            GameState.save();
 
-                GameState.gold += rewardGold;
-                GameState.lastLoginTime = now;
-                GameState.save();
-                UIManager.updateCurrencyUI();
-
-                // 접속 후 0.5초 뒤에 기분 좋은 팝업 띄우기
-                setTimeout(() => {
-                    AudioEngine.sfx.coin();
-                    UIManager.triggerHeavyHaptic();
-                    alert(`⏳ 오프라인 보상 도착!\n마스터님이 자리를 비운 동안 길드원들이 사냥을 다녀왔습니다.\n\n🪙 +${rewardGold.toLocaleString()} G 획득! (방치 시간: ${Math.floor(offlineMinutes/60)}시간 ${offlineMinutes%60}분)`);
-                }, 500);
-            } else {
-                // 10분이 안 넘었으면 시간만 최신화
-                GameState.lastLoginTime = now;
-                GameState.save();
-            }
+            UIManager.updateCurrencyUI();
+            UIManager.updateIdleUI();
+            AudioEngine.sfx.coin();
+            UIManager.triggerHeavyHaptic();
+            alert(`🎉 방치형 보상 수령!\n마스터님이 비우신 동안 모인 [ ${reward}G ] 를 지갑에 넣었습니다!`);
         },
-        // 🔥 여기까지! (이 아래에는 원래 있던 claimDailyReward() 등이 그대로 이어지면 됩니다.)
         claimDailyReward() {
             if (GameState.lastCheckIn === new Date().toDateString()) return UIManager.showToast("오늘 이미 보상을 받았습니다! ⏱️");
             GameState.gold += 100; GameState.lastCheckIn = new Date().toDateString(); GameState.save();
@@ -433,4 +418,5 @@ const GameSystem = {
     }
 
 };
+
 
