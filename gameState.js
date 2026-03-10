@@ -34,9 +34,6 @@ const GameState = {
         this.equippedSkin = localStorage.getItem('master_equipped_skin');
 
         this.checkAndRevive();
-        
-        // 🔥 Bug #2 수정: load 시점의 직접적인 UI 호출(alert)을 제거하고 
-        // UIManager.init()에서 처리하도록 master_in_battle 상태는 유지합니다.
     },
 
     save() {
@@ -64,7 +61,10 @@ const GameState = {
 
     getTotalStats() {
         let mult = 1.0;
-        if(this.equippedGear && GameData.items[this.equippedGear]) mult = GameData.items[this.equippedGear].statMult;
+        // 🔥 Bug #4 수정: 장착된 아이템이 'gear' 타입인 경우에만 스탯 배율을 적용하도록 보안 강화
+        if(this.equippedGear && GameData.items[this.equippedGear] && GameData.items[this.equippedGear].type === 'gear') {
+            mult = GameData.items[this.equippedGear].statMult || 1.0;
+        }
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
