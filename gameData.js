@@ -1,26 +1,27 @@
 // =========================================================================
 // 1. GAME DATA (게임 데이터베이스)
 // =========================================================================
-// gameData.js
 const GameData = {
     items: {
-        'c1': { id: 'c1', type: 'gear', name: '낡은 철검', emoji: '🗡️', rarity: 'common', statMult: 1.05, crit: 0.02, dodge: 0 },
-        'c2': { id: 'c2', type: 'gear', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', statMult: 1.05, crit: 0, dodge: 0.02 },
-        'r1': { id: 'r1', type: 'gear', name: '기사의 장검', emoji: '⚔️', rarity: 'rare', statMult: 1.15, crit: 0.05, dodge: 0.02 },
-        'r2': { id: 'r2', type: 'skin', name: '은빛 오라', emoji: '✨', rarity: 'rare', crit: 0.02, dodge: 0.03 },
-        'e1': { id: 'e1', type: 'gear', name: '마법사 지팡이', emoji: '🪄', rarity: 'epic', statMult: 1.35, crit: 0.10, dodge: 0.05 },
-        'e2': { id: 'e2', type: 'skin', name: '심연의 불꽃', emoji: '🌌', rarity: 'epic', crit: 0.05, dodge: 0.08 },
-        'l1': { id: 'l1', type: 'gear', name: '엑스칼리버', emoji: '🔱', rarity: 'legendary', statMult: 1.70, crit: 0.15, dodge: 0.10 },
-        'l2': { id: 'l2', type: 'skin', name: '초월자의 관', emoji: '👑', rarity: 'legendary', crit: 0.10, dodge: 0.15 }
+        'c1': { id: 'c1', type: 'gear', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+        'c2': { id: 'c2', type: 'gear', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+        'c3': { id: 'c3', type: 'gear', name: '평범한 반지', emoji: '💍', rarity: 'common', color: 'text-slate-400', statMult: 1.05 },
+        'r1': { id: 'r1', type: 'gear', name: '기사단의 롱소드', emoji: '⚔️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
+        'r2': { id: 'r2', type: 'gear', name: '강철 대방패', emoji: '🛡️', rarity: 'rare', color: 'text-blue-400', statMult: 1.15 },
+        'r3': { id: 'r3', type: 'skin', name: '은빛 테두리', emoji: '✨', rarity: 'rare', color: 'text-blue-400' },
+        'e1': { id: 'e1', type: 'gear', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
+        'e2': { id: 'e2', type: 'gear', name: '심연의 단검', emoji: '🔪', rarity: 'epic', color: 'text-purple-400', statMult: 1.30 },
+        'e3': { id: 'e3', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
+        'l1': { id: 'l1', type: 'gear', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
+        'l2': { id: 'l2', type: 'gear', name: '군주의 절대 왕관', emoji: '👑', rarity: 'legendary', color: 'text-yellow-400', statMult: 1.50 },
+        'l3': { id: 'l3', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' }
     },
     monsters: {
         normal: [
-            {e:'🦠', n:'슬라임'}, {e:'BAT', n:'흡혈박쥐'}, {e:'ORC', n:'심연의 오크'}, {e:'WOLF', n:'그림자 늑대'}, {e:'DRAGON', n:'고대의 비룡'}
+            {e:'🦠',n:'슬라임'},{e:'🦇',n:'흡혈박쥐'},{e:'👺',n:'고블린'},{e:'🐺',n:'마수늑대'},{e:'💀',n:'해골병사'}
         ],
         boss: {
-            5: {e:'GHOST', n:'망령의 군주'},
-            10: {e:'KRAKEN', n:'심연의 가디언'},
-            15: {e:'FIRE', n:'염옥의 지배자'}
+            5:{e:'🐉',n:'심연의 드래곤'}, 10:{e:'🐙',n:'크라켄'}, 15:{e:'🦖',n:'폭군 렉스'}
         }
     }
 };
@@ -50,5 +51,4 @@ const AudioEngine = {
 };
 
 document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
-
 document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
