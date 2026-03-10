@@ -23,6 +23,18 @@ const GameData = {
         boss: {
             5:{e:'🐉',n:'심연의 드래곤'}, 10:{e:'🐙',n:'크라켄'}, 15:{e:'🦖',n:'폭군 렉스'}
         }
+   },
+    quests: {
+        daily: [
+            { id: 'd1', name: '전투 전문가', desc: '심연의 탑 3회 진입', goal: 3, rewardGem: 10 },
+            { id: 'd2', name: '연금술사의 조수', desc: '아이템 연성 1회 시도', goal: 1, rewardGem: 15 },
+            { id: 'd3', name: '탐험의 즐거움', desc: '테스트 플레이 1회 완료', goal: 1, rewardGem: 5 }
+        ],
+        achievements: [
+            { id: 'a1', name: '초보 정복자', desc: '심연의 탑 5층 도달', goal: 5, rewardGem: 50 },
+            { id: 'a2', name: '숙련된 연금술사', desc: '희귀 등급 이상 아이템 획득', goal: 1, rewardGem: 100 },
+            { id: 'a3', name: '몬스터 학살자', desc: '누적 몬스터 50마리 토벌', goal: 50, rewardGem: 200 }
+        ]
     }
 };
 
@@ -52,3 +64,4 @@ const AudioEngine = {
 
 document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
 document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
+
