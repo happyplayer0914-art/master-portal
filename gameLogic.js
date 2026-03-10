@@ -190,16 +190,13 @@ const GameSystem = {
             UIManager.showToast("출석체크 완료! 100G 획득 🪙");
         },
         rewardForPlay() { 
-            // 🔥 클릭된 링크의 href를 키로 사용하여 각각의 보상 여부를 판단합니다.
             const testUrl = window.event?.currentTarget?.href || "default_test";
             const today = new Date().toDateString();
-            
             if (GameState.lastPlayRewards[testUrl] === today) {
                 return UIManager.showToast("이 테스트 보상은 오늘 이미 받았습니다! ⏱️");
             }
-            
             GameState.gold += 10; 
-            GameState.lastPlayRewards[testUrl] = today; // 해당 링크의 수령 날짜 기록
+            GameState.lastPlayRewards[testUrl] = today; 
             GameState.save(); 
             UIManager.updateCurrencyUI(); 
             AudioEngine.sfx.coin(); 
@@ -253,7 +250,9 @@ const GameSystem = {
                 results.forEach((item, index) => {
                     setTimeout(() => {
                         let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                        resBox.innerHTML += `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
+                        // 🔥 Bug Fix: innerHTML += 대신 insertAdjacentHTML을 사용하여 UI 반짝임(Flicker) 현상 해결
+                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
+                        resBox.insertAdjacentHTML('beforeend', cardHtml);
                         if(item.rarity === 'legendary' || item.rarity === 'epic') UIManager.triggerHaptic(); 
                     }, index * 100); 
                 });
@@ -283,40 +282,29 @@ const GameSystem = {
             const list = document.getElementById('ranking-list'); 
             list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
             if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
-            
             try {
-                const q = window.query(
-                    window.collection(window.db, "rankings"),
-                    window.limit(50) 
-                ); 
+                const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
                 const snap = await window.getDocs(q);
                 let all = []; snap.forEach(d => all.push(d.data()));
-                
                 all.sort((a,b) => { 
                     if (b.stage !== a.stage) return b.stage - a.stage; 
                     const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
                     const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
                     return timeA - timeB; 
                 });
-
                 let unique = []; let seen = new Set();
                 all.forEach(d => { 
                     const id = d.deviceId || d.nickname; 
-                    if(!seen.has(id) && unique.length < 10) { 
-                        seen.add(id); 
-                        unique.push(d); 
-                    } 
+                    if(!seen.has(id) && unique.length < 10) { seen.add(id); unique.push(d); } 
                 });
-
                 if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
-                
                 list.innerHTML = '';
                 unique.forEach((d, i) => {
                     let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; if(d.skin && d.skin !== 'none' && GameData.items[d.skin]) skinClass = `skin-${GameData.items[d.skin].rarity}`;
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
+                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
@@ -337,20 +325,9 @@ const GameSystem = {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
-            if (roll < 0.12) { 
-                titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
-                descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; 
-            } else if (roll < 0.21) { 
-                titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
-                let dmg = Math.floor(GameState.getTotalStats().hp * 0.15); 
-                descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
-                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
-            } else { 
-                titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; 
-                let heal = Math.floor(GameState.getTotalStats().hp * 0.3); 
-                descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); GameState.gem += 5; 
-                GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); 
-            }
+            if (roll < 0.12) { titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; AudioEngine.sfx.coin(); GameState.gold += 30; } 
+            else if (roll < 0.21) { titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; let dmg = Math.floor(GameState.getTotalStats().hp * 0.15); descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); } 
+            else { titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; let heal = Math.floor(GameState.getTotalStats().hp * 0.3); descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); GameState.gem += 5; GameState.currentHp = Math.min(GameState.getTotalStats().hp, GameState.currentHp + heal); }
         },
         endEvent() { GameState.rpgStage++; GameState.save(); document.getElementById('bottom-nav').style.display = 'flex'; UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); },
         startBattleSequence(isBoss) {
@@ -361,17 +338,8 @@ const GameSystem = {
             localStorage.setItem('master_in_battle', 'true');
             if (isBoss) {
                 AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
-                
                 const battleCard = document.getElementById('battle-card');
-                let shakes = 0; 
-                let shakeInt = setInterval(() => { 
-                    if(battleCard) {
-                        battleCard.classList.add('shake'); 
-                        UIManager.triggerHeavyHaptic(); 
-                        setTimeout(() => battleCard.classList.remove('shake'), 150); 
-                    }
-                    if(++shakes >= 4) clearInterval(shakeInt); 
-                }, 500);
+                let shakes = 0; let shakeInt = setInterval(() => { if(battleCard) { battleCard.classList.add('shake'); UIManager.triggerHeavyHaptic(); setTimeout(() => battleCard.classList.remove('shake'), 150); } if(++shakes >= 4) clearInterval(shakeInt); }, 500);
                 setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
             } else { this.initBattle(false); }
         },
@@ -413,88 +381,42 @@ const GameSystem = {
             const ATTACK_COOLDOWN = 600;
             const now = Date.now();
             if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
-            
             this.lastAttackTime = now;
             AudioEngine.sfx.hit(); UIManager.triggerHaptic();
-            
             let myAtk = GameState.getTotalStats().atk; 
-            let isCrit = Math.random() < 0.2; 
-            let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
+            let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
             this.monsterCurrentHp -= damage;
-            
             const sprite = document.getElementById('monster-sprite');
-            sprite.classList.remove('damage-flash'); 
-            void sprite.offsetWidth; 
-            sprite.classList.add('damage-flash');
-            
+            sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
             document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
-
             const btn = document.getElementById('btn-attack');
-            btn.disabled = true;
-            btn.classList.add('opacity-50');
-            
+            btn.disabled = true; btn.classList.add('opacity-50');
             let timeLeft = ATTACK_COOLDOWN;
-            const cooldownTimer = setInterval(() => {
-                timeLeft -= 100;
-                if (timeLeft <= 0 || this.monsterCurrentHp <= 0) {
-                    clearInterval(cooldownTimer);
-                    if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) {
-                        btn.disabled = false;
-                        btn.classList.remove('opacity-50');
-                        btn.innerHTML = "⚔️ 공격 (TAP!)";
-                    }
-                } else {
-                    btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`;
-                }
-            }, 100);
-
+            const cooldownTimer = setInterval(() => { timeLeft -= 100; if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { btn.disabled = false; btn.classList.remove('opacity-50'); btn.innerHTML = "⚔️ 공격 (TAP!)"; } } else { btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; } }, 100);
             this.updateBattleUI(); 
-            if (this.monsterCurrentHp <= 0) {
-                clearInterval(cooldownTimer); 
-                setTimeout(() => this.endBattle(true), 300);
-            }
+            if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
         },
         monsterAttack() {
-            if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) {
-                clearInterval(this.battleInterval);
-                return;
-            }
+            if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
             AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             GameState.currentHp -= damage; GameState.save(); 
-            
             const battleCard = document.getElementById('battle-card');
-            if(battleCard) {
-                battleCard.classList.add('shake'); 
-                setTimeout(() => battleCard.classList.remove('shake'), 200);
-            }
-            
+            if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
             document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
-
             this.updateBattleUI(); 
-            if (GameState.currentHp <= 0) {
-                clearInterval(this.battleInterval);
-                setTimeout(() => this.endBattle(false), 300);
-            }
+            if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
         endBattle(isWin) {
-            clearInterval(this.battleInterval); 
-            GameState.isBattling = false; 
-            localStorage.removeItem('master_in_battle'); 
-            
+            clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
             const btnAtk = document.getElementById('btn-attack');
-            btnAtk.disabled = true; 
-            btnAtk.innerHTML = "⚔️ 전투 종료";
-
+            btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료";
             document.getElementById('bottom-nav').style.display = 'flex'; 
             const isBoss = (GameState.rpgStage % 5 === 0);
-            
             if (isWin) {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
-                let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; 
-                let rewardGem = isBoss ? 50 : 0;
-                GameState.gold += rewardGold; GameState.gem += rewardGem; 
-                GameState.rpgStage++; GameState.save();
+                let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
+                GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
                 GameSystem.Ranking.updateRankingSilently();
                 alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
             } else {
