@@ -4,6 +4,7 @@
 const GameState = {
     nickname: "위대한 길드장",
     deviceId: "", // 🔥 기기 식별자
+    lastLoginTime: 0, // 🔥 1. 여기에 추가: 마지막 접속 시간 기록
     gold: 10000, gem: 10000, lastCheckIn: "",
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
@@ -19,6 +20,8 @@ const GameState = {
         }
         this.deviceId = storedId;
 
+        // 🔥 2. load() 함수 안에 추가: 저장된 접속 시간 불러오기 (처음이면 현재 시간)
+        this.lastLoginTime = parseInt(localStorage.getItem('master_last_login')) || Date.now();
         this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
         this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
@@ -49,6 +52,8 @@ const GameState = {
         localStorage.setItem('master_current_hp', this.currentHp);
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
+        // 🔥 3. save() 함수 안에 추가: 접속 시간 저장하기
+        localStorage.setItem('master_last_login', this.lastLoginTime);
         if(this.equippedGear) localStorage.setItem('master_equipped_gear', this.equippedGear); else localStorage.removeItem('master_equipped_gear');
         if(this.equippedSkin) localStorage.setItem('master_equipped_skin', this.equippedSkin); else localStorage.removeItem('master_equipped_skin');
     },
@@ -66,4 +71,5 @@ const GameState = {
         if(this.equippedGear && GameData.items[this.equippedGear]) mult = GameData.items[this.equippedGear].statMult;
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
+
 };
