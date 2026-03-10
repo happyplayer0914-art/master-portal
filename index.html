@@ -615,8 +615,10 @@
 </script>
     <style>#synth-modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }</style>
 
+<!-- 연금술 모달 (태그 닫힘 구조 정밀 수정본) -->
 <div id="synth-modal" class="fixed inset-0 z-[1200] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-purple-500">
+        <!-- 닫기 버튼 -->
         <button onclick="GameSystem.Synthesis.closeModal()" class="absolute top-3 right-4 text-slate-400 hover:text-white text-3xl font-light">&times;</button>
         
         <div class="text-center mb-5 mt-2">
@@ -624,51 +626,52 @@
             <p class="text-xs text-slate-400 break-keep leading-relaxed">같은 등급의 장비 3개를 융합합니다.<br><span class="text-emerald-400 font-bold">(장착 중인 장비는 안전하게 보호됩니다)</span></p>
         </div>
 
+        <!-- 등급 탭 -->
         <div class="flex gap-2 mb-4">
-            <button onclick="GameSystem.Synthesis.selectTier('common')" id="synth-tab-common" class="flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded transition-all">일반</button>
-            <button onclick="GameSystem.Synthesis.selectTier('rare')" id="synth-tab-rare" class="flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all">희귀</button>
-            <button onclick="GameSystem.Synthesis.selectTier('epic')" id="synth-tab-epic" class="flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all">영웅</button>
+            <button onclick="GameSystem.Synthesis.selectTier('common')" id="synth-tab-common" class="flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded">일반</button>
+            <button onclick="GameSystem.Synthesis.selectTier('rare')" id="synth-tab-rare" class="flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded">희귀</button>
+            <button onclick="GameSystem.Synthesis.selectTier('epic')" id="synth-tab-epic" class="flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded">영웅</button>
         </div>
 
+        <!-- 가마솥 내부 (중요: 여기서 </div> 태그 순서가 중요합니다) -->
         <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-700 relative overflow-hidden text-center mb-4">
             <div class="flex justify-center items-center gap-3 mb-5">
                 <div id="synth-slot-1" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
                 <div id="synth-slot-2" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
-                <div id="synth-slot-3" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all text-3xl cursor-pointer"></div>
+                <div id="synth-slot-3" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex items-center justify-center transition-all text-3xl"></div>
             </div>
             
-              <p class="text-[11px] text-slate-400 mb-1 font-bold">성공 확률</p>
-            <div id="synth-rate-text" class="text-3xl font-black text-emerald-400 min-h-[50px]">100%</div>
+            <p class="text-[11px] text-slate-400 mb-1 font-bold">성공 확률</p>
+            <div id="synth-rate-text" class="text-3xl font-black text-emerald-400 min-h-[45px]">100%</div>
             
-            <!-- 실패 보정 마일리지 (순수하게 게이지만 표시) -->
+            <!-- 실패 보정 마일리지 영역 -->
             <div id="synth-pity-wrap" class="mt-4 hidden bg-slate-800/50 p-2 rounded-lg border border-slate-700">
                 <div class="flex justify-between text-[10px] font-bold text-yellow-400 mb-1.5 px-1">
-                    <span>실패 보정 마일리지</span>
+                    <span>실패 보정</span>
                     <span id="synth-pity-text">0%</span>
                 </div>
-                <div class="progress-track h-2">
-                    <div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300" style="width: 0%"></div>
-                </div>
+                <div class="progress-track h-2"><div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500" style="width: 0%"></div></div>
             </div>
 
-            <!-- 🔥 중요: 재료 목록을 밖으로 꺼내서 항상 보이게 함 -->
-            <p class="text-[11px] font-bold text-amber-400 mt-5 mb-2 px-1 uppercase tracking-tighter text-left">보유 중인 재료 (탭하여 등록/해제)</p>
-            <div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-4 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[140px] max-h-[180px]">
-                <!-- 아이템 리스트가 여기에 뜹니다 -->
+            <!-- 보유 재료 목록 (여기가 항상 보여야 합니다) -->
+            <p class="text-[11px] font-bold text-amber-400 mt-5 mb-2 px-1 uppercase tracking-tighter text-left">보유 중인 재료 (탭하여 등록)</p>
+            <div id="synth-material-list" class="grid grid-cols-4 gap-2 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[140px] max-h-[180px]">
+                <!-- 로직에 의해 렌더링됨 -->
             </div>
-                <div class="progress-track h-2"><div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300" style="width: 0%"></div></div>
-                <p class="text-[9px] text-slate-500 mt-1.5 break-keep">실패할 때마다 확률이 상승하여 100% 도달 시 확정 성공합니다.</p>
-            </div>
-        </div>
+            
+            <p class="text-[9px] text-slate-500 mt-2 break-keep">실패 시 확률이 상승하며 100% 도달 시 확정 성공합니다.</p>
+        </div> <!-- bg-slate-900/80 닫음 -->
 
+        <!-- 연성 버튼 (박스 바깥, 카드 안쪽에 위치) -->
         <button id="btn-synth-execute" onclick="GameSystem.Synthesis.execute()" disabled class="w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 disabled:opacity-50">
             <span class="text-sm" id="synth-btn-title">재료 부족 (0/3)</span>
             <span class="text-[10px]" id="synth-btn-cost">🪙 0</span>
         </button>
-    </div>
-</div>
+    </div> <!-- glass-card 닫음 -->
+</div> <!-- synth-modal 닫음 -->
 </body>
 </html>
+
 
 
 
