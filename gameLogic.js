@@ -59,6 +59,7 @@ const UIManager = {
         document.getElementById(`inv-panel-${t}`).classList.remove('hidden');
         document.getElementById('inv-tab-gear').className = t === 'gear' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
         document.getElementById('inv-tab-skin').className = t === 'skin' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+        this.renderInventory(); // 탭 전환 시 인벤토리 다시 그리기
     },
     
     updateCurrencyUI() {
@@ -118,9 +119,9 @@ const UIManager = {
         for(const [id, count] of Object.entries(counts)) {
             const item = GameData.items[id]; if(!item) continue;
             
-            // 🔥 장착 상태 판단 로직 보강 (undefined/null 방어 코드)
-            const isEquipped = (GameState.equippedGear && GameState.equippedGear === id) || 
-                              (GameState.equippedSkin && GameState.equippedSkin === id);
+            // 🔥 장착 상태 판단 로직 강화: 타입까지 확인하여 엉뚱한 칸에 배지가 뜨는 것을 방지
+            const isEquipped = (item.type === 'gear' && GameState.equippedGear === id) || 
+                              (item.type === 'skin' && GameState.equippedSkin === id);
             
             const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
@@ -204,6 +205,7 @@ const GameSystem = {
         },
         toggleEquip(id) {
             const item = GameData.items[id]; 
+            if(!item) return;
             if(item.type === 'gear') GameState.equippedGear = GameState.equippedGear === id ? null : id;
             else GameState.equippedSkin = GameState.equippedSkin === id ? null : id;
             GameState.save(); UIManager.renderInventory(); UIManager.applyAvatarSkin(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.equip(); UIManager.triggerHaptic();
@@ -346,11 +348,16 @@ const GameSystem = {
             localStorage.setItem('master_in_battle', 'true');
             if (isBoss) {
                 AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
-                let shakes = 0; let shakeInt = setInterval(() => { 
-                    const appCont = document.querySelector('.app-container');
-                    appCont.classList.add('shake'); 
-                    UIManager.triggerHeavyHaptic(); 
-                    setTimeout(() => appCont.classList.remove('shake'), 150); 
+                
+                // 🔥 헤더 제외 몬스터 카드만 흔들리도록 수정
+                const battleCard = document.getElementById('battle-card');
+                let shakes = 0; 
+                let shakeInt = setInterval(() => { 
+                    if(battleCard) {
+                        battleCard.classList.add('shake'); 
+                        UIManager.triggerHeavyHaptic(); 
+                        setTimeout(() => battleCard.classList.remove('shake'), 150); 
+                    }
                     if(++shakes >= 4) clearInterval(shakeInt); 
                 }, 500);
                 setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
