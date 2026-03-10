@@ -533,14 +533,14 @@
             </button>
         </div>
 
-        <!-- 장비 목록 영역 -->
-        <div class="glass-card p-4 min-h-[300px]">
-            <div id="inv-panel-gear" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
-            <div id="inv-panel-skin" class="grid grid-cols-2 sm:grid-cols-3 gap-3 hidden"></div>
+         <!-- 장비 목록 영역 (수정됨: 높이 고정 및 그리드 최적화) -->
+        <div class="glass-card p-4 min-h-[380px]">
+            <div id="inv-panel-gear" class="grid grid-cols-3 gap-3"></div>
+            <div id="inv-panel-skin" class="grid grid-cols-3 gap-3 hidden"></div>
             
             <div id="inv-empty-state" class="hidden text-center py-10">
-                <div class="text-5xl mb-3 opacity-50">🕸️</div>
-                <p class="text-slate-400 text-sm">보관함이 텅 비어있습니다.<br>가챠 상점에서 아이템을 뽑아보세요!</p>
+                <div class="text-4xl mb-3 opacity-50">🕸️</div>
+                <p class="text-slate-400 text-xs">보관함이 비어있습니다.</p>
             </div>
         </div>
     </main>
@@ -637,19 +637,25 @@
                 <div id="synth-slot-3" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all text-3xl cursor-pointer"></div>
             </div>
             
-            <p class="text-[11px] text-slate-400 mb-1 font-bold">성공 확률</p>
-            <div id="synth-rate-text" class="text-3xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] flex flex-col items-center justify-center min-h-[50px]">100%</div>
+              <p class="text-[11px] text-slate-400 mb-1 font-bold">성공 확률</p>
+            <div id="synth-rate-text" class="text-3xl font-black text-emerald-400 min-h-[50px]">100%</div>
             
+            <!-- 실패 보정 마일리지 (순수하게 게이지만 표시) -->
             <div id="synth-pity-wrap" class="mt-4 hidden bg-slate-800/50 p-2 rounded-lg border border-slate-700">
                 <div class="flex justify-between text-[10px] font-bold text-yellow-400 mb-1.5 px-1">
                     <span>실패 보정 마일리지</span>
                     <span id="synth-pity-text">0%</span>
                 </div>
-                <!-- 연성 확률 안내 바로 아래에 추가하세요 -->
-<p class="text-[11px] font-bold text-amber-400 mb-2 px-1 uppercase tracking-tighter text-left">보유 중인 재료 (탭하여 넣기/빼기)</p>
-<div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-4 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[120px]">
-    <!-- 여기에 재료 아이템들이 자동으로 나타납니다 -->
-</div>
+                <div class="progress-track h-2">
+                    <div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 🔥 중요: 재료 목록을 밖으로 꺼내서 항상 보이게 함 -->
+            <p class="text-[11px] font-bold text-amber-400 mt-5 mb-2 px-1 uppercase tracking-tighter text-left">보유 중인 재료 (탭하여 등록/해제)</p>
+            <div id="synth-material-list" class="grid grid-cols-4 gap-2 mb-4 overflow-y-auto p-2 bg-black/40 rounded-lg min-h-[140px] max-h-[180px]">
+                <!-- 아이템 리스트가 여기에 뜹니다 -->
+            </div>
                 <div class="progress-track h-2"><div id="synth-pity-bar" class="hp-fill bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300" style="width: 0%"></div></div>
                 <p class="text-[9px] text-slate-500 mt-1.5 break-keep">실패할 때마다 확률이 상승하여 100% 도달 시 확정 성공합니다.</p>
             </div>
@@ -663,6 +669,7 @@
 </div>
 </body>
 </html>
+
 
 
 
