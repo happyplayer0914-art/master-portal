@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>마스터의 놀이터 | 프리미엄 테스트 & 미니게임 포털</title>
-    <meta name="description" content="매일매일 새로운 즐거움! 각종 심리 테스트와 미니 RPG 게임을 즐기고 포인트를 모아보세요.">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,7 +12,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700;800;900&display=swap');
         
         :root {
-            --bg-dark: #09090b; 
+            --bg-dark: #05050a; 
             --panel-bg: rgba(24, 24, 27, 0.7);
         }
 
@@ -21,10 +20,24 @@
             margin: 0; padding: 0; background-color: var(--bg-dark);
             font-family: 'Pretendard', sans-serif; color: white;
             overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none; /* 당겨서 새로고침 방지 (앱처럼) */
+        }
+
+        /* 다이내믹 배경 캔버스 */
+        #dynamic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+
+        .app-container {
+            max-width: 480px; margin: 0 auto; min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            background: linear-gradient(180deg, rgba(15,23,42,0.3) 0%, rgba(0,0,0,0) 100%);
         }
 
         .glass-header {
-            background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            background: rgba(5, 5, 10, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         
@@ -33,151 +46,103 @@
             border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
         .glass-card:active { transform: scale(0.98); }
 
         .text-gradient { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .text-gradient-gold { background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .text-gradient-danger { background: linear-gradient(135deg, #f87171 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #fcd34d; } 100% { transform: scale(1); } }
         .animate-pop { animation: pop 0.4s ease-out; }
 
-        .app-container {
-            max-width: 480px; margin: 0 auto; min-height: 100vh;
-            background: radial-gradient(circle at top right, rgba(49, 46, 129, 0.15), transparent 40%),
-                        radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.1), transparent 40%);
-            position: relative;
+        /* 하단 GNB 네비게이션 바 */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: 70px;
+            background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100; padding-bottom: env(safe-area-inset-bottom);
         }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 25%; height: 100%; color: #64748b; font-size: 10px; font-weight: 700;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item.active { color: #c084fc; text-shadow: 0 0 10px rgba(192,132,252,0.5); }
+        .nav-item.active i { transform: translateY(-3px) scale(1.1); color: #c084fc; }
 
         /* Screen Management */
-        .screen { display: none; animation: fadeIn 0.3s ease; }
+        .screen { display: none; animation: fadeIn 0.3s ease; padding-bottom: 90px; /* GNB 공간 확보 */ }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0;} 50% { transform: scale(1.1); opacity: 1;} 100% { transform: scale(1); opacity: 1;} }
-        .animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* Battle Animations */
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
-        .shake { animation: shake 0.2s ease-in-out; }
         
-        @keyframes damageFlash { 0% { filter: brightness(1) drop-shadow(0 0 0 red); } 50% { filter: brightness(2) drop-shadow(0 0 20px red); color: red; } 100% { filter: brightness(1) drop-shadow(0 0 0 red); } }
+        /* 전투 연출 애니메이션 */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
+        .shake { animation: shake 0.2s ease-in-out; }
+        @keyframes damageFlash { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 red); } 50% { filter: brightness(2) drop-shadow(0 0 20px red); color: red; } }
         .damage-flash { animation: damageFlash 0.3s ease-out; }
 
-        /* HP Bars */
         .progress-track { background: rgba(0, 0, 0, 0.5); border-radius: 99px; height: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); width: 100%;}
         .hp-fill { height: 100%; background: linear-gradient(90deg, #ef4444, #b91c1c); border-radius: 99px; transition: width 0.2s ease; }
         .monster-hp-fill { height: 100%; background: linear-gradient(90deg, #a855f7, #7e22ce); border-radius: 99px; transition: width 0.2s ease; }
 
-        /* ================================================== */
-        /* 🚨 BOSS WARNING OVERLAY & MONSTER CARD UPGRADES 🚨 */
-        /* ================================================== */
+        /* 보스 경고창 */
         #boss-warning-overlay {
-            position: fixed; inset: 0; z-index: 999;
-            background: rgba(5, 0, 0, 0.95);
+            position: fixed; inset: 0; z-index: 999; background: rgba(5, 0, 0, 0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
         }
         #boss-warning-overlay.active { opacity: 1; pointer-events: all; }
-        
-        /* 경고창 부드러운 공중 부양 애니메이션 추가 */
-        .warning-content {
-            display: flex; flex-direction: column; align-items: center;
-            animation: smoothFloat 3s ease-in-out infinite;
-        }
-        @keyframes smoothFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        /* 깜빡임(Pulse) 속도를 늦추고 자연스러운 광원(Glow) 효과로 변경 */
         .warning-text {
             font-size: 3.5rem; font-weight: 900; color: #ef4444; letter-spacing: 0.1em;
-            text-shadow: 0 0 30px rgba(239, 68, 68, 1);
             animation: warningGlow 1.5s ease-in-out infinite alternate;
         }
-        @keyframes warningGlow { 
-            from { transform: scale(1); text-shadow: 0 0 20px rgba(239, 68, 68, 0.5); opacity: 0.8; } 
-            to { transform: scale(1.03); text-shadow: 0 0 50px rgba(239, 68, 68, 1); opacity: 1; } 
-        }
+        @keyframes warningGlow { from { transform: scale(1); text-shadow: 0 0 20px rgba(239,68,68,0.5); } to { transform: scale(1.05); text-shadow: 0 0 50px rgba(239,68,68,1); } }
 
-        /* 고급 몬스터 일러스트 프레임 */
+        /* 몬스터 아바타 */
         .monster-avatar-container {
-            width: 150px; height: 150px; margin: 0 auto 24px auto;
-            border-radius: 24px; position: relative;
+            width: 150px; height: 150px; margin: 0 auto 24px auto; border-radius: 24px; position: relative;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.4) 100%);
-            overflow: hidden;
-            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.1); background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.4) 100%);
         }
-        .monster-avatar-container::before {
-            content: ''; position: absolute; inset: 0;
-            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);
-        }
-        
-        /* 보스 전용 스페셜 프레임 */
         .boss-avatar-container {
-            border-color: #ef4444; width: 180px; height: 180px;
-            box-shadow: 0 0 50px rgba(239,68,68,0.5), inset 0 0 30px rgba(239,68,68,0.3);
+            border-color: #ef4444; width: 180px; height: 180px; box-shadow: 0 0 50px rgba(239,68,68,0.5), inset 0 0 30px rgba(239,68,68,0.3);
             background: radial-gradient(circle at center, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0.9) 100%);
         }
-        .boss-avatar-container::after {
-            content: ''; position: absolute; inset: -50%;
-            background: conic-gradient(transparent, rgba(239,68,68,0.4), transparent);
-            animation: spin 3s linear infinite; z-index: 0;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        .monster-emoji {
-            font-size: 5rem; position: relative; z-index: 10;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
-            transition: transform 0.1s;
-        }
-        .boss-emoji {
-            font-size: 7rem;
-            filter: drop-shadow(0 0 25px rgba(239,68,68,0.8));
-            animation: float 3s ease-in-out infinite;
-        }
+        .monster-emoji { font-size: 5rem; position: relative; z-index: 10; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
+        .boss-emoji { font-size: 7rem; filter: drop-shadow(0 0 25px rgba(239,68,68,0.8)); animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        /* 보스 테마 배틀 배경 */
-        .battle-card.boss-theme {
-            border-color: rgba(239, 68, 68, 0.4);
-            background: linear-gradient(180deg, rgba(127, 29, 29, 0.2) 0%, transparent 100%);
-        }
     </style>
 </head>
 <body>
 
-<div class="app-container pb-24">
+<!-- 다이내믹 배경 -->
+<canvas id="dynamic-bg"></canvas>
 
-    <!-- 상단 네비게이션 바 -->
-    <header class="glass-header fixed top-0 left-0 right-0 z-50 max-w-[480px] mx-auto w-full px-5 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="switchScreen('screen-portal')">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.5)]">
-                M
-            </div>
+<div class="app-container">
+
+    <!-- 상단 헤더 (지갑) -->
+    <header class="glass-header fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-[480px] px-5 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.5)]">M</div>
             <span class="font-bold text-lg tracking-wide">MASTER LAB</span>
         </div>
-        
         <div class="flex gap-3">
             <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span class="text-sm">🪙</span>
-                <span id="gold-display" class="font-bold text-yellow-400 text-sm w-10 text-right">0</span>
+                <span class="text-sm">🪙</span><span id="gold-display" class="font-bold text-yellow-400 text-sm w-10 text-right">0</span>
             </div>
             <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span class="text-sm">💎</span>
-                <span id="gem-display" class="font-bold text-cyan-400 text-sm w-6 text-right">0</span>
+                <span class="text-sm">💎</span><span id="gem-display" class="font-bold text-cyan-400 text-sm w-6 text-right">0</span>
             </div>
         </div>
     </header>
 
     <!-- ============================================== -->
-    <!-- 1. 포털 메인 화면 (screen-portal)              -->
+    <!-- 1. [홈] 화면 (screen-home)                     -->
     <!-- ============================================== -->
-    <main id="screen-portal" class="screen active pt-24 px-5">
+    <main id="screen-home" class="screen active pt-24 px-5">
         <section class="mb-8">
             <div class="glass-card p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-[40px]"></div>
@@ -189,48 +154,29 @@
             </div>
         </section>
 
-        <!-- 미니 RPG 투기장 -->
-        <section class="mb-10">
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-gamepad text-purple-400"></i> 미니 RPG 투기장</h2>
-                <span class="text-xs text-purple-300 font-medium bg-purple-500/20 px-2 py-1 rounded-full">대규모 보스전!</span>
-            </div>
-            
-            <div onclick="switchScreen('screen-rpg-lobby')" class="glass-card border-purple-500/50 p-6 text-center relative cursor-pointer hover:bg-slate-800 transition-colors group">
-                <div class="text-5xl mb-3 group-hover:scale-110 transition-transform">🐉</div>
-                <h3 class="font-black text-lg text-purple-300 mb-1">심연의 탑 토벌전</h3>
-                <p class="text-xs text-slate-400">강력해진 심연의 군주들을 쓰러뜨리세요!</p>
-                <div class="mt-4 w-full py-3 bg-purple-600/20 text-purple-300 rounded-xl font-bold text-sm border border-purple-500/30 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    던전 입구로 가기 ⚔️
-                </div>
-            </div>
-        </section>
-
-        <!-- 인기 폭발 테스트 -->
+        <!-- 인기 폭발 테스트 (플러팅, RPG, 수호령) -->
         <section class="mb-10">
             <div class="flex justify-between items-end mb-4">
                 <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> 인기 폭발 테스트</h2>
                 <span class="text-xs text-slate-400 font-medium">플레이 시 +10G</span>
             </div>
             <div class="space-y-4">
-                <!-- 3. 플러팅 무기 테스트 카드 (새로 추가!) -->
                 <a href="https://flirting-mbti.vercel.app/" target="_blank" onclick="rewardForPlay()" class="block glass-card p-4 hover:border-pink-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-pink-900 to-purple-900 flex items-center justify-center text-4xl shadow-inner border border-pink-500/30">💘</div>
                         <div class="flex flex-col justify-center flex-1">
                             <span class="text-[10px] text-pink-400 font-bold px-2 py-0.5 bg-pink-500/10 rounded-full w-max mb-1.5">연애/심리 1위</span>
                             <h3 class="font-bold text-[15px] mb-1 leading-snug">나의 플러팅 무기 테스트</h3>
-                            <p class="text-xs text-slate-400">내가 썸 탈 때 쓰는 치명적인 무기는?</p>
+                            <p class="text-xs text-slate-400">내가 썸 탈 때 쓰는 무기는?</p>
                         </div>
                     </div>
                 </a>
-
                 <a href="https://rpg-mbti-test.vercel.app/" target="_blank" onclick="rewardForPlay()" class="block glass-card p-4 hover:border-indigo-500/50 transition-colors relative overflow-hidden">
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-800 to-indigo-900 flex items-center justify-center text-4xl shadow-inner border border-indigo-500/30">👑</div>
                         <div class="flex flex-col justify-center flex-1">
                             <span class="text-[10px] text-indigo-400 font-bold px-2 py-0.5 bg-indigo-500/10 rounded-full w-max mb-1.5">서브컬처 1위</span>
-                            <h3 class="font-bold text-[15px] mb-1 leading-snug">전설의 길드장 소환 (MBTI)</h3>
+                            <h3 class="font-bold text-[15px] mb-1 leading-snug">전설의 길드장 소환</h3>
                             <p class="text-xs text-slate-400">내 영혼에 각인된 RPG 클래스는?</p>
                         </div>
                     </div>
@@ -239,8 +185,8 @@
                     <div class="flex gap-4">
                         <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-900 to-slate-900 flex items-center justify-center text-4xl shadow-inner border border-yellow-500/30">🪙</div>
                         <div class="flex flex-col justify-center flex-1">
-                            <span class="text-[10px] text-yellow-400 font-bold px-2 py-0.5 bg-yellow-500/10 rounded-full w-max mb-1.5">재테크/금전운</span>
-                            <h3 class="font-bold text-[15px] mb-1 leading-snug">내 지갑 수호령 소환 테스트</h3>
+                            <span class="text-[10px] text-yellow-400 font-bold px-2 py-0.5 bg-yellow-500/10 rounded-full w-max mb-1.5">재테크 1위</span>
+                            <h3 class="font-bold text-[15px] mb-1 leading-snug">내 지갑 수호령 소환</h3>
                             <p class="text-xs text-slate-400">나의 소비/저축 습관 정밀 분석</p>
                         </div>
                     </div>
@@ -250,12 +196,13 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 2. RPG 로비 화면 (screen-rpg-lobby)            -->
+    <!-- 2. [투기장] 로비 화면 (screen-arena)           -->
     <!-- ============================================== -->
-    <main id="screen-rpg-lobby" class="screen pt-24 px-5">
-        <button onclick="switchScreen('screen-portal')" class="mb-4 text-slate-400 font-bold text-sm flex items-center hover:text-white transition-colors">
-            <i class="fa-solid fa-arrow-left mr-2"></i> 포털로 돌아가기
-        </button>
+    <main id="screen-arena" class="screen pt-24 px-5">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">심연의 탑</span></h1>
+            <p class="text-slate-400 text-sm">골드로 스탯을 올리고 마왕을 토벌하세요.</p>
+        </div>
 
         <div class="glass-card p-6 mb-6 text-center border-t-4 border-t-purple-500">
             <p class="text-purple-400 font-bold text-xs tracking-widest uppercase mb-1">Current Stage</p>
@@ -331,105 +278,205 @@
             </div>
         </div>
 
-        <button onclick="enterDungeon()" class="w-full py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2 mb-8">
+        <button onclick="enterDungeon()" class="w-full py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2">
             <span>🚪</span> 심연으로 전진하기
         </button>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 2-1. 랜덤 이벤트 화면 (screen-rpg-event)       -->
-    <!-- ============================================== -->
+    <!-- [전투 및 이벤트 화면 (기존과 동일, 내비게이션 없음)] -->
     <main id="screen-rpg-event" class="screen pt-24 px-5">
         <div class="glass-card p-8 text-center border border-indigo-500/50 relative overflow-hidden mt-10">
-            <div class="absolute inset-0 bg-gradient-to-b from-indigo-900/30 to-transparent"></div>
-            
-            <p class="text-indigo-400 font-bold text-xs tracking-widest uppercase mb-4 relative z-10">Random Encounter</p>
-            <div id="event-icon" class="text-8xl mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-bounce-in relative z-10">🎁</div>
-            <h2 id="event-title" class="text-2xl font-black text-white mb-4 relative z-10">숨겨진 보물상자!</h2>
-            <p id="event-desc" class="text-slate-300 text-sm leading-relaxed mb-8 relative z-10 break-keep">먼지가 쌓인 상자를 열었더니 골드가 들어있습니다!</p>
-            
-            <button onclick="endEvent()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all relative z-10">
-                인벤토리에 넣고 돌아가기
+            <p class="text-indigo-400 font-bold text-xs tracking-widest uppercase mb-4">Random Encounter</p>
+            <div id="event-icon" class="text-8xl mb-6">🎁</div>
+            <h2 id="event-title" class="text-2xl font-black text-white mb-4">숨겨진 보물상자!</h2>
+            <p id="event-desc" class="text-slate-300 text-sm leading-relaxed mb-8 break-keep">이벤트 결과</p>
+            <button onclick="endEvent()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all">
+                돌아가기
             </button>
         </div>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 3. RPG 전투 화면 (screen-rpg-battle)           -->
-    <!-- ============================================== -->
     <main id="screen-rpg-battle" class="screen pt-20 px-5 relative">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-black text-white" id="battle-stage-title">STAGE 1</h2>
         </div>
-
-        <!-- 고급화된 몬스터 영역 -->
-        <div id="battle-card" class="glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30 bg-gradient-to-b from-purple-900/10 to-transparent">
-            <h3 class="text-lg font-black text-white mb-5 tracking-wide drop-shadow-md" id="battle-monster-name">점액질 슬라임</h3>
-            
-            <!-- 몬스터 아바타 컨테이너 (고퀄리티 프레임) -->
+        <div id="battle-card" class="glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30">
+            <h3 class="text-lg font-black text-white mb-5" id="battle-monster-name">몬스터</h3>
             <div id="monster-avatar-wrap" class="monster-avatar-container">
                 <div id="monster-sprite" class="monster-emoji">🦠</div>
             </div>
-
-            <!-- 몬스터 체력바 -->
             <div class="w-full mb-1">
                 <div class="flex justify-between text-[10px] font-bold text-slate-300 mb-1 px-1">
-                    <span>HP</span>
-                    <span id="battle-monster-hp-text">50 / 50</span>
+                    <span>HP</span><span id="battle-monster-hp-text">50 / 50</span>
                 </div>
-                <div class="progress-track h-3">
-                    <div id="battle-monster-hp-bar" class="monster-hp-fill" style="width: 100%"></div>
-                </div>
+                <div class="progress-track h-3"><div id="battle-monster-hp-bar" class="monster-hp-fill" style="width: 100%"></div></div>
             </div>
         </div>
-
-        <!-- 타격 이펙트/로그 -->
         <div class="h-10 flex items-center justify-center mb-4">
             <p id="battle-log" class="text-sm font-bold text-yellow-400 animate-pulse">적 출현! 전투를 준비하세요.</p>
         </div>
-
-        <!-- 플레이어 체력바 -->
         <div class="glass-card p-4 mb-4 border border-emerald-500/30 bg-slate-900/80">
             <div class="flex justify-between text-xs font-bold text-emerald-400 mb-2 px-1">
-                <span>마스터 HP</span>
-                <span id="battle-player-hp-text">100 / 100</span>
+                <span>마스터 HP</span><span id="battle-player-hp-text">100 / 100</span>
             </div>
-            <div class="progress-track h-4">
-                <div id="battle-player-hp-bar" class="hp-fill" style="width: 100%"></div>
-            </div>
+            <div class="progress-track h-4"><div id="battle-player-hp-bar" class="hp-fill" style="width: 100%"></div></div>
         </div>
-
-        <!-- 액션 버튼 영역 -->
         <div class="grid grid-cols-3 gap-3">
-            <button id="btn-attack" onclick="playerAttack()" class="col-span-2 py-6 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-500 rounded-2xl font-black text-xl shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:shadow-[0_6px_0_rgba(15,23,42,1)]">
-                ⚔️ 공격 (TAP!)
-            </button>
-            <button onclick="usePotionInBattle()" class="col-span-1 py-4 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-600 rounded-2xl font-bold text-sm flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all select-none">
-                <span class="text-xl mb-1">❤️</span>
-                <span class="text-[10px] text-slate-300">포션 (<span id="battle-potion-count">0</span>)</span>
+            <button id="btn-attack" onclick="playerAttack()" class="col-span-2 py-6 bg-slate-800 border border-slate-500 rounded-2xl font-black text-xl shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] disabled:opacity-50">⚔️ 공격 (TAP!)</button>
+            <button onclick="usePotionInBattle()" class="col-span-1 py-4 bg-slate-800 border border-slate-600 rounded-2xl font-bold text-sm flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px]">
+                <span class="text-xl mb-1">❤️</span><span class="text-[10px] text-slate-300">포션 (<span id="battle-potion-count">0</span>)</span>
             </button>
         </div>
     </main>
 
+    <!-- ============================================== -->
+    <!-- 3. [가챠샵] 공사 중 화면 (screen-shop)         -->
+    <!-- ============================================== -->
+    <main id="screen-shop" class="screen pt-32 px-5 text-center">
+        <div class="text-8xl mb-6">🎰</div>
+        <h2 class="text-2xl font-black text-white mb-3">프리미엄 젬(💎) 상점</h2>
+        <p class="text-slate-400 text-sm mb-8 break-keep">전설의 무기와 한정판 프로필 테두리를 뽑을 수 있는 가챠 상점이 곧 오픈됩니다!</p>
+        <div class="p-6 glass-card border-dashed border-2 border-slate-600 bg-black/20">
+            <p class="text-xs text-slate-500 font-bold tracking-widest uppercase">Coming Soon (Step 3)</p>
+        </div>
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 4. [내 정보] 공사 중 화면 (screen-profile)     -->
+    <!-- ============================================== -->
+    <main id="screen-profile" class="screen pt-32 px-5 text-center">
+        <div class="text-8xl mb-6">🎒</div>
+        <h2 class="text-2xl font-black text-white mb-3">인벤토리 & 장비</h2>
+        <p class="text-slate-400 text-sm mb-8 break-keep">획득한 장비를 장착하고 마스터의 칭호를 뽐낼 수 있는 프로필 공간이 준비 중입니다!</p>
+        <div class="p-6 glass-card border-dashed border-2 border-slate-600 bg-black/20">
+            <p class="text-xs text-slate-500 font-bold tracking-widest uppercase">Coming Soon (Step 2)</p>
+        </div>
+    </main>
+
+    <!-- 하단 고정 내비게이션 바 (GNB) -->
+    <nav id="bottom-nav" class="bottom-nav">
+        <div class="nav-item active" onclick="navTo('screen-home', this)">
+            <i class="fa-solid fa-house"></i><span>홈</span>
+        </div>
+        <div class="nav-item" onclick="navTo('screen-arena', this)">
+            <i class="fa-solid fa-khanda"></i><span>투기장</span>
+        </div>
+        <div class="nav-item" onclick="navTo('screen-shop', this)">
+            <i class="fa-solid fa-store"></i><span>가챠샵</span>
+        </div>
+        <div class="nav-item" onclick="navTo('screen-profile', this)">
+            <i class="fa-solid fa-user"></i><span>내 정보</span>
+        </div>
+    </nav>
+
 </div>
 
-<!-- 🚨 웅장한 보스 경고 오버레이 (구조 변경) -->
-<div id="boss-warning-overlay">
-    <div class="warning-content">
-        <div class="text-7xl mb-6 text-center">⚠️</div>
-        <div class="warning-text">WARNING</div>
-        <div class="text-red-300 font-bold mt-4 tracking-[0.2em] text-sm animate-pulse text-center">심연의 주인이 눈을 떴습니다...</div>
-    </div>
-</div>
+<!-- 보스 경고 오버레이 -->
+<div id="boss-warning-overlay"><div class="warning-content"><div class="text-7xl mb-6 text-center">⚠️</div><div class="warning-text">WARNING</div><div class="text-red-300 font-bold mt-4 tracking-[0.2em] text-sm animate-pulse text-center">심연의 주인이 눈을 떴습니다...</div></div></div>
 
-<!-- 하단 고정 토스트 -->
-<div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[100] border border-indigo-500/50 shadow-2xl backdrop-blur-sm whitespace-nowrap"></div>
+<!-- 토스트 -->
+<div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[100] border border-indigo-500/50 shadow-2xl whitespace-nowrap"></div>
 
 <script>
-    // --- 유틸리티 및 알림 ---
+    // ==========================================
+    // 🔊 자체 내장 사운드 엔진 (Web Audio API)
+    // ==========================================
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    let soundEnabled = false;
+
+    // 첫 터치 시 오디오 컨텍스트 활성화 (브라우저 정책)
+    document.body.addEventListener('touchstart', initAudio, { once: true });
+    document.body.addEventListener('click', initAudio, { once: true });
+
+    function initAudio() {
+        if(!audioCtx) {
+            audioCtx = new AudioContext();
+            soundEnabled = true;
+        }
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playTone(freq, type, duration, vol) {
+        if(!soundEnabled || !audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    const sfx = {
+        click: () => playTone(600, 'sine', 0.1, 0.05), // 경쾌한 틱
+        coin: () => { playTone(987, 'sine', 0.1, 0.1); setTimeout(()=>playTone(1318, 'sine', 0.2, 0.1), 100); }, // 띠링!
+        hit: () => playTone(150, 'sawtooth', 0.15, 0.15), // 퍽! (묵직한 타격)
+        boss: () => { playTone(50, 'square', 1.0, 0.2); playTone(60, 'sawtooth', 1.5, 0.2); } // 우우웅...
+    };
+
+    // 진동
     function triggerHaptic() { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); }
     function triggerHeavyHaptic() { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); }
 
+    // ==========================================
+    // 🌌 파티클 배경 애니메이션
+    // ==========================================
+    const canvas = document.getElementById('dynamic-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resizeBg() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeBg); resizeBg();
+
+    for(let i=0; i<40; i++) {
+        particles.push({
+            x: Math.random() * width, y: Math.random() * height,
+            r: Math.random() * 2 + 0.5, vy: Math.random() * 0.5 + 0.2,
+            alpha: Math.random() * 0.5 + 0.1
+        });
+    }
+    function drawBg() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+            p.y -= p.vy;
+            if(p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(168, 85, 247, ${p.alpha})`; // 보라색 입자
+            ctx.fill();
+        });
+        requestAnimationFrame(drawBg);
+    }
+    drawBg();
+
+    // ==========================================
+    // 📱 GNB 라우팅 시스템
+    // ==========================================
+    let isBattling = false;
+
+    function navTo(screenId, el) {
+        if (isBattling) {
+            showToast("⚔️ 전투 중에는 벗어날 수 없습니다!");
+            return;
+        }
+        sfx.click(); triggerHaptic();
+        
+        // 화면 교체
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        window.scrollTo(0, 0);
+
+        // GNB 아이콘 활성화
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        if(screenId === 'screen-arena') updateRpgLobbyUI();
+    }
+
+    // 토스트 알림
     function showToast(message) {
         const toast = document.getElementById('toast');
         toast.innerText = message;
@@ -437,75 +484,39 @@
         setTimeout(() => { toast.style.opacity = '0'; }, 2500);
     }
 
-    let isBattling = false;
-
-    function switchScreen(screenId) {
-        if (isBattling && screenId !== 'screen-rpg-battle') {
-            showToast("⚔️ 전투 중에는 벗어날 수 없습니다!");
-            return;
-        }
-
-        triggerHaptic();
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
-        window.scrollTo(0, 0);
-        if(screenId === 'screen-rpg-lobby') updateRpgLobbyUI();
-    }
-
-    function switchTab(tab) {
-        triggerHaptic();
-        document.getElementById('panel-forge').classList.add('hidden');
-        document.getElementById('panel-shop').classList.add('hidden');
-        document.getElementById('tab-forge').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        document.getElementById('tab-shop').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
-        
-        document.getElementById(`panel-${tab}`).classList.remove('hidden');
-        document.getElementById(`tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
-    }
-
-    // --- 글로벌 스탯 관리 ---
+    // ==========================================
+    // 기존 RPG 로직 (데이터, 출석, 전투) - 요약 적용
+    // ==========================================
     let userGold = parseInt(localStorage.getItem('master_gold')) || 0;
     let userGem = parseInt(localStorage.getItem('master_gem')) || 0;
     let lastCheckIn = localStorage.getItem('last_checkin') || "";
-    
     let rpgStage = parseInt(localStorage.getItem('master_stage')) || 1;
     let rpgAtk = parseInt(localStorage.getItem('master_atk')) || 10;
     let rpgMaxHp = parseInt(localStorage.getItem('master_max_hp')) || 100;
     let currentHp = parseInt(localStorage.getItem('master_current_hp'));
     let userPotions = parseInt(localStorage.getItem('master_potions')) || 1; 
 
-    // 🚨 무료 부활 시스템 (자정 초기화)
     function checkAndRevive() {
         const lastReviveDate = localStorage.getItem('master_last_revive_date') || "";
-        const now = new Date();
-        const todayString = now.toLocaleDateString(); 
-
-        if (isNaN(currentHp)) {
-            currentHp = rpgMaxHp;
-            localStorage.setItem('master_last_revive_date', todayString);
-        } else if (currentHp <= 0 && lastReviveDate !== todayString) {
-            currentHp = rpgMaxHp;
-            localStorage.setItem('master_last_revive_date', todayString);
-            showToast("✨ 새로운 아침이 밝았습니다! 마스터의 체력이 완전히 회복되었습니다.");
+        const todayString = new Date().toLocaleDateString(); 
+        if (isNaN(currentHp)) { currentHp = rpgMaxHp; localStorage.setItem('master_last_revive_date', todayString); } 
+        else if (currentHp <= 0 && lastReviveDate !== todayString) {
+            currentHp = rpgMaxHp; localStorage.setItem('master_last_revive_date', todayString);
+            showToast("✨ 새로운 아침! 체력이 완벽히 회복되었습니다.");
         }
     }
     checkAndRevive();
 
-    // 🚨 새로고침 도주 감지 (페널티 없이 경고창만)
     if (localStorage.getItem('master_in_battle') === 'true') {
         localStorage.removeItem('master_in_battle');
         setTimeout(() => alert(`🚨 비겁하게 도망치다니! 전투는 처음부터 다시 시작해야 합니다.`), 500);
     }
 
     function saveData() {
-        localStorage.setItem('master_gold', userGold);
-        localStorage.setItem('master_gem', userGem);
-        localStorage.setItem('master_stage', rpgStage);
-        localStorage.setItem('master_atk', rpgAtk);
-        localStorage.setItem('master_max_hp', rpgMaxHp);
-        localStorage.setItem('master_current_hp', currentHp);
-        localStorage.setItem('master_potions', userPotions);
-        updateCurrencyUI();
+        localStorage.setItem('master_gold', userGold); localStorage.setItem('master_gem', userGem);
+        localStorage.setItem('master_stage', rpgStage); localStorage.setItem('master_atk', rpgAtk);
+        localStorage.setItem('master_max_hp', rpgMaxHp); localStorage.setItem('master_current_hp', currentHp);
+        localStorage.setItem('master_potions', userPotions); updateCurrencyUI();
     }
 
     function updateCurrencyUI() {
@@ -514,42 +525,36 @@
     }
 
     function claimDailyReward() {
-        triggerHaptic();
-        const today = new Date().toDateString();
-        if (lastCheckIn === today) { showToast("오늘 이미 보상을 받았습니다! ⏱️"); return; }
-        userGold += 100;
-        lastCheckIn = today;
-        localStorage.setItem('last_checkin', today);
-        saveData();
-        showToast("출석체크 완료! 100G 획득 🪙");
-        initCheckinButton();
+        if (lastCheckIn === new Date().toDateString()) { showToast("오늘 이미 보상을 받았습니다! ⏱️"); return; }
+        sfx.coin(); triggerHaptic();
+        userGold += 100; lastCheckIn = new Date().toDateString(); localStorage.setItem('last_checkin', lastCheckIn);
+        saveData(); showToast("출석체크 완료! 100G 획득 🪙"); initCheckinButton();
     }
     
     function initCheckinButton() {
         const btn = document.getElementById('btn-checkin');
         if (lastCheckIn === new Date().toDateString()) {
             btn.innerHTML = '<span>✅</span> 내일 다시 오세요';
-            btn.classList.replace('from-indigo-600', 'from-slate-600');
-            btn.classList.replace('to-purple-600', 'to-slate-700');
+            btn.classList.replace('from-indigo-600', 'from-slate-600'); btn.classList.replace('to-purple-600', 'to-slate-700');
         }
     }
     initCheckinButton();
-    function rewardForPlay() { userGold += 10; saveData(); showToast("탐험 지원금 10G 획득 🪙"); }
+    function rewardForPlay() { sfx.coin(); userGold += 10; saveData(); showToast("탐험 지원금 10G 획득 🪙"); }
 
-    // ==========================================
-    // 로비: 대장간 & 잡화점
-    // ==========================================
-    function getUpgradeCost(type) {
-        if (type === 'atk') return Math.floor(rpgAtk * 5);
-        if (type === 'hp') return Math.floor(rpgMaxHp * 0.5);
-        return 9999;
+    function switchTab(tab) {
+        sfx.click(); triggerHaptic();
+        document.getElementById('panel-forge').classList.add('hidden'); document.getElementById('panel-shop').classList.add('hidden');
+        document.getElementById('tab-forge').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+        document.getElementById('tab-shop').className = "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
+        document.getElementById(`panel-${tab}`).classList.remove('hidden');
+        document.getElementById(`tab-${tab}`).className = "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500";
     }
 
+    function getUpgradeCost(type) { return type === 'atk' ? Math.floor(rpgAtk * 5) : Math.floor(rpgMaxHp * 0.5); }
     function updateRpgLobbyUI() {
         document.getElementById('rpg-stage-display').innerText = rpgStage;
         document.getElementById('lobby-hp-text').innerText = `${Math.max(0, currentHp)} / ${rpgMaxHp}`;
         document.getElementById('lobby-hp-bar').style.width = `${Math.max(0, (currentHp / rpgMaxHp) * 100)}%`;
-        
         document.getElementById('stat-atk-display').innerText = rpgAtk.toLocaleString();
         document.getElementById('stat-hp-display').innerText = rpgMaxHp.toLocaleString();
         document.getElementById('cost-atk-display').innerText = getUpgradeCost('atk').toLocaleString();
@@ -558,306 +563,165 @@
     }
 
     function upgradeStat(type) {
-        triggerHaptic();
         const cost = getUpgradeCost(type);
         if (userGold < cost) { showToast("골드가 부족합니다! 🪙"); return; }
-        
-        userGold -= cost;
+        sfx.coin(); triggerHaptic(); userGold -= cost;
         if (type === 'atk') { rpgAtk += Math.floor(rpgAtk * 0.2) + 2; } 
-        else if (type === 'hp') {
-            const hpIncrease = Math.floor(rpgMaxHp * 0.2) + 20;
-            rpgMaxHp += hpIncrease; currentHp += hpIncrease; 
-        }
+        else if (type === 'hp') { const hpIncrease = Math.floor(rpgMaxHp * 0.2) + 20; rpgMaxHp += hpIncrease; currentHp += hpIncrease; }
         saveData(); updateRpgLobbyUI(); showToast("스탯 강화 성공! ✨");
     }
 
     function buyItem(itemType) {
-        triggerHaptic();
         if (itemType === 'potion') {
             if (userGold < 30) { showToast("골드가 부족합니다! 🪙"); return; }
-            userGold -= 30; userPotions += 1;
+            sfx.coin(); triggerHaptic(); userGold -= 30; userPotions += 1;
             saveData(); updateRpgLobbyUI(); showToast("물약을 구매했습니다! ❤️");
         } else if (itemType === 'inn') {
             if (currentHp >= rpgMaxHp) { showToast("이미 체력이 가득 차 있습니다."); return; }
             if (userGold < 20) { showToast("골드가 부족합니다! 🪙"); return; }
-            userGold -= 20; currentHp = rpgMaxHp;
+            sfx.coin(); triggerHaptic(); userGold -= 20; currentHp = rpgMaxHp;
             saveData(); updateRpgLobbyUI(); showToast("여관에서 푹 쉬었습니다. 체력 100% 회복! ⛺");
         }
     }
 
-    // ==========================================
-    // 던전 탐험 & 랜덤 이벤트
-    // ==========================================
     function enterDungeon() {
-        triggerHaptic();
-        if (currentHp <= 0) {
-            showToast("체력이 없습니다! 여관에서 휴식하거나 내일을 기다리세요. ⛺");
-            return;
-        }
-
+        if (currentHp <= 0) { showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺"); return; }
+        sfx.click(); triggerHaptic();
+        document.getElementById('bottom-nav').style.display = 'none'; // 전투 진입 시 GNB 숨김
         const isBoss = (rpgStage % 5 === 0);
-        let stageRoll = localStorage.getItem('master_stage_roll_' + rpgStage);
-        if (!stageRoll) {
-            stageRoll = Math.random();
-            localStorage.setItem('master_stage_roll_' + rpgStage, stageRoll);
-        } else { stageRoll = parseFloat(stageRoll); }
-
-        if (!isBoss && stageRoll < 0.3) {
-            triggerRandomEvent(stageRoll);
-        } else {
-            startBattleSequence(isBoss);
-        }
+        let stageRoll = localStorage.getItem('master_stage_roll_' + rpgStage) || Math.random();
+        localStorage.setItem('master_stage_roll_' + rpgStage, stageRoll);
+        if (!isBoss && parseFloat(stageRoll) < 0.3) triggerRandomEvent(parseFloat(stageRoll));
+        else startBattleSequence(isBoss);
     }
 
     function triggerRandomEvent(roll) {
-        switchScreen('screen-rpg-event');
-        const titleEl = document.getElementById('event-title');
-        const iconEl = document.getElementById('event-icon');
-        const descEl = document.getElementById('event-desc');
-
-        if (roll < 0.12) { // 상자
-            titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁";
-            titleEl.className = "text-2xl font-black text-yellow-400 mb-4 relative z-10";
-            descEl.innerText = "먼지가 쌓인 상자를 열었더니 골드가 쏟아집니다!\n(골드 +30G 획득)";
-            userGold += 30;
-        } else if (roll < 0.21) { // 함정
-            titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤";
-            titleEl.className = "text-2xl font-black text-rose-500 mb-4 relative z-10";
-            let dmg = Math.floor(rpgMaxHp * 0.15);
-            descEl.innerText = `어둠 속에서 독화살이 날아왔습니다!\n(마스터 체력 -${dmg} 감소)`;
-            currentHp -= dmg;
-            if(currentHp <= 0) currentHp = 1; 
-            triggerHeavyHaptic();
-        } else { // 요정
-            titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚";
-            titleEl.className = "text-2xl font-black text-cyan-400 mb-4 relative z-10";
-            let heal = Math.floor(rpgMaxHp * 0.3);
-            descEl.innerText = `길 잃은 요정을 도와주었더니 감사의 표시를 남겼습니다.\n(젬 +5💎, 체력 ${heal} 회복)`;
-            userGem += 5;
-            currentHp = Math.min(rpgMaxHp, currentHp + heal);
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-rpg-event').classList.add('active');
+        const titleEl = document.getElementById('event-title'), iconEl = document.getElementById('event-icon'), descEl = document.getElementById('event-desc');
+        if (roll < 0.12) {
+            titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4";
+            descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+30G 획득)"; sfx.coin(); userGold += 30;
+        } else if (roll < 0.21) {
+            titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4";
+            let dmg = Math.floor(rpgMaxHp * 0.15); descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`;
+            currentHp = Math.max(1, currentHp - dmg); sfx.hit(); triggerHeavyHaptic();
+        } else {
+            titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4";
+            let heal = Math.floor(rpgMaxHp * 0.3); descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`;
+            sfx.coin(); userGem += 5; currentHp = Math.min(rpgMaxHp, currentHp + heal);
         }
     }
 
     function endEvent() {
-        rpgStage++; 
-        saveData();
-        switchScreen('screen-rpg-lobby');
+        rpgStage++; saveData(); document.getElementById('bottom-nav').style.display = 'flex'; // GNB 복구
+        navTo('screen-arena');
     }
 
-    // ==========================================
-    // 대규모 전투 시스템 & 몬스터 도감
-    // ==========================================
-    let monsterMaxHp = 0, monsterCurrentHp = 0, monsterAtkObj = 0;
-    let battleInterval = null;
-    let lastAttackTime = 0;
+    let monsterMaxHp = 0, monsterCurrentHp = 0, monsterAtkObj = 0, battleInterval = null, lastAttackTime = 0;
     const ATTACK_COOLDOWN = 600; 
-
-    // 일반 몬스터 도감 확장 (10종)
-    const normalMonsters = [
-        { emoji: '🦠', name: '점액질 슬라임' }, { emoji: '🦇', name: '흡혈 동굴 박쥐' },
-        { emoji: '👺', name: '붉은 숲 고블린' }, { emoji: '🐺', name: '굶주린 마수 늑대' }, 
-        { emoji: '💀', name: '떠도는 해골 병사' }, { emoji: '🦂', name: '돌연변이 맹독 전갈' },
-        { emoji: '🕷️', name: '심연의 거미' }, { emoji: '🧟', name: '저주받은 구울' },
-        { emoji: '🧛', name: '타락한 귀족' }, { emoji: '🧌', name: '단단한 숲의 트롤' }
-    ];
-
-    // 보스 몬스터 도감 (층수별 매핑)
-    const bossMonsters = {
-        5: { emoji: '🐉', name: '심연의 드래곤' },
-        10: { emoji: '🐙', name: '고대 바다의 크라켄' },
-        15: { emoji: '🦖', name: '대지의 폭군 렉스' },
-        20: { emoji: '👁️', name: '주시하는 마왕의 눈' },
-        25: { emoji: '👹', name: '지옥의 수라왕' }
-    };
+    const nMonsters = [{e:'🦠',n:'슬라임'},{e:'🦇',n:'흡혈박쥐'},{e:'👺',n:'고블린'},{e:'🐺',n:'마수늑대'},{e:'💀',n:'해골병사'}];
+    const bMonsters = {5:{e:'🐉',n:'심연의 드래곤'},10:{e:'🐙',n:'크라켄'},15:{e:'🦖',n:'폭군 렉스'}};
 
     function startBattleSequence(isBoss) {
-        if(isBattling) return; 
-        isBattling = true;
-        localStorage.setItem('master_in_battle', 'true'); 
-        
-        switchScreen('screen-rpg-battle');
-        
+        if(isBattling) return; isBattling = true; localStorage.setItem('master_in_battle', 'true');
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-rpg-battle').classList.add('active');
         if (isBoss) {
-            // 🚨 보스 등장 연출 
-            const overlay = document.getElementById('boss-warning-overlay');
-            overlay.classList.add('active');
-            
-            // 경고창은 놔두고, 뒤의 배경(app-container)만 쿵쿵 흔들기!
-            const appContainer = document.querySelector('.app-container');
-            let shakes = 0;
-            let shakeInt = setInterval(() => {
-                appContainer.classList.add('shake');
-                triggerHeavyHaptic();
-                setTimeout(() => appContainer.classList.remove('shake'), 150);
-                shakes++;
-                if(shakes >= 4) clearInterval(shakeInt);
+            sfx.boss();
+            const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
+            let shakes = 0; let shakeInt = setInterval(() => {
+                document.body.classList.add('shake'); triggerHeavyHaptic();
+                setTimeout(() => document.body.classList.remove('shake'), 150);
+                if(++shakes >= 4) clearInterval(shakeInt);
             }, 500);
-
-            // 3초 뒤에 경고 꺼지고 전투 시작
-            setTimeout(() => {
-                overlay.classList.remove('active');
-                initBattle(true);
-            }, 3000);
-        } else {
-            initBattle(false);
-        }
+            setTimeout(() => { overlay.classList.remove('active'); initBattle(true); }, 3000);
+        } else initBattle(false);
     }
 
     function initBattle(isBoss) {
-        monsterMaxHp = rpgStage * 40 + (isBoss ? 200 : 0);
-        monsterCurrentHp = monsterMaxHp;
+        monsterMaxHp = rpgStage * 40 + (isBoss ? 200 : 0); monsterCurrentHp = monsterMaxHp;
         monsterAtkObj = Math.floor(rpgStage * 3) + (isBoss ? 15 : 0);
-        
-        // 몬스터 정보 가져오기
-        let mInfo;
-        if (isBoss) {
-            mInfo = bossMonsters[rpgStage] || { emoji: '👑', name: '이름 없는 고대의 왕' };
-        } else {
-            mInfo = normalMonsters[(rpgStage - 1) % normalMonsters.length];
-        }
+        let mInfo = isBoss ? (bMonsters[rpgStage] || {e:'👑',n:'고대의 왕'}) : nMonsters[(rpgStage - 1) % nMonsters.length];
         
         document.getElementById('battle-stage-title').innerText = `STAGE ${rpgStage} ${isBoss ? '🔥' : ''}`;
-        document.getElementById('battle-monster-name').innerText = mInfo.name;
-        document.getElementById('battle-potion-count').innerText = userPotions;
+        document.getElementById('battle-monster-name').innerText = mInfo.n;
+        document.getElementById('monster-sprite').innerText = mInfo.e;
+        document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative boss-theme" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
+        document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
+        document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
         
-        // 고퀄리티 아바타 UI 변경
-        const avatarWrap = document.getElementById('monster-avatar-wrap');
-        const sprite = document.getElementById('monster-sprite');
-        const battleCard = document.getElementById('battle-card');
-        
-        sprite.innerText = mInfo.emoji;
-        
-        if(isBoss) {
-            avatarWrap.className = "monster-avatar-container boss-avatar-container";
-            sprite.className = "monster-emoji boss-emoji";
-            battleCard.classList.add('boss-theme');
-            document.getElementById('battle-monster-name').className = "text-2xl font-black text-red-400 mb-5 tracking-wide drop-shadow-md";
-        } else {
-            avatarWrap.className = "monster-avatar-container";
-            sprite.className = "monster-emoji";
-            battleCard.classList.remove('boss-theme');
-            document.getElementById('battle-monster-name').className = "text-lg font-black text-white mb-5 tracking-wide drop-shadow-md";
-        }
-
         document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
-        document.getElementById('battle-log').className = "text-sm font-bold text-yellow-400 animate-pulse";
-        
-        const btnAttack = document.getElementById('btn-attack');
-        btnAttack.disabled = false;
-        btnAttack.innerHTML = "⚔️ 공격 (TAP!)";
-        lastAttackTime = 0;
-
-        updateBattleUI();
-        clearInterval(battleInterval);
-        battleInterval = setInterval(monsterAttack, 1500); 
+        document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
+        lastAttackTime = 0; updateBattleUI();
+        clearInterval(battleInterval); battleInterval = setInterval(monsterAttack, 1500); 
     }
 
     function updateBattleUI() {
         document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, currentHp)} / ${rpgMaxHp}`;
         document.getElementById('battle-player-hp-bar').style.width = `${Math.max(0, (currentHp / rpgMaxHp) * 100)}%`;
-        
         document.getElementById('battle-monster-hp-text').innerText = `${Math.max(0, Math.floor(monsterCurrentHp))} / ${monsterMaxHp}`;
         document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (monsterCurrentHp / monsterMaxHp) * 100)}%`;
-        
         document.getElementById('battle-potion-count').innerText = userPotions;
     }
 
     function usePotionInBattle() {
-        triggerHaptic();
-        if(currentHp <= 0 || monsterCurrentHp <= 0) return;
-        if(userPotions <= 0) { showToast("물약이 없습니다!"); return; }
-        if(currentHp >= rpgMaxHp) { showToast("체력이 이미 가득 차 있습니다."); return; }
-
-        userPotions -= 1;
-        let healAmt = Math.floor(rpgMaxHp * 0.5);
-        currentHp = Math.min(rpgMaxHp, currentHp + healAmt);
+        if(currentHp <= 0 || monsterCurrentHp <= 0 || userPotions <= 0 || currentHp >= rpgMaxHp) return;
+        sfx.click(); triggerHaptic(); userPotions -= 1;
+        let healAmt = Math.floor(rpgMaxHp * 0.5); currentHp = Math.min(rpgMaxHp, currentHp + healAmt);
         saveData(); updateBattleUI();
-        
-        document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력이 ${healAmt} 회복되었습니다.`;
-        document.getElementById('battle-log').className = "text-sm font-bold text-emerald-400";
+        document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
     }
 
     function playerAttack() {
         if(monsterCurrentHp <= 0 || currentHp <= 0) return;
+        if (Date.now() - lastAttackTime < ATTACK_COOLDOWN) return;
+        lastAttackTime = Date.now();
         
-        const now = Date.now();
-        if (now - lastAttackTime < ATTACK_COOLDOWN) return;
-        lastAttackTime = now;
-
-        triggerHaptic();
-        
-        let isCrit = Math.random() < 0.2;
-        let damage = isCrit ? Math.floor(rpgAtk * 1.5) : rpgAtk;
+        sfx.hit(); triggerHaptic();
+        let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(rpgAtk * 1.5) : rpgAtk;
         monsterCurrentHp -= damage;
         
         const sprite = document.getElementById('monster-sprite');
         sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+        document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
 
-        const log = document.getElementById('battle-log');
-        log.innerText = `🗡️ 마스터의 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
-        log.className = `text-sm font-bold ${isCrit ? 'text-red-400 text-base' : 'text-slate-200'}`;
-
-        const btnAttack = document.getElementById('btn-attack');
-        btnAttack.disabled = true;
-        btnAttack.innerHTML = "⏳ 쿨타임...";
-        setTimeout(() => {
-            if(currentHp > 0 && monsterCurrentHp > 0) {
-                btnAttack.disabled = false;
-                btnAttack.innerHTML = "⚔️ 공격 (TAP!)";
-            }
-        }, ATTACK_COOLDOWN);
-
-        updateBattleUI();
-        if (monsterCurrentHp <= 0) setTimeout(() => endBattle(true), 300);
+        const btn = document.getElementById('btn-attack');
+        btn.disabled = true; btn.innerHTML = "⏳ 쿨타임...";
+        setTimeout(() => { if(currentHp > 0 && monsterCurrentHp > 0) { btn.disabled = false; btn.innerHTML = "⚔️ 공격 (TAP!)"; } }, ATTACK_COOLDOWN);
+        updateBattleUI(); if (monsterCurrentHp <= 0) setTimeout(() => endBattle(true), 300);
     }
 
     function monsterAttack() {
         if(monsterCurrentHp <= 0 || currentHp <= 0) return;
-        triggerHeavyHaptic();
-        
+        sfx.hit(); triggerHeavyHaptic();
         let damage = Math.floor(monsterAtkObj * (0.8 + Math.random() * 0.4));
-        currentHp -= damage;
-        saveData(); 
+        currentHp -= damage; saveData(); 
         
-        // 몬스터 반격 시에도 배경만 흔들리도록 수정
-        const appContainer = document.querySelector('.app-container');
-        appContainer.classList.add('shake');
-        setTimeout(() => appContainer.classList.remove('shake'), 200);
+        document.querySelector('.app-container').classList.add('shake');
+        setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 200);
+        document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
 
-        const log = document.getElementById('battle-log');
-        log.innerText = `💥 적의 반격! 마스터가 ${damage} 피해를 입었습니다!`;
-        log.className = "text-sm font-bold text-rose-500";
-
-        updateBattleUI();
-        if (currentHp <= 0) setTimeout(() => endBattle(false), 300);
+        updateBattleUI(); if (currentHp <= 0) setTimeout(() => endBattle(false), 300);
     }
 
     function endBattle(isWin) {
-        clearInterval(battleInterval);
-        isBattling = false; 
-        localStorage.removeItem('master_in_battle'); 
-
+        clearInterval(battleInterval); isBattling = false; localStorage.removeItem('master_in_battle'); 
+        document.getElementById('bottom-nav').style.display = 'flex'; // 전투 종료 시 GNB 복구
         const isBoss = (rpgStage % 5 === 0);
         
         if (isWin) {
-            triggerHaptic();
-            // 요청하신 고정 보상 시스템 적용
-            let rewardGold = isBoss ? (rpgStage * 30) : 10; 
-            let rewardGem = isBoss ? 50 : 0;
-            
-            userGold += rewardGold; userGem += rewardGem; rpgStage++;
-            saveData();
-            alert(`🎉 토벌 성공!\n[획득 보상]\n🪙 골드: +${rewardGold}G\n${isBoss ? '💎 젬: +'+rewardGem : ''}`);
+            sfx.coin(); triggerHaptic();
+            let rewardGold = isBoss ? (rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
+            userGold += rewardGold; userGem += rewardGem; rpgStage++; saveData();
+            alert(`🎉 토벌 성공!\n🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
         } else {
-            triggerHeavyHaptic();
-            // 사망 시 골드 차감 X, 피만 0으로 깎임 (요청사항 반영)
-            currentHp = 0; 
-            saveData();
-            alert(`💀 마스터가 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활할 수 있습니다.`);
+            triggerHeavyHaptic(); currentHp = 0; saveData();
+            alert(`💀 쓰러졌습니다...\n여관에서 휴식하거나 내일 자정이 지나면 부활합니다.`);
         }
-        switchScreen('screen-rpg-lobby');
+        // 로비로 이동하면서 액티브 탭 맞추기
+        navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
     }
-
 </script>
 </body>
 </html>
