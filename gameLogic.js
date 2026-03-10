@@ -337,6 +337,7 @@ const GameSystem = {
 
             GameState.gold -= cost;
             GameState.gem -= gemCost;
+            GameSystem.Quest.updateProgress('daily', 'd2');
 
             // 재료 제거
             UIManager.selectedItems.forEach(id => {
@@ -527,11 +528,46 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-
+// [추가] 394행 Ranking 모듈 끝난 후 (Battle 모듈 시작 전)
+    Quest: {
+        updateProgress(type, id, amount = 1) {
+            if (type === 'daily') {
+                const q = GameData.quests.daily.find(item => item.id === id);
+                if (!q) return;
+                const current = this.getDailyProgress(id);
+                if (current >= q.goal) return; // 이미 달성함
+                
+                GameState.questData.daily.progress[id] = current + amount;
+                if (GameState.questData.daily.progress[id] >= q.goal) {
+                    this.giveReward(q.rewardGem, `일일 퀘스트 [${q.name}] 달성!`);
+                }
+            } else {
+                const q = GameData.quests.achievements.find(item => item.id === id);
+                if (!q || GameState.questData.achievements.completed.includes(id)) return;
+                
+                const current = GameState.questData.achievements.progress[id] || 0;
+                GameState.questData.achievements.progress[id] = current + amount;
+                
+                if (GameState.questData.achievements.progress[id] >= q.goal) {
+                    GameState.questData.achievements.completed.push(id);
+                    this.giveReward(q.rewardGem, `업적 달성! [${q.name}]`);
+                }
+            }
+            GameState.save();
+        },
+        getDailyProgress(id) { return GameState.questData.daily.progress[id] || 0; },
+        giveReward(gem, msg) {
+            GameState.gem += gem;
+            UIManager.showToast(`💎 ${msg} (+${gem})`);
+            UIManager.updateCurrencyUI();
+            AudioEngine.sfx.coin();
+        }
+    },
     Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
         enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
+            GameSystem.Quest.updateProgress('daily', 'd1');
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
             const isBoss = (GameState.rpgStage % 5 === 0);
@@ -662,6 +698,7 @@ const GameSystem = {
         }
     } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
