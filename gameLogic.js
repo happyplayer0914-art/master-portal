@@ -416,6 +416,11 @@ const GameSystem = {
                 return UIManager.showToast("이 테스트 보상은 오늘 이미 받았습니다! ⏱️");
             }
             GameState.gold += 10; 
+            // [여기에 삽입] 일일 퀘스트 '탐험의 즐거움(d3)' 달성
+            GameSystem.Quest.updateProgress('daily', 'd3');
+
+            GameState.save(); 
+            // ... (이하 기존 코드 동일)
             GameState.lastPlayRewards[testUrl] = today; 
             GameState.save(); 
             UIManager.updateCurrencyUI(); 
@@ -684,6 +689,16 @@ const GameSystem = {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
                 GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
+                // [여기에 삽입] 
+                // 1. 업적: '몬스터 학살자(a3)' 카운트 증가
+                GameSystem.Quest.updateProgress('achievements', 'a3'); 
+                
+                // 2. 업적: '초보 정복자(a1)' 5층 도달 체크
+                if (GameState.rpgStage >= 5) {
+                    GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
+                }
+
+                GameState.save();
                 UIManager.updateCurrencyUI(); 
                 GameSystem.Ranking.updateRankingSilently();
                 UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
@@ -698,6 +713,7 @@ const GameSystem = {
         }
     } // 🔴 FIX 2: 누락되었던 닫는 중괄호(}) 추가 완료!
 };
+
 
 
 
