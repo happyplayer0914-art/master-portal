@@ -34,8 +34,8 @@ const GameState = {
         this.deviceId = storedId;
         try { this.synthPity = JSON.parse(localStorage.getItem('master_synth_pity') || '{"rare":0, "epic":0}'); } catch(e) { this.synthPity = { rare: 0, epic: 0 }; }
 
-        this.gold = parseInt(localStorage.getItem('master_gold') || "10000");
-        this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
+        this.gold = parseInt(localStorage.getItem('master_gold') || "0");
+        this.gem = parseInt(localStorage.getItem('master_gem') || "0");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
         try { this.lastPlayRewards = JSON.parse(localStorage.getItem('master_play_rewards_map') || "{}"); } catch(e) { this.lastPlayRewards = {}; }
 
@@ -137,5 +137,6 @@ const GameState = {
         };
     }
 };
+
 
 
