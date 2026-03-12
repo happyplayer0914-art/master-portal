@@ -332,23 +332,89 @@ const GameSystem = {
         closeGacha() { AudioEngine.sfx.click(); document.getElementById('gacha-overlay').classList.remove('active'); document.getElementById('bottom-nav').style.display = 'flex'; }
     },
     
-  Ranking: {
+ Ranking: {
+        // 💡 이제 수동 등록 모달창 안 씀! (누르면 친절한 안내문만 나옴)
         openRegisterModal() { 
-            // 🛡️ [신규 방어막] 닉네임 안 정했으면 랭킹 등록 거부!
-            if (GameState.nickname === "위대한 길드장") {
-                alert("먼저 '내 정보' 탭에서 닉네임을 영구 설정해주세요! (✏️ 버튼 클릭)");
-                return;
-            }
-            
-            // 🚀 닉네임이 고정되어 있으니까, 귀찮은 모달창 없이 쾌속 등록!
-            if(confirm(`영구 닉네임 [${GameState.nickname}]으로 명예의 전당에 기록하시겠습니까?`)) {
-                // 숨겨진 닉네임 input 칸에 몰래 내 닉네임을 넣고 기존 등록 함수 실행! (꼼수)
-                const inputEl = document.getElementById('nickname-input');
-                if(inputEl) inputEl.value = GameState.nickname;
-                
-                this.submitRanking(); 
+            UIManager.showToast("마스터의 최고 기록은 10초마다 명예의 전당에 자동 등록됩니다! 🚀");
+        },
+        closeModal() { 
+            const modal = document.getElementById('nickname-modal');
+            if(modal) modal.classList.remove('active');
+        },
+        
+        // 🥷 [핵심] 10초마다 내 최고 기록을 서버에 조용히 갱신!
+        async updateRankingSilently() {
+            if (GameState.nickname === "위대한 길드장" || !window.db) return;
+            const uid = localStorage.getItem('master_uid');
+            if (!uid) return;
+
+            try { 
+                // 내 고유 ID(uid)를 이름표로 써서 계속 '덮어쓰기' (도배 방지!)
+                await window.setDoc(window.doc(window.db, "rankings", uid), { 
+                    uid: uid,
+                    nickname: GameState.nickname, 
+                    stage: GameState.rpgStage, 
+                    skin: GameState.equippedSkin || 'none', 
+                    prestige: GameState.prestigeCount || 0, 
+                    timestamp: window.serverTimestamp()
+                }, { merge: true }); // 기존 기록 덮어쓰기
+            } catch(e) { 
+                console.error("오토 랭킹 갱신 실패", e); 
             }
         },
+
+        // 🏆 랭킹 1위~10위 불러오기 (자동 정렬)
+        async loadRanking() {
+            const list = document.getElementById('ranking-list'); 
+            if(!list) return;
+            list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
+            
+            if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
+            
+            try {
+                // 랭킹 DB에서 다 가져오기
+                const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
+                const snap = await window.getDocs(q);
+                let all = []; 
+                snap.forEach(d => all.push(d.data()));
+                
+                // 환생 횟수 -> 도달 층수 -> 도달 시간 순으로 완벽하게 줄 세우기!
+                all.sort((a,b) => { 
+                    const prestigeA = a.prestige || 0;
+                    const prestigeB = b.prestige || 0;
+                    if (prestigeA !== prestigeB) return prestigeB - prestigeA; 
+                    if (b.stage !== a.stage) return b.stage - a.stage; 
+                    
+                    const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
+                    const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
+                    return timeA - timeB; 
+                });
+                
+                // 💡 [핵심] 상위 10명만 딱 잘라서 보여주기!
+                const top10 = all.slice(0, 10);
+                
+                if(top10.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
+                list.innerHTML = '';
+                
+                top10.forEach((d, i) => {
+                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
+                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+                    
+                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; 
+                    let sId = d.skin;
+                    if(sId === 'r3') sId = 's_r1'; if(sId === 'e3') sId = 's_e1'; if(sId === 'l3') sId = 's_l1';
+                    if(sId && sId !== 'none' && GameData && GameData.items && GameData.items[sId]) {
+                        skinClass = `skin-${GameData.items[sId].rarity}`;
+                    }
+                    
+                    const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
+                    let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
+                    
+                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
+                });
+            } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
+        }
+    },
         
         closeModal() { document.getElementById('nickname-modal').classList.remove('active'); },
         async submitRanking() {
@@ -507,7 +573,10 @@ const GameSystem = {
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     this.autoSaveTimer = setInterval(() => {
                         this.silentSaveToCloud(user.uid);
-                    }, 10000); // 10000ms = 10초
+                        // 💡 [신규 추가] 세이브할 때 내 랭킹도 10초마다 자동 갱신!!!
+                        GameSystem.Ranking.updateRankingSilently();
+                    }, 10000);
+                   
                 } else {
                     // 로그아웃 상태면 자동 저장 타이머 끄기
                     localStorage.removeItem('master_uid');
@@ -1106,6 +1175,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
