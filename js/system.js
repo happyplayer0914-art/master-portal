@@ -522,7 +522,7 @@ const GameSystem = {
             input.value = ''; // 글 날렸으니 입력창 비워주기
             this.lastChatTime = now; // 시간 기록
 
-            // ④ 파이어베이스로 발사! 🚀
+           // ④ 파이어베이스로 발사! 🚀
             try {
                 await window.addDoc(window.collection(window.db, "chats"), {
                     uid: uid,
@@ -530,6 +530,25 @@ const GameSystem = {
                     text: text,
                     timestamp: window.serverTimestamp()
                 });
+
+                // ⑤ 🧹 [신규] 스마트 자동 청소기 작동!
+                // 10번 채팅 칠 때 1번꼴(10% 확률)로 가동해서 서버 부하를 완벽 차단!
+                if (Math.random() < 0.1) {
+                    // 시간 순서대로(asc) 정렬해서, 가장 오래된 썩은(?) 채팅 5개만 골라옴!
+                    const oldQuery = window.query(
+                        window.collection(window.db, "chats"),
+                        window.orderBy("timestamp", "asc"),
+                        window.limit(5)
+                    );
+                    const snap = await window.getDocs(oldQuery);
+                    
+                    // 골라온 5개를 자비 없이 삭제! 💥
+                    snap.forEach(d => {
+                        window.deleteDoc(d.ref);
+                    });
+                    console.log("🧹 낡은 채팅 청소 완료!");
+                }
+
             } catch(e) {
                 console.error(e);
                 UIManager.showToast("채팅 전송에 실패했습니다 😢");
@@ -1214,6 +1233,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
