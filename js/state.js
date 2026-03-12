@@ -119,12 +119,16 @@ const GameState = {
             }
         });
         
+       // 💡 [환생 업데이트] 환생 1번당 마스터의 기본 스탯이 100%씩 영구 증가합니다!
+        let prestigeMultiplier = 1.0 + (this.prestigeCount || 0);
+
         return { 
-            atk: Math.floor(this.rpgAtk * finalAtkMult), 
-            hp: Math.floor(this.rpgMaxHp * finalHpMult),
+            atk: Math.floor(this.rpgAtk * finalAtkMult * prestigeMultiplier), 
+            hp: Math.floor(this.rpgMaxHp * finalHpMult * prestigeMultiplier),
             critRate: finalCritRate,
             critDmg: finalCritDmg,
             vamp: finalVamp
         };
     }
 };
+
