@@ -95,9 +95,12 @@ const GameSystem = {
             const listArea = document.getElementById('synth-material-list');
             if (listArea) {
                 listArea.innerHTML = "";
+                
+                // 💡 [핵심 수정] 장착 중인 3개의 장비는 목록에서 아예 숨기기!
                 const eligibleItems = GameState.inventory.filter(id => {
                     const item = GameData.items[id];
-                    return item && item.type === 'gear' && item.rarity === this.currentTier && id !== GameState.equippedGear;
+                    const isEquipped = (GameState.equippedWeapon === id || GameState.equippedArmor === id || GameState.equippedAccessory === id);
+                    return item && item.type === 'gear' && item.rarity === this.currentTier && !isEquipped;
                 });
 
                 [...new Set(eligibleItems)].forEach(id => {
@@ -743,6 +746,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
