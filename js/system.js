@@ -533,7 +533,7 @@ const GameSystem = {
             
             const isBoss = (GameState.rpgStage % 5 === 0);
             
-            if (!isBoss && Math.random() < 1.0) { 
+            if (!isBoss && Math.random() < 0.2) { 
                 this.triggerRandomEvent(); 
             } else { 
                 if (isBoss) {
@@ -946,6 +946,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
