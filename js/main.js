@@ -2,8 +2,11 @@
 // 🚀 앱 부팅 (초기화)
 // =========================================================================
 window.onload = function() {
+    // 💡 [신규 추가] 자동 로그인 및 오토 세이브 감시자 출동!
+    GameSystem.Auth.init();
+    
     try {
         GameState.load();
         UIManager.init();
     } catch(e) { console.error("초기화 오류:", e); }
-};
+};;
