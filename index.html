@@ -373,7 +373,7 @@
             </div>
             
             
-            <div class="flex justify-center gap-4 mt-2 mb-2">
+           <div class="flex justify-center gap-4 mt-2 mb-4">
                 <div id="lobby-slot-weapon" class="w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all">
                     <span class="text-[10px] text-slate-500 font-bold">무기</span>
                 </div>
@@ -383,11 +383,9 @@
                 <div id="lobby-slot-accessory" class="w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all">
                     <span class="text-[10px] text-slate-500 font-bold">장신구</span>
                 </div>
-                <button onclick="GameSystem.Battle.doPrestige()" class="w-full py-3 mb-4 bg-gradient-to-r from-purple-800 to-indigo-700 hover:from-purple-700 hover:to-indigo-600 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-purple-500/50 transition-all active:scale-95 flex items-center justify-center gap-2">
-            <span class="text-xl">✨</span> 차원의 여신에게 환생 요청하기
-        </button>
-            </div>
-        </div>
+            </div> <button onclick="GameSystem.Battle.doPrestige()" class="w-full py-3 mb-4 bg-gradient-to-r from-purple-800 to-indigo-700 hover:from-purple-700 hover:to-indigo-600 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-purple-500/50 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <span class="text-xl">✨</span> 차원의 여신에게 환생 요청하기
+            </button>
 
         <div class="grid grid-cols-2 gap-2 mb-4">
             <button onclick="UIManager.switchTab('forge')" id="tab-forge" class="py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500">대장간 (기본강화)</button>
@@ -739,6 +737,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
