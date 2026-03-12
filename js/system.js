@@ -346,7 +346,7 @@ const GameSystem = {
         },
         async updateRankingSilently() {
             if(GameState.nickname === "위대한 길드장" || !window.db) return;
-            try { await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: GameState.nickname, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', timestamp: window.serverTimestamp() }); } catch(e) { console.error("Silent rank update failed", e); }
+            try { await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: GameState.nickname, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', prestige: GameState.prestigeCount || 0, timestamp: window.serverTimestamp() }); } catch(e) { console.error("Silent rank update failed", e); }
         },
         async loadRanking() {
             const list = document.getElementById('ranking-list'); 
@@ -384,9 +384,13 @@ const GameSystem = {
                     if(sId && sId !== 'none' && GameData.items[sId]) {
                         skinClass = `skin-${GameData.items[sId].rarity}`;
                     }
-                    
+                   //환생자 우대
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
+                    
+                    // 💡 [핵심 추가] 환생 횟수가 1 이상이면 번쩍이는 환생 텍스트 달아주기!
+                    let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
+                    
+                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
@@ -600,10 +604,16 @@ const GameSystem = {
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
             }
         },
+       //몬스터 스탯
         initBattle(isBoss) {
-            this.monsterMaxHp = GameState.rpgStage * 40 + (isBoss ? 200 : 0); 
+            // 💡 [환생 업데이트] 마스터가 환생한 만큼 몬스터도 배수로 강력해집니다!
+            let prestigeMult = 1.0 + (GameState.prestigeCount || 0);
+
+            // 기존 몬스터 스탯 공식에 * prestigeMult 를 곱해줍니다.
+            this.monsterMaxHp = Math.floor((GameState.rpgStage * 40 + (isBoss ? 200 : 0)) * prestigeMult); 
             this.monsterCurrentHp = this.monsterMaxHp;
-            this.monsterAtkObj = Math.floor(GameState.rpgStage * 3) + (isBoss ? 15 : 0);
+            this.monsterAtkObj = Math.floor((Math.floor(GameState.rpgStage * 3) + (isBoss ? 15 : 0)) * prestigeMult);
+            
             let mInfo = isBoss ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) : GameData.monsters.normal[(GameState.rpgStage - 1) % GameData.monsters.normal.length];
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
@@ -734,6 +744,26 @@ const GameSystem = {
                 }, 500);
             }
         }
+        // 💡 [신규] 차원의 여신 환생 시스템
+        doPrestige() {
+            if (GameState.rpgStage < 50) {
+                return UIManager.showToast("마왕(50층)을 토벌해야 차원의 여신을 만날 수 있습니다!");
+            }
+
+            // 미소녀 여신의 등장 연출 (알림창)
+            const isConfirm = confirm("✨ [차원의 여신]\n\n\"훌륭해요 용사님! 드디어 마왕을 무찌르셨군요.\n하지만 악의 근원은 아직 사라지지 않았답니다.\n제가 시간을 되돌려 드릴 테니, 더 강해진 모습으로 세상을 구해주세요!\"\n\n(환생하시겠습니까? 1층으로 돌아가며 모든 스탯이 영구적으로 대폭 상승합니다!)");
+
+            if(isConfirm) {
+                GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
+                GameState.rpgStage = 1; // 1층으로 회귀!
+                GameState.currentHp = GameState.getTotalStats().hp; // 뻥튀기된 피로 만피 회복
+                GameState.save();
+
+                UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 마왕의 군대도 더욱 강해졌습니다!`);
+                UIManager.updateRpgLobbyUI();
+                GameSystem.Ranking.updateRankingSilently(); // 랭킹 서버에 내 환생 기록 저장
+            }
+        },
     } // <-- Battle 닫는 괄호
 }; // <-- GameSystem 닫는 괄호 (이게 빠져서 에러가 났던 거야!)
 
@@ -816,6 +846,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
