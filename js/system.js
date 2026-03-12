@@ -743,7 +743,7 @@ const GameSystem = {
                     document.getElementById('revive-modal').classList.add('active');
                 }, 500);
             }
-        }
+        },
         // 💡 [신규] 차원의 여신 환생 시스템
         doPrestige() {
             if (GameState.rpgStage < 50) {
@@ -846,6 +846,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
