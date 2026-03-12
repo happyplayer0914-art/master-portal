@@ -921,10 +921,18 @@ window.onRewardEarned = function() {
             GameState.isBattling = false;
             localStorage.setItem('master_in_battle', 'false');
 
-            // 화면 다 끄고 로비만 켜기
+            // 화면 다 끄기
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const lobbyScreen = document.getElementById('screen-rpg-lobby');
-            if (lobbyScreen) lobbyScreen.classList.add('active');
+            
+            // 💡 [핵심 수정] 마스터의 HTML에 맞는 진짜 투기장(RPG) 화면 ID 켜기! 
+            const lobbyScreen = document.getElementById('screen-rpg'); // rpg-lobby 대신 rpg로 수정!
+            
+            if (lobbyScreen) {
+                lobbyScreen.classList.add('active');
+            } else {
+                // 만약 screen-rpg도 없다면 1번 탭(홈 화면)으로 강제 비상탈출!
+                document.getElementById('screen-home').classList.add('active'); 
+            }
             
             // 사라졌던 하단 메뉴바 다시 살려주기
             const bottomNav = document.getElementById('bottom-nav');
@@ -938,6 +946,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
