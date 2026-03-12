@@ -4,7 +4,7 @@
 const GameState = {
     nickname: "위대한 길드장",
     deviceId: "", 
-    gold: 10000, gem: 10000, 
+    gold: 0, gem: 0, 
     synthPity: { rare: 0, epic: 0 }, 
     lastCheckIn: "",
     lastPlayRewards: {}, 
