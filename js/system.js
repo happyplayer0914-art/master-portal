@@ -356,7 +356,7 @@ const GameSystem = {
                 }, { merge: true }); 
             } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
         },
-        async loadRanking() {
+      async loadRanking() {
             const list = document.getElementById('ranking-list'); 
             if(!list) return;
             list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
@@ -369,6 +369,7 @@ const GameSystem = {
                 let all = []; 
                 snap.forEach(d => all.push(d.data()));
                 
+                // 1순위: 환생, 2순위: 층수, 3순위: 도달 시간으로 정렬
                 all.sort((a,b) => { 
                     const prestigeA = a.prestige || 0;
                     const prestigeB = b.prestige || 0;
@@ -380,12 +381,23 @@ const GameSystem = {
                     return timeA - timeB; 
                 });
                 
-                const top10 = all.slice(0, 10);
+                // 💡 [핵심 복구] 같은 닉네임이나 계정이면 '최고 기록' 1개만 남기고 다 거르기!
+                let uniqueTop10 = [];
+                let seen = new Set();
                 
-                if(top10.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
+                for (let d of all) {
+                    const id = d.uid || d.nickname; // 고유 ID가 없으면 닉네임으로라도 구별
+                    if (!seen.has(id)) {
+                        seen.add(id);
+                        uniqueTop10.push(d);
+                    }
+                    if (uniqueTop10.length >= 10) break; // 딱 10명 모이면 멈춤!
+                }
+                
+                if(uniqueTop10.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
                 list.innerHTML = '';
                 
-                top10.forEach((d, i) => {
+                uniqueTop10.forEach((d, i) => {
                     let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
@@ -1061,5 +1073,6 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
