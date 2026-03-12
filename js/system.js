@@ -255,10 +255,30 @@ const GameSystem = {
         toggleEquip(id) {
             const item = GameData.items[id]; 
             if(!item) return;
-            if(item.type === 'gear') GameState.equippedGear = GameState.equippedGear === id ? null : id;
-            else GameState.equippedSkin = GameState.equippedSkin === id ? null : id;
-            GameState.save(); UIManager.renderInventory(); UIManager.applyAvatarSkin(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.equip(); UIManager.triggerHaptic();
-            UIManager.showToast(GameState.equippedGear === id || GameState.equippedSkin === id ? `[${item.name}] 장착 완료!` : `장착 해제됨`);
+            
+            // 💡 [핵심] 장비 부위(subType)에 맞춰서 각각의 칸에 장착/해제하기!
+            if (item.type === 'gear') {
+                if (item.subType === 'weapon') {
+                    GameState.equippedWeapon = GameState.equippedWeapon === id ? null : id;
+                } else if (item.subType === 'armor') {
+                    GameState.equippedArmor = GameState.equippedArmor === id ? null : id;
+                } else if (item.subType === 'accessory') {
+                    GameState.equippedAccessory = GameState.equippedAccessory === id ? null : id;
+                }
+            } 
+            else { 
+                // 스킨은 그대로!
+                GameState.equippedSkin = GameState.equippedSkin === id ? null : id;
+            }
+            
+            GameState.save(); 
+            UIManager.renderInventory(); 
+            UIManager.applyAvatarSkin(); 
+            UIManager.updateRpgLobbyUI(); 
+            AudioEngine.sfx.equip(); 
+            UIManager.triggerHaptic();
+            
+            UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
     
@@ -537,7 +557,7 @@ const GameSystem = {
             let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
             GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
         },
-      playerAttack() {
+     playerAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
             const ATTACK_COOLDOWN = 600;
             const now = Date.now();
@@ -545,14 +565,31 @@ const GameSystem = {
             this.lastAttackTime = now;
             AudioEngine.sfx.hit(); UIManager.triggerHaptic();
             
-            let myAtk = GameState.getTotalStats().atk; 
-            let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
+            // 💡 [핵심 1] 여기서 새로운 갓-스탯들을 불러옵니다!
+            const stats = GameState.getTotalStats(); 
+            let myAtk = stats.atk; 
+            let critChance = stats.critRate / 100;   // 예: 25% -> 0.25
+            let critMultiplier = stats.critDmg / 100; // 예: 200% -> 2.0
+            
+            // 💡 [핵심 2] 크리티컬 터졌는지 주사위 굴리기!
+            let isCrit = Math.random() < critChance; 
+            let damage = isCrit ? Math.floor(myAtk * critMultiplier) : myAtk;
             this.monsterCurrentHp -= damage;
             
+            // 💡 [핵심 3] 흡혈(피흡) 로직! 데미지에 비례해서 피가 찹니다.
+            if (stats.vamp > 0 && GameState.currentHp < stats.hp) {
+                let healAmount = Math.floor(damage * (stats.vamp / 100));
+                if (healAmount > 0) {
+                    GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmount);
+                    // 마스터 머리 위에 초록색 피흡 숫자 띄우기! (타격 이펙트 재활용)
+                    this.showDamageText('battle-player-hp-text', `+${healAmount}`, 'text-emerald-400 font-black text-xl drop-shadow-md');
+                }
+            }
+
             const sprite = document.getElementById('monster-sprite');
             sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
             
-            // 💡 [핵심 연동] 몬스터 아바타 위에 노란색(또는 보라색) 데미지 띄우기!
+            // 몬스터 머리 위에 데미지 텍스트 띄우기
             this.showDamageText('monster-avatar-wrap', isCrit ? `CRIT! ${damage}` : damage, isCrit ? 'damage-crit' : 'damage-monster');
 
             document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
@@ -703,6 +740,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
