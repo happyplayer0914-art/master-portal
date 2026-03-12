@@ -606,6 +606,16 @@
                 <p id="auth-email" class="text-xs text-slate-300 bg-slate-800 px-3 py-1 rounded-full border border-slate-600 mb-3">
                     user@gmail.com
                 </p>
+                
+                <div class="flex gap-2 w-full mb-3 px-2">
+                    <button onclick="GameSystem.Auth.saveToCloud(this)" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg shadow-md transition-all active:scale-95 border border-indigo-400">
+                        ☁️ 서버에 저장
+                    </button>
+                    <button onclick="GameSystem.Auth.loadFromCloud(this)" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-lg shadow-md transition-all active:scale-95 border border-emerald-400">
+                        📥 서버에서 불러오기
+                    </button>
+                </div>
+                
                 <button onclick="GameSystem.Auth.logout()" class="text-xs text-slate-400 underline hover:text-slate-200">
                     로그아웃 및 기기 데이터 분리
                 </button>
@@ -818,6 +828,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
