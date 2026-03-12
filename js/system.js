@@ -509,7 +509,7 @@ const GameSystem = {
             const isBoss = (GameState.rpgStage % 5 === 0);
             let stageRoll = localStorage.getItem('master_stage_roll_' + GameState.rpgStage) || Math.random(); 
             localStorage.setItem('master_stage_roll_' + GameState.rpgStage, stageRoll);
-            if (!isBoss && parseFloat(stageRoll) < 0.3) { this.triggerRandomEvent(parseFloat(stageRoll)); } else { this.startBattleSequence(isBoss); }
+            if (!isBoss && parseFloat(stageRoll) < 0.3) { this.triggerRandomEvent(parseFloat(stageRoll)); } else { this.initBattle(isBoss); }
         },
       triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
@@ -846,6 +846,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
