@@ -39,12 +39,15 @@ const GameSystem = {
             this.updateUI();
         },
 
-        selectItem(id) {
+      selectItem(id) {
             const item = GameData.items[id];
             if (!item || item.type !== 'gear' || item.rarity !== this.currentTier) {
                 return UIManager.showToast("동일 등급의 장비만 연성 가능합니다.");
             }
-            if (GameState.equippedGear === id) {
+            
+            // 💡 [핵심 수정] 3분할 장비 중 하나라도 장착하고 있다면 막기!
+            const isEquipped = (GameState.equippedWeapon === id || GameState.equippedArmor === id || GameState.equippedAccessory === id);
+            if (isEquipped) {
                 return UIManager.showToast("장착 중인 장비는 안전을 위해 연성할 수 없습니다.");
             }
 
@@ -740,6 +743,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
