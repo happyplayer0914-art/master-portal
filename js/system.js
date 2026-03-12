@@ -797,28 +797,34 @@ const GameSystem = {
             }
         },
         // 💡 [신규] 차원의 여신 환생 시스템
-      doPrestige() {
-            // 💡 [핵심 수정] 50층을 클리어해서 '51층'이 되었을 때만 환생 버튼 작동!
+     doPrestige() {
             if (GameState.rpgStage <= 50) {
                 return UIManager.showToast("50층의 마왕을 토벌해야 차원의 여신을 만날 수 있습니다!");
             }
+            
+            // 💡 [수정] 못생긴 confirm 알림창 대신 예쁜 여신님 모달 띄우기!
+            const modal = document.getElementById('goddess-modal');
+            if (modal) modal.classList.remove('hidden');
+            AudioEngine.sfx.coin(); // 띠링~ 신비로운 효과음 대용
+        },
 
-            const isConfirm = confirm("✨ [차원의 여신]\n\n\"훌륭해요 용사님! 드디어 마왕을 무찌르셨군요.\n하지만 악의 근원은 아직 사라지지 않았답니다.\n제가 시간을 되돌려 드릴 테니, 더 강해진 모습으로 세상을 구해주세요!\"\n\n(환생하시겠습니까? 1층으로 돌아가며 모든 스탯이 영구적으로 대폭 상승합니다!)");
+        // 💡 [신규] 모달창에서 '환생 수락' 버튼을 눌렀을 때 실행되는 진짜 환생 로직!
+        confirmPrestige() {
+            document.getElementById('goddess-modal').classList.add('hidden'); // 모달 닫기
 
-            if(isConfirm) {
-                GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
-                GameState.rpgStage = 1; 
-                // 💡 [여기에 추가!] 환생하면 골드로 올렸던 기본 스탯을 초기화해서 밸런스 맞추기!
-                GameState.rpgAtk = 10;
-                GameState.rpgMaxHp = 100;
-                
-                GameState.currentHp = GameState.getTotalStats().hp; 
-                GameState.save();
+            GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
+            GameState.rpgStage = 1; 
+            
+            // 골드로 올린 스탯 초기화
+            GameState.rpgAtk = 10;
+            GameState.rpgMaxHp = 100;
 
-                UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 마왕의 군대도 더욱 강해졌습니다!`);
-                UIManager.updateRpgLobbyUI();
-                GameSystem.Ranking.updateRankingSilently(); 
-            }
+            GameState.currentHp = GameState.getTotalStats().hp; 
+            GameState.save();
+
+            UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 마왕의 군대도 더욱 강해졌습니다!`);
+            UIManager.updateRpgLobbyUI();
+            GameSystem.Ranking.updateRankingSilently(); 
         },
     } // <-- Battle 닫는 괄호
 }; // <-- GameSystem 닫는 괄호 (이게 빠져서 에러가 났던 거야!)
@@ -902,6 +908,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
