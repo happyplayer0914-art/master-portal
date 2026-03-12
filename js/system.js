@@ -790,6 +790,10 @@ const GameSystem = {
             if(isConfirm) {
                 GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
                 GameState.rpgStage = 1; 
+                // 💡 [여기에 추가!] 환생하면 골드로 올렸던 기본 스탯을 초기화해서 밸런스 맞추기!
+                GameState.rpgAtk = 10;
+                GameState.rpgMaxHp = 100;
+                
                 GameState.currentHp = GameState.getTotalStats().hp; 
                 GameState.save();
 
@@ -880,6 +884,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
