@@ -7,6 +7,9 @@ window.onload = function() {
     
     try {
         GameState.load();
+        // 💡 [신규 추가] 게임 켜질 때 닉네임 고정 버튼 숨길지 말지 결정!
+        GameSystem.applyNicknameUI();
         UIManager.init();
     } catch(e) { console.error("초기화 오류:", e); }
 };;
+
