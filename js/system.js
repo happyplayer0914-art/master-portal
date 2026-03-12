@@ -332,8 +332,21 @@ const GameSystem = {
         closeGacha() { AudioEngine.sfx.click(); document.getElementById('gacha-overlay').classList.remove('active'); document.getElementById('bottom-nav').style.display = 'flex'; }
     },
     
-    Ranking: {
-        openRegisterModal() { document.getElementById('modal-current-stage').innerText = GameState.rpgStage; document.getElementById('nickname-modal').classList.add('active'); },
+  Ranking: {
+        openRegisterModal() { 
+            // 💡 [수정] 층수 적는 칸이 HTML에 있는지 먼저 확인하고, 있으면 적기!
+            const stageEl = document.getElementById('modal-current-stage');
+            if (stageEl) {
+                stageLabel.innerText = GameState.rpgStage; 
+            }
+            
+            // 그리고 무조건 닉네임 입력 모달창 띄우기!
+            const modal = document.getElementById('nickname-modal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        },
+        
         closeModal() { document.getElementById('nickname-modal').classList.remove('active'); },
         async submitRanking() {
             const nick = document.getElementById('nickname-input').value.trim(); if(!nick) return alert("닉네임을 입력해주세요!");
@@ -889,6 +902,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
