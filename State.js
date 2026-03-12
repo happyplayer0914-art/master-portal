@@ -1,24 +1,22 @@
 // =========================================================================
-// 3. GAME STATE (데이터 관리)
+// 2. GAME STATE (데이터 관리)
 // =========================================================================
 const GameState = {
     nickname: "위대한 길드장",
     deviceId: "", 
     gold: 10000, gem: 10000, 
-    synthPity: { rare: 0, epic: 0 }, // 🔥 신규: 등급별 실패 마일리지 스택
+    synthPity: { rare: 0, epic: 0 }, 
     lastCheckIn: "",
-    lastPlayRewards: {}, // 🔥 여러 테스트의 보상 날짜를 저장하기 위해 객체(Object)로 변경
+    lastPlayRewards: {}, 
     lastIdleCheck: Date.now(),
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     potions: 1, inventory: [], equippedGear: null, equippedSkin: null,
-    // [추가] 14행 isBattling: false 아래
     isBattling: false,
     questData: {
-        daily: { date: "", progress: {} }, // { d1: 0, d2: 0, d3: 0 }
-        achievements: { progress: {}, completed: [] } // { a3: 12 }, [ 'a1' ]
+        daily: { date: "", progress: {} }, 
+        achievements: { progress: {}, completed: [] } 
     },
     
-
     load() {
         this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
         
@@ -28,7 +26,7 @@ const GameState = {
             localStorage.setItem('master_device_id', storedId);
         }
         this.deviceId = storedId;
-        try { // 🔥 신규 로드 로직
+        try { 
             this.synthPity = JSON.parse(localStorage.getItem('master_synth_pity') || '{"rare":0, "epic":0}');
         } catch(e) { this.synthPity = { rare: 0, epic: 0 }; }
 
@@ -36,7 +34,6 @@ const GameState = {
         this.gem = parseInt(localStorage.getItem('master_gem') || "10000");
         this.lastCheckIn = localStorage.getItem('last_checkin') || "";
         
-        // 🔥 객체 데이터 로드
         try {
             this.lastPlayRewards = JSON.parse(localStorage.getItem('master_play_rewards_map') || "{}");
         } catch(e) {
@@ -70,11 +67,8 @@ const GameState = {
         localStorage.setItem('master_gold', this.gold);
         localStorage.setItem('master_gem', this.gem);
         localStorage.setItem('last_checkin', this.lastCheckIn);
-        localStorage.setItem('master_synth_pity', JSON.stringify(this.synthPity)); // 🔥 신규 저장 로직
-        
-        // 🔥 객체 데이터 저장
+        localStorage.setItem('master_synth_pity', JSON.stringify(this.synthPity)); 
         localStorage.setItem('master_play_rewards_map', JSON.stringify(this.lastPlayRewards));
-        
         localStorage.setItem('master_last_idle', this.lastIdleCheck);
         localStorage.setItem('master_stage', this.rpgStage);
         localStorage.setItem('master_atk', this.rpgAtk);
@@ -99,6 +93,7 @@ const GameState = {
             this.save();
         }
     },
+    
     checkAndRevive() {
         const today = new Date().toLocaleDateString();
         if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
@@ -115,5 +110,3 @@ const GameState = {
         return { atk: Math.floor(this.rpgAtk * mult), hp: Math.floor(this.rpgMaxHp * mult) };
     }
 };
-
-
