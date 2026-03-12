@@ -588,10 +588,9 @@ const GameSystem = {
                     timestamp: window.serverTimestamp()
                 });
                 
-                // 공지도 20개 넘게 쌓이면 낡은 거 삭제 (서버 최적화)
-                const oldQuery = window.query(window.collection(window.db, "notices"), window.orderBy("timestamp", "asc"), window.limit(2));
-                const snap = await window.getDocs(oldQuery);
-                snap.forEach(d => window.deleteDoc(d.ref));
+// 🚨 청소기 압수!! (너무 열심히 일해서 당분간 정지시킴 ㅋㅋㅋ)
+                // 나중에 공지가 진짜 100개쯤 쌓이면 그때 다시 살려줄게!
+                
             } catch(e) {
                 console.error("시스템 공지 전송 실패:", e);
             }
@@ -1275,6 +1274,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
