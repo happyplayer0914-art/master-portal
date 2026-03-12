@@ -417,7 +417,7 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-   // 🔒 [신규] 구글 로그인 시스템 (최신 모듈러 방식)
+// 🔒 [신규] 구글 로그인 시스템 (최신 모듈러 방식)
     Auth: {
         loginWithGoogle() {
             // window에 달아둔 구글 로그인 제공자 불러오기
@@ -456,21 +456,7 @@ const GameSystem = {
                 document.getElementById('auth-user-info').classList.add('hidden');
             });
         }
-    },
-
-        // 로그아웃
-        logout() {
-            if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
-
-            firebase.auth().signOut().then(() => {
-                UIManager.showToast("안전하게 로그아웃 되었습니다.");
-                
-                // UI 원상복구
-                document.getElementById('btn-google-login').classList.remove('hidden');
-                document.getElementById('auth-user-info').classList.add('hidden');
-            });
-        }
-    },
+    }, // 🚨 [핵심] 여기에 쉼표 꼭 있어야 해! (Quest: 로 넘어가기 전)
 
     Quest: {
         updateProgress(type, id, amount = 1) {
@@ -1000,6 +986,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
