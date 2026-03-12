@@ -540,10 +540,10 @@ const GameSystem = {
             } else if (eventType === 3) {
                 titleEl.innerText = "미믹의 기습!"; iconEl.innerText = "👅"; titleEl.className = "text-2xl font-black text-red-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.2); 
-                descEl.innerText = `보물상자인 줄 알았지만 몬스터였습니다!\n상처를 입었지만 골드를 뱉어냈습니다.\n(-${dmg} HP, +100G)`;
+                descEl.innerText = `보물상자인 줄 알았지만 몬스터였습니다!\n상처를 입었지만 골드를 뱉어냈습니다.\n(-${dmg} HP, +50G)`;
                 // 💡 [수정] 피 1 보장 안전벨트 제거!
                 GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
-                GameState.gold += 100;
+                GameState.gold += 50;
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 4) {
@@ -816,6 +816,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
