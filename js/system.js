@@ -532,7 +532,7 @@ const GameSystem = {
             });
         }
     }
-}; // 🚨 GameSystem 닫는 괄호! (절대 지우지 마!)
+},
 
     Quest: {
         updateProgress(type, id, amount = 1) {
@@ -1062,6 +1062,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
