@@ -512,11 +512,7 @@ const GameSystem = {
         },
         enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
-            
-            // 💡 [핵심 추가] 50층 마왕을 잡았으면(51층이 되면) 강제로 입장 막기!
-            if (GameState.rpgStage > 50) {
-                return UIManager.showToast("마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
-            }
+            if (GameState.rpgStage > 50) return UIManager.showToast("마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
             
             GameSystem.Quest.updateProgress('daily', 'd1');
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
@@ -528,10 +524,19 @@ const GameSystem = {
                 this.triggerRandomEvent(); 
             } else { 
                 if (isBoss) {
+                    // 💡 [사운드 복구] 보스 등장 사운드 재생! 
+                    // (AudioEngine에 설정해둔 보스 사운드 이름으로 맞춰서 실행)
+                    if (AudioEngine.sfx.warning) AudioEngine.sfx.warning();
+                    else if (AudioEngine.sfx.boss) AudioEngine.sfx.boss();
+
                     const warning = document.getElementById('boss-warning-overlay');
                     if (warning) warning.classList.add('active');
                     UIManager.triggerHeavyHaptic();
-                    setTimeout(() => { if (warning) warning.classList.remove('active'); this.initBattle(true); }, 1500);
+                    
+                    setTimeout(() => { 
+                        if (warning) warning.classList.remove('active'); 
+                        this.initBattle(true); 
+                    }, 1500);
                 } else {
                     this.initBattle(false); 
                 }
@@ -884,6 +889,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
