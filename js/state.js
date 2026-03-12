@@ -47,6 +47,9 @@ const GameState = {
         this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
         
+        // 💡 [핵심 추가] 브라우저야, 내 환생 횟수를 기억해!!
+        this.prestigeCount = parseInt(localStorage.getItem('master_prestige') || "0");
+        
         // 💡 3개의 장비 슬롯 로드
         const w = localStorage.getItem('master_equipped_weapon'); this.equippedWeapon = (w === "null" || !w) ? null : w;
         const a = localStorage.getItem('master_equipped_armor'); this.equippedArmor = (a === "null" || !a) ? null : a;
@@ -76,6 +79,9 @@ const GameState = {
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
         localStorage.setItem('master_quest_data', JSON.stringify(this.questData));
+        
+        // 💡 [핵심 추가] 환생할 때마다 로컬 저장소에 내 횟수 꾹꾹 눌러 담기!
+        localStorage.setItem('master_prestige', this.prestigeCount || 0);
         
         // 💡 3개의 장비 슬롯 세이브
         if(this.equippedWeapon) localStorage.setItem('master_equipped_weapon', this.equippedWeapon); else localStorage.removeItem('master_equipped_weapon');
@@ -131,4 +137,5 @@ const GameState = {
         };
     }
 };
+
 
