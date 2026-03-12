@@ -333,7 +333,6 @@ const GameSystem = {
     },
     
  Ranking: {
-        // 💡 이제 수동 등록 모달창 안 씀! (누르면 친절한 안내문만 나옴)
         openRegisterModal() { 
             UIManager.showToast("마스터의 최고 기록은 10초마다 명예의 전당에 자동 등록됩니다! 🚀");
         },
@@ -341,15 +340,12 @@ const GameSystem = {
             const modal = document.getElementById('nickname-modal');
             if(modal) modal.classList.remove('active');
         },
-        
-        // 🥷 [핵심] 10초마다 내 최고 기록을 서버에 조용히 갱신!
         async updateRankingSilently() {
             if (GameState.nickname === "위대한 길드장" || !window.db) return;
             const uid = localStorage.getItem('master_uid');
             if (!uid) return;
 
             try { 
-                // 내 고유 ID(uid)를 이름표로 써서 계속 '덮어쓰기' (도배 방지!)
                 await window.setDoc(window.doc(window.db, "rankings", uid), { 
                     uid: uid,
                     nickname: GameState.nickname, 
@@ -357,13 +353,9 @@ const GameSystem = {
                     skin: GameState.equippedSkin || 'none', 
                     prestige: GameState.prestigeCount || 0, 
                     timestamp: window.serverTimestamp()
-                }, { merge: true }); // 기존 기록 덮어쓰기
-            } catch(e) { 
-                console.error("오토 랭킹 갱신 실패", e); 
-            }
+                }, { merge: true }); 
+            } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
         },
-
-        // 🏆 랭킹 1위~10위 불러오기 (자동 정렬)
         async loadRanking() {
             const list = document.getElementById('ranking-list'); 
             if(!list) return;
@@ -372,13 +364,11 @@ const GameSystem = {
             if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
             
             try {
-                // 랭킹 DB에서 다 가져오기
                 const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
                 const snap = await window.getDocs(q);
                 let all = []; 
                 snap.forEach(d => all.push(d.data()));
                 
-                // 환생 횟수 -> 도달 층수 -> 도달 시간 순으로 완벽하게 줄 세우기!
                 all.sort((a,b) => { 
                     const prestigeA = a.prestige || 0;
                     const prestigeB = b.prestige || 0;
@@ -390,7 +380,6 @@ const GameSystem = {
                     return timeA - timeB; 
                 });
                 
-                // 💡 [핵심] 상위 10명만 딱 잘라서 보여주기!
                 const top10 = all.slice(0, 10);
                 
                 if(top10.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
@@ -414,80 +403,9 @@ const GameSystem = {
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
-    },
-        
-        closeModal() { document.getElementById('nickname-modal').classList.remove('active'); },
-        async submitRanking() {
-            const nick = document.getElementById('nickname-input').value.trim(); if(!nick) return alert("닉네임을 입력해주세요!");
-            GameState.nickname = nick; GameState.save(); document.getElementById('profile-nickname-display').innerText = nick;
-            const btn = document.getElementById('btn-submit-ranking'); btn.disabled = true; btn.innerHTML = '<div class="loader" style="width:16px;height:16px;"></div> 등록 중...';
-            try {
-                // 💡 [수정] 수동으로 랭킹 등록할 때도 환생 횟수(prestige)가 제대로 저장되게 추가!
-                await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: nick, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', prestige: GameState.prestigeCount || 0, timestamp: window.serverTimestamp() });
-                UIManager.showToast("명예의 전당에 기록되었습니다! 🏆"); this.closeModal(); this.loadRanking();
-            } catch(e) { console.error(e); UIManager.showToast("서버 통신에 실패했습니다."); } finally { btn.disabled = false; btn.innerHTML = '등록'; }
-        },
-        async updateRankingSilently() {
-            if(GameState.nickname === "위대한 길드장" || !window.db) return;
-            try { await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: GameState.nickname, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', prestige: GameState.prestigeCount || 0, timestamp: window.serverTimestamp() }); } catch(e) { console.error("Silent rank update failed", e); }
-        },
-        async loadRanking() {
-            const list = document.getElementById('ranking-list'); 
-            list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
-            if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
-            try {
-                const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
-                const snap = await window.getDocs(q);
-                let all = []; snap.forEach(d => all.push(d.data()));
-                
-                // 💡 [핵심 수정] 랭킹 줄 세우기 (1순위: 환생, 2순위: 층수, 3순위: 달성 시간)
-                all.sort((a,b) => { 
-                    const prestigeA = a.prestige || 0;
-                    const prestigeB = b.prestige || 0;
-                    
-                    if (prestigeA !== prestigeB) return prestigeB - prestigeA; // 1. 환생 횟수가 다르면 환생 높은 사람이 무조건 위!
-                    if (b.stage !== a.stage) return b.stage - a.stage;         // 2. 환생 횟수가 같으면 층수가 높은 사람이 위!
-                    
-                    const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
-                    const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
-                    return timeA - timeB;                                      // 3. 다 똑같으면 먼저 도달한 사람이 위!
-                });
-                
-                let unique = []; let seen = new Set();
-                all.forEach(d => { 
-                    const id = d.deviceId || d.nickname; 
-                    if(!seen.has(id) && unique.length < 10) { seen.add(id); unique.push(d); } 
-                });
-                
-                if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
-                list.innerHTML = '';
-                
-                unique.forEach((d, i) => {
-                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
-                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
-                    
-                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; 
-                    let sId = d.skin;
-                    if(sId === 'r3') sId = 's_r1'; 
-                    if(sId === 'e3') sId = 's_e1'; 
-                    if(sId === 'l3') sId = 's_l1';
-                    
-                    if(sId && sId !== 'none' && GameData.items[sId]) {
-                        skinClass = `skin-${GameData.items[sId].rarity}`;
-                    }
-                    
-                    const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    
-                    // 환생 뱃지 달아주기
-                    let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
-                    
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
-                });
-            } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
-        }
-    },
+    }, // 🚨 [랭킹 끝]
 
-        // 🔒 [신규 완벽판] 닉네임 영구 고정 & 중복 방지 시스템
+    // 🔒 [닉네임 영구 고정 & 중복 방지 시스템]
     async setFixedNickname() {
         if (GameState.nickname !== "위대한 길드장") {
             return UIManager.showToast("닉네임은 한 번 정하면 절대 바꿀 수 없습니다! 🔒");
@@ -504,7 +422,6 @@ const GameSystem = {
 
         const finalNick = newNick.trim();
 
-        // 🔍 [핵심] 클라우드 DB에 중복 닉네임이 있는지 검사!
         UIManager.showToast("닉네임 중복을 확인하는 중... 🔍");
         
         try {
@@ -512,23 +429,15 @@ const GameSystem = {
             const nickSnap = await window.getDoc(nickRef);
 
             if (nickSnap.exists()) {
-                // 이미 누가 선점함!
                 return alert(`'${finalNick}'(은)는 이미 다른 마스터가 사용 중인 닉네임입니다. 😭 다른 이름을 지어주세요!`);
             }
 
-            // 아무도 안 쓰는 닉네임이라면 최종 확정!
             if (confirm(`[${finalNick}] - 이 닉네임으로 확정하시겠습니까?`)) {
-                // 1. 파이어베이스 'nicknames' 구역에 내 닉네임 찜하기! (다른 사람 못 쓰게)
                 await window.setDoc(nickRef, { uid: uid, createdAt: window.serverTimestamp() });
-
-                // 2. 내 정보에 저장하고 화면 바꾸기
                 GameState.nickname = finalNick;
                 GameState.save();
                 this.applyNicknameUI();
-                
-                // 3. 내 데이터 클라우드에 자동 백업!
                 this.Auth.silentSaveToCloud(uid);
-
                 UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
                 UIManager.updateProfileUI(); 
             }
@@ -538,78 +447,62 @@ const GameSystem = {
         }
     },
 
-    // 💡 게임 켤 때 닉네임 적용하고 버튼 숨겨주는 함수
     applyNicknameUI() {
         const display = document.getElementById('profile-nickname-display');
         const btn = document.getElementById('btn-edit-nickname');
         
         if(display) display.innerText = GameState.nickname;
         
-        // 닉네임이 초기값이 아니면(설정 완료했으면) 버튼 가려버리기!
         if (GameState.nickname !== "위대한 길드장" && btn) {
             btn.style.display = 'none';
         }
     },
-// 🔒 [오토 세이브/로드] 구글 로그인 + 닌자 백업 시스템
+
+    // 🔒 [오토 세이브/로드] 구글 로그인 + 닌자 백업 시스템
     Auth: {
-        // 🚀 [신규] 게임 켤 때마다 로그인 상태 확인하고 자동 백업해주는 감시자!
         init() {
             window.auth.onAuthStateChanged((user) => {
                 if (user) {
-                    // 1. 파이어베이스가 "이 사람 아까 로그인했던 사람이야!" 라고 알려줌
                     localStorage.setItem('master_uid', user.uid);
-                    
-                    // 2. UI를 조용히 '로그인 완료' 상태로 바꿈
                     const loginBtn = document.getElementById('btn-google-login');
                     const userInfo = document.getElementById('auth-user-info');
                     if(loginBtn) loginBtn.classList.add('hidden');
                     if(userInfo) userInfo.classList.remove('hidden');
                     document.getElementById('auth-email').innerText = user.email;
 
-                    // 3. 접속 시 딱 한 번! 클라우드에서 최신 데이터를 자동으로 불러옴
                     this.silentLoadFromCloud(user.uid);
 
-                    // 4. [오토 세이브] 10초마다 유저 몰래 클라우드에 쓱싹 저장함 (꼼수 완벽 차단!)
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     this.autoSaveTimer = setInterval(() => {
                         this.silentSaveToCloud(user.uid);
-                        // 💡 [신규 추가] 세이브할 때 내 랭킹도 10초마다 자동 갱신!!!
+                        // 💡 세이브할 때 내 랭킹도 10초마다 자동 갱신!
                         GameSystem.Ranking.updateRankingSilently();
-                    }, 10000);
-                   
+                    }, 10000); 
                 } else {
-                    // 로그아웃 상태면 자동 저장 타이머 끄기
                     localStorage.removeItem('master_uid');
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                 }
             });
         },
-
         loginWithGoogle() {
             const provider = new window.GoogleAuthProvider();
             UIManager.showToast("구글 로그인을 요청합니다...");
-
             window.signInWithPopup(window.auth, provider)
                 .then((result) => {
                     UIManager.showToast(`환영합니다, ${result.user.displayName}님! ✨`);
-                    // 로그인 성공하면 onAuthStateChanged 가 알아서 뒷정리(init) 다 해줌!
                 }).catch((error) => {
                     console.error("로그인 에러:", error);
                     UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
                 });
         },
-
         logout() {
             if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
-
             window.signOut(window.auth).then(() => {
                 UIManager.showToast("안전하게 로그아웃 되었습니다.");
                 document.getElementById('btn-google-login').classList.remove('hidden');
                 document.getElementById('auth-user-info').classList.add('hidden');
             });
         },
-
-        // 🥷 알림 없이 조용히 클라우드에 저장하는 닌자 함수
         silentSaveToCloud(uid) {
             const allMyData = {};
             for (let i = 0; i < localStorage.length; i++) {
@@ -619,33 +512,27 @@ const GameSystem = {
                 }
             }
             if(Object.keys(allMyData).length === 0) return;
-
             window.setDoc(window.doc(window.db, "users", uid), {
                 saveData: allMyData,
                 lastSaved: window.serverTimestamp()
             }).catch(e => console.log("자동 저장 중...", e));
         },
-
-        // 🥷 게임 켤 때 클라우드에서 최신 정보를 딱 한 번만 덮어씌우는 함수
         silentLoadFromCloud(uid) {
-            // 이번 접속에서 이미 불러왔으면(무한 새로고침 방지) 패스!
             if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
-
             window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
                 if (docSnap.exists() && docSnap.data().saveData) {
                     const data = docSnap.data().saveData;
                     for (const key in data) {
                         localStorage.setItem(key, data[key]);
                     }
-                    sessionStorage.setItem('cloud_loaded_once', 'true'); // "나 방금 불러왔음!" 도장 찍기
+                    sessionStorage.setItem('cloud_loaded_once', 'true'); 
                     console.log("☁️ 클라우드 동기화 완료!");
-                    
-                    // 데이터 덮어쓰고 화면에 반영하기 위해 쿨하게 1회 새로고침!
                     location.reload(); 
                 }
             });
         }
-    },
+    }
+}; // 🚨 GameSystem 닫는 괄호! (절대 지우지 마!)
 
     Quest: {
         updateProgress(type, id, amount = 1) {
@@ -1175,6 +1062,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
