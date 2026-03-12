@@ -417,32 +417,32 @@ const GameSystem = {
         }
     }, // 🚨 [랭킹 끝]
 // 💬 [신규] 실시간 주점 채팅 시스템!
-    Chat: {
-        lastChatTime: 0, // 도배 방지용 타이머
+  Chat: {
+        lastChatTime: 0,
         unsubscribe: null,
+        initialLoadDone: false, // 💡 [신규] 처음 30개 불러올 때 가짜 알림 울리는 거 방지!
 
-        // 1. 서버에 귀를 대고 실시간으로 채팅을 듣는 함수!
         init() {
             if (!window.db) return;
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
 
-            // 파이어베이스에서 최신 채팅 30개만 가져오기 (시간 역순)
             const q = window.query(
                 window.collection(window.db, "chats"), 
                 window.orderBy("timestamp", "desc"), 
                 window.limit(30)
             );
 
-            // 💡 [핵심] onSnapshot = 누군가 채팅을 치면 즉시 화면을 새로고침해 줌!
             this.unsubscribe = window.onSnapshot(q, (snapshot) => {
                 let messages = [];
                 snapshot.forEach((doc) => {
                     messages.push(doc.data());
                 });
-                // 최신순으로 가져왔으니, 화면에 뿌릴 땐 다시 시간순(예전 글이 위로)으로 뒤집기!
                 messages.reverse();
+                
+                // 화면 그리기
                 this.renderMessages(messages);
+
                 // 💡 [핵심] 알림 로직 변경! 처음 켤 땐 조용히 넘어가고, 그 이후 새 글 올라올 때만 점등!
                 if (this.initialLoadDone) {
                     const tavernScreen = document.getElementById('screen-tavern');
@@ -458,7 +458,6 @@ const GameSystem = {
             });
         },
 
-        // 2. 채팅 데이터를 화면(HTML)에 예쁘게 그려주는 함수!
         renderMessages(messages) {
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
@@ -467,10 +466,8 @@ const GameSystem = {
             
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
-                // 시간 예쁘게 포맷팅 (예: 오전 10:30)
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
                 
-                // 🔹 내가 쓴 채팅은 오른쪽 파란색 버블
                 if (isMe) {
                     chatList.innerHTML += `
                         <div class="flex justify-end mb-2">
@@ -482,7 +479,6 @@ const GameSystem = {
                             </div>
                         </div>`;
                 } 
-                // 🔸 남이 쓴 채팅은 왼쪽 회색 버블 + 아바타
                 else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
@@ -500,13 +496,8 @@ const GameSystem = {
 
             // 채팅이 올라오면 스크롤을 맨 아래로 쫙 내려주기!
             chatList.scrollTop = chatList.scrollHeight;
-
-            // 💡 [알림 기능] 내가 주점 화면이 아닐 때 채팅이 오면 🍺버튼에 빨간 점 켜기!
-            const tavernScreen = document.getElementById('screen-tavern');
-            const notiDot = document.getElementById('chat-noti-dot');
-            if (tavernScreen && !tavernScreen.classList.contains('active') && notiDot) {
-                notiDot.classList.remove('hidden');
-            }
+            
+            // 🚨 아까 여기에 있던 알림 켜는 로직은 위쪽(init)으로 이사 갔음!
         },
 
         // 3. 내가 채팅을 쳤을 때 서버로 날리는 함수!
@@ -1245,6 +1236,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
