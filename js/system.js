@@ -439,6 +439,26 @@ const GameSystem = {
     
     Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
+        // 💡 [추가] 데미지 텍스트를 화면에 그려주는 함수!
+        showDamageText(targetId, text, typeClass) {
+            const target = document.getElementById(targetId);
+            if(!target) return;
+
+            const textEl = document.createElement('div');
+            textEl.innerText = text;
+            textEl.className = `damage-text ${typeClass}`;
+
+            // 숫자가 맨날 똑같은 데서 안 뜨고, 랜덤하게 살짝씩 흩뿌려지게!
+            const randomX = (Math.random() - 0.5) * 60;
+            const randomY = (Math.random() - 0.5) * 40;
+            textEl.style.left = `calc(50% + ${randomX}px)`;
+            textEl.style.top = `calc(50% + ${randomY}px)`;
+
+            target.appendChild(textEl);
+
+            // 0.7초 뒤에 태그 자동 삭제 (쓰레기 쌓이는 거 방지)
+            setTimeout(() => { textEl.remove(); }, 700);
+        },
         enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
             GameSystem.Quest.updateProgress('daily', 'd1');
@@ -517,33 +537,47 @@ const GameSystem = {
             let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
             GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
         },
-        playerAttack() {
+      playerAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
             const ATTACK_COOLDOWN = 600;
             const now = Date.now();
             if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
             this.lastAttackTime = now;
             AudioEngine.sfx.hit(); UIManager.triggerHaptic();
+            
             let myAtk = GameState.getTotalStats().atk; 
             let isCrit = Math.random() < 0.2; let damage = isCrit ? Math.floor(myAtk * 1.5) : myAtk;
             this.monsterCurrentHp -= damage;
+            
             const sprite = document.getElementById('monster-sprite');
             sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+            
+            // 💡 [핵심 연동] 몬스터 아바타 위에 노란색(또는 보라색) 데미지 띄우기!
+            this.showDamageText('monster-avatar-wrap', isCrit ? `CRIT! ${damage}` : damage, isCrit ? 'damage-crit' : 'damage-monster');
+
             document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
+            
             const btn = document.getElementById('btn-attack');
             btn.disabled = true; btn.classList.add('opacity-50');
             let timeLeft = ATTACK_COOLDOWN;
             const cooldownTimer = setInterval(() => { timeLeft -= 100; if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { btn.disabled = false; btn.classList.remove('opacity-50'); btn.innerHTML = "⚔️ 공격 (TAP!)"; } } else { btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; } }, 100);
+            
             this.updateBattleUI(); 
             if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
         },
-       monsterAttack() {
+        
+        monsterAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
             AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             GameState.currentHp -= damage; GameState.save(); 
+            
             const battleCard = document.getElementById('battle-card');
             if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
+            
+            // 💡 [핵심 연동] 마스터(전투 창 전체) 위에 빨간색 데미지 띄우기!
+            this.showDamageText('battle-card', `-${damage}`, 'damage-player');
+
             document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
             this.updateBattleUI(); 
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
@@ -669,6 +703,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
