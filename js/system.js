@@ -503,29 +503,27 @@ const GameSystem = {
         },
         enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
+            
+            // 💡 [핵심 추가] 50층 마왕을 잡았으면(51층이 되면) 강제로 입장 막기!
+            if (GameState.rpgStage > 50) {
+                return UIManager.showToast("마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
+            }
+            
             GameSystem.Quest.updateProgress('daily', 'd1');
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
             
             const isBoss = (GameState.rpgStage % 5 === 0);
             
-            // 일반 몬스터 & 50% 확률로 랜덤 이벤트 발생!
-            if (!isBoss && Math.random() < 0.3) { 
+            if (!isBoss && Math.random() < 0.5) { 
                 this.triggerRandomEvent(); 
             } else { 
-                // 💡 [연출 복구] 보스전이면 화면 시뻘겋게 띄우고 들어가기!
                 if (isBoss) {
                     const warning = document.getElementById('boss-warning-overlay');
                     if (warning) warning.classList.add('active');
-                    UIManager.triggerHeavyHaptic(); // 징~ 징~ 진동!
-                    
-                    // 1.5초 뒤에 경고창 끄고 보스 전투 시작!
-                    setTimeout(() => {
-                        if (warning) warning.classList.remove('active');
-                        this.initBattle(true);
-                    }, 1500);
+                    UIManager.triggerHeavyHaptic();
+                    setTimeout(() => { if (warning) warning.classList.remove('active'); this.initBattle(true); }, 1500);
                 } else {
-                    // 일반 몬스터는 딜레이 없이 바로 전투 시작!
                     this.initBattle(false); 
                 }
             }
@@ -625,20 +623,21 @@ const GameSystem = {
         },
        //몬스터 스탯
        //몬스터 스탯
-        initBattle(isBoss) {
-            // 💡 [핵심 추가] 전투 화면으로 전환하고 전투 상태 켜기!
+     initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-rpg-battle').classList.add('active');
             GameState.isBattling = true;
             localStorage.setItem('master_in_battle', 'true');
 
-            // 💡 [환생 업데이트] 마스터가 환생한 만큼 몬스터도 배수로 강력해집니다!
-            let prestigeMult = 1.0 + (GameState.prestigeCount || 0);
+            // 💡 [핵심 수정] 환생 횟수에 따라 베이스 층수를 50씩 더해줌! (1환생 1층 = 51층 스펙)
+            let prestigeCount = GameState.prestigeCount || 0;
+            let prestigeMult = 1.0 + prestigeCount;
+            let effStage = GameState.rpgStage + (prestigeCount * 50);
 
-            // 기존 몬스터 스탯 공식에 * prestigeMult 를 곱해줍니다.
-            this.monsterMaxHp = Math.floor((GameState.rpgStage * 40 + (isBoss ? 200 : 0)) * prestigeMult); 
+            // 뻥튀기된 effStage를 기준으로 몬스터 스탯 재계산!
+            this.monsterMaxHp = Math.floor((effStage * 40 + (isBoss ? 200 : 0)) * prestigeMult); 
             this.monsterCurrentHp = this.monsterMaxHp;
-            this.monsterAtkObj = Math.floor((Math.floor(GameState.rpgStage * 3) + (isBoss ? 15 : 0)) * prestigeMult);
+            this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
             
             let mInfo = isBoss ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) : GameData.monsters.normal[(GameState.rpgStage - 1) % GameData.monsters.normal.length];
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
@@ -771,23 +770,23 @@ const GameSystem = {
             }
         },
         // 💡 [신규] 차원의 여신 환생 시스템
-        doPrestige() {
-            if (GameState.rpgStage < 50) {
-                return UIManager.showToast("마왕(50층)을 토벌해야 차원의 여신을 만날 수 있습니다!");
+      doPrestige() {
+            // 💡 [핵심 수정] 50층을 클리어해서 '51층'이 되었을 때만 환생 버튼 작동!
+            if (GameState.rpgStage <= 50) {
+                return UIManager.showToast("50층의 마왕을 토벌해야 차원의 여신을 만날 수 있습니다!");
             }
 
-            // 미소녀 여신의 등장 연출 (알림창)
             const isConfirm = confirm("✨ [차원의 여신]\n\n\"훌륭해요 용사님! 드디어 마왕을 무찌르셨군요.\n하지만 악의 근원은 아직 사라지지 않았답니다.\n제가 시간을 되돌려 드릴 테니, 더 강해진 모습으로 세상을 구해주세요!\"\n\n(환생하시겠습니까? 1층으로 돌아가며 모든 스탯이 영구적으로 대폭 상승합니다!)");
 
             if(isConfirm) {
                 GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
-                GameState.rpgStage = 1; // 1층으로 회귀!
-                GameState.currentHp = GameState.getTotalStats().hp; // 뻥튀기된 피로 만피 회복
+                GameState.rpgStage = 1; 
+                GameState.currentHp = GameState.getTotalStats().hp; 
                 GameState.save();
 
                 UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 마왕의 군대도 더욱 강해졌습니다!`);
                 UIManager.updateRpgLobbyUI();
-                GameSystem.Ranking.updateRankingSilently(); // 랭킹 서버에 내 환생 기록 저장
+                GameSystem.Ranking.updateRankingSilently(); 
             }
         },
     } // <-- Battle 닫는 괄호
@@ -872,6 +871,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
