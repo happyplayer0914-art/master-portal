@@ -334,16 +334,19 @@ const GameSystem = {
     
   Ranking: {
         openRegisterModal() { 
-            // 💡 [수정] 층수 적는 칸이 HTML에 있는지 먼저 확인하고, 있으면 적기!
-            const stageEl = document.getElementById('modal-current-stage');
-            if (stageEl) {
-                stageLabel.innerText = GameState.rpgStage; 
+            // 🛡️ [신규 방어막] 닉네임 안 정했으면 랭킹 등록 거부!
+            if (GameState.nickname === "위대한 길드장") {
+                alert("먼저 '내 정보' 탭에서 닉네임을 영구 설정해주세요! (✏️ 버튼 클릭)");
+                return;
             }
             
-            // 그리고 무조건 닉네임 입력 모달창 띄우기!
-            const modal = document.getElementById('nickname-modal');
-            if (modal) {
-                modal.classList.add('active');
+            // 🚀 닉네임이 고정되어 있으니까, 귀찮은 모달창 없이 쾌속 등록!
+            if(confirm(`영구 닉네임 [${GameState.nickname}]으로 명예의 전당에 기록하시겠습니까?`)) {
+                // 숨겨진 닉네임 input 칸에 몰래 내 닉네임을 넣고 기존 등록 함수 실행! (꼼수)
+                const inputEl = document.getElementById('nickname-input');
+                if(inputEl) inputEl.value = GameState.nickname;
+                
+                this.submitRanking(); 
             }
         },
         
@@ -1081,6 +1084,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
