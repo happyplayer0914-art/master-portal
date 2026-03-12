@@ -18,12 +18,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script type="module">
+  <script type="module">
+        // 1. 코어 및 DB 도구 수입
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        // 💡 [핵심] doc, setDoc, getDoc 이 세 가지 마법 도구를 추가로 수입해 왔어!
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        
+        // 2. 인증(Auth) 도구 수입
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
+        // 3. 내 파이어베이스 키 (마스터 거 그대로!)
         const firebaseConfig = {
             apiKey: "AIzaSyBPROuMKd8xQ20wUvo6ZJ2FxPp5taY1zj8",
             authDomain: "master-portal-db.firebaseapp.com",
@@ -33,14 +36,12 @@
             appId: "1:767344912957:web:112216b03aee5312c79854"
         };
 
-        // Initialize Firebase
+        // 4. 파이어베이스 시동 걸기!
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        // 💡 [핵심 추가] 인증(로그인) 기능 켜기!
-        const auth = getAuth(app); 
+        const auth = getAuth(app);
 
-        // 전역 변수로 할당하여 다른 스크립트에서 사용 가능하게 함
+        // 5. 🚨 [핵심] system.js에서 쓸 수 있게 window에 꼼꼼하게 다 달아주기!
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -49,14 +50,15 @@
         window.orderBy = orderBy;
         window.limit = limit;
         window.serverTimestamp = serverTimestamp;
-
-     // 💡 [핵심] 수입해 온 도구를 system.js에서 쓸 수 있게 window에 달아주기!
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
 
+        // 🚨 [이 부분이 빠져서 에러가 났던 거야!]
         window.auth = auth;
         window.signInWithPopup = signInWithPopup;
+        window.GoogleAuthProvider = GoogleAuthProvider; 
+        window.signOut = signOut;
     </script>
 
     <style>
@@ -828,6 +830,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
