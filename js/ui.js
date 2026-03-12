@@ -138,7 +138,7 @@ const UIManager = {
         });
     },
     
-  renderInventory() {
+ renderInventory() {
         const pGear = document.getElementById('inv-panel-gear'); 
         const pSkin = document.getElementById('inv-panel-skin');
         const emptyState = document.getElementById('inv-empty-state');
@@ -151,11 +151,13 @@ const UIManager = {
         const counts = {}; 
         GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
 
+        // 💡 [핵심 추가] 아이템 카드를 부위별로 담아둘 바구니(배열) 준비!
+        const groupedCards = { weapon: [], armor: [], accessory: [], skin: [] };
+
         for(const [id, count] of Object.entries(counts)) {
             const item = GameData.items[id]; 
             if(!item) continue;
             
-            // 💡 [핵심 1] 아이템 부위에 따라 장착 중인지 확인하기!
             let isEquipped = false;
             if (item.type === 'gear') {
                 if (item.subType === 'weapon' && GameState.equippedWeapon === id) isEquipped = true;
@@ -168,14 +170,8 @@ const UIManager = {
             const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider">장착중</div>` : '';
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
             
-            // 💡 [핵심 2] 장비 특성에 맞춰 예쁜 텍스트 달아주기!
             let effectText = '';
             if (item.type === 'gear') {
-                // 부위 표시 (작은 글씨)
-                let typeLabel = item.subType === 'weapon' ? '[무기]' : item.subType === 'armor' ? '[방어구]' : '[장신구]';
-                effectText += `<span class="text-[8px] text-slate-500 mb-0.5">${typeLabel}</span>`;
-                
-                // 특성 표시
                 if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold">공격력 +${Math.round((item.atkMult - 1)*100)}%</span>`;
                 if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold">체력 +${Math.round((item.hpMult - 1)*100)}%</span>`;
                 if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold">크리티컬 +${item.critRate}%</span>`;
@@ -185,7 +181,6 @@ const UIManager = {
                 effectText = `<span class="text-[9px] text-cyan-400 font-bold mt-1">프로필 테두리</span>`;
             }
             
-            // 카드 HTML 그리기
             const card = `
                 <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-2 h-[140px] !important">
                     ${badgeHTML}
@@ -198,12 +193,31 @@ const UIManager = {
                 </div>
             `;
             
-            if(item.type === 'gear') { 
-                pGear.innerHTML += card; hasGear = true; 
+            // 💡 [핵심 추가] 부위별로 알맞은 바구니에 카드 집어넣기!
+            if (item.type === 'gear') { 
+                groupedCards[item.subType].push(card);
+                hasGear = true; 
             } else { 
-                pSkin.innerHTML += card; hasSkin = true; 
+                groupedCards.skin.push(card);
+                hasSkin = true; 
             }
         }
+
+        // 💡 [핵심 추가] 각 바구니에 담긴 템들을 구분선(제목)과 함께 화면에 순서대로 뿌려주기!
+        if (groupedCards.weapon.length > 0) {
+            pGear.innerHTML += `<div class="col-span-3 text-xs font-bold text-indigo-300 mt-1 mb-1 border-b border-slate-700/50 pb-1 flex items-center gap-1.5"><span class="text-sm">🗡️</span> 무기</div>`;
+            pGear.innerHTML += groupedCards.weapon.join('');
+        }
+        if (groupedCards.armor.length > 0) {
+            pGear.innerHTML += `<div class="col-span-3 text-xs font-bold text-emerald-300 mt-3 mb-1 border-b border-slate-700/50 pb-1 flex items-center gap-1.5"><span class="text-sm">🛡️</span> 방어구</div>`;
+            pGear.innerHTML += groupedCards.armor.join('');
+        }
+        if (groupedCards.accessory.length > 0) {
+            pGear.innerHTML += `<div class="col-span-3 text-xs font-bold text-yellow-300 mt-3 mb-1 border-b border-slate-700/50 pb-1 flex items-center gap-1.5"><span class="text-sm">💍</span> 장신구</div>`;
+            pGear.innerHTML += groupedCards.accessory.join('');
+        }
+        
+        pSkin.innerHTML = groupedCards.skin.join('');
         
         // 텅 빈 상태 처리
         const isGearTab = !document.getElementById('inv-tab-gear').classList.contains('text-slate-400');
@@ -217,8 +231,8 @@ const UIManager = {
         const stats = GameState.getTotalStats(); 
         document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
-      
-      // 💡 [핵심 추가] 내 정보(프로필) 화면에도 장착된 3종 장비 그려주기!
+        
+        // 내 정보(프로필) 화면 장착 슬롯 렌더링
         const renderProfileSlot = (slotId, itemId, label) => {
             const el = document.getElementById(slotId);
             if (!el) return;
@@ -253,6 +267,7 @@ const UIManager = {
         drawBg();
     }
 };
+
 
 
 
