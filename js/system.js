@@ -265,7 +265,24 @@ const GameSystem = {
     Gacha: {
         performGacha(times) {
             const cost = times * 50; if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
-            GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
+     // 💡 [여기 추가됨!] 앱으로 들어왔고, 1회 뽑기가 아니라면(혹은 조건에 맞게) 광고를 띄운다!
+            // (만약 젬 소모 없이 무조건 1회 광고 뽑기를 만들고 싶다면 조건문을 바꿔야 해. 지금은 젬을 소모하기 직전에 띄우는 예시야.)
+            if (window.AppChannel) {
+                // 이 변수를 저장해 둬야 나중에 보상 줄 때 몇 번 뽑았는지 알 수 있어!
+                window._pendingGachaTimes = times; 
+                
+                // 앱에 광고 띄워달라고 찌르기!
+                window.AppChannel.postMessage('SHOW_REWARD_AD');
+                return; // 🛑 여기서 스톱! (광고 다 볼 때까지 아래 가챠 코드가 실행되면 안 돼!)
+            }
+
+            // (앱이 아니거나 PC 웹이면 기존처럼 바로 가챠 진행)
+            this._executeGachaLogic(times);
+        },
+
+        // 💡 [여기 추가됨!] 원래 performGacha 안에 있던 엄청 긴 가챠 로직들을 이 함수로 통째로 옮겨야 해!
+        _executeGachaLogic(times) {
+            GameState.gem -= (times * 50); GameState.save(); UIManager.updateCurrencyUI();
             document.getElementById('bottom-nav').style.display = 'none'; 
             const over = document.getElementById('gacha-overlay'); const resBox = document.getElementById('gacha-results-container'); const anim = document.getElementById('gacha-animation');
             over.classList.add('active'); resBox.classList.add('hidden'); resBox.innerHTML = ''; anim.classList.remove('hidden'); document.getElementById('gacha-title').innerText = "소환의식 진행 중...";
@@ -573,3 +590,16 @@ const GameSystem = {
         }
     }
 };
+// =========================================================================
+// 💡 [추가] 플러터 앱에서 광고 시청이 완료되면 이 함수를 강제로 실행함!
+// =========================================================================
+window.onRewardEarned = function() {
+    console.log("플러터 앱으로부터 광고 시청 완료 신호를 받았습니다!");
+    
+    // 아까 저장해 둔 뽑기 횟수를 가져옴 (없으면 기본 1회)
+    const times = window._pendingGachaTimes || 1; 
+    
+    // 모아둔 젬을 소모하고 진짜 가챠 연출 시작!
+    GameSystem.Gacha._executeGachaLogic(times);
+};
+
