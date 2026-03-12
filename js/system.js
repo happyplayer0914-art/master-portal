@@ -537,7 +537,7 @@ const GameSystem = {
             this.updateBattleUI(); 
             if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
         },
-        monsterAttack() {
+       monsterAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
             AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
             let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
@@ -548,7 +548,7 @@ const GameSystem = {
             this.updateBattleUI(); 
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
-      endBattle(isWin) {
+        endBattle(isWin) {
             clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
             const btnAtk = document.getElementById('btn-attack');
             btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료";
@@ -587,7 +587,9 @@ const GameSystem = {
                 }, 500);
             }
         }
-};
+    } // <-- Battle 닫는 괄호
+}; // <-- GameSystem 닫는 괄호 (이게 빠져서 에러가 났던 거야!)
+
 // =========================================================================
 // 💡 [스마트 보상 시스템] 광고 꼬리표 달기!
 // =========================================================================
@@ -653,6 +655,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
