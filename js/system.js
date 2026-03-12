@@ -417,23 +417,22 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-// 🔒 [신규] 구글 로그인 시스템 (최신 모듈러 방식)
+// 🔒 [완전판] 구글 로그인 + 클라우드 세이브/로드 시스템
     Auth: {
         loginWithGoogle() {
-            // window에 달아둔 구글 로그인 제공자 불러오기
             const provider = new window.GoogleAuthProvider();
-            
             UIManager.showToast("구글 로그인을 요청합니다...");
 
-            // window에 달아둔 팝업 로그인 실행!
             window.signInWithPopup(window.auth, provider)
                 .then((result) => {
                     const user = result.user;
                     console.log("로그인 성공 유저:", user);
                     
+                    // 💡 [핵심] 유저 고유 ID를 안전하게 임시 보관! (이 ID가 클라우드 금고 열쇠가 됨)
+                    localStorage.setItem('master_uid', user.uid);
+                    
                     UIManager.showToast(`환영합니다, ${user.displayName}님! ✨`);
                     
-                    // UI 변경 (버튼 숨기고 정보 보여주기)
                     document.getElementById('btn-google-login').classList.add('hidden');
                     document.getElementById('auth-user-info').classList.remove('hidden');
                     document.getElementById('auth-email').innerText = user.email;
@@ -447,16 +446,73 @@ const GameSystem = {
         logout() {
             if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
 
-            // window에 달아둔 로그아웃 실행!
             window.signOut(window.auth).then(() => {
+                localStorage.removeItem('master_uid'); // 로그아웃 시 열쇠도 폐기!
                 UIManager.showToast("안전하게 로그아웃 되었습니다.");
                 
-                // UI 원상복구
                 document.getElementById('btn-google-login').classList.remove('hidden');
                 document.getElementById('auth-user-info').classList.add('hidden');
             });
+        },
+
+        // ☁️ [신규] 클라우드에 내 데이터 쏘아올리기!
+        saveToCloud(btnElement) {
+            const uid = localStorage.getItem('master_uid');
+            if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
+            
+            btnElement.innerText = "저장 중...";
+            
+            // 우리가 이미 쓰고 있던 로컬 저장 데이터를 꿀꺽!
+            const localData = localStorage.getItem('master_gameState');
+            if(!localData) {
+                btnElement.innerText = "☁️ 서버에 저장";
+                return UIManager.showToast("저장할 데이터가 아직 없습니다!");
+            }
+
+            // 파이어베이스에 고유 ID 이름표를 달아서 문서 생성하고 복붙!
+            window.setDoc(window.doc(window.db, "users", uid), {
+                saveData: localData,
+                lastSaved: window.serverTimestamp()
+            }).then(() => {
+                UIManager.showToast("☁️ 클라우드에 안전하게 백업되었습니다! 든-든");
+                btnElement.innerText = "☁️ 서버에 저장";
+            }).catch(error => {
+                console.error("저장 실패:", error);
+                UIManager.showToast("저장 실패 😢 콘솔을 확인해주세요.");
+                btnElement.innerText = "☁️ 서버에 저장";
+            });
+        },
+
+        // 📥 [신규] 클라우드에서 내 데이터 내려받기!
+        loadFromCloud(btnElement) {
+            const uid = localStorage.getItem('master_uid');
+            if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
+            
+            if(!confirm("⚠️ 경고: 클라우드 데이터를 불러오면 현재 기기의 데이터는 덮어씌워집니다. 진행할까요?")) return;
+
+            btnElement.innerText = "불러오는 중...";
+
+            // 파이어베이스 금고에서 내 ID 열쇠로 데이터 꺼내오기!
+            window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.saveData) {
+                        // 로컬 스토리지에 클라우드 데이터 강제 주입!
+                        localStorage.setItem('master_gameState', data.saveData);
+                        UIManager.showToast("📥 데이터를 성공적으로 복원했습니다! 재시작합니다.");
+                        setTimeout(() => location.reload(), 1500); // 1.5초 뒤 쿨하게 새로고침
+                    }
+                } else {
+                    UIManager.showToast("서버에 저장된 백업 데이터가 없습니다.");
+                    btnElement.innerText = "📥 서버에서 불러오기";
+                }
+            }).catch(error => {
+                console.error("불러오기 실패:", error);
+                UIManager.showToast("불러오기 실패 😢");
+                btnElement.innerText = "📥 서버에서 불러오기";
+            });
         }
-    }, // 🚨 [핵심] 여기에 쉼표 꼭 있어야 해! (Quest: 로 넘어가기 전)
+    },
 
     Quest: {
         updateProgress(type, id, amount = 1) {
@@ -986,6 +1042,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
