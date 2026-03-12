@@ -417,16 +417,22 @@ const GameSystem = {
         }
     }, // 🚨 [랭킹 끝]
 
-    // 🔒 [닉네임 영구 고정 & 중복 방지 시스템]
+    // 🔒 [닉네임 영구 고정 & 중복 방지 시스템 - 게스트 환영 버전!]
     async setFixedNickname() {
         if (GameState.nickname !== "위대한 길드장") {
             return UIManager.showToast("닉네임은 한 번 정하면 절대 바꿀 수 없습니다! 🔒");
         }
 
+        // 💡 [핵심] 로그인 안 한 유저(게스트)가 닉네임 바꾸려고 하면 아주 자연스럽게 로그인 유도!
         const uid = localStorage.getItem('master_uid');
-        if (!uid) return alert("클라우드 저장을 위해 구글 로그인이 먼저 필요합니다!");
+        if (!uid) {
+            if (confirm("데이터를 안전하게 클라우드에 보관하고, 다른 마스터들과 소통하려면 '구글 로그인'이 필요합니다.\n지금 바로 로그인 하시겠습니까?")) {
+                this.Auth.loginWithGoogle(); // 확인 누르면 곧바로 구글 팝업 짠!
+            }
+            return;
+        }
 
-        const newNick = prompt("영구적으로 사용할 마스터의 닉네임을 입력하세요! (최대 8자)\n\n⚠️ 주의: 한 번 정하면 절대 바꿀 수 없습니다.");
+        const newNick = prompt("영구적으로 사용할 마스터의 고유 닉네임을 입력하세요! (최대 8자)\n\n⚠️ 주의: 한 번 정하면 절대 바꿀 수 없습니다.");
         
         if (!newNick || newNick.trim() === "") return;
         if (newNick.length > 8) return alert("닉네임은 8자 이내로 정해주세요!");
@@ -1073,6 +1079,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
