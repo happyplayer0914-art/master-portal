@@ -467,7 +467,16 @@ const GameSystem = {
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                
+                // 📢 [신규] 시스템 공지인 경우 (노란색 알림 띠)
+                if (msg.isSystem) {
+                    chatList.innerHTML += `
+                        <div class="flex justify-center mb-3 mt-1">
+                            <div class="bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 text-xs px-4 py-1.5 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.2)] text-center font-bold tracking-wide">
+                                ${this.escapeHTML(msg.text)}
+                            </div>
+                        </div>`;
+                    return; // 시스템 공지를 그렸으니 아래(일반 채팅)는 건너뜀!
+                }
                 if (isMe) {
                     chatList.innerHTML += `
                         <div class="flex justify-end mb-2">
@@ -521,6 +530,12 @@ const GameSystem = {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return; // 빈칸이면 무시
+            // 🚨 [신규] 1순위: 악성 링크 및 도배 방지 철벽 방어!
+            // http, https, www, .com, .net 등이 포함되어 있는지 검사하는 마법진(정규식)
+            const linkPattern = /(http|https|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/|\b))/i;
+            if (linkPattern.test(text)) {
+                return UIManager.showToast("🚨 경고: 채팅에 외부 링크는 포함할 수 없습니다!");
+            }
 
             input.value = ''; // 글 날렸으니 입력창 비워주기
             this.lastChatTime = now; // 시간 기록
@@ -564,13 +579,31 @@ const GameSystem = {
             if (notiDot) notiDot.classList.add('hidden');
         },
 
+      
         // 악성 스크립트(해킹) 삽입 방지용 철벽!
         escapeHTML(str) {
             return str.replace(/[&<>'"]/g, tag => ({
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
             }[tag] || tag));
-        }
-    }, // 🚨 콤마(,) 잊지 마! 이 밑에 async setFixedNickname() 가 있어야 해!
+            
+     // 📢 [신규] 추가 아이디어: 시스템 전체 공지 발송 마법!
+        // 마스터(개발자)나 게임 시스템이 직접 채팅방 한가운데에 노란색 공지를 띄웁니다!
+        async sendSystemMessage(message) {
+            if (!window.db) return;
+            try {
+                await window.addDoc(window.collection(window.db, "chats"), {
+                    uid: "SYSTEM_MASTER", // 시스템 전용 ID
+                    nickname: "📢 [시스템]",
+                    text: message,
+                    timestamp: window.serverTimestamp(),
+                    isSystem: true // 💡 이게 바로 '시스템 공지'라는 표식!
+                });
+            } catch(e) {
+                console.error("시스템 공지 전송 실패:", e);
+            }
+        },
+
+    
     // 🔒 [닉네임 영구 고정 & 중복 방지 시스템 - 게스트 환영 버전!]
     async setFixedNickname() {
         if (GameState.nickname !== "위대한 길드장") {
@@ -1236,6 +1269,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
