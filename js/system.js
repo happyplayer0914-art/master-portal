@@ -634,10 +634,16 @@ window.onRewardEarned = function() {
         UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
     } 
     // 꼬리표가 'revive' 일 때
-    else if (window.currentAdAction === 'revive') {
+   else if (window.currentAdAction === 'revive') {
         document.getElementById('revive-modal').classList.remove('active'); // 부활 창 끄기
         
         GameState.currentHp = GameState.getTotalStats().hp; // 체력 100% 회복!
+        
+        // 💡 [핵심 추가] 시스템한테 다시 전투 중이라고 멱살 잡고 알려주기!
+        GameState.isBattling = true; 
+        localStorage.setItem('master_in_battle', 'true'); 
+        document.getElementById('battle-log').innerText = `✨ 기적적인 부활! 반격을 시작하세요!`; // 텍스트도 멋지게 변경
+
         GameState.save();
         GameSystem.Battle.updateBattleUI(); // 전투 화면 체력바 쫙 채워주기
         
@@ -645,10 +651,13 @@ window.onRewardEarned = function() {
         AudioEngine.sfx.coin(); 
         UIManager.showToast("✨ 기적적으로 부활했습니다! 전투를 이어갑니다.");
         
-        // 🛑 멈췄던 몬스터의 공격과 전투 버튼을 다시 살려줌!
+        // 🛑 멈췄던 몬스터의 공격과 전투 버튼을 다시 확실하게 살려줌!
+        clearInterval(GameSystem.Battle.battleInterval); // 혹시 모를 타이머 중복 꼬임 방지
         GameSystem.Battle.battleInterval = setInterval(() => GameSystem.Battle.monsterAttack(), 1500);
+        
         const btnAtk = document.getElementById('btn-attack');
         btnAtk.disabled = false;
+        btnAtk.classList.remove('opacity-50'); // 버튼 회색으로 변한 것도 원래대로!
         btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
     }
 
