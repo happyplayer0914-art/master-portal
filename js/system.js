@@ -614,9 +614,14 @@ window.watchAdForRevive = function() {
 };
 
 // 3. 포기하고 마을로 갈 때
+// 3. 포기하고 마을로 갈 때
 window.giveUpBattle = function() {
     document.getElementById('revive-modal').classList.remove('active');
     UIManager.showToast(`💀 쓰러졌습니다... 여관에서 휴식하세요.`);
+    
+    // 💡 [핵심 추가] 숨겨졌던 하단 메뉴바(네비게이션)를 다시 나타나게 켜주기!
+    document.getElementById('bottom-nav').style.display = 'flex'; 
+    
     UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
 };
 
@@ -664,6 +669,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
