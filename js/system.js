@@ -515,41 +515,38 @@ const GameSystem = {
             const iconEl = document.getElementById('event-icon');
             const descEl = document.getElementById('event-desc');
             
-            // 💡 [업데이트] 총 6가지의 흥미진진한 랜덤 이벤트 중 하나 뽑기!
             const eventType = Math.floor(Math.random() * 6); 
             let hpStat = GameState.getTotalStats().hp;
 
             if (eventType === 0) {
-                // 1. 단순 보물 상자 (기존)
                 titleEl.innerText = "숨겨진 보물상자!"; iconEl.innerText = "🎁"; titleEl.className = "text-2xl font-black text-yellow-400 mb-4"; 
                 descEl.innerText = "상자를 열었더니 골드가 쏟아집니다!\n(+50G 획득)"; AudioEngine.sfx.coin(); 
                 GameState.gold += 50; 
                 
             } else if (eventType === 1) {
-                // 2. 함정 (기존)
                 titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.15); 
-                descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
+                descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; 
+                // 💡 [수정] 피 1 보장 안전벨트 제거! (Math.max(0)으로 변경)
+                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 2) {
-                // 3. 요정의 축복 (기존)
                 titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; 
                 let heal = Math.floor(hpStat * 0.3); 
                 descEl.innerText = `요정이 상처를 치료해 줍니다.\n(+5💎, +${heal} HP)`; AudioEngine.sfx.coin(); 
                 GameState.gem += 5; GameState.currentHp = Math.min(hpStat, GameState.currentHp + heal); 
                 
             } else if (eventType === 3) {
-                // 4. ✨[신규] 미믹의 기습 (하이리스크 하이리턴)
                 titleEl.innerText = "미믹의 기습!"; iconEl.innerText = "👅"; titleEl.className = "text-2xl font-black text-red-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.2); 
                 descEl.innerText = `보물상자인 줄 알았지만 몬스터였습니다!\n상처를 입었지만 골드를 뱉어냈습니다.\n(-${dmg} HP, +100G)`;
-                GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
+                // 💡 [수정] 피 1 보장 안전벨트 제거!
+                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
                 GameState.gold += 100;
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 4) {
-                // 5. ✨[신규] 떠돌이 상인 (돈을 빼가고 포션을 줌)
                 titleEl.innerText = "떠돌이 상인"; iconEl.innerText = "🧙‍♂️"; titleEl.className = "text-2xl font-black text-purple-400 mb-4"; 
                 if (GameState.gold >= 50) {
                     GameState.gold -= 50; GameState.potions += 1;
@@ -559,30 +556,49 @@ const GameSystem = {
                 }
                 
             } else {
-                // 6. ✨[신규] 저주받은 제단 (체력을 깎고 젬을 줌)
                 titleEl.innerText = "저주받은 제단"; iconEl.innerText = "🩸"; titleEl.className = "text-2xl font-black text-rose-600 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.25); 
                 descEl.innerText = `제단에 마스터의 피를 바치고 젬을 얻었습니다.\n(-${dmg} HP, +15💎)`;
-                GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
+                // 💡 [수정] 피 1 보장 안전벨트 제거!
+                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
                 GameState.gem += 15;
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
             }
             
+            // 💡 [추가] 만약 이 이벤트로 피가 0이 되었다면 텍스트랑 버튼 빨갛게 바꾸기!
+            const btn = document.querySelector('#screen-rpg-event button');
+            if (GameState.currentHp <= 0) {
+                descEl.innerText += "\n\n💀 치명상! 마스터가 쓰러졌습니다...";
+                btn.innerText = "쓰러짐...";
+                btn.className = "w-full py-4 bg-red-900 hover:bg-red-800 text-white rounded-xl font-bold border border-red-700 active:scale-95 transition-all";
+            } else {
+                btn.innerText = "돌아가기";
+                btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all";
+            }
+            
             UIManager.updateCurrencyUI(); 
         },
-        endEvent() { GameState.rpgStage++; GameState.save(); document.getElementById('bottom-nav').style.display = 'flex'; UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); },
-        startBattleSequence(isBoss) {
-            if(GameState.isBattling) return; 
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-            document.getElementById('screen-rpg-battle').classList.add('active');
-            GameState.isBattling = true; 
-            localStorage.setItem('master_in_battle', 'true');
-            if (isBoss) {
-                AudioEngine.sfx.boss(); const overlay = document.getElementById('boss-warning-overlay'); overlay.classList.add('active');
-                const battleCard = document.getElementById('battle-card');
-                let shakes = 0; let shakeInt = setInterval(() => { if(battleCard) { battleCard.classList.add('shake'); UIManager.triggerHeavyHaptic(); setTimeout(() => battleCard.classList.remove('shake'), 150); } if(++shakes >= 4) clearInterval(shakeInt); }, 500);
-                setTimeout(() => { overlay.classList.remove('active'); this.initBattle(true); }, 3000);
-            } else { this.initBattle(false); }
+
+        // 💡 [수정] 이벤트 끝날 때 피가 0이면 다음 층으로 안 가고 부활 모달 띄우기!
+        endEvent() { 
+            document.getElementById('bottom-nav').style.display = 'flex'; 
+            
+            if (GameState.currentHp <= 0) {
+                // 사망 처리
+                GameState.save();
+                UIManager.updateRpgLobbyUI();
+                document.getElementById('screen-rpg-event').classList.remove('active');
+                
+                // 0.5초 뒤에 익숙한 그 부활 팝업 띄우기!
+                setTimeout(() => {
+                    document.getElementById('revive-modal').classList.add('active');
+                }, 500);
+            } else {
+                // 살아있으면 정상적으로 다음 층으로 진입
+                GameState.rpgStage++; 
+                GameState.save(); 
+                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
+            }
         },
         initBattle(isBoss) {
             this.monsterMaxHp = GameState.rpgStage * 40 + (isBoss ? 200 : 0); 
@@ -800,6 +816,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
