@@ -90,18 +90,42 @@ const UIManager = {
         }
     },
     
-    updateRpgLobbyUI() {
-        const stats = GameState.getTotalStats(); document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
+   updateRpgLobbyUI() {
+        const stats = GameState.getTotalStats(); 
+        document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
+        
         document.getElementById('lobby-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
         document.getElementById('lobby-hp-bar').style.width = (GameState.currentHp / stats.hp * 100) + "%";
         
-        const atkBuff = stats.atk - GameState.rpgAtk; const hpBuff = stats.hp - GameState.rpgMaxHp;
+        const atkBuff = stats.atk - GameState.rpgAtk; 
+        const hpBuff = stats.hp - GameState.rpgMaxHp;
+        
         document.getElementById('stat-atk-display').innerHTML = `${GameState.rpgAtk.toLocaleString()} ${atkBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${atkBuff})</span>` : ''}`;
         document.getElementById('stat-hp-display').innerHTML = `${GameState.rpgMaxHp.toLocaleString()} ${hpBuff > 0 ? `<span class="text-[12px] text-emerald-400">(+${hpBuff})</span>` : ''}`;
         
         document.getElementById('cost-atk-display').innerText = GameSystem.Lobby.getUpgradeCost('atk').toLocaleString();
         document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
         document.getElementById('potion-count-display').innerText = GameState.potions;
+
+        // 💡 [핵심 추가] 투기장 로비에 장착된 3종 장비 아이콘 그려주기!
+        const renderSlot = (slotId, itemId, label) => {
+            const el = document.getElementById(slotId);
+            if (!el) return;
+            if (itemId && GameData.items[itemId]) {
+                const item = GameData.items[itemId];
+                // 템 끼고 있으면 레어리티 테두리랑 이모지 띄우기!
+                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
+                el.innerHTML = `<span class="filter drop-shadow-md">${item.emoji}</span>`;
+            } else {
+                // 템 안 끼고 있으면 빈칸(점선) 표시!
+                el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
+                el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
+            }
+        };
+
+        renderSlot('lobby-slot-weapon', GameState.equippedWeapon, '무기');
+        renderSlot('lobby-slot-armor', GameState.equippedArmor, '방어구');
+        renderSlot('lobby-slot-accessory', GameState.equippedAccessory, '장신구');
     },
     
     applyAvatarSkin() {
@@ -211,4 +235,5 @@ const UIManager = {
         drawBg();
     }
 };
+
 
