@@ -581,11 +581,12 @@ const GameSystem = {
 
       
         // 악성 스크립트(해킹) 삽입 방지용 철벽!
-        escapeHTML(str) {
+      escapeHTML(str) {
             return str.replace(/[&<>'"]/g, tag => ({
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
             }[tag] || tag));
-        }, 
+        }, // 👈 요기!! 함수 끝나는 중괄호 뒤에 콤마 추가!!
+        
      // 📢 [신규] 추가 아이디어: 시스템 전체 공지 발송 마법!
         // 마스터(개발자)나 게임 시스템이 직접 채팅방 한가운데에 노란색 공지를 띄웁니다!
         async sendSystemMessage(message) {
@@ -1269,6 +1270,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
