@@ -605,7 +605,14 @@ const GameSystem = {
             }
         },
        //몬스터 스탯
+       //몬스터 스탯
         initBattle(isBoss) {
+            // 💡 [핵심 추가] 전투 화면으로 전환하고 전투 상태 켜기!
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-rpg-battle').classList.add('active');
+            GameState.isBattling = true;
+            localStorage.setItem('master_in_battle', 'true');
+
             // 💡 [환생 업데이트] 마스터가 환생한 만큼 몬스터도 배수로 강력해집니다!
             let prestigeMult = 1.0 + (GameState.prestigeCount || 0);
 
@@ -846,6 +853,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
