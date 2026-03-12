@@ -420,12 +420,15 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-    // 🔒 [신규] 닉네임 영구 고정 시스템
-    setFixedNickname() {
-        // 이미 닉네임을 정했다면 철벽 방어!
+
+        // 🔒 [신규 완벽판] 닉네임 영구 고정 & 중복 방지 시스템
+    async setFixedNickname() {
         if (GameState.nickname !== "위대한 길드장") {
             return UIManager.showToast("닉네임은 한 번 정하면 절대 바꿀 수 없습니다! 🔒");
         }
+
+        const uid = localStorage.getItem('master_uid');
+        if (!uid) return alert("클라우드 저장을 위해 구글 로그인이 먼저 필요합니다!");
 
         const newNick = prompt("영구적으로 사용할 마스터의 닉네임을 입력하세요! (최대 8자)\n\n⚠️ 주의: 한 번 정하면 절대 바꿀 수 없습니다.");
         
@@ -433,20 +436,39 @@ const GameSystem = {
         if (newNick.length > 8) return alert("닉네임은 8자 이내로 정해주세요!");
         if (newNick === "위대한 길드장") return alert("다른 닉네임을 사용해주세요!");
 
-        // 마지막 최종 경고!
-        if (confirm(`[${newNick.trim()}] - 이 닉네임으로 확정하시겠습니까?`)) {
-            GameState.nickname = newNick.trim();
-            GameState.save();
-            
-            // 화면 업데이트 및 ✏️버튼 영구 삭제!
-            this.applyNicknameUI();
-            
-            // ☁️ 클라우드에 즉시 닌자 백업! (데이터 보존)
-            const uid = localStorage.getItem('master_uid');
-            if(uid) this.Auth.silentSaveToCloud(uid);
+        const finalNick = newNick.trim();
 
-            UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
-            UIManager.updateProfileUI(); // 아이콘 첫 글자도 바꿔주기
+        // 🔍 [핵심] 클라우드 DB에 중복 닉네임이 있는지 검사!
+        UIManager.showToast("닉네임 중복을 확인하는 중... 🔍");
+        
+        try {
+            const nickRef = window.doc(window.db, "nicknames", finalNick);
+            const nickSnap = await window.getDoc(nickRef);
+
+            if (nickSnap.exists()) {
+                // 이미 누가 선점함!
+                return alert(`'${finalNick}'(은)는 이미 다른 마스터가 사용 중인 닉네임입니다. 😭 다른 이름을 지어주세요!`);
+            }
+
+            // 아무도 안 쓰는 닉네임이라면 최종 확정!
+            if (confirm(`[${finalNick}] - 이 닉네임으로 확정하시겠습니까?`)) {
+                // 1. 파이어베이스 'nicknames' 구역에 내 닉네임 찜하기! (다른 사람 못 쓰게)
+                await window.setDoc(nickRef, { uid: uid, createdAt: window.serverTimestamp() });
+
+                // 2. 내 정보에 저장하고 화면 바꾸기
+                GameState.nickname = finalNick;
+                GameState.save();
+                this.applyNicknameUI();
+                
+                // 3. 내 데이터 클라우드에 자동 백업!
+                this.Auth.silentSaveToCloud(uid);
+
+                UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
+                UIManager.updateProfileUI(); 
+            }
+        } catch (e) {
+            console.error("닉네임 설정 오류:", e);
+            alert("서버 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
     },
 
@@ -1084,6 +1106,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
