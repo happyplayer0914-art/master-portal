@@ -416,7 +416,139 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     }, // 🚨 [랭킹 끝]
+// 💬 [신규] 실시간 주점 채팅 시스템!
+    Chat: {
+        lastChatTime: 0, // 도배 방지용 타이머
+        unsubscribe: null,
 
+        // 1. 서버에 귀를 대고 실시간으로 채팅을 듣는 함수!
+        init() {
+            if (!window.db) return;
+            const chatList = document.getElementById('chat-messages');
+            if (!chatList) return;
+
+            // 파이어베이스에서 최신 채팅 30개만 가져오기 (시간 역순)
+            const q = window.query(
+                window.collection(window.db, "chats"), 
+                window.orderBy("timestamp", "desc"), 
+                window.limit(30)
+            );
+
+            // 💡 [핵심] onSnapshot = 누군가 채팅을 치면 즉시 화면을 새로고침해 줌!
+            this.unsubscribe = window.onSnapshot(q, (snapshot) => {
+                let messages = [];
+                snapshot.forEach((doc) => {
+                    messages.push(doc.data());
+                });
+                // 최신순으로 가져왔으니, 화면에 뿌릴 땐 다시 시간순(예전 글이 위로)으로 뒤집기!
+                messages.reverse();
+                this.renderMessages(messages);
+            });
+        },
+
+        // 2. 채팅 데이터를 화면(HTML)에 예쁘게 그려주는 함수!
+        renderMessages(messages) {
+            const chatList = document.getElementById('chat-messages');
+            if (!chatList) return;
+            
+            chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">주점에 입장했습니다. 매너 채팅 부탁드립니다! ✨</div>`;
+            
+            messages.forEach(msg => {
+                const isMe = (msg.nickname === GameState.nickname);
+                // 시간 예쁘게 포맷팅 (예: 오전 10:30)
+                const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
+                
+                // 🔹 내가 쓴 채팅은 오른쪽 파란색 버블
+                if (isMe) {
+                    chatList.innerHTML += `
+                        <div class="flex justify-end mb-2">
+                            <div class="flex flex-col items-end max-w-[75%]">
+                                <div class="flex items-end gap-1">
+                                    <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
+                                    <div class="bg-indigo-600 text-white text-sm px-3 py-2 rounded-2xl rounded-tr-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                } 
+                // 🔸 남이 쓴 채팅은 왼쪽 회색 버블 + 아바타
+                else {
+                    chatList.innerHTML += `
+                        <div class="flex justify-start mb-2 gap-2">
+                            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0 border border-slate-600">${msg.nickname.charAt(0)}</div>
+                            <div class="flex flex-col items-start max-w-[75%]">
+                                <span class="text-[10px] text-slate-400 mb-0.5 font-bold">${msg.nickname}</span>
+                                <div class="flex items-end gap-1">
+                                    <div class="bg-slate-700 text-white text-sm px-3 py-2 rounded-2xl rounded-tl-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
+                                    <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+
+            // 채팅이 올라오면 스크롤을 맨 아래로 쫙 내려주기!
+            chatList.scrollTop = chatList.scrollHeight;
+
+            // 💡 [알림 기능] 내가 주점 화면이 아닐 때 채팅이 오면 🍺버튼에 빨간 점 켜기!
+            const tavernScreen = document.getElementById('screen-tavern');
+            const notiDot = document.getElementById('chat-noti-dot');
+            if (tavernScreen && !tavernScreen.classList.contains('active') && notiDot) {
+                notiDot.classList.remove('hidden');
+            }
+        },
+
+        // 3. 내가 채팅을 쳤을 때 서버로 날리는 함수!
+        async sendMessage() {
+            // ① 검문소: 로그인 안 했거나 이름 없으면 커트!
+            const uid = localStorage.getItem('master_uid');
+            if (!uid || GameState.nickname === "위대한 길드장") {
+                if (confirm("주점에서 대화하려면 구글 로그인과 닉네임 설정이 필요합니다!\n지금 설정하시겠습니까?")) {
+                    GameSystem.setFixedNickname(); // 입국 심사대로 강제 이송!
+                }
+                return;
+            }
+
+            // ② 도배 방지: 3초에 한 번만 말할 수 있음!
+            const now = Date.now();
+            if (now - this.lastChatTime < 3000) {
+                return UIManager.showToast("⏳ 숨 좀 고르고 말씀하세요! (3초 쿨타임)");
+            }
+
+            // ③ 입력창에서 글씨 빼오기
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return; // 빈칸이면 무시
+
+            input.value = ''; // 글 날렸으니 입력창 비워주기
+            this.lastChatTime = now; // 시간 기록
+
+            // ④ 파이어베이스로 발사! 🚀
+            try {
+                await window.addDoc(window.collection(window.db, "chats"), {
+                    uid: uid,
+                    nickname: GameState.nickname,
+                    text: text,
+                    timestamp: window.serverTimestamp()
+                });
+            } catch(e) {
+                console.error(e);
+                UIManager.showToast("채팅 전송에 실패했습니다 😢");
+            }
+        },
+
+        // 빨간 알림 점 끄기 버튼 (유저가 주점에 들어오면 실행)
+        clearNoti() {
+            const notiDot = document.getElementById('chat-noti-dot');
+            if (notiDot) notiDot.classList.add('hidden');
+        },
+
+        // 악성 스크립트(해킹) 삽입 방지용 철벽!
+        escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+    }, // 🚨 콤마(,) 잊지 마! 이 밑에 async setFixedNickname() 가 있어야 해!
     // 🔒 [닉네임 영구 고정 & 중복 방지 시스템 - 게스트 환영 버전!]
     async setFixedNickname() {
         if (GameState.nickname !== "위대한 길드장") {
@@ -1080,6 +1212,8 @@ window.onRewardEarned = function() {
     window.currentAdAction = ''; 
 };
 
+// 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
+setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
 
 
 
