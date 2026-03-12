@@ -555,16 +555,30 @@
         </button>
     </main>
 
-    <main id="screen-profile" class="screen pt-20 px-5">
+<main id="screen-profile" class="screen pt-20 px-5">
         
-        <div class="glass-card p-6 mb-4 flex items-center gap-5 border-t-4 border-t-emerald-500">
-            <div id="profile-big-icon" class="master-avatar w-20 h-20 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center font-black text-3xl text-white shadow-xl">M</div>
-            <div>
-                <p class="text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1">Master Profile</p>
-                <h2 class="text-2xl font-black text-white mb-1" id="profile-nickname-display">위대한 길드장</h2>
-                <div class="flex gap-2 text-xs font-bold text-slate-300">
-                    <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">전투력: <span id="profile-total-power" class="text-red-400">0</span></span>
-                    <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">생존력: <span id="profile-total-hp" class="text-emerald-400">0</span></span>
+        <div class="glass-card p-6 mb-4 border-t-4 border-t-emerald-500">
+            <div class="flex items-center gap-5 mb-5">
+                <div id="profile-big-icon" class="master-avatar w-20 h-20 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center font-black text-3xl text-white shadow-xl">M</div>
+                <div>
+                    <p class="text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1">Master Profile</p>
+                    <h2 class="text-2xl font-black text-white mb-1" id="profile-nickname-display">위대한 길드장</h2>
+                    <div class="flex gap-2 text-xs font-bold text-slate-300">
+                        <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">전투력: <span id="profile-total-power" class="text-red-400">0</span></span>
+                        <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">생존력: <span id="profile-total-hp" class="text-emerald-400">0</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center gap-4 pt-4 border-t border-slate-700/50">
+                <div id="profile-slot-weapon" class="w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all">
+                    <span class="text-[10px] text-slate-500 font-bold">무기</span>
+                </div>
+                <div id="profile-slot-armor" class="w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all">
+                    <span class="text-[10px] text-slate-500 font-bold">방어구</span>
+                </div>
+                <div id="profile-slot-accessory" class="w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center transition-all">
+                    <span class="text-[10px] text-slate-500 font-bold">장신구</span>
                 </div>
             </div>
         </div>
@@ -721,6 +735,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
