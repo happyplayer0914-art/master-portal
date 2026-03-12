@@ -265,18 +265,7 @@ const GameSystem = {
     Gacha: {
         performGacha(times) {
             const cost = times * 50; if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
-     // 💡 [여기 추가됨!] 앱으로 들어왔고, 1회 뽑기가 아니라면(혹은 조건에 맞게) 광고를 띄운다!
-            // (만약 젬 소모 없이 무조건 1회 광고 뽑기를 만들고 싶다면 조건문을 바꿔야 해. 지금은 젬을 소모하기 직전에 띄우는 예시야.)
-            if (window.AppChannel) {
-                // 이 변수를 저장해 둬야 나중에 보상 줄 때 몇 번 뽑았는지 알 수 있어!
-                window._pendingGachaTimes = times; 
-                
-                // 앱에 광고 띄워달라고 찌르기!
-                window.AppChannel.postMessage('SHOW_REWARD_AD');
-                return; // 🛑 여기서 스톱! (광고 다 볼 때까지 아래 가챠 코드가 실행되면 안 돼!)
-            }
-
-            // (앱이 아니거나 PC 웹이면 기존처럼 바로 가챠 진행)
+ // 광고 보지 말고 무조건 젬 소모하고 뽑기 진행!
             this._executeGachaLogic(times);
         },
 
@@ -591,15 +580,34 @@ const GameSystem = {
     }
 };
 // =========================================================================
-// 💡 [추가] 플러터 앱에서 광고 시청이 완료되면 이 함수를 강제로 실행함!
+// 💡 [수정] 광고 보고 50젬 받기 전용 시스템
 // =========================================================================
-window.onRewardEarned = function() {
-    console.log("플러터 앱으로부터 광고 시청 완료 신호를 받았습니다!");
-    
-    // 아까 저장해 둔 뽑기 횟수를 가져옴 (없으면 기본 1회)
-    const times = window._pendingGachaTimes || 1; 
-    
-    // 모아둔 젬을 소모하고 진짜 가챠 연출 시작!
-    GameSystem.Gacha._executeGachaLogic(times);
+
+// 유저가 "광고 보기" 버튼을 눌렀을 때 실행될 함수
+window.watchAdForGems = function() {
+    AudioEngine.sfx.click();
+    if (window.AppChannel) {
+        // 모바일 앱이면 플러터에게 영상 광고 띄우라고 명령!
+        window.AppChannel.postMessage('SHOW_REWARD_AD');
+    } else {
+        // PC 웹이면 그냥 바로 보상 지급 (테스트용)
+        window.onRewardEarned();
+    }
 };
+
+// 플러터 앱에서 광고 시청이 완료되면 자동으로 실행되는 함수
+window.onRewardEarned = function() {
+    console.log("광고 시청 완료! 50 젬 지급!");
+    
+    // 1. 유저에게 50젬 추가
+    GameState.gem += 50;
+    GameState.save();
+    UIManager.updateCurrencyUI(); // 상단 재화 UI 업데이트
+    
+    // 2. 효과음 및 알림 띄우기
+    AudioEngine.sfx.coin();
+    UIManager.triggerHaptic();
+    UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
+};;
+
 
