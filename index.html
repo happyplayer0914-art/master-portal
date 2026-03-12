@@ -599,7 +599,25 @@ window.onload = function() {
 
        
     </main>
+<main id="screen-tavern" class="screen pt-24 pb-20 px-5">
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">낡은 주점 🍻</span></h1>
+        <p class="text-slate-400 text-sm">마왕 토벌을 앞둔 마스터들의 휴식처입니다.</p>
+    </div>
 
+    <div id="chat-messages" class="flex-1 bg-slate-900/90 rounded-2xl border border-slate-700/50 p-4 mb-4 flex flex-col gap-3 shadow-inner overflow-y-auto" style="min-height: 50vh; max-height: 55vh;">
+        <div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">
+            주점에 입장했습니다. 매너 채팅 부탁드립니다! ✨
+        </div>
+        </div>
+
+    <div class="flex gap-2 relative z-10">
+        <input type="text" id="chat-input" maxlength="40" placeholder="메시지를 입력하세요... (최대 40자)" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500">
+        <button id="btn-send-chat" onclick="GameSystem.Chat.sendMessage()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-5 py-3 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center">
+            전송
+        </button>
+    </div>
+</main>
 
     <main id="screen-profile" class="screen pt-20 px-5">
         
@@ -684,6 +702,12 @@ window.onload = function() {
         <div class="nav-item" onclick="UIManager.navTo('screen-arena', this)"><i class="fa-solid fa-khanda"></i><span>투기장</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-gacha-shop', this)"><i class="fa-solid fa-store"></i><span>가챠샵</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-ranking', this)"><i class="fa-solid fa-trophy"></i><span>랭킹</span></div>
+       <div class="nav-item" onclick="UIManager.navTo('screen-tavern', this)">
+            <i class="fa-solid fa-comment-dots relative">
+                <span id="chat-noti-dot" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-slate-900 hidden"></span>
+            </i>
+            <span>주점</span>
+        </div>
         <div class="nav-item" onclick="UIManager.navTo('screen-profile', this)"><i class="fa-solid fa-user"></i><span>내 정보</span></div>
     </nav>
 </div> <div id="boss-warning-overlay">
@@ -837,6 +861,7 @@ window.onload = function() {
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
