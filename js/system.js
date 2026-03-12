@@ -417,6 +417,48 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
+    // 🔒 [신규] 닉네임 영구 고정 시스템
+    setFixedNickname() {
+        // 이미 닉네임을 정했다면 철벽 방어!
+        if (GameState.nickname !== "위대한 길드장") {
+            return UIManager.showToast("닉네임은 한 번 정하면 절대 바꿀 수 없습니다! 🔒");
+        }
+
+        const newNick = prompt("영구적으로 사용할 마스터의 닉네임을 입력하세요! (최대 8자)\n\n⚠️ 주의: 한 번 정하면 절대 바꿀 수 없습니다.");
+        
+        if (!newNick || newNick.trim() === "") return;
+        if (newNick.length > 8) return alert("닉네임은 8자 이내로 정해주세요!");
+        if (newNick === "위대한 길드장") return alert("다른 닉네임을 사용해주세요!");
+
+        // 마지막 최종 경고!
+        if (confirm(`[${newNick.trim()}] - 이 닉네임으로 확정하시겠습니까?`)) {
+            GameState.nickname = newNick.trim();
+            GameState.save();
+            
+            // 화면 업데이트 및 ✏️버튼 영구 삭제!
+            this.applyNicknameUI();
+            
+            // ☁️ 클라우드에 즉시 닌자 백업! (데이터 보존)
+            const uid = localStorage.getItem('master_uid');
+            if(uid) this.Auth.silentSaveToCloud(uid);
+
+            UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
+            UIManager.updateProfileUI(); // 아이콘 첫 글자도 바꿔주기
+        }
+    },
+
+    // 💡 게임 켤 때 닉네임 적용하고 버튼 숨겨주는 함수
+    applyNicknameUI() {
+        const display = document.getElementById('profile-nickname-display');
+        const btn = document.getElementById('btn-edit-nickname');
+        
+        if(display) display.innerText = GameState.nickname;
+        
+        // 닉네임이 초기값이 아니면(설정 완료했으면) 버튼 가려버리기!
+        if (GameState.nickname !== "위대한 길드장" && btn) {
+            btn.style.display = 'none';
+        }
+    },
 // 🔒 [오토 세이브/로드] 구글 로그인 + 닌자 백업 시스템
     Auth: {
         // 🚀 [신규] 게임 켤 때마다 로그인 상태 확인하고 자동 백업해주는 감시자!
@@ -1039,6 +1081,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
