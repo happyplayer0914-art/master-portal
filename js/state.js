@@ -12,7 +12,7 @@ const GameState = {
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     potions: 1, inventory: [], 
     
-    // 💡 [수정됨] 장비 칸이 3개로 나뉘었어!
+    // 💡 장착 칸 3개 분할 완료!
     equippedWeapon: null, 
     equippedArmor: null, 
     equippedAccessory: null, 
@@ -47,7 +47,7 @@ const GameState = {
         this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
         
-        // 💡 [수정됨] 3개의 장비 슬롯을 각각 불러오기
+        // 💡 3개의 장비 슬롯 로드
         const w = localStorage.getItem('master_equipped_weapon'); this.equippedWeapon = (w === "null" || !w) ? null : w;
         const a = localStorage.getItem('master_equipped_armor'); this.equippedArmor = (a === "null" || !a) ? null : a;
         const ac = localStorage.getItem('master_equipped_accessory'); this.equippedAccessory = (ac === "null" || !ac) ? null : ac;
@@ -77,7 +77,7 @@ const GameState = {
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
         localStorage.setItem('master_quest_data', JSON.stringify(this.questData));
         
-        // 💡 [수정됨] 3개의 장비 슬롯을 각각 저장하기
+        // 💡 3개의 장비 슬롯 세이브
         if(this.equippedWeapon) localStorage.setItem('master_equipped_weapon', this.equippedWeapon); else localStorage.removeItem('master_equipped_weapon');
         if(this.equippedArmor) localStorage.setItem('master_equipped_armor', this.equippedArmor); else localStorage.removeItem('master_equipped_armor');
         if(this.equippedAccessory) localStorage.setItem('master_equipped_accessory', this.equippedAccessory); else localStorage.removeItem('master_equipped_accessory');
@@ -96,25 +96,35 @@ const GameState = {
         }
     },
 
-    // 💡 [핵심 수정됨] 무기, 방어구, 장신구의 스탯을 모두 합산해서 계산!
+    // 💡 [핵심] 장착된 장비들의 특성까지 모조리 합산하는 궁극의 뇌!
     getTotalStats() {
         let finalAtkMult = 1.0;
         let finalHpMult = 1.0;
         
-        if (this.equippedWeapon && GameData.items[this.equippedWeapon]) {
-            finalAtkMult += (GameData.items[this.equippedWeapon].atkMult - 1.0);
-        }
-        if (this.equippedArmor && GameData.items[this.equippedArmor]) {
-            finalHpMult += (GameData.items[this.equippedArmor].hpMult - 1.0);
-        }
-        if (this.equippedAccessory && GameData.items[this.equippedAccessory]) {
-            if (GameData.items[this.equippedAccessory].atkMult) finalAtkMult += (GameData.items[this.equippedAccessory].atkMult - 1.0);
-            if (GameData.items[this.equippedAccessory].hpMult) finalHpMult += (GameData.items[this.equippedAccessory].hpMult - 1.0);
-        }
+        // 마스터의 기본 패시브 스탯
+        let finalCritRate = 10; // 기본 크리티컬 확률 10%
+        let finalCritDmg = 150; // 기본 크리티컬 데미지 150%
+        let finalVamp = 0;      // 기본 피흡 0%
+
+        const gears = [this.equippedWeapon, this.equippedArmor, this.equippedAccessory];
+        
+        gears.forEach(id => {
+            if (id && GameData.items[id]) {
+                const item = GameData.items[id];
+                if (item.atkMult) finalAtkMult += (item.atkMult - 1.0);
+                if (item.hpMult) finalHpMult += (item.hpMult - 1.0);
+                if (item.critRate) finalCritRate += item.critRate;
+                if (item.critDmg) finalCritDmg += item.critDmg;
+                if (item.vamp) finalVamp += item.vamp;
+            }
+        });
         
         return { 
             atk: Math.floor(this.rpgAtk * finalAtkMult), 
-            hp: Math.floor(this.rpgMaxHp * finalHpMult) 
+            hp: Math.floor(this.rpgMaxHp * finalHpMult),
+            critRate: finalCritRate,
+            critDmg: finalCritDmg,
+            vamp: finalVamp
         };
     }
 };
