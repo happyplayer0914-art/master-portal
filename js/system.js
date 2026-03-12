@@ -599,10 +599,11 @@ const GameSystem = {
                     timestamp: window.serverTimestamp(),
                     isSystem: true // 💡 이게 바로 '시스템 공지'라는 표식!
                 });
-            } catch(e) {
+           } catch(e) {
                 console.error("시스템 공지 전송 실패:", e);
             }
-        },
+        } // 👈 1. 함수 닫기 (여긴 콤마 없음!)
+    }, // 👈 2. 🌟여기가 핵심🌟! Chat 묶음을 통째로 닫아주는 문이야!
 
     
     // 🔒 [닉네임 영구 고정 & 중복 방지 시스템 - 게스트 환영 버전!]
@@ -1270,6 +1271,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
