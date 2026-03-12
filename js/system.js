@@ -443,6 +443,18 @@ const GameSystem = {
                 // 최신순으로 가져왔으니, 화면에 뿌릴 땐 다시 시간순(예전 글이 위로)으로 뒤집기!
                 messages.reverse();
                 this.renderMessages(messages);
+                // 💡 [핵심] 알림 로직 변경! 처음 켤 땐 조용히 넘어가고, 그 이후 새 글 올라올 때만 점등!
+                if (this.initialLoadDone) {
+                    const tavernScreen = document.getElementById('screen-tavern');
+                    const notiDot = document.getElementById('chat-noti-dot');
+                    // 주점 화면에 없는데 새 글이 왔다면? 빨간 불 켜기!
+                    if (tavernScreen && !tavernScreen.classList.contains('active') && notiDot) {
+                        notiDot.classList.remove('hidden');
+                    }
+                } else {
+                    // 첫 로딩 무사통과! 이제부터 감시 모드 켜짐!
+                    this.initialLoadDone = true; 
+                }
             });
         },
 
@@ -1233,6 +1245,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
