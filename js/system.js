@@ -340,7 +340,8 @@ const GameSystem = {
             GameState.nickname = nick; GameState.save(); document.getElementById('profile-nickname-display').innerText = nick;
             const btn = document.getElementById('btn-submit-ranking'); btn.disabled = true; btn.innerHTML = '<div class="loader" style="width:16px;height:16px;"></div> 등록 중...';
             try {
-                await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: nick, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', timestamp: window.serverTimestamp() });
+                // 💡 [수정] 수동으로 랭킹 등록할 때도 환생 횟수(prestige)가 제대로 저장되게 추가!
+                await window.addDoc(window.collection(window.db, "rankings"), { deviceId: GameState.deviceId || 'unknown', nickname: nick, stage: GameState.rpgStage, skin: GameState.equippedSkin || 'none', prestige: GameState.prestigeCount || 0, timestamp: window.serverTimestamp() });
                 UIManager.showToast("명예의 전당에 기록되었습니다! 🏆"); this.closeModal(); this.loadRanking();
             } catch(e) { console.error(e); UIManager.showToast("서버 통신에 실패했습니다."); } finally { btn.disabled = false; btn.innerHTML = '등록'; }
         },
@@ -356,27 +357,35 @@ const GameSystem = {
                 const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
                 const snap = await window.getDocs(q);
                 let all = []; snap.forEach(d => all.push(d.data()));
+                
+                // 💡 [핵심 수정] 랭킹 줄 세우기 (1순위: 환생, 2순위: 층수, 3순위: 달성 시간)
                 all.sort((a,b) => { 
-                    if (b.stage !== a.stage) return b.stage - a.stage; 
+                    const prestigeA = a.prestige || 0;
+                    const prestigeB = b.prestige || 0;
+                    
+                    if (prestigeA !== prestigeB) return prestigeB - prestigeA; // 1. 환생 횟수가 다르면 환생 높은 사람이 무조건 위!
+                    if (b.stage !== a.stage) return b.stage - a.stage;         // 2. 환생 횟수가 같으면 층수가 높은 사람이 위!
+                    
                     const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
                     const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
-                    return timeA - timeB; 
+                    return timeA - timeB;                                      // 3. 다 똑같으면 먼저 도달한 사람이 위!
                 });
+                
                 let unique = []; let seen = new Set();
                 all.forEach(d => { 
                     const id = d.deviceId || d.nickname; 
                     if(!seen.has(id) && unique.length < 10) { seen.add(id); unique.push(d); } 
                 });
+                
                 if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
                 list.innerHTML = '';
-               unique.forEach((d, i) => {
+                
+                unique.forEach((d, i) => {
                     let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
-                    // 💡 [수정됨] 옛날 스킨 ID 호환성 패치! (번역기 가동)
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; 
                     let sId = d.skin;
-                    // 옛날 이름표면 새 이름표로 바꿔주기!
                     if(sId === 'r3') sId = 's_r1'; 
                     if(sId === 'e3') sId = 's_e1'; 
                     if(sId === 'l3') sId = 's_l1';
@@ -384,10 +393,10 @@ const GameSystem = {
                     if(sId && sId !== 'none' && GameData.items[sId]) {
                         skinClass = `skin-${GameData.items[sId].rarity}`;
                     }
-                   //환생자 우대
+                    
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     
-                    // 💡 [핵심 추가] 환생 횟수가 1 이상이면 번쩍이는 환생 텍스트 달아주기!
+                    // 환생 뱃지 달아주기
                     let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
                     
                     list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
@@ -871,6 +880,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
