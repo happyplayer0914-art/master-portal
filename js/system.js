@@ -878,8 +878,13 @@ window.onRewardEarned = function() {
         UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
     } 
    // 꼬리표가 'revive' 일 때
+ // 꼬리표가 'revive' 일 때
     else if (window.currentAdAction === 'revive') {
-        document.getElementById('revive-modal').classList.remove('active'); // 부활 창 끄기
+        // 💡 [안전장치 추가] 모달창 이름이 revive-modal이든 death-modal이든 찾아서 안전하게 끄기!
+        const reviveModal = document.getElementById('revive-modal');
+        if (reviveModal) reviveModal.classList.remove('active');
+        const deathModal = document.getElementById('death-modal');
+        if (deathModal) deathModal.classList.remove('active');
         
         GameState.currentHp = GameState.getTotalStats().hp; // 체력 100% 회복!
         GameState.save();
@@ -887,14 +892,16 @@ window.onRewardEarned = function() {
         UIManager.triggerHaptic();
         AudioEngine.sfx.coin(); 
 
-        // 💡 [핵심 버그 수정] 전투 중이었는지, 이벤트 함정이었는지 구분해서 살려주기!
-        const isBattleScreen = document.getElementById('screen-rpg-battle').classList.contains('active');
+        // 💡 [안전장치 추가] 화면 요소가 없을 때 에러 나는 걸 방지! (? 기호 사용)
+        const battleScreen = document.getElementById('screen-rpg-battle');
+        const isBattleScreen = battleScreen ? battleScreen.classList.contains('active') : false;
 
         if (isBattleScreen) {
             // ⚔️ 1. 전투 중에 죽었을 때 -> 전투 이어서 하기!
             GameState.isBattling = true; 
             localStorage.setItem('master_in_battle', 'true'); 
-            document.getElementById('battle-log').innerText = `✨ 기적적인 부활! 반격을 시작하세요!`; 
+            const battleLog = document.getElementById('battle-log');
+            if (battleLog) battleLog.innerText = `✨ 기적적인 부활! 반격을 시작하세요!`; 
 
             GameSystem.Battle.updateBattleUI(); 
             
@@ -902,9 +909,11 @@ window.onRewardEarned = function() {
             GameSystem.Battle.battleInterval = setInterval(() => GameSystem.Battle.monsterAttack(), 1500);
             
             const btnAtk = document.getElementById('btn-attack');
-            btnAtk.disabled = false;
-            btnAtk.classList.remove('opacity-50'); 
-            btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
+            if (btnAtk) {
+                btnAtk.disabled = false;
+                btnAtk.classList.remove('opacity-50'); 
+                btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
+            }
             
             UIManager.showToast("✨ 기적적으로 부활했습니다! 전투를 이어갑니다.");
         } else {
@@ -914,7 +923,8 @@ window.onRewardEarned = function() {
 
             // 화면 다 끄고 로비만 켜기
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-rpg-lobby').classList.add('active');
+            const lobbyScreen = document.getElementById('screen-rpg-lobby');
+            if (lobbyScreen) lobbyScreen.classList.add('active');
             
             // 사라졌던 하단 메뉴바 다시 살려주기
             const bottomNav = document.getElementById('bottom-nav');
