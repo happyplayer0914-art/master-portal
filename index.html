@@ -230,6 +230,26 @@
         /* 스크롤바 커스텀 */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
+        
+        /* 💡 [추가] 타격감 폭발! 데미지 플로팅 애니메이션 */
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
+        }
+        .damage-text {
+            position: absolute;
+            font-weight: 900;
+            pointer-events: none; /* 클릭 방해 안 함 */
+            z-index: 100;
+            animation: floatUpFade 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            white-space: nowrap;
+        }
+        /* 데미지 종류별 색상 & 크기 */
+        .damage-monster { color: #facc15; font-size: 2rem; text-shadow: 0 4px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5); } 
+        .damage-crit { color: #c084fc; font-size: 2.5rem; text-shadow: 0 0 15px #c084fc, 0 4px 4px black; } 
+        .damage-player { color: #ef4444; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        
     </style>
 </head>
 <body>
@@ -689,5 +709,6 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
