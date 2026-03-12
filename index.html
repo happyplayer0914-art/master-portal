@@ -32,7 +32,7 @@ window.onload = function() {
   <script type="module">
         // 1. 코어 및 DB 도구 수입
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
         // 2. 인증(Auth) 도구 수입
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -64,6 +64,7 @@ window.onload = function() {
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
+        window.onSnapshot = onSnapshot;
 
         // 🚨 [이 부분이 빠져서 에러가 났던 거야!]
         window.auth = auth;
@@ -861,6 +862,7 @@ window.onload = function() {
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
