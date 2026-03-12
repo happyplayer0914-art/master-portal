@@ -481,15 +481,21 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <button onclick="GameSystem.Gacha.performGacha(1)" class="py-6 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all">
+            <button onclick="GameSystem.Gacha.performGacha(1)" class="py-6 bg-slate-800 ...">
                 <span class="text-white mb-1">1회 소환</span>
                 <span class="text-cyan-400 text-sm font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 50</span>
             </button>
-            <button onclick="GameSystem.Gacha.performGacha(10)" class="py-6 bg-gradient-to-br from-indigo-900 to-purple-900 hover:from-indigo-800 hover:to-purple-800 border border-purple-500 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(49,46,129,1)] active:shadow-[0_0px_0_rgba(49,46,129,1)] active:translate-y-[6px] transition-all">
+            <button onclick="GameSystem.Gacha.performGacha(10)" class="py-6 bg-gradient-to-br ...">
                 <span class="text-white mb-1">10회 연속 소환</span>
                 <span class="text-cyan-400 text-sm font-bold bg-black/30 px-3 py-1 rounded-full border border-purple-400/50">💎 500</span>
             </button>
         </div>
+
+        <button onclick="window.watchAdForGems()" class="w-full py-4 mt-2 mb-4 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-indigo-600 hover:to-purple-600 text-white rounded-2xl font-black shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-slate-600 hover:border-indigo-400 transition-all active:scale-95 flex items-center justify-center gap-2 group">
+            <span class="text-2xl group-hover:animate-bounce">📺</span> 
+            광고 보고 <span class="text-cyan-300 ml-1 text-lg">50 💎</span> <span class="text-sm font-medium ml-1">무료 획득!</span>
+        </button>
+
     </main>
 
     <main id="screen-ranking" class="screen pt-24 px-5">
@@ -668,3 +674,4 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
