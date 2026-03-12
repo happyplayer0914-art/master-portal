@@ -114,44 +114,82 @@ const UIManager = {
         });
     },
     
-    renderInventory() {
-        const pGear = document.getElementById('inv-panel-gear'); const pSkin = document.getElementById('inv-panel-skin');
+  renderInventory() {
+        const pGear = document.getElementById('inv-panel-gear'); 
+        const pSkin = document.getElementById('inv-panel-skin');
         const emptyState = document.getElementById('inv-empty-state');
         if(!pGear || !pSkin) return;
 
         pGear.innerHTML = ''; pSkin.innerHTML = '';
         let hasGear = false; let hasSkin = false;
         
+        // 인벤토리에 같은 템이 몇 개 있는지 세기
         const counts = {}; 
         GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
 
         for(const [id, count] of Object.entries(counts)) {
-            const item = GameData.items[id]; if(!item) continue;
+            const item = GameData.items[id]; 
+            if(!item) continue;
             
-            const isEquipped = (item.type === 'gear' && GameState.equippedGear === id) || 
-                              (item.type === 'skin' && GameState.equippedSkin === id);
+            // 💡 [핵심 1] 아이템 부위에 따라 장착 중인지 확인하기!
+            let isEquipped = false;
+            if (item.type === 'gear') {
+                if (item.subType === 'weapon' && GameState.equippedWeapon === id) isEquipped = true;
+                if (item.subType === 'armor' && GameState.equippedArmor === id) isEquipped = true;
+                if (item.subType === 'accessory' && GameState.equippedAccessory === id) isEquipped = true;
+            } else if (item.type === 'skin') {
+                if (GameState.equippedSkin === id) isEquipped = true;
+            }
             
-            const badgeHTML = isEquipped ? `<div class="item-equipped-badge">장착중</div>` : '';
+            const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider">장착중</div>` : '';
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
-            const effectHTML = item.type === 'gear' ? `<span class="text-[9px] text-emerald-400 font-bold mt-1">스탯 +${Math.round((item.statMult - 1)*100)}%</span>` : `<span class="text-[9px] text-purple-400 font-bold mt-1">프로필 효과</span>`;
             
+            // 💡 [핵심 2] 장비 특성에 맞춰 예쁜 텍스트 달아주기!
+            let effectText = '';
+            if (item.type === 'gear') {
+                // 부위 표시 (작은 글씨)
+                let typeLabel = item.subType === 'weapon' ? '[무기]' : item.subType === 'armor' ? '[방어구]' : '[장신구]';
+                effectText += `<span class="text-[8px] text-slate-500 mb-0.5">${typeLabel}</span>`;
+                
+                // 특성 표시
+                if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold">공격력 +${Math.round((item.atkMult - 1)*100)}%</span>`;
+                if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold">체력 +${Math.round((item.hpMult - 1)*100)}%</span>`;
+                if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold">크리티컬 +${item.critRate}%</span>`;
+                if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold">크리데미지 +${item.critDmg}%</span>`;
+                if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold">피흡 +${item.vamp}%</span>`;
+            } else {
+                effectText = `<span class="text-[9px] text-cyan-400 font-bold mt-1">프로필 테두리</span>`;
+            }
+            
+            // 카드 HTML 그리기
             const card = `
-                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative">
+                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-2 h-[140px] !important">
                     ${badgeHTML}
-                    <div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[11px] text-center break-keep leading-tight">${item.name}</h4>
-                    ${effectHTML}
+                    <div class="text-3xl mb-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
+                    <h4 class="text-white font-bold text-[10px] text-center break-keep leading-tight min-h-[24px] flex items-center mb-1">${item.name}</h4>
+                    <div class="flex flex-col items-center leading-tight">
+                        ${effectText}
+                    </div>
                     ${countHTML}
                 </div>
             `;
-            if(item.type === 'gear') { pGear.innerHTML += card; hasGear = true; } 
-            else { pSkin.innerHTML += card; hasSkin = true; }
+            
+            if(item.type === 'gear') { 
+                pGear.innerHTML += card; hasGear = true; 
+            } else { 
+                pSkin.innerHTML += card; hasSkin = true; 
+            }
         }
         
-        const currentTab = pGear.classList.contains('hidden') ? 'skin' : 'gear';
-        if ((currentTab === 'gear' && !hasGear) || (currentTab === 'skin' && !hasSkin)) emptyState.classList.remove('hidden');
-        else emptyState.classList.add('hidden');
+        // 텅 빈 상태 처리
+        const isGearTab = !document.getElementById('inv-tab-gear').classList.contains('text-slate-400');
+        if ((isGearTab && !hasGear) || (!isGearTab && !hasSkin)) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
         
+        // 내 정보 상단 전투력/생존력 업데이트
         const stats = GameState.getTotalStats(); 
         document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
@@ -173,3 +211,4 @@ const UIManager = {
         drawBg();
     }
 };
+
