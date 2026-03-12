@@ -20,9 +20,8 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        
-        // 💡 [핵심 추가] 로그인(Auth)에 필요한 도구들 수입해오기!
+        // 💡 [핵심] doc, setDoc, getDoc 이 세 가지 마법 도구를 추가로 수입해 왔어!
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -41,7 +40,7 @@
         // 💡 [핵심 추가] 인증(로그인) 기능 켜기!
         const auth = getAuth(app); 
 
-        // 전역 변수로 할당하여 다른 스크립트에서 사용 가능하게 함 (기존 DB 코드)
+        // 전역 변수로 할당하여 다른 스크립트에서 사용 가능하게 함
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -51,11 +50,13 @@
         window.limit = limit;
         window.serverTimestamp = serverTimestamp;
 
-        // 💡 [핵심 추가] 로그인 기능들도 system.js에서 쓸 수 있게 window에 달아주기!
+     // 💡 [핵심] 수입해 온 도구를 system.js에서 쓸 수 있게 window에 달아주기!
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+
         window.auth = auth;
         window.signInWithPopup = signInWithPopup;
-        window.GoogleAuthProvider = GoogleAuthProvider;
-        window.signOut = signOut;
     </script>
 
     <style>
@@ -817,6 +818,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
