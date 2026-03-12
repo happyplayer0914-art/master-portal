@@ -548,66 +548,111 @@ const GameSystem = {
             this.updateBattleUI(); 
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
-        endBattle(isWin) {
+      endBattle(isWin) {
             clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
             const btnAtk = document.getElementById('btn-attack');
             btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료";
-            document.getElementById('bottom-nav').style.display = 'flex'; 
+            
             const isBoss = (GameState.rpgStage % 5 === 0);
+            
             if (isWin) {
+                document.getElementById('bottom-nav').style.display = 'flex'; 
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
                 GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
                 
                 GameSystem.Quest.updateProgress('achievements', 'a3'); 
-                if (GameState.rpgStage >= 5) {
-                    GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
-                }
+                if (GameState.rpgStage >= 5) GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
 
                 GameState.save();
                 UIManager.updateCurrencyUI(); 
                 GameSystem.Ranking.updateRankingSilently();
                 UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
                 document.getElementById('battle-log').innerText = `토벌 성공! 보상을 획득했습니다.`;
+                
+                setTimeout(() => {
+                    UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+                }, 1500);
             } else {
-                UIManager.triggerHeavyHaptic(); GameState.currentHp = 0; GameState.save();
-                UIManager.showToast(`💀 쓰러졌습니다... 여관에서 휴식하세요.`);
+                // 💡 [부활 업데이트] 패배 시 쫓아내지 않고 부활 모달을 띄움!
+                UIManager.triggerHeavyHaptic(); 
+                GameState.currentHp = 0; 
+                GameState.save();
+                this.updateBattleUI(); // 피 0 된거 화면에 보여주기
+                document.getElementById('battle-log').innerText = `마스터가 쓰러졌습니다...`;
+                
+                // 부활 팝업 짠!
+                setTimeout(() => {
+                    document.getElementById('revive-modal').classList.add('active');
+                }, 500);
             }
-            setTimeout(() => {
-                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
-            }, 1500);
         }
-    }
 };
 // =========================================================================
-// 💡 [수정] 광고 보고 50젬 받기 전용 시스템
+// 💡 [스마트 보상 시스템] 광고 꼬리표 달기!
 // =========================================================================
 
-// 유저가 "광고 보기" 버튼을 눌렀을 때 실행될 함수
+// 현재 유저가 어떤 이유로 광고를 보는지 저장하는 꼬리표 변수
+window.currentAdAction = ''; 
+
+// 1. 젬 받기 버튼 눌렀을 때
 window.watchAdForGems = function() {
+    window.currentAdAction = 'gems'; // 꼬리표: "얘는 젬 주려고 본 거임!"
     AudioEngine.sfx.click();
-    if (window.AppChannel) {
-        // 모바일 앱이면 플러터에게 영상 광고 띄우라고 명령!
-        window.AppChannel.postMessage('SHOW_REWARD_AD');
-    } else {
-        // PC 웹이면 그냥 바로 보상 지급 (테스트용)
-        window.onRewardEarned();
-    }
+    if (window.AppChannel) window.AppChannel.postMessage('SHOW_REWARD_AD');
+    else window.onRewardEarned(); // PC웹 테스트용
 };
 
-// 플러터 앱에서 광고 시청이 완료되면 자동으로 실행되는 함수
+// 2. 부활하기 버튼 눌렀을 때
+window.watchAdForRevive = function() {
+    window.currentAdAction = 'revive'; // 꼬리표: "얘는 부활하려고 본 거임!"
+    AudioEngine.sfx.click();
+    if (window.AppChannel) window.AppChannel.postMessage('SHOW_REWARD_AD');
+    else window.onRewardEarned();
+};
+
+// 3. 포기하고 마을로 갈 때
+window.giveUpBattle = function() {
+    document.getElementById('revive-modal').classList.remove('active');
+    UIManager.showToast(`💀 쓰러졌습니다... 여관에서 휴식하세요.`);
+    UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
+};
+
+// 💡 [핵심] 플러터가 광고 시청 완료 후 실행하는 함수
 window.onRewardEarned = function() {
-    console.log("광고 시청 완료! 50 젬 지급!");
+    console.log("광고 시청 완료! 꼬리표 확인 중...", window.currentAdAction);
     
-    // 1. 유저에게 50젬 추가
-    GameState.gem += 50;
-    GameState.save();
-    UIManager.updateCurrencyUI(); // 상단 재화 UI 업데이트
-    
-    // 2. 효과음 및 알림 띄우기
-    AudioEngine.sfx.coin();
-    UIManager.triggerHaptic();
-    UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
-};;
+    // 꼬리표가 'gems' 일 때
+    if (window.currentAdAction === 'gems') {
+        GameState.gem += 50;
+        GameState.save();
+        UIManager.updateCurrencyUI();
+        AudioEngine.sfx.coin();
+        UIManager.triggerHaptic();
+        UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
+    } 
+    // 꼬리표가 'revive' 일 때
+    else if (window.currentAdAction === 'revive') {
+        document.getElementById('revive-modal').classList.remove('active'); // 부활 창 끄기
+        
+        GameState.currentHp = GameState.getTotalStats().hp; // 체력 100% 회복!
+        GameState.save();
+        GameSystem.Battle.updateBattleUI(); // 전투 화면 체력바 쫙 채워주기
+        
+        UIManager.triggerHaptic();
+        AudioEngine.sfx.coin(); 
+        UIManager.showToast("✨ 기적적으로 부활했습니다! 전투를 이어갑니다.");
+        
+        // 🛑 멈췄던 몬스터의 공격과 전투 버튼을 다시 살려줌!
+        GameSystem.Battle.battleInterval = setInterval(() => GameSystem.Battle.monsterAttack(), 1500);
+        const btnAtk = document.getElementById('btn-attack');
+        btnAtk.disabled = false;
+        btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
+    }
+
+    // 보상 줬으니 꼬리표 초기화
+    window.currentAdAction = ''; 
+};
+
 
 
