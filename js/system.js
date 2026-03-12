@@ -417,26 +417,46 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-// 🔒 [완전판] 구글 로그인 + 클라우드 세이브/로드 시스템
+// 🔒 [오토 세이브/로드] 구글 로그인 + 닌자 백업 시스템
     Auth: {
+        // 🚀 [신규] 게임 켤 때마다 로그인 상태 확인하고 자동 백업해주는 감시자!
+        init() {
+            window.auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // 1. 파이어베이스가 "이 사람 아까 로그인했던 사람이야!" 라고 알려줌
+                    localStorage.setItem('master_uid', user.uid);
+                    
+                    // 2. UI를 조용히 '로그인 완료' 상태로 바꿈
+                    const loginBtn = document.getElementById('btn-google-login');
+                    const userInfo = document.getElementById('auth-user-info');
+                    if(loginBtn) loginBtn.classList.add('hidden');
+                    if(userInfo) userInfo.classList.remove('hidden');
+                    document.getElementById('auth-email').innerText = user.email;
+
+                    // 3. 접속 시 딱 한 번! 클라우드에서 최신 데이터를 자동으로 불러옴
+                    this.silentLoadFromCloud(user.uid);
+
+                    // 4. [오토 세이브] 10초마다 유저 몰래 클라우드에 쓱싹 저장함 (꼼수 완벽 차단!)
+                    if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                    this.autoSaveTimer = setInterval(() => {
+                        this.silentSaveToCloud(user.uid);
+                    }, 10000); // 10000ms = 10초
+                } else {
+                    // 로그아웃 상태면 자동 저장 타이머 끄기
+                    localStorage.removeItem('master_uid');
+                    if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                }
+            });
+        },
+
         loginWithGoogle() {
             const provider = new window.GoogleAuthProvider();
             UIManager.showToast("구글 로그인을 요청합니다...");
 
             window.signInWithPopup(window.auth, provider)
                 .then((result) => {
-                    const user = result.user;
-                    console.log("로그인 성공 유저:", user);
-                    
-                    // 💡 [핵심] 유저 고유 ID를 안전하게 임시 보관! (이 ID가 클라우드 금고 열쇠가 됨)
-                    localStorage.setItem('master_uid', user.uid);
-                    
-                    UIManager.showToast(`환영합니다, ${user.displayName}님! ✨`);
-                    
-                    document.getElementById('btn-google-login').classList.add('hidden');
-                    document.getElementById('auth-user-info').classList.remove('hidden');
-                    document.getElementById('auth-email').innerText = user.email;
-                    
+                    UIManager.showToast(`환영합니다, ${result.user.displayName}님! ✨`);
+                    // 로그인 성공하면 onAuthStateChanged 가 알아서 뒷정리(init) 다 해줌!
                 }).catch((error) => {
                     console.error("로그인 에러:", error);
                     UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
@@ -447,79 +467,46 @@ const GameSystem = {
             if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
 
             window.signOut(window.auth).then(() => {
-                localStorage.removeItem('master_uid'); // 로그아웃 시 열쇠도 폐기!
                 UIManager.showToast("안전하게 로그아웃 되었습니다.");
-                
                 document.getElementById('btn-google-login').classList.remove('hidden');
                 document.getElementById('auth-user-info').classList.add('hidden');
             });
         },
 
-        // ☁️ [완벽판] 뿔뿔이 흩어진 내 데이터 싹 다 긁어모아 클라우드에 쏘아올리기!
-        saveToCloud(btnElement) {
-            const uid = localStorage.getItem('master_uid');
-            if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
-            
-            btnElement.innerText = "저장 중...";
-            
-            // 💡 [핵심] 로컬 스토리지에 있는 모든 작은 상자들을 하나의 큰 박스(allMyData)에 쓸어 담기!
+        // 🥷 알림 없이 조용히 클라우드에 저장하는 닌자 함수
+        silentSaveToCloud(uid) {
             const allMyData = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                // 마스터의 데이터(master_ 로 시작하거나 last_checkin)만 쏙쏙 골라 담기!
                 if (key && (key.startsWith('master_') || key === 'last_checkin')) {
                     allMyData[key] = localStorage.getItem(key);
                 }
             }
+            if(Object.keys(allMyData).length === 0) return;
 
-            if(Object.keys(allMyData).length === 0) {
-                btnElement.innerText = "☁️ 서버에 저장";
-                return UIManager.showToast("저장할 데이터가 아직 없습니다!");
-            }
-
-            // 파이어베이스에 쓸어 담은 데이터를 통째로 복붙!
             window.setDoc(window.doc(window.db, "users", uid), {
                 saveData: allMyData,
                 lastSaved: window.serverTimestamp()
-            }).then(() => {
-                UIManager.showToast("☁️ 클라우드에 안전하게 백업되었습니다! 든-든");
-                btnElement.innerText = "☁️ 서버에 저장";
-            }).catch(error => {
-                console.error("저장 실패:", error);
-                UIManager.showToast("저장 실패 😢 콘솔을 확인해주세요.");
-                btnElement.innerText = "☁️ 서버에 저장";
-            });
+            }).catch(e => console.log("자동 저장 중...", e));
         },
 
-        // 📥 [완벽판] 클라우드에서 큰 박스 가져와서 내 폰에 다시 예쁘게 진열하기!
-        loadFromCloud(btnElement) {
-            const uid = localStorage.getItem('master_uid');
-            if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
-            
-            if(!confirm("⚠️ 경고: 클라우드 데이터를 불러오면 현재 기기의 데이터는 덮어씌워집니다. 진행할까요?")) return;
+        // 🥷 게임 켤 때 클라우드에서 최신 정보를 딱 한 번만 덮어씌우는 함수
+        silentLoadFromCloud(uid) {
+            // 이번 접속에서 이미 불러왔으면(무한 새로고침 방지) 패스!
+            if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
 
-            btnElement.innerText = "불러오는 중...";
-
-            // 파이어베이스 금고에서 내 ID 열쇠로 큰 박스 꺼내오기!
             window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(data.saveData) {
-                        // 💡 [핵심] 클라우드에서 가져온 큰 박스 속 데이터들을 로컬 스토리지에 하나씩 원래 이름표대로 다시 꽂아주기!
-                        for (const key in data.saveData) {
-                            localStorage.setItem(key, data.saveData[key]);
-                        }
-                        UIManager.showToast("📥 데이터를 성공적으로 복원했습니다! 재시작합니다.");
-                        setTimeout(() => location.reload(), 1500); // 1.5초 뒤 쿨하게 게임 새로고침!
+                if (docSnap.exists() && docSnap.data().saveData) {
+                    const data = docSnap.data().saveData;
+                    for (const key in data) {
+                        localStorage.setItem(key, data[key]);
                     }
-                } else {
-                    UIManager.showToast("서버에 저장된 백업 데이터가 없습니다.");
-                    btnElement.innerText = "📥 서버에서 불러오기";
+                    sessionStorage.setItem('cloud_loaded_once', 'true'); // "나 방금 불러왔음!" 도장 찍기
+                    console.log("☁️ 클라우드 동기화 완료!");
+                    
+                    // 데이터 덮어쓰고 화면에 반영하기 위해 쿨하게 1회 새로고침!
+                    location.reload(); 
                 }
-            }).catch(error => {
-                console.error("불러오기 실패:", error);
-                UIManager.showToast("불러오기 실패 😢");
-                btnElement.innerText = "📥 서버에서 불러오기";
             });
         }
     },
@@ -1052,6 +1039,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
