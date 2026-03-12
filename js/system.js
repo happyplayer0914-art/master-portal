@@ -528,11 +528,10 @@ const GameSystem = {
                     sessionStorage.setItem('cloud_loaded_once', 'true'); 
                     console.log("☁️ 클라우드 동기화 완료!");
                     location.reload(); 
-                }
+            }
             });
         }
-    }
-},
+    },
 
     Quest: {
         updateProgress(type, id, amount = 1) {
@@ -1062,43 +1061,5 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
