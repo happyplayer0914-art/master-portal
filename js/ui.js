@@ -217,6 +217,24 @@ const UIManager = {
         const stats = GameState.getTotalStats(); 
         document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
+      
+      // 💡 [핵심 추가] 내 정보(프로필) 화면에도 장착된 3종 장비 그려주기!
+        const renderProfileSlot = (slotId, itemId, label) => {
+            const el = document.getElementById(slotId);
+            if (!el) return;
+            if (itemId && GameData.items[itemId]) {
+                const item = GameData.items[itemId];
+                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
+                el.innerHTML = `<span class="filter drop-shadow-md">${item.emoji}</span>`;
+            } else {
+                el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
+                el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
+            }
+        };
+
+        renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
+        renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
+        renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
     },
     
     initBackground() { 
@@ -235,5 +253,6 @@ const UIManager = {
         drawBg();
     }
 };
+
 
 
