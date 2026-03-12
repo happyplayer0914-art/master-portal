@@ -4,25 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>마스터의 놀이터 | 프리미엄 테스트 & 미니게임 포털</title>
-    <!-- 🌐 SNS 공유용 메타 태그 (오픈그래프) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://master-portal-xi.vercel.app/">
     <meta property="og:title" content="마스터의 놀이터 | 프리미엄 MBTI & 미니게임">
     <meta property="og:description" content="나의 플러팅 무기 확인하고, 심연의 탑을 정복하세요! 지금 접속 시 100G 지급!">
-    <!-- 🚨 아래 content에 깃허브에서 복사한 'Raw' 이미지 주소를 넣으세요 -->
     <meta property="og:image" content="https://raw.githubusercontent.com/happyplayer0914-art/master-portal/refs/heads/main/og-image-portal.png">
     
-    <!-- 트위터용 설정 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="마스터의 놀이터 | 프리미엄 MBTI & 미니게임">
     <meta name="twitter:description" content="나의 플러팅 무기 확인하고, 심연의 탑을 정복하세요! 지금 접속 시 100G 지급!">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/happyplayer0914-art/master-portal/refs/heads/main/og-image-portal.png">
 
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 🔥 Firebase SDK 추가 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -155,19 +150,18 @@
         }
         #gacha-overlay.active { opacity: 1; pointer-events: all; }
         
-        /* 🔥 버그 수정: 카드 높이 고정 및 내부 정렬 최적화 */
-.item-card {
-    background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 12px 8px;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    border: 2px solid; position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s;
-    height: 125px !important; /* 높이를 125px로 고정 */
-    width: 100%;
-}
-.item-card:active { transform: scale(0.96); }
-.item-card h4 { 
-    font-size: 11px; font-weight: 700; text-align: center; margin-top: 4px; 
-    line-height: 1.2; height: 28px; display: flex; align-items: center; justify-content: center; 
-}
+        /* 🔥 카드 높이 고정 및 내부 정렬 최적화 */
+        .item-card {
+            background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 12px 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            border: 2px solid; position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s;
+            height: 125px !important; width: 100%;
+        }
+        .item-card:active { transform: scale(0.96); }
+        .item-card h4 { 
+            font-size: 11px; font-weight: 700; text-align: center; margin-top: 4px; 
+            line-height: 1.2; height: 28px; display: flex; align-items: center; justify-content: center; 
+        }
         .item-card:hover { transform: scale(1.05); }
         .gacha-item-card { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: scale(0.5); }
         @keyframes popIn { to { opacity: 1; transform: scale(1); } }
@@ -211,17 +205,38 @@
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        #nickname-modal.active { opacity: 1; pointer-events: all; }
+        
+        /* ---------------------------------------------------- */
+        /* 하단에 분리되어 있던 모달 활성화 및 스크롤바 속성 병합 */
+        /* ---------------------------------------------------- */
+        
+        /* 모든 모달의 기본 상태: 클릭 통과 */
+        #synth-modal, #quest-modal, #nickname-modal, #gacha-overlay, #boss-warning-overlay {
+            pointer-events: none;
+        }
+
+        /* .active 클래스가 붙었을 때만 클릭 가능 */
+        #synth-modal.active, 
+        #quest-modal.active, 
+        #nickname-modal.active, 
+        #gacha-overlay.active, 
+        #boss-warning-overlay.active { 
+            opacity: 1; 
+            pointer-events: auto !important; 
+            transform: scale(1); 
+        }
+
+        /* 스크롤바 커스텀 */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<!-- 다이내믹 배경 -->
 <canvas id="dynamic-bg"></canvas>
 
 <div class="app-container">
 
-    <!-- 상단 헤더 (지갑) -->
     <header class="glass-header fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-[480px] px-5 py-4 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <div id="master-profile-icon" class="master-avatar w-8 h-8 rounded-full bg-gradient-to-tr from-slate-600 to-slate-400 flex items-center justify-center font-black text-sm text-white shadow-md">M</div>
@@ -237,9 +252,6 @@
         </div>
     </header>
 
-    <!-- ============================================== -->
-    <!-- 1. [홈] 화면 (screen-home)                     -->
-    <!-- ============================================== -->
     <main id="screen-home" class="screen active pt-24 px-5">
         <section class="mb-8">
             <div class="glass-card p-6 relative overflow-hidden group">
@@ -251,7 +263,7 @@
                 </button>
             </div>
         </section>
-<!-- 🔥 추가할 부분: 방치형 보상 버튼 섹션 -->
+
         <section class="mb-8">
             <div class="glass-card p-5 relative overflow-hidden group border border-slate-700/50 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
                 <div class="flex justify-between items-start mb-3">
@@ -271,7 +283,7 @@
                 </button>
             </div>
         </section>
-        <!-- [추가] 187행 </section> 바로 뒤 -->
+
         <section class="mb-8">
             <button onclick="GameSystem.Quest.openModal()" class="w-full py-4 glass-card border-indigo-500/30 flex items-center justify-between px-6 group active:scale-95 transition-all">
                 <div class="flex items-center gap-3">
@@ -284,7 +296,7 @@
                 <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
             </button>
         </section>
-        <!-- 인기 폭발 테스트 -->
+
         <section class="mb-10">
             <div class="flex justify-between items-end mb-4">
                 <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-fire text-red-500"></i> 인기 폭발 테스트</h2>
@@ -322,9 +334,6 @@
         </section>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 2. [투기장] 화면 (screen-arena)                -->
-    <!-- ============================================== -->
     <main id="screen-arena" class="screen pt-24 px-5">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">심연의 탑</span></h1>
@@ -405,7 +414,6 @@
         </button>
     </main>
 
-    <!-- [전투 및 이벤트 화면 (복구 완료)] -->
     <main id="screen-rpg-event" class="screen pt-24 px-5">
         <div class="glass-card p-8 text-center border border-indigo-500/50 relative overflow-hidden mt-10">
             <p class="text-indigo-400 font-bold text-xs tracking-widest uppercase mb-4">Random Encounter</p>
@@ -450,9 +458,6 @@
         </div>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 3. [가챠샵] (screen-gacha-shop)                -->
-    <!-- ============================================== -->
     <main id="screen-gacha-shop" class="screen pt-24 px-5">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">프리미엄 소환</span></h1>
@@ -487,9 +492,6 @@
         </div>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 4. [랭킹] 명예의 전당 화면                     -->
-    <!-- ============================================== -->
     <main id="screen-ranking" class="screen pt-24 px-5">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">명예의 전당</span></h1>
@@ -517,12 +519,8 @@
         </button>
     </main>
 
-    <!-- ============================================== -->
-    <!-- 5. [내 정보] 인벤토리 화면 (screen-profile)    -->
-    <!-- ============================================== -->
     <main id="screen-profile" class="screen pt-20 px-5">
         
-        <!-- 프로필 요약 카드 -->
         <div class="glass-card p-6 mb-4 flex items-center gap-5 border-t-4 border-t-emerald-500">
             <div id="profile-big-icon" class="master-avatar w-20 h-20 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center font-black text-3xl text-white shadow-xl">M</div>
             <div>
@@ -535,8 +533,7 @@
             </div>
         </div>
 
-        <!-- 인벤토리 탭 -->
-       <div class="flex justify-between items-center mb-4 gap-2 border-b border-slate-800 pb-3">
+        <div class="flex justify-between items-center mb-4 gap-2 border-b border-slate-800 pb-3">
             <div class="flex gap-2 w-2/3">
                 <button onclick="UIManager.switchInvTab('gear')" id="inv-tab-gear" class="w-full py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors">장비(스탯)</button>
                 <button onclick="UIManager.switchInvTab('skin')" id="inv-tab-skin" class="w-full py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors">치장품</button>
@@ -546,8 +543,7 @@
             </button>
         </div>
 
-         <!-- 장비 목록 영역 (수정됨: 높이 고정 및 그리드 최적화) -->
-        <div class="glass-card p-4 min-h-[380px]">
+         <div class="glass-card p-4 min-h-[380px]">
             <div id="inv-panel-gear" class="grid grid-cols-3 gap-3"></div>
             <div id="inv-panel-skin" class="grid grid-cols-3 gap-3 hidden"></div>
             
@@ -558,20 +554,14 @@
         </div>
     </main>
 
-   <!-- 하단 고정 내비게이션 바 (GNB) -->
-    <nav id="bottom-nav" class="bottom-nav">
+   <nav id="bottom-nav" class="bottom-nav">
         <div class="nav-item active" onclick="UIManager.navTo('screen-home', this)"><i class="fa-solid fa-house"></i><span>홈</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-arena', this)"><i class="fa-solid fa-khanda"></i><span>투기장</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-gacha-shop', this)"><i class="fa-solid fa-store"></i><span>가챠샵</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-ranking', this)"><i class="fa-solid fa-trophy"></i><span>랭킹</span></div>
         <div class="nav-item" onclick="UIManager.navTo('screen-profile', this)"><i class="fa-solid fa-user"></i><span>내 정보</span></div>
     </nav>
-</div> <!-- app-container 닫음 -->
-
-<!-- [오버레이 레이어 - app-container 외부에 위치해야 클릭 간섭이 없음] -->
-
-<!-- 1. 보스 경고 -->
-<div id="boss-warning-overlay">
+</div> <div id="boss-warning-overlay">
     <div class="warning-content">
         <div class="text-7xl mb-6 text-center">⚠️</div>
         <div class="warning-text">WARNING</div>
@@ -579,7 +569,6 @@
     </div>
 </div>
 
-<!-- 2. 가챠 결과 -->
 <div id="gacha-overlay">
     <h2 class="text-2xl font-black text-white mb-10 tracking-widest" id="gacha-title">소환의식 진행 중...</h2>
     <div id="gacha-animation" class="text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🎁</div>
@@ -587,7 +576,6 @@
     <button id="gacha-close-btn" onclick="GameSystem.Gacha.closeGacha()" class="hidden mt-10 px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold border border-slate-600 transition-colors shadow-lg active:scale-95">인벤토리에 넣기</button>
 </div>
 
-<!-- 3. 닉네임 등록 -->
 <div id="nickname-modal">
     <div class="glass-card p-6 w-full max-w-sm m-4 border-t-4 border-t-indigo-500 text-center">
         <h3 class="text-xl font-bold text-white mb-2">명예의 전당 등록</h3>
@@ -600,7 +588,6 @@
     </div>
 </div>
 
-<!-- 4. 연금술 모달 (구조 정밀 복구본) -->
 <div id="synth-modal" class="fixed inset-0 z-[1200] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-purple-500">
         <button onclick="GameSystem.Synthesis.closeModal()" class="absolute top-3 right-4 text-slate-400 hover:text-white text-3xl font-light">&times;</button>
@@ -646,7 +633,7 @@
         </button>
     </div>
 </div>
-    <!-- [추가] 635행 </div> <!-- synth-modal 닫음 --> 바로 뒤 -->
+
 <div id="quest-modal" class="fixed inset-0 z-[1300] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-indigo-500 flex flex-col max-h-[80vh]">
         <button onclick="GameSystem.Quest.closeModal()" class="absolute top-3 right-4 text-slate-400 hover:text-white text-3xl font-light">&times;</button>
@@ -662,54 +649,22 @@
         </div>
 
         <div id="quest-list-container" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-            <!-- 자바스크립트로 동적 생성됨 -->
-        </div>
+            </div>
     </div>
 </div>
 
-<!-- 알림 토스트 -->
 <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-indigo-900/90 text-white px-6 py-3 rounded-full text-sm font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-[2000] border border-indigo-500/50 shadow-2xl"></div>
 
-<!-- [스크립트 로드 - 중복 제거 및 순서 보장] -->
-<script src="gameData.js"></script>
-<script src="gameState.js"></script>
-<script src="gameLogic.js"></script>
-<script>
-    window.onload = function() {
-        try {
-            GameState.load();
-            UIManager.init();
-        } catch(e) { console.error("초기화 오류:", e); }
-    };
-</script>
+//불러오기 순서
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
 
-<style>
-    /* 모든 모달의 기본 상태: 클릭 통과 */
-    #synth-modal, #quest-modal, #nickname-modal, #gacha-overlay, #boss-warning-overlay {
-        pointer-events: none;
-    }
+<script src="js/audio.js"></script>
 
-    /* .active 클래스가 붙었을 때만 클릭 가능 */
-    #synth-modal.active, 
-    #quest-modal.active, 
-    #nickname-modal.active, 
-    #gacha-overlay.active, 
-    #boss-warning-overlay.active { 
-        opacity: 1; 
-        pointer-events: auto !important; 
-        transform: scale(1); 
-    }
+<script src="js/system.js"></script>
 
-    /* 스크롤바 커스텀 */
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
-</style>
+<script src="js/ui.js"></script>
 
+<script src="js/main.js"></script>
 </body>
 </html>
-
-
-
-
-
-
