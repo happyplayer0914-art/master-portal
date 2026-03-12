@@ -417,18 +417,17 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     },
-    // 🔒 [신규] 구글 로그인 시스템
+   // 🔒 [신규] 구글 로그인 시스템 (최신 모듈러 방식)
     Auth: {
-        // 구글 로그인 창 띄우기
         loginWithGoogle() {
-            // 파이어베이스 구글 로그인 제공자 생성
-            const provider = new firebase.auth.GoogleAuthProvider();
+            // window에 달아둔 구글 로그인 제공자 불러오기
+            const provider = new window.GoogleAuthProvider();
             
             UIManager.showToast("구글 로그인을 요청합니다...");
 
-            firebase.auth().signInWithPopup(provider)
+            // window에 달아둔 팝업 로그인 실행!
+            window.signInWithPopup(window.auth, provider)
                 .then((result) => {
-                    // 로그인 성공!
                     const user = result.user;
                     console.log("로그인 성공 유저:", user);
                     
@@ -438,15 +437,26 @@ const GameSystem = {
                     document.getElementById('btn-google-login').classList.add('hidden');
                     document.getElementById('auth-user-info').classList.remove('hidden');
                     document.getElementById('auth-email').innerText = user.email;
-
-                    // 💡 여기에 나중에 "클라우드에서 내 데이터 불러오기" 기능이 추가될 거야!
                     
                 }).catch((error) => {
-                    // 로그인 실패 (창을 그냥 닫았거나 에러 발생)
                     console.error("로그인 에러:", error);
                     UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
                 });
         },
+
+        logout() {
+            if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
+
+            // window에 달아둔 로그아웃 실행!
+            window.signOut(window.auth).then(() => {
+                UIManager.showToast("안전하게 로그아웃 되었습니다.");
+                
+                // UI 원상복구
+                document.getElementById('btn-google-login').classList.remove('hidden');
+                document.getElementById('auth-user-info').classList.add('hidden');
+            });
+        }
+    },
 
         // 로그아웃
         logout() {
@@ -990,6 +1000,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
