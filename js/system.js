@@ -369,10 +369,22 @@ const GameSystem = {
                 });
                 if(unique.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
                 list.innerHTML = '';
-                unique.forEach((d, i) => {
+               unique.forEach((d, i) => {
                     let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
-                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; if(d.skin && d.skin !== 'none' && GameData.items[d.skin]) skinClass = `skin-${GameData.items[d.skin].rarity}`;
+                    
+                    // 💡 [수정됨] 옛날 스킨 ID 호환성 패치! (번역기 가동)
+                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; 
+                    let sId = d.skin;
+                    // 옛날 이름표면 새 이름표로 바꿔주기!
+                    if(sId === 'r3') sId = 's_r1'; 
+                    if(sId === 'e3') sId = 's_e1'; 
+                    if(sId === 'l3') sId = 's_l1';
+                    
+                    if(sId && sId !== 'none' && GameData.items[sId]) {
+                        skinClass = `skin-${GameData.items[sId].rarity}`;
+                    }
+                    
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${d.stage}F</p></div></div>`;
                 });
@@ -746,6 +758,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
