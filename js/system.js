@@ -455,23 +455,31 @@ const GameSystem = {
             });
         },
 
-        // ☁️ [신규] 클라우드에 내 데이터 쏘아올리기!
+        // ☁️ [완벽판] 뿔뿔이 흩어진 내 데이터 싹 다 긁어모아 클라우드에 쏘아올리기!
         saveToCloud(btnElement) {
             const uid = localStorage.getItem('master_uid');
             if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
             
             btnElement.innerText = "저장 중...";
             
-            // 우리가 이미 쓰고 있던 로컬 저장 데이터를 꿀꺽!
-            const localData = localStorage.getItem('master_gameState');
-            if(!localData) {
+            // 💡 [핵심] 로컬 스토리지에 있는 모든 작은 상자들을 하나의 큰 박스(allMyData)에 쓸어 담기!
+            const allMyData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                // 마스터의 데이터(master_ 로 시작하거나 last_checkin)만 쏙쏙 골라 담기!
+                if (key && (key.startsWith('master_') || key === 'last_checkin')) {
+                    allMyData[key] = localStorage.getItem(key);
+                }
+            }
+
+            if(Object.keys(allMyData).length === 0) {
                 btnElement.innerText = "☁️ 서버에 저장";
                 return UIManager.showToast("저장할 데이터가 아직 없습니다!");
             }
 
-            // 파이어베이스에 고유 ID 이름표를 달아서 문서 생성하고 복붙!
+            // 파이어베이스에 쓸어 담은 데이터를 통째로 복붙!
             window.setDoc(window.doc(window.db, "users", uid), {
-                saveData: localData,
+                saveData: allMyData,
                 lastSaved: window.serverTimestamp()
             }).then(() => {
                 UIManager.showToast("☁️ 클라우드에 안전하게 백업되었습니다! 든-든");
@@ -483,7 +491,7 @@ const GameSystem = {
             });
         },
 
-        // 📥 [신규] 클라우드에서 내 데이터 내려받기!
+        // 📥 [완벽판] 클라우드에서 큰 박스 가져와서 내 폰에 다시 예쁘게 진열하기!
         loadFromCloud(btnElement) {
             const uid = localStorage.getItem('master_uid');
             if(!uid) return UIManager.showToast("다시 한 번 구글 로그인을 눌러주세요!");
@@ -492,15 +500,17 @@ const GameSystem = {
 
             btnElement.innerText = "불러오는 중...";
 
-            // 파이어베이스 금고에서 내 ID 열쇠로 데이터 꺼내오기!
+            // 파이어베이스 금고에서 내 ID 열쇠로 큰 박스 꺼내오기!
             window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if(data.saveData) {
-                        // 로컬 스토리지에 클라우드 데이터 강제 주입!
-                        localStorage.setItem('master_gameState', data.saveData);
+                        // 💡 [핵심] 클라우드에서 가져온 큰 박스 속 데이터들을 로컬 스토리지에 하나씩 원래 이름표대로 다시 꽂아주기!
+                        for (const key in data.saveData) {
+                            localStorage.setItem(key, data.saveData[key]);
+                        }
                         UIManager.showToast("📥 데이터를 성공적으로 복원했습니다! 재시작합니다.");
-                        setTimeout(() => location.reload(), 1500); // 1.5초 뒤 쿨하게 새로고침
+                        setTimeout(() => location.reload(), 1500); // 1.5초 뒤 쿨하게 게임 새로고침!
                     }
                 } else {
                     UIManager.showToast("서버에 저장된 백업 데이터가 없습니다.");
@@ -1042,6 +1052,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
