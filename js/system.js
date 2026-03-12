@@ -416,43 +416,81 @@ const GameSystem = {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     }, // 🚨 [랭킹 끝]
-// 💬 [신규] 실시간 주점 채팅 시스템!
-  Chat: {
+// 💬 [개편] 실시간 다중 채널 채팅 & 공지 시스템!
+    Chat: {
         lastChatTime: 0,
-        unsubscribe: null,
-        initialLoadDone: false, // 💡 [신규] 처음 30개 불러올 때 가짜 알림 울리는 거 방지!
+        unsubChat: null,
+        unsubNotice: null, // 공지용 수신기 따로 추가!
+        initialLoadDone: false,
+        currentRoom: 'I', // 기본 채널은 I (내향인) 주점!
 
         init() {
             if (!window.db) return;
-            const chatList = document.getElementById('chat-messages');
-            if (!chatList) return;
 
-            const q = window.query(
-                window.collection(window.db, "chats"), 
-                window.orderBy("timestamp", "desc"), 
-                window.limit(30)
-            );
+            // 📢 1. 공지사항 전용 수신기 가동 (모든 채널 공통)
+            const qNotice = window.query(window.collection(window.db, "notices"), window.orderBy("timestamp", "desc"), window.limit(10));
+            this.unsubNotice = window.onSnapshot(qNotice, (snapshot) => {
+                const noticeBox = document.getElementById('notice-box');
+                if (!noticeBox) return;
+                
+                let notices = [];
+                snapshot.forEach(doc => notices.push(doc.data()));
+                
+                if (notices.length === 0) {
+                    noticeBox.innerHTML = '<div class="text-center text-yellow-500/50 mt-2">최근 공지가 없습니다. 평화롭네요! 🕊️</div>';
+                } else {
+                    // 최신 공지가 맨 위로 오도록 그림
+                    noticeBox.innerHTML = notices.map(n => `<div class="mb-1.5 border-b border-yellow-700/30 pb-1"><span class="text-yellow-400 font-bold">📢 [시스템]</span> <span class="text-yellow-100">${this.escapeHTML(n.text)}</span></div>`).join('');
+                }
+            });
 
-            this.unsubscribe = window.onSnapshot(q, (snapshot) => {
+            // 💬 2. 현재 선택된 채널(I 또는 E) 채팅 수신기 가동!
+            this.listenRoom(this.currentRoom);
+        },
+
+        // 📺 [신규] 채널 변경 마법!
+        switchRoom(roomName) {
+            if (this.currentRoom === roomName) return; // 이미 그 방이면 무시
+            this.currentRoom = roomName;
+
+            // UI 탭 색상 변경 로직
+            const btnI = document.getElementById('btn-room-I');
+            const btnE = document.getElementById('btn-room-E');
+            if (roomName === 'I') {
+                btnI.className = "flex-1 bg-indigo-600 text-white py-2 rounded-t-xl font-bold text-sm border border-indigo-500 border-b-0 transition-all shadow-md";
+                btnE.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-sm border border-slate-700 border-b-0 hover:text-white transition-all";
+            } else {
+                btnE.className = "flex-1 bg-orange-600 text-white py-2 rounded-t-xl font-bold text-sm border border-orange-500 border-b-0 transition-all shadow-md";
+                btnI.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-sm border border-slate-700 border-b-0 hover:text-white transition-all";
+            }
+
+            // 새 방에 들어왔으니 채팅창 비우기
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomName}] 채널 주점에 입장했습니다!</div>`;
+
+            // 기존 방 수신기 끄고, 새 방 수신기 켜기!
+            if (this.unsubChat) this.unsubChat();
+            this.listenRoom(roomName);
+        },
+
+        // 🎧 특정 방의 채팅만 듣는 수신기!
+        listenRoom(roomName) {
+            // 💡 핵심: 방 이름에 따라 서버 폴더를 다르게 씀! (chats_I 또는 chats_E)
+            const qChat = window.query(window.collection(window.db, `chats_${roomName}`), window.orderBy("timestamp", "desc"), window.limit(30));
+            
+            this.unsubChat = window.onSnapshot(qChat, (snapshot) => {
                 let messages = [];
-                snapshot.forEach((doc) => {
-                    messages.push(doc.data());
-                });
+                snapshot.forEach(doc => messages.push(doc.data()));
                 messages.reverse();
                 
-                // 화면 그리기
                 this.renderMessages(messages);
 
-                // 💡 [핵심] 알림 로직 변경! 처음 켤 땐 조용히 넘어가고, 그 이후 새 글 올라올 때만 점등!
                 if (this.initialLoadDone) {
                     const tavernScreen = document.getElementById('screen-tavern');
                     const notiDot = document.getElementById('chat-noti-dot');
-                    // 주점 화면에 없는데 새 글이 왔다면? 빨간 불 켜기!
                     if (tavernScreen && !tavernScreen.classList.contains('active') && notiDot) {
                         notiDot.classList.remove('hidden');
                     }
                 } else {
-                    // 첫 로딩 무사통과! 이제부터 감시 모드 켜짐!
                     this.initialLoadDone = true; 
                 }
             });
@@ -462,21 +500,13 @@ const GameSystem = {
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
             
-            chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">주점에 입장했습니다. 매너 채팅 부탁드립니다! ✨</div>`;
+            // 기존 공지 그리는 로직은 제거됨! (위에 전용칸이 생겼으니까!)
+            chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">매너 채팅 부탁드립니다! ✨</div>`;
             
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                // 📢 [신규] 시스템 공지인 경우 (노란색 알림 띠)
-                if (msg.isSystem) {
-                    chatList.innerHTML += `
-                        <div class="flex justify-center mb-3 mt-1">
-                            <div class="bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 text-xs px-4 py-1.5 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.2)] text-center font-bold tracking-wide">
-                                ${this.escapeHTML(msg.text)}
-                            </div>
-                        </div>`;
-                    return; // 시스템 공지를 그렸으니 아래(일반 채팅)는 건너뜀!
-                }
+                
                 if (isMe) {
                     chatList.innerHTML += `
                         <div class="flex justify-end mb-2">
@@ -487,8 +517,7 @@ const GameSystem = {
                                 </div>
                             </div>
                         </div>`;
-                } 
-                else {
+                } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
                             <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0 border border-slate-600">${msg.nickname.charAt(0)}</div>
@@ -502,108 +531,83 @@ const GameSystem = {
                         </div>`;
                 }
             });
-
-            // 채팅이 올라오면 스크롤을 맨 아래로 쫙 내려주기!
             chatList.scrollTop = chatList.scrollHeight;
-            
-            // 🚨 아까 여기에 있던 알림 켜는 로직은 위쪽(init)으로 이사 갔음!
         },
 
-        // 3. 내가 채팅을 쳤을 때 서버로 날리는 함수!
         async sendMessage() {
-            // ① 검문소: 로그인 안 했거나 이름 없으면 커트!
             const uid = localStorage.getItem('master_uid');
             if (!uid || GameState.nickname === "위대한 길드장") {
                 if (confirm("주점에서 대화하려면 구글 로그인과 닉네임 설정이 필요합니다!\n지금 설정하시겠습니까?")) {
-                    GameSystem.setFixedNickname(); // 입국 심사대로 강제 이송!
+                    GameSystem.setFixedNickname();
                 }
                 return;
             }
 
-            // ② 도배 방지: 3초에 한 번만 말할 수 있음!
             const now = Date.now();
-            if (now - this.lastChatTime < 3000) {
-                return UIManager.showToast("⏳ 숨 좀 고르고 말씀하세요! (3초 쿨타임)");
-            }
+            if (now - this.lastChatTime < 3000) return UIManager.showToast("⏳ 숨 좀 고르고 말씀하세요! (3초 쿨타임)");
 
-            // ③ 입력창에서 글씨 빼오기
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
-            if (!text) return; // 빈칸이면 무시
-            // 🚨 [신규] 1순위: 악성 링크 및 도배 방지 철벽 방어!
-            // http, https, www, .com, .net 등이 포함되어 있는지 검사하는 마법진(정규식)
+            if (!text) return;
+
             const linkPattern = /(http|https|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/|\b))/i;
-            if (linkPattern.test(text)) {
-                return UIManager.showToast("🚨 경고: 채팅에 외부 링크는 포함할 수 없습니다!");
-            }
+            if (linkPattern.test(text)) return UIManager.showToast("🚨 경고: 채팅에 외부 링크는 포함할 수 없습니다!");
 
-            input.value = ''; // 글 날렸으니 입력창 비워주기
-            this.lastChatTime = now; // 시간 기록
+            input.value = '';
+            this.lastChatTime = now;
 
-           // ④ 파이어베이스로 발사! 🚀
+            // 💡 핵심: 현재 방 이름에 맞춰서 폴더를 골라 전송!
+            const collectionName = `chats_${this.currentRoom}`;
+
             try {
-                await window.addDoc(window.collection(window.db, "chats"), {
+                await window.addDoc(window.collection(window.db, collectionName), {
                     uid: uid,
                     nickname: GameState.nickname,
                     text: text,
                     timestamp: window.serverTimestamp()
                 });
 
-                // ⑤ 🧹 [신규] 스마트 자동 청소기 작동!
-                // 10번 채팅 칠 때 1번꼴(10% 확률)로 가동해서 서버 부하를 완벽 차단!
+                // 청소기도 해당 방만 청소하도록 업그레이드!
                 if (Math.random() < 0.1) {
-                    // 시간 순서대로(asc) 정렬해서, 가장 오래된 썩은(?) 채팅 5개만 골라옴!
-                    const oldQuery = window.query(
-                        window.collection(window.db, "chats"),
-                        window.orderBy("timestamp", "asc"),
-                        window.limit(5)
-                    );
+                    const oldQuery = window.query(window.collection(window.db, collectionName), window.orderBy("timestamp", "asc"), window.limit(5));
                     const snap = await window.getDocs(oldQuery);
-                    
-                    // 골라온 5개를 자비 없이 삭제! 💥
-                    snap.forEach(d => {
-                        window.deleteDoc(d.ref);
-                    });
-                    console.log("🧹 낡은 채팅 청소 완료!");
+                    snap.forEach(d => window.deleteDoc(d.ref));
                 }
-
             } catch(e) {
                 console.error(e);
                 UIManager.showToast("채팅 전송에 실패했습니다 😢");
             }
         },
 
-        // 빨간 알림 점 끄기 버튼 (유저가 주점에 들어오면 실행)
+        // 📢 [시스템 공지 발송] - 이건 notices 폴더로 따로 날아감!
+        async sendSystemMessage(message) {
+            if (!window.db) return;
+            try {
+                await window.addDoc(window.collection(window.db, "notices"), {
+                    text: message,
+                    timestamp: window.serverTimestamp()
+                });
+                
+                // 공지도 20개 넘게 쌓이면 낡은 거 삭제 (서버 최적화)
+                const oldQuery = window.query(window.collection(window.db, "notices"), window.orderBy("timestamp", "asc"), window.limit(2));
+                const snap = await window.getDocs(oldQuery);
+                snap.forEach(d => window.deleteDoc(d.ref));
+            } catch(e) {
+                console.error("시스템 공지 전송 실패:", e);
+            }
+        },
+
         clearNoti() {
             const notiDot = document.getElementById('chat-noti-dot');
             if (notiDot) notiDot.classList.add('hidden');
         },
 
-      
-        // 악성 스크립트(해킹) 삽입 방지용 철벽!
-      escapeHTML(str) {
+        escapeHTML(str) {
             return str.replace(/[&<>'"]/g, tag => ({
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
             }[tag] || tag));
-        }, // 👈 요기!! 함수 끝나는 중괄호 뒤에 콤마 추가!!
-        
-     // 📢 [신규] 추가 아이디어: 시스템 전체 공지 발송 마법!
-        // 마스터(개발자)나 게임 시스템이 직접 채팅방 한가운데에 노란색 공지를 띄웁니다!
-        async sendSystemMessage(message) {
-            if (!window.db) return;
-            try {
-                await window.addDoc(window.collection(window.db, "chats"), {
-                    uid: "SYSTEM_MASTER", // 시스템 전용 ID
-                    nickname: "📢 [시스템]",
-                    text: message,
-                    timestamp: window.serverTimestamp(),
-                    isSystem: true // 💡 이게 바로 '시스템 공지'라는 표식!
-                });
-           } catch(e) {
-                console.error("시스템 공지 전송 실패:", e);
-            }
-        } // 👈 1. 함수 닫기 (여긴 콤마 없음!)
-    }, // 👈 2. 🌟여기가 핵심🌟! Chat 묶음을 통째로 닫아주는 문이야!
+        }
+    }, // 👈 완벽한 콤마 마무리!
 
     
     // 🔒 [닉네임 영구 고정 & 중복 방지 시스템 - 게스트 환영 버전!]
@@ -1271,6 +1275,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
