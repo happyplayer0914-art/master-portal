@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>마스터의 놀이터 | 프리미엄 테스트 & 미니게임 포털</title>
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://master-portal-xi.vercel.app/">
+    <meta property="og:url" content="http// =========================================================================
+// 🚀 앱 부팅 (초기화)
+// =========================================================================
+window.onload = function() {
+    // 💡 [신규 추가] 자동 로그인 및 오토 세이브 감시자 출동!
+    GameSystem.Auth.init();
+    
+    try {
+        GameState.load();
+        UIManager.init();
+    } catch(e) { console.error("초기화 오류:", e); }
+};s://master-portal-xi.vercel.app/">
     <meta property="og:title" content="마스터의 놀이터 | 프리미엄 MBTI & 미니게임">
     <meta property="og:description" content="나의 플러팅 무기 확인하고, 심연의 탑을 정복하세요! 지금 접속 시 100G 지급!">
     <meta property="og:image" content="https://raw.githubusercontent.com/happyplayer0914-art/master-portal/refs/heads/main/og-image-portal.png">
@@ -621,8 +632,14 @@
             <div class="flex items-center gap-5 mb-5">
                 <div id="profile-big-icon" class="master-avatar w-20 h-20 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center font-black text-3xl text-white shadow-xl">M</div>
                 <div>
-                    <p class="text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1">Master Profile</p>
-                    <h2 class="text-2xl font-black text-white mb-1" id="profile-nickname-display">위대한 길드장</h2>
+                   <p class="text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1">Master Profile</p>
+                    
+                    <div class="flex items-center gap-2 mb-1">
+                        <h2 class="text-2xl font-black text-white" id="profile-nickname-display">위대한 길드장</h2>
+                        <button id="btn-edit-nickname" onclick="GameSystem.setFixedNickname()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-2 py-1 rounded shadow transition-all active:scale-95">
+                            ✏️ 설정
+                        </button>
+                    </div>
                     <div class="flex gap-2 text-xs font-bold text-slate-300">
                         <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">전투력: <span id="profile-total-power" class="text-red-400">0</span></span>
                         <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700">생존력: <span id="profile-total-hp" class="text-emerald-400">0</span></span>
@@ -823,6 +840,7 @@
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
