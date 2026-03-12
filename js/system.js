@@ -506,10 +506,29 @@ const GameSystem = {
             GameSystem.Quest.updateProgress('daily', 'd1');
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
+            
             const isBoss = (GameState.rpgStage % 5 === 0);
-            let stageRoll = localStorage.getItem('master_stage_roll_' + GameState.rpgStage) || Math.random(); 
-            localStorage.setItem('master_stage_roll_' + GameState.rpgStage, stageRoll);
-            if (!isBoss && parseFloat(stageRoll) < 0.3) { this.triggerRandomEvent(parseFloat(stageRoll)); } else { this.initBattle(isBoss); }
+            
+            // 일반 몬스터 & 50% 확률로 랜덤 이벤트 발생!
+            if (!isBoss && Math.random() < 0.3) { 
+                this.triggerRandomEvent(); 
+            } else { 
+                // 💡 [연출 복구] 보스전이면 화면 시뻘겋게 띄우고 들어가기!
+                if (isBoss) {
+                    const warning = document.getElementById('boss-warning-overlay');
+                    if (warning) warning.classList.add('active');
+                    UIManager.triggerHeavyHaptic(); // 징~ 징~ 진동!
+                    
+                    // 1.5초 뒤에 경고창 끄고 보스 전투 시작!
+                    setTimeout(() => {
+                        if (warning) warning.classList.remove('active');
+                        this.initBattle(true);
+                    }, 1500);
+                } else {
+                    // 일반 몬스터는 딜레이 없이 바로 전투 시작!
+                    this.initBattle(false); 
+                }
+            }
         },
       triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
@@ -853,6 +872,7 @@ window.onRewardEarned = function() {
     // 보상 줬으니 꼬리표 초기화
     window.currentAdAction = ''; 
 };
+
 
 
 
