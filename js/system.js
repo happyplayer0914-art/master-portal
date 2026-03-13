@@ -1119,15 +1119,13 @@ enterDungeon() {
             this.monsterCurrentHp = this.monsterMaxHp;
             this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
             
-         // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
+            // 🌟 현재 층수에 맞는 구역(Zone) 계산하기!
             let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
-            
-            // 100층을 넘어갈 경우를 대비해 1~10구역 무한 반복!
             if (currentZone > 10) {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
 
-            // 🌟 [🔥여기에 신규 추가!!🔥] 구역별 테마 이름 사전 만들기! (감성 넘치는 이모지 포함!)
+            // 🌟 구역별 테마 이름 사전 만들기!
             const zoneNames = {
                 1: "🌲 초보자의 숲",
                 2: "🏜️ 메마른 황무지",
@@ -1141,43 +1139,32 @@ enterDungeon() {
                 10: "🌌 마왕의 심연"
             };
 
-           // 🌟 [🔥수정!!🔥] 전체 화면이 아니라 '몬스터 상자(battle-card)' 안에만 배경 깔기!
             const battleCard = document.getElementById('battle-card');
             
-            // 💡 [꿀팁] 몬스터 상자 안에 숲/사막 배경이 예쁘게 들어갑니다!
-            battleCard.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
-            battleCard.style.backgroundSize = "cover";
-            battleCard.style.backgroundPosition = "center";
-            battleCard.style.overflow = "hidden";
-            
-            // (혹시 몰라서 넣는 방어막) 아까 전체 화면에 잘못 발라둔 배경 벽지는 싹 뜯어냅니다! ㅋㅋㅋ
+            // 전체 화면에 잘못 발라둔 배경 벽지는 싹 뜯어냅니다!
             document.getElementById('screen-rpg-battle').style.backgroundImage = "none";
         
-            // 해당 구역의 일반 몬스터 배열 가져오기 (데이터가 혹시 없으면 기본 1구역으로 방어!)
+            // 해당 구역의 일반 몬스터 배열 가져오기
             let normalPool = GameData.monsters.normal[currentZone] || GameData.monsters.normal[1];
             
-            // 💡 [수정됨] 보스면 보스 데이터에서 뽑고, 일반 몹이면 '현재 구역(normalPool)'에서 순서대로 뽑기!
+            // 보스면 보스 데이터에서 뽑고, 일반 몹이면 '현재 구역'에서 순서대로 뽑기!
             let mInfo = isBoss 
                 ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) 
                 : normalPool[(GameState.rpgStage - 1) % normalPool.length];
-            // 🌟 [여기까지 교체 완료!]
 
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-        
-            
-        // 🌟 [이모지 롤백 & 비밀 프리로딩 엔진 탑재!]
+            // 🌟 [이모지 롤백 엔진 탑재!]
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
-            const battleCard = document.getElementById('battle-card');
 
             // 1. 복잡했던 배경, 크기, 레이어 스타일 싹 다 초기화! (쾌적한 순정 상태)
             battleCard.style.backgroundImage = "none";
-            avatarWrap.style.cssText = ""; // 껍데기 설정 초기화
-            spriteBox.style.cssText = "";  // 알맹이 설정 초기화
+            avatarWrap.style.cssText = ""; 
+            spriteBox.style.cssText = "";  
             
-            // 아까 넣었던 레이어(z-index) 샌드위치 마법도 깔끔하게 해제!
+            // 레이어(z-index) 샌드위치 마법 깔끔하게 해제!
             Array.from(battleCard.children).forEach(child => {
                 child.style.position = "";
                 child.style.zIndex = ""; 
@@ -1189,21 +1176,17 @@ enterDungeon() {
 
             
 
-            // (기존 UI 업데이트 코드 복구)
+           // (기존 UI 업데이트 코드)
             document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
             document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
             
-            // 👇 [레이어 구출 마법 끝!] 이라고 적혀있던 곳 아래에 있던 원래 코드들
             document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
-            document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
-            this.lastAttackTime = 0; this.updateBattleUI();
-            clearInterval(this.battleInterval); 
-            this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
-
-            document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
-            document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
-            this.lastAttackTime = 0; this.updateBattleUI();
+            document.getElementById('btn-attack').disabled = false; 
+            document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
+            
+            this.lastAttackTime = 0; 
+            this.updateBattleUI();
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500); 
         },
@@ -1583,6 +1566,7 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
     }
 };
+
 
 
 
