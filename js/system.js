@@ -1198,12 +1198,17 @@ window.watchAdForRevive = function() {
 };
 
 // 3. 포기하고 마을로 갈 때
-// 3. 포기하고 마을로 갈 때
 window.giveUpBattle = function() {
-    document.getElementById('revive-modal').classList.remove('active');
+    // 🌟 [수정된 부분] 낡은 'active' 떼기 대신 Tailwind 애니메이션 끄기 적용!
+    const reviveModal = document.getElementById('revive-modal');
+    if (reviveModal) {
+        reviveModal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+        reviveModal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+    }
+    
     UIManager.showToast(`💀 쓰러졌습니다... 여관에서 휴식하세요.`);
     
-    // 💡 [핵심 추가] 숨겨졌던 하단 메뉴바(네비게이션)를 다시 나타나게 켜주기!
+    // 💡 숨겨졌던 하단 메뉴바(네비게이션)를 다시 나타나게 켜주기!
     document.getElementById('bottom-nav').style.display = 'flex'; 
     
     UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
@@ -1294,6 +1299,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
