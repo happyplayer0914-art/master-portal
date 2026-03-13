@@ -4,6 +4,8 @@
 window.onload = function() {
     // 💡 [신규 추가] 자동 로그인 및 오토 세이브 감시자 출동!
     GameSystem.Auth.init();
+// 게임 시작 코드들 어딘가에 이 한 줄을 추가!
+    AssetPreloader.preloadAll();
     
     try {
         GameState.load();
@@ -16,3 +18,4 @@ window.onload = function() {
         UIManager.init();
     } catch(e) { console.error("초기화 오류:", e); }
 };
+
