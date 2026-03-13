@@ -1067,7 +1067,7 @@ enterDungeon() {
             UIManager.updateCurrencyUI(); 
         },
 
-        // 💡 [수정] 이벤트 끝날 때 피가 0이면 다음 층으로 안 가고 부활 모달 띄우기!
+       // 💡 [수정] 이벤트 끝날 때 피가 0이면 다음 층으로 안 가고 부활 모달 띄우기!
         endEvent() { 
             document.getElementById('bottom-nav').style.display = 'flex'; 
             
@@ -1082,13 +1082,15 @@ enterDungeon() {
                     document.getElementById('revive-modal').classList.add('active');
                 }, 500);
             } else {
-                // 살아있으면 정상적으로 다음 층으로 진입
-                GameState.rpgStage++; 
+                // 살아있으면 정상적으로 다음 층으로 진입 (이 아니라, 층수 고정하고 로비로 귀환!)
+                
+                // 💀 [여기를 삭제!!] 이 줄을 과감하게 지워버리거나 주석(//) 처리하세요!
+                // GameState.rpgStage++; 
+                
                 GameState.save(); 
                 UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
             }
         },
-       //몬스터 스탯
        //몬스터 스탯
      initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1444,6 +1446,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
