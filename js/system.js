@@ -1102,13 +1102,27 @@ enterDungeon() {
             this.monsterCurrentHp = this.monsterMaxHp;
             this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
             
-           // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
+         // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
             let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
             
             // 100층을 넘어갈 경우를 대비해 1~10구역 무한 반복!
             if (currentZone > 10) {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
+
+            // 🌟 [🔥여기에 신규 추가!!🔥] 구역별 테마 이름 사전 만들기! (감성 넘치는 이모지 포함!)
+            const zoneNames = {
+                1: "🌲 초보자의 숲",
+                2: "🏜️ 메마른 황무지",
+                3: "⛰️ 거친 산맥",
+                4: "🏚️ 버려진 유적",
+                5: "🌊 오염된 늪지대",
+                6: "🩸 저주받은 핏빛 성",
+                7: "🗿 마법사의 탑",
+                8: "🌑 기사단의 무덤",
+                9: "🔥 불타는 지옥문",
+                10: "🌌 마왕의 심연"
+            };
 
            // 🌟 [🔥수정!!🔥] 전체 화면이 아니라 '몬스터 상자(battle-card)' 안에만 배경 깔기!
             const battleCard = document.getElementById('battle-card');
@@ -1130,7 +1144,7 @@ enterDungeon() {
                 : normalPool[(GameState.rpgStage - 1) % normalPool.length];
             // 🌟 [여기까지 교체 완료!]
 
-            document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
+            document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
             // 🌟 [도트 이미지 불러오기 마법!]
@@ -1506,6 +1520,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
