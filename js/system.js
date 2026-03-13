@@ -849,13 +849,14 @@ const GameSystem = {
             }
         },
 
-        openModal() {
+       openModal() {
             AudioEngine.sfx.click();
             UIManager.triggerHaptic();
             const modal = document.getElementById('quest-modal');
             if (modal) {
+                // 💡 [핵심] 뚫려있던 클릭 판정을 막아주는 마스터의 'active' 클래스 추가!
                 modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
                 this.renderList(); // 열 때 화면 그리기
             }
         },
@@ -864,7 +865,8 @@ const GameSystem = {
             AudioEngine.sfx.click();
             const modal = document.getElementById('quest-modal');
             if (modal) {
-                modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                // 💡 [핵심] 닫을 때 'active' 클래스도 같이 빼주기!
+                modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
                 modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
             }
         },
@@ -1436,6 +1438,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
