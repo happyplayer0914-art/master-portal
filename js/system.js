@@ -364,7 +364,7 @@ const GameSystem = {
             if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
             
             try {
-                const q = window.query(window.collection(window.db, "rankings"), window.limit(50)); 
+                const q = window.query(window.collection(window.db, "rankings"), window.limit(100)); 
                 const snap = await window.getDocs(q);
                 let all = []; 
                 snap.forEach(d => all.push(d.data()));
@@ -848,22 +848,24 @@ const GameSystem = {
             // 0.7초 뒤에 태그 자동 삭제 (쓰레기 쌓이는 거 방지)
             setTimeout(() => { textEl.remove(); }, 700);
         },
-        enterDungeon() {
+enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
-            if (GameState.rpgStage > 50) return UIManager.showToast("마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
+            
+            // 🔓 1. 최대 층수 100층으로 해제!
+            if (GameState.rpgStage > 100) return UIManager.showToast("진(眞) 마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
             
             GameSystem.Quest.updateProgress('daily', 'd1');
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
             
-            const isBoss = (GameState.rpgStage % 5 === 0);
+            // 👹 2. 보스 등장 주기: 10층마다(10, 20, 30... 100층) 등장하도록 변경!
+            const isBoss = (GameState.rpgStage % 10 === 0);
             
             if (!isBoss && Math.random() < 0.2) { 
                 this.triggerRandomEvent(); 
             } else { 
                 if (isBoss) {
-                    // 💡 [사운드 복구] 보스 등장 사운드 재생! 
-                    // (AudioEngine에 설정해둔 보스 사운드 이름으로 맞춰서 실행)
+                    // 💡 보스 등장 사운드 재생! 
                     if (AudioEngine.sfx.warning) AudioEngine.sfx.warning();
                     else if (AudioEngine.sfx.boss) AudioEngine.sfx.boss();
 
@@ -879,7 +881,7 @@ const GameSystem = {
                     this.initBattle(false); 
                 }
             }
-        },
+        }, // 🚨 끝에 콤마(,) 잊지 마!
       triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
@@ -1121,21 +1123,21 @@ const GameSystem = {
                 }, 500);
             }
         },
-        // 💡 [신규] 차원의 여신 환생 시스템
-     doPrestige() {
-            if (GameState.rpgStage <= 50) {
-                return UIManager.showToast("50층의 마왕을 토벌해야 차원의 여신을 만날 수 있습니다!");
+     // 💡 [신규] 차원의 여신 환생 시스템
+        doPrestige() {
+            if (GameState.rpgStage <= 100) {
+                return UIManager.showToast("100층의 진(眞) 마왕을 토벌해야 차원의 여신을 만날 수 있습니다! 👑");
             }
             
-            // 💡 [수정] 못생긴 confirm 알림창 대신 예쁜 여신님 모달 띄우기!
             const modal = document.getElementById('goddess-modal');
             if (modal) modal.classList.remove('hidden');
-            AudioEngine.sfx.coin(); // 띠링~ 신비로운 효과음 대용
+            AudioEngine.sfx.coin(); 
         },
 
-        // 💡 [신규] 모달창에서 '환생 수락' 버튼을 눌렀을 때 실행되는 진짜 환생 로직!
+        // 💡 모달창에서 '환생 수락' 버튼을 눌렀을 때 실행되는 진짜 환생 로직!
         confirmPrestige() {
-            document.getElementById('goddess-modal').classList.add('hidden'); // 모달 닫기
+            const modal = document.getElementById('goddess-modal');
+            if (modal) modal.classList.add('hidden'); // 모달 닫기
 
             GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
             GameState.rpgStage = 1; 
@@ -1143,15 +1145,23 @@ const GameSystem = {
             // 골드로 올린 스탯 초기화
             GameState.rpgAtk = 10;
             GameState.rpgMaxHp = 100;
-
             GameState.currentHp = GameState.getTotalStats().hp; 
+
+            // 💎 [보상 추가] 100층 환생 기념 초대박 보상! 
+            // 기본 1000개 + (환생 횟수 * 500개) 씩 점점 더 많이 줌!
+            const rewardDiamond = 1000 + (GameState.prestigeCount * 500);
+            GameState.diamond = (GameState.diamond || 0) + rewardDiamond;
+
             GameState.save();
 
-            UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 마왕의 군대도 더욱 강해졌습니다!`);
+            UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 보상으로 다이아 ${rewardDiamond}개를 획득했습니다! 💎`);
             UIManager.updateRpgLobbyUI();
-            GameSystem.Ranking.updateRankingSilently(); 
-        },
-    } // <-- Battle 닫는 괄호
+            
+            // 랭킹에도 환생 횟수 업데이트!
+            if (GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
+                GameSystem.Ranking.updateRankingSilently(); 
+            }
+        }
 }; // <-- GameSystem 닫는 괄호 (이게 빠져서 에러가 났던 거야!)
 
 // =========================================================================
@@ -1274,6 +1284,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
