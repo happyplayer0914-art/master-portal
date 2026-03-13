@@ -89,7 +89,7 @@ const GameData = {
             // 🔥 9구역 (81~89층) : 불타는 지옥문
             9: [
                 { id: 'n15', e: '🧌', n: '지옥 슬라임', img: 'hell_slime.png' },
-                { id: 'n16', e: '🦍', n: '불타는 해골전사', img: 'frie_sk.png' },
+                { id: 'n16', e: '🦍', n: '용암 골렘', img: 'magma_golem.png' },
                 { id: 'n23', e: '🔥', n: '지옥 불개', img: 'hellhound.png' }
             ],
             // 🌌 10구역 (91~99층) : 심연의 끝
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
