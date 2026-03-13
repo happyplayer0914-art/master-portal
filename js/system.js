@@ -1165,9 +1165,7 @@ enterDungeon() {
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-            // 🌟 [도트 이미지 불러오기 마법!]
-            const spriteBox = document.getElementById('monster-sprite');
-            const avatarWrap = document.getElementById('monster-avatar-wrap');
+        
             
         // 🌟 [이모지 롤백 & 비밀 프리로딩 엔진 탑재!]
             const spriteBox = document.getElementById('monster-sprite');
@@ -1585,6 +1583,7 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
     }
 };
+
 
 
 
