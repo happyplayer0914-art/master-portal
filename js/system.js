@@ -1130,7 +1130,7 @@ enterDungeon() {
             
             if (mInfo.img) {
                 // 1. 이미지가 있으면 <img> 태그로 그려줌! (그림자가 더 돋보이게 진하게 변경!)
-                spriteBox.innerHTML = `<img src="assets/monsters/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)]" onerror="this.outerHTML='${mInfo.e}'">`;
+                spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)]" onerror="this.outerHTML='${mInfo.e}'">`;
                 
                 // 이미지가 꽉 차게!
                 spriteBox.style.width = "100%";
@@ -1497,6 +1497,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
