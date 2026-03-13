@@ -1176,14 +1176,21 @@ enterDungeon() {
                 spriteBox.style.width = "100%";
                 spriteBox.style.height = "100%";
                 
-                // 💡 [핵심] 답답한 상자를 투명하게 날려버리고, 크기를 2배로 뻥튀기!
+                // 💡 [핵심] 답답한 상자를 투명하게 날려버리고, 크기를 뻥튀기!
                 avatarWrap.style.background = "transparent";
                 avatarWrap.style.border = "none";
                 avatarWrap.style.boxShadow = "none";
                 
-                // 🔥 마스터 입맛대로 크기 조절 (현재 220px, 더 키우고 싶으면 250px 300px 등으로 조절!)
-                avatarWrap.style.width = "220px"; 
-                avatarWrap.style.height = "220px";
+                // 🌟 [🔥보스 크기 뻥튀기 추가!!🔥]
+                if (isBoss) {
+                    // 보스면 화면을 꽉 채우게 압도적으로 키웁니다! (350px 정도, 더 키우고 싶으면 숫자를 올리세요!)
+                    avatarWrap.style.width = "350px"; 
+                    avatarWrap.style.height = "350px";
+                } else {
+                    // 일반 몬스터는 기존 220px 유지!
+                    avatarWrap.style.width = "220px"; 
+                    avatarWrap.style.height = "220px";
+                }
                 
             } else {
                 // 2. 이미지가 없어서 이모지가 나올 때는 예전처럼 예쁜 박스 모양으로 복구!
@@ -1537,6 +1544,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
