@@ -54,7 +54,7 @@ const GameData = {
             3: [
                 { id: 'n8', e: '🕷️', n: '거대 거미', img: 'spider.png' },
                 { id: 'n9', e: '🦅', n: '흉포한 독수리', img: 'eagle.png' },
-                { id: 'n10', e: '🐗', n: '돌진하는 멧돼지', img: 'boar.png' }
+                { id: 'n10', e: '🐗', n: '돌연변이 멧돼지', img: 'boar.png' }
             ],
             // 🏚️ 4구역 (31~39층) : 버려진 유적
             4: [
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
