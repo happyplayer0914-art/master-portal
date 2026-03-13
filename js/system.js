@@ -1222,12 +1222,16 @@ window.onRewardEarned = function() {
         UIManager.triggerHaptic();
         UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
     } 
-   // 꼬리표가 'revive' 일 때
- // 꼬리표가 'revive' 일 때
+    // 꼬리표가 'revive' 일 때
     else if (window.currentAdAction === 'revive') {
-        // 💡 [안전장치 추가] 모달창 이름이 revive-modal이든 death-modal이든 찾아서 안전하게 끄기!
+        // 🌟 [수정된 부분] 낡은 'active' 대신 Tailwind 애니메이션으로 스르륵 끄기!
         const reviveModal = document.getElementById('revive-modal');
-        if (reviveModal) reviveModal.classList.remove('active');
+        if (reviveModal) {
+            reviveModal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            reviveModal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        }
+        
+        // (혹시 몰라서 남겨두는 옛날 death-modal 안전장치)
         const deathModal = document.getElementById('death-modal');
         if (deathModal) deathModal.classList.remove('active');
         
@@ -1237,10 +1241,10 @@ window.onRewardEarned = function() {
         UIManager.triggerHaptic();
         AudioEngine.sfx.coin(); 
 
-        // 💡 [안전장치 추가] 화면 요소가 없을 때 에러 나는 걸 방지! (? 기호 사용)
         const battleScreen = document.getElementById('screen-rpg-battle');
-        const isBattleScreen = battleScreen ? battleScreen.classList.contains('active') : false;
+        const isBattleScreen = battleScreen ? battleScreen.classList.contains('active') || battleScreen.style.display !== 'none' : false;
 
+        // 👇 여기서부터는 마스터가 짜둔 기적의 부활 로직 그대로!
         if (isBattleScreen) {
             // ⚔️ 1. 전투 중에 죽었을 때 -> 전투 이어서 하기!
             GameState.isBattling = true; 
@@ -1262,24 +1266,20 @@ window.onRewardEarned = function() {
             
             UIManager.showToast("✨ 기적적으로 부활했습니다! 전투를 이어갑니다.");
         } else {
-            // ☠️ 2. 이벤트 함정에서 죽었을 때 -> 안전하게 로비로 귀환!
+            // ☠️ 2. 안전하게 로비로 귀환!
             GameState.isBattling = false;
             localStorage.setItem('master_in_battle', 'false');
 
-            // 화면 다 끄기
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
-            // 💡 [핵심 수정] 마스터의 HTML에 맞는 진짜 투기장(RPG) 화면 ID 켜기! 
-            const lobbyScreen = document.getElementById('screen-rpg'); // rpg-lobby 대신 rpg로 수정!
-            
+            const lobbyScreen = document.getElementById('screen-rpg'); 
             if (lobbyScreen) {
                 lobbyScreen.classList.add('active');
             } else {
-                // 만약 screen-rpg도 없다면 1번 탭(홈 화면)으로 강제 비상탈출!
-                document.getElementById('screen-home').classList.add('active'); 
+                const homeScreen = document.getElementById('screen-home');
+                if(homeScreen) homeScreen.classList.add('active'); 
             }
             
-            // 사라졌던 하단 메뉴바 다시 살려주기
             const bottomNav = document.getElementById('bottom-nav');
             if (bottomNav) bottomNav.style.display = 'flex';
 
@@ -1294,6 +1294,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
