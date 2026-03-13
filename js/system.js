@@ -1123,11 +1123,12 @@ enterDungeon() {
                 GameState.currentHp = 0; 
                 GameState.save();
                 
-                // 마스터가 만든 그 무시무시한 부활/포기 모달창 띄우기!
-                const defeatModal = document.getElementById('defeat-modal'); // 모달 ID가 이거 맞지?
-                if (defeatModal) {
-                    defeatModal.classList.remove('hidden'); 
-                    defeatModal.classList.add('active');
+           // 💡 마스터가 만든 'revive-modal' (부활 모달창) 소환!!
+                const deathModal = document.getElementById('revive-modal'); 
+                if (deathModal) {
+                    // 마스터가 세팅해둔 Tailwind 애니메이션을 스르륵~ 켜주는 마법!
+                    deathModal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                    deathModal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
                 }
             }
         }, // 👈 콤마 잊지 마!
@@ -1293,6 +1294,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
