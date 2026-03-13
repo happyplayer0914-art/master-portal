@@ -262,7 +262,8 @@ const GameSystem = {
                 return UIManager.showToast("이 테스트 보상은 오늘 이미 받았습니다! ⏱️");
             }
             GameState.gold += 10; 
-            GameSystem.Quest.updateProgress('daily', 'd3');
+          // 💡 [퀘스트 센서] 인기 폭발 테스트를 누르면 일일 퀘스트(d2) 카운트 1 증가!
+            GameSystem.Quest.update('daily', 'd2', 1);
             GameState.lastPlayRewards[testUrl] = today; 
             GameState.save(); 
             UIManager.updateCurrencyUI(); 
@@ -912,6 +913,7 @@ const GameSystem = {
                     btnHtml = `<div class="text-xs font-bold text-slate-400">${progress.count} / ${q.target}</div>`;
                 }
 
+              // (renderList 함수 안쪽의 html 변수 덮어씌우기)
                 const html = `
                     <div class="glass-card p-4 border border-slate-700/50 flex flex-col gap-2 ${progress.claimed ? 'opacity-50' : ''}">
                         <div class="flex justify-between items-start">
@@ -919,9 +921,9 @@ const GameSystem = {
                                 <h4 class="text-sm font-black text-white flex items-center gap-1">${q.title} ${isCompleted && !progress.claimed ? '✅' : ''}</h4>
                                 <p class="text-[10px] text-slate-400 mt-0.5">${q.desc}</p>
                             </div>
-                            <div class="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded border border-slate-700">
-                                <span class="text-xs">💎</span>
-                                <span class="text-xs font-bold text-indigo-300">${q.rewardGems}</span>
+                            <div class="flex items-center gap-2 bg-slate-900/80 px-2 py-1 rounded border border-slate-700">
+                                <span class="text-[10px] font-bold text-yellow-400">🪙 ${q.rewardGold}</span>
+                                <span class="text-[10px] font-bold text-cyan-400">💎 ${q.rewardGems}</span>
                             </div>
                         </div>
                         <div class="flex justify-between items-center mt-1">
@@ -1226,7 +1228,7 @@ enterDungeon() {
                 GameSystem.Quest.update('daily', 'd1', 1);
                 GameSystem.Quest.update('weekly', 'w1', 1);
                 if (isBoss) {
-                    GameSystem.Quest.update('daily', 'd2', 1);
+                
                     GameSystem.Quest.update('weekly', 'w2', 1);
                 }
                 // 👆 여기까지!
@@ -1442,6 +1444,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
