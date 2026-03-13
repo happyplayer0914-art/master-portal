@@ -1121,7 +1121,27 @@ enterDungeon() {
 
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
-            document.getElementById('monster-sprite').innerText = mInfo.e;
+            // (기존) document.getElementById('monster-sprite').innerText = mInfo.e;
+            
+            // 🌟 [신규 추가!] 도트 이미지 불러오기 마법!
+            const spriteBox = document.getElementById('monster-sprite');
+            
+            if (mInfo.img) {
+                // 1. 이미지가 있으면 <img> 태그로 그려줌! 
+                // 💡 (주의: 이미지 파일이 들어있는 폴더 경로를 맞춰주세요! 예: 'assets/monsters/')
+                // 💡 (onerror 마법: 혹시 이미지 파일이 아직 없거나 깨지면, 자동으로 이모지로 돌아갑니다!)
+                spriteBox.innerHTML = `<img src="assets/monsters/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" onerror="this.outerHTML='${mInfo.e}'">`;
+                
+                // 이미지가 꽉 차게 보이도록 원래 있던 글자 크기(font-size) 클래스 무력화
+                spriteBox.style.width = "80%";
+                spriteBox.style.height = "80%";
+            } else {
+                // 2. 이미지가 설정 안 되어 있으면 기존처럼 이모지 출력!
+                spriteBox.innerHTML = '';
+                spriteBox.innerText = mInfo.e;
+                spriteBox.style.width = "auto";
+                spriteBox.style.height = "auto";
+            }
             document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
             document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
@@ -1456,6 +1476,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
