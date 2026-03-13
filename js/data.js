@@ -42,7 +42,7 @@ const GameData = {
             1: [
                 { id: 'n1', e: '🦠', n: '초록 슬라임', img: 'slime.png' },
                 { id: 'n2', e: '🦇', n: '동굴 박쥐', img: 'bat.png' },
-                { id: 'n3', e: '👺', n: '붉은 고블린', img: 'goblin.png' }
+                { id: 'n3', e: '👺', n: '고블린', img: 'goblin.png' }
             ],
             // 🏜️ 2구역 (11~19층) : 메마른 황무지
             2: [
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
