@@ -1084,55 +1084,53 @@ enterDungeon() {
             this.updateBattleUI(); 
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
-        endBattle(isWin) {
+       endBattle(isWin) {
             clearInterval(this.battleInterval); GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
             const btnAtk = document.getElementById('btn-attack');
-            btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료";
+            if (btnAtk) { btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료"; }
             
             const isBoss = (GameState.rpgStage % 10 === 0);
             
             if (isWin) {
+                // 🌟 [승리 로직] 이겼을 때만 실행됨!
                 document.getElementById('bottom-nav').style.display = 'flex'; 
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 
-                // 💰 2. [신규] 층수에 비례하는 완벽한 보상 스케일링 공식!
-                // 일반 몹: 기본 10G + (층수 * 5G) 👉 1층=15G, 50층=260G, 99층=505G
-                // 보스 몹: (층수 * 50G) 👉 10층=500G, 50층=2500G, 100층=5000G
-                let rewardGold = isBoss ? (GameState.rpgStage * 10) : (10 + (GameState.rpgStage * 1)); 
-                
-                // 💎 3. [신규] 젬(보석) 보상도 층수가 오를수록 증가!
-                // 보스 몹: 기본 50개 + (층수 * 2개) 👉 10층=70개, 50층=150개, 100층=250개
+                let rewardGold = isBoss ? (GameState.rpgStage * 50) : (10 + (GameState.rpgStage * 5)); 
                 let rewardGem = isBoss ? (50 + (GameState.rpgStage * 2)) : 0;
                 
-                // 💡 마스터 코드는 다이아가 아니라 gem으로 되어있으니 주의!
                 GameState.gold += rewardGold; GameState.gem += rewardGem; 
                 GameState.rpgStage++; GameState.save();
                 
-                GameSystem.Quest.updateProgress('achievements', 'a3'); 
-                if (GameState.rpgStage >= 5) GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
+                if (GameSystem.Quest) {
+                    GameSystem.Quest.updateProgress('achievements', 'a3'); 
+                    if (GameState.rpgStage >= 5) GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
+                }
 
-                GameState.save();
                 UIManager.updateCurrencyUI(); 
-                GameSystem.Ranking.updateRankingSilently();
+                if (GameSystem.Ranking) GameSystem.Ranking.updateRankingSilently();
                 UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
-                document.getElementById('battle-log').innerText = `토벌 성공! 보상을 획득했습니다.`;
+                
+                const battleLog = document.getElementById('battle-log');
+                if (battleLog) battleLog.innerText = `토벌 성공! 보상을 획득했습니다.`;
                 
                 setTimeout(() => {
                     UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
                 }, 1500);
-                // 💡 [부활 업데이트] 패배 시 쫓아내지 않고 부활 모달을 띄움!
-                UIManager.triggerHeavyHaptic(); 
+
+            } else {
+                // 💀 [패배 로직] 몬스터한테 졌을 때만 실행됨! (여기가 괄호 안으로 쏙 들어와야 해!)
                 GameState.currentHp = 0; 
                 GameState.save();
-                this.updateBattleUI(); // 피 0 된거 화면에 보여주기
-                document.getElementById('battle-log').innerText = `마스터가 쓰러졌습니다...`;
                 
-                // 부활 팝업 짠!
-                setTimeout(() => {
-                    document.getElementById('revive-modal').classList.add('active');
-                }, 500);
+                // 마스터가 만든 그 무시무시한 부활/포기 모달창 띄우기!
+                const defeatModal = document.getElementById('defeat-modal'); // 모달 ID가 이거 맞지?
+                if (defeatModal) {
+                    defeatModal.classList.remove('hidden'); 
+                    defeatModal.classList.add('active');
+                }
             }
-        },
+        }, // 👈 콤마 잊지 마!
      // 💡 [신규] 차원의 여신 환생 시스템
         doPrestige() {
             if (GameState.rpgStage <= 100) {
@@ -1295,6 +1293,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
