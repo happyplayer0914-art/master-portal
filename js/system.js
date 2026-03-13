@@ -1110,13 +1110,17 @@ enterDungeon() {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
 
-            // 🌟 [🔥여기에 추가!!🔥] 전투 화면 배경을 구역에 맞춰서 쫙 깔아주기!
-            const battleScreen = document.getElementById('screen-rpg-battle');
-            // 💡 [꿀팁] 배경이 너무 밝으면 글씨가 안 보일 수 있으니, 반투명한 검은색(rgba) 필터를 살짝 씌워서 텍스트 가독성을 지킵니다!
-            battleScreen.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
-            battleScreen.style.backgroundSize = "cover";
-            battleScreen.style.backgroundPosition = "center";
-
+           // 🌟 [🔥수정!!🔥] 전체 화면이 아니라 '몬스터 상자(battle-card)' 안에만 배경 깔기!
+            const battleCard = document.getElementById('battle-card');
+            
+            // 💡 [꿀팁] 몬스터 상자 안에 숲/사막 배경이 예쁘게 들어갑니다!
+            battleCard.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
+            battleCard.style.backgroundSize = "cover";
+            battleCard.style.backgroundPosition = "center";
+            
+            // (혹시 몰라서 넣는 방어막) 아까 전체 화면에 잘못 발라둔 배경 벽지는 싹 뜯어냅니다! ㅋㅋㅋ
+            document.getElementById('screen-rpg-battle').style.backgroundImage = "none";
+        
             // 해당 구역의 일반 몬스터 배열 가져오기 (데이터가 혹시 없으면 기본 1구역으로 방어!)
             let normalPool = GameData.monsters.normal[currentZone] || GameData.monsters.normal[1];
             
@@ -1502,6 +1506,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
