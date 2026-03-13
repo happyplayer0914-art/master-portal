@@ -10,6 +10,12 @@ const GameState = {
     lastPlayRewards: {}, 
     lastIdleCheck: Date.now(),
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
+    
+    // 🌟 [신규 스탯 3인방 추가!]
+    rpgDef: 0, // 방어력
+    rpgEva: 0, // 회피율
+    rpgSpd: 0, // 공격 속도
+    
     potions: 1, inventory: [], 
     
     // 💡 장착 칸 3개 분할 완료!
@@ -44,6 +50,12 @@ const GameState = {
         this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
         this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
         this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
+        
+        // 🌟 [신규 스탯 로드 기능 추가!]
+        this.rpgDef = parseInt(localStorage.getItem('master_def') || "0");
+        this.rpgEva = parseInt(localStorage.getItem('master_eva') || "0");
+        this.rpgSpd = parseInt(localStorage.getItem('master_spd') || "0");
+        
         this.potions = parseInt(localStorage.getItem('master_potions') || "1");
         this.inventory = JSON.parse(localStorage.getItem('master_inventory') || "[]");
         
@@ -76,6 +88,12 @@ const GameState = {
         localStorage.setItem('master_atk', this.rpgAtk);
         localStorage.setItem('master_max_hp', this.rpgMaxHp);
         localStorage.setItem('master_current_hp', this.currentHp);
+        
+        // 🌟 [신규 스탯 저장 기능 추가!]
+        localStorage.setItem('master_def', this.rpgDef);
+        localStorage.setItem('master_eva', this.rpgEva);
+        localStorage.setItem('master_spd', this.rpgSpd);
+        
         localStorage.setItem('master_potions', this.potions);
         localStorage.setItem('master_inventory', JSON.stringify(this.inventory));
         localStorage.setItem('master_quest_data', JSON.stringify(this.questData));
@@ -111,6 +129,11 @@ const GameState = {
         let finalCritRate = 10; // 기본 크리티컬 확률 10%
         let finalCritDmg = 150; // 기본 크리티컬 데미지 150%
         let finalVamp = 0;      // 기본 피흡 0%
+        
+        // 🌟 [미래 대비!] 장비가 올려줄 신규 스탯들도 계산할 준비 완료!
+        let finalDef = this.rpgDef;
+        let finalEva = this.rpgEva;
+        let finalSpd = this.rpgSpd;
 
         const gears = [this.equippedWeapon, this.equippedArmor, this.equippedAccessory];
         
@@ -122,6 +145,10 @@ const GameState = {
                 if (item.critRate) finalCritRate += item.critRate;
                 if (item.critDmg) finalCritDmg += item.critDmg;
                 if (item.vamp) finalVamp += item.vamp;
+                // 🌟 나중에 장비에 def, eva, spd 옵션이 있으면 알아서 더해줍니다!
+                if (item.def) finalDef += item.def;
+                if (item.eva) finalEva += item.eva;
+                if (item.spd) finalSpd += item.spd;
             }
         });
         
@@ -133,10 +160,11 @@ const GameState = {
             hp: Math.floor(this.rpgMaxHp * finalHpMult * prestigeMultiplier),
             critRate: finalCritRate,
             critDmg: finalCritDmg,
-            vamp: finalVamp
+            vamp: finalVamp,
+            // 🌟 최종 계산된 신규 스탯들을 던져줍니다!
+            def: finalDef,
+            eva: finalEva,
+            spd: finalSpd
         };
     }
 };
-
-
-
