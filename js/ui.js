@@ -131,6 +131,61 @@ updateRpgLobbyUI() {
         if(document.getElementById('profile-def')) document.getElementById('profile-def').innerText = stats.def;
         if(document.getElementById('profile-eva')) document.getElementById('profile-eva').innerText = stats.eva;
         if(document.getElementById('profile-spd')) document.getElementById('profile-spd').innerText = stats.spd;
+
+        // =========================================================================
+        // 🔥 [엔드 콘텐츠] 신화(1) + 전설(2) 전직 & 업적 달성 판독기!!
+        // =========================================================================
+        const equippedIds = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+        const gears = equippedIds.filter(id => id !== null).map(id => GameData.items[id]).filter(item => item !== undefined);
+        
+        let mythicItem = null;
+        let legendaryCount = 0;
+        
+        // 등급(Rarity) 검사!
+        gears.forEach(g => {
+            if (g.rarity === 'mythic') mythicItem = g;
+            if (g.rarity === 'legendary') legendaryCount++;
+        });
+
+        const jobTitleEl = document.getElementById('profile-job-title');
+        const passiveEl = document.getElementById('profile-passive-title');
+
+        // 💡 전직 조건: 신화 1개 + 전설 2개가 모두 장착되었을 때!
+        if (mythicItem && legendaryCount === 2) {
+            // ⚔️ 전직 UI 텍스트 & 이펙트 업데이트!
+            if(jobTitleEl) {
+                jobTitleEl.innerText = `✨ ${mythicItem.job} [${mythicItem.mbti}] ✨`;
+                jobTitleEl.className = "text-red-400 font-black text-xs sm:text-sm tracking-widest uppercase mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all duration-300";
+            }
+            if(passiveEl) {
+                passiveEl.innerText = `▶ 패시브: ${mythicItem.passive}`;
+                passiveEl.classList.remove('hidden');
+            }
+
+            // 🏆 [최초 전직 업적 달성 로직!] (배열에 'class_advanced'가 없으면 최초 달성으로 인정)
+            if (!GameState.questData.achievements.completed.includes('class_advanced')) {
+                GameState.questData.achievements.completed.push('class_advanced');
+                GameState.gem += 5000; // 💡 파격적인 보상: 5000젬 획득!
+                GameState.save();
+                
+                if(UIManager.updateCurrencyUI) UIManager.updateCurrencyUI(); // 상단 젬 텍스트 즉시 갱신
+                
+                // 화면에 화려하게 업적 달성 알림!
+                if(UIManager.showToast) {
+                    setTimeout(() => UIManager.showToast(`🏆 [히든 업적] ${mythicItem.job} 전직 완료! (보상: 5000💎)`), 500);
+                }
+                if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+            }
+        } else {
+            // ❌ 전직 조건 미달 (장비를 빼거나 조건이 안 맞으면 일반 상태로 복구)
+            if(jobTitleEl) {
+                jobTitleEl.innerText = "Master Profile";
+                jobTitleEl.className = "text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1 transition-all duration-300";
+            }
+            if(passiveEl) {
+                passiveEl.classList.add('hidden');
+            }
+        }
     },
     
     applyAvatarSkin() {
@@ -272,6 +327,7 @@ updateRpgLobbyUI() {
         drawBg();
     }
 };
+
 
 
 
