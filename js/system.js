@@ -776,23 +776,23 @@ const GameSystem = {
         currentTab: 'daily',
         
         // 💡 마스터의 새로운 퀘스트 목록! (보상과 목표치는 여기서 수정하세요)
-        list: {
+      list: {
             daily: [
-                { id: 'd1', title: '고블린 학살자', desc: '일반 몬스터 20마리 토벌', target: 20, rewardGems: 10 },
-                { id: 'd2', title: '보스 사냥꾼', desc: '보스 몬스터 3마리 토벌', target: 3, rewardGems: 20 },
-                { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 10회 강화', target: 10, rewardGems: 10 }
+                { id: 'd1', title: '심연의 도전자', desc: '심연의 탑 3층(회) 클리어', target: 3, rewardGold: 10, rewardGems: 10 },
+                { id: 'd2', title: '트렌드 세터', desc: '인기 폭발 테스트 3회 참여', target: 3, rewardGold: 10, rewardGems: 10 },
+                { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 3회 강화', target: 3, rewardGold: 10, rewardGems: 10 }
             ],
-            weekly: [ // 🌟 5개로 꽉꽉 채운 주간 퀘스트!
-                { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 300마리 토벌', target: 300, rewardGems: 100 },
-                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 30마리 토벌', target: 30, rewardGems: 150 },
-                { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGems: 50 },
-                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 100회 강화', target: 100, rewardGems: 100 },
-                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGems: 300 }
+            weekly: [ // 주간 퀘스트 (보상 골드 추가)
+                { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 300마리 토벌', target: 300, rewardGold: 500, rewardGems: 100 },
+                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 30마리 토벌', target: 30, rewardGold: 1000, rewardGems: 150 },
+                { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGold: 300, rewardGems: 50 },
+                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 100회 강화', target: 100, rewardGold: 0, rewardGems: 100 },
+                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 5000, rewardGems: 300 }
             ]
         },
 
         progress: { daily: {}, weekly: {} },
-
+      
         init() {
             const saved = localStorage.getItem('master_quest_progress2'); // 기존 에러 방지를 위해 저장소 이름 변경
             if (saved) {
@@ -831,24 +831,28 @@ const GameSystem = {
             }
         },
 
+        // 💡 2. 골드와 젬을 동시에 주도록 보상 수령 함수 업그레이드!
         claimReward(type, questId) {
             let qProgress = this.progress[type][questId];
             let qData = this.list[type].find(q => q.id === questId);
 
             if (qProgress.count >= qData.target && !qProgress.claimed) {
                 qProgress.claimed = true;
-                GameState.gem += qData.rewardGems; 
+                
+                // 골드와 젬을 동시에 지급!
+                GameState.gold += (qData.rewardGold || 0); 
+                GameState.gem += (qData.rewardGems || 0); 
+                
                 GameState.save();
                 this.save();
                 
                 UIManager.updateCurrencyUI();
                 AudioEngine.sfx.coin();
                 UIManager.triggerHaptic();
-                UIManager.showToast(`💎 ${qData.rewardGems}젬 획득!`);
+                UIManager.showToast(`🎁 보상 획득! 🪙 ${qData.rewardGold} / 💎 ${qData.rewardGems}`);
                 this.renderList(); 
             }
         },
-
        openModal() {
             AudioEngine.sfx.click();
             UIManager.triggerHaptic();
@@ -1438,6 +1442,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
