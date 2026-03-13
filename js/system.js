@@ -1317,10 +1317,12 @@ enterDungeon() {
             GameState.rpgMaxHp = 100;
             GameState.currentHp = GameState.getTotalStats().hp; 
 
-            // 💎 [보상 추가] 100층 환생 기념 초대박 보상! 
+         // 💎 [보상 추가] 100층 환생 기념 초대박 보상! 
             // 기본 1000개 + (환생 횟수 * 500개) 씩 점점 더 많이 줌!
             const rewardDiamond = 1000 + (GameState.prestigeCount * 500);
-            GameState.diamond = (GameState.diamond || 0) + rewardDiamond;
+            
+            // 💡 [수정됨] 엉뚱한 diamond 지갑 버리고 진짜 gem 지갑에 넣기!
+            GameState.gem += rewardDiamond;
 
             GameState.save();
             // 💡 [퀘스트 센서 추가!] 환생 성공 시!
@@ -1479,6 +1481,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
