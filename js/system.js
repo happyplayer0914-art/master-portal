@@ -1254,6 +1254,21 @@ window.onRewardEarned = function() {
         UIManager.triggerHaptic();
         UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
     } 
+        // 🌟 [여기 추가!!] 꼬리표가 'idle_double' (방치형 2배) 일 때!!
+    else if (window.currentAdAction === 'idle_double') {
+        // 방치형 지원금 계산 함수를 불러와서 금액을 가져오고, x 2 를 때려버립니다!!
+        const amount = GameSystem.Lobby.calculateIdleReward() * 2; 
+        
+        GameState.gold += amount;
+        GameState.lastIdleCheck = Date.now(); // 시간 초기화 
+        GameState.save();
+        
+        UIManager.updateCurrencyUI();
+        UIManager.updateIdleUI(); // 화면 0G로 리셋
+        AudioEngine.sfx.coin();
+        UIManager.triggerHaptic();
+        UIManager.showToast(`📺 광고 보상! 방치 지원금 ${amount}G (2배) 수령 완료! 💰✨`);
+    }
     // 꼬리표가 'revive' 일 때
     else if (window.currentAdAction === 'revive') {
         // 🌟 [수정된 부분] 낡은 'active' 대신 Tailwind 애니메이션으로 스르륵 끄기!
@@ -1326,6 +1341,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
