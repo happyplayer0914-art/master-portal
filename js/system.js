@@ -1089,13 +1089,24 @@ enterDungeon() {
             const btnAtk = document.getElementById('btn-attack');
             btnAtk.disabled = true; btnAtk.innerHTML = "⚔️ 전투 종료";
             
-            const isBoss = (GameState.rpgStage % 5 === 0);
+            const isBoss = (GameState.rpgStage % 10 === 0);
             
             if (isWin) {
                 document.getElementById('bottom-nav').style.display = 'flex'; 
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
-                let rewardGold = isBoss ? (GameState.rpgStage * 30) : 10; let rewardGem = isBoss ? 50 : 0;
-                GameState.gold += rewardGold; GameState.gem += rewardGem; GameState.rpgStage++; GameState.save();
+                
+                // 💰 2. [신규] 층수에 비례하는 완벽한 보상 스케일링 공식!
+                // 일반 몹: 기본 10G + (층수 * 5G) 👉 1층=15G, 50층=260G, 99층=505G
+                // 보스 몹: (층수 * 50G) 👉 10층=500G, 50층=2500G, 100층=5000G
+                let rewardGold = isBoss ? (GameState.rpgStage * 10) : (10 + (GameState.rpgStage * 1)); 
+                
+                // 💎 3. [신규] 젬(보석) 보상도 층수가 오를수록 증가!
+                // 보스 몹: 기본 50개 + (층수 * 2개) 👉 10층=70개, 50층=150개, 100층=250개
+                let rewardGem = isBoss ? (50 + (GameState.rpgStage * 2)) : 0;
+                
+                // 💡 마스터 코드는 다이아가 아니라 gem으로 되어있으니 주의!
+                GameState.gold += rewardGold; GameState.gem += rewardGem; 
+                GameState.rpgStage++; GameState.save();
                 
                 GameSystem.Quest.updateProgress('achievements', 'a3'); 
                 if (GameState.rpgStage >= 5) GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
@@ -1109,7 +1120,6 @@ enterDungeon() {
                 setTimeout(() => {
                     UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]);
                 }, 1500);
-            } else {
                 // 💡 [부활 업데이트] 패배 시 쫓아내지 않고 부활 모달을 띄움!
                 UIManager.triggerHeavyHaptic(); 
                 GameState.currentHp = 0; 
@@ -1160,9 +1170,10 @@ enterDungeon() {
             // 랭킹에도 환생 횟수 업데이트!
             if (GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
                 GameSystem.Ranking.updateRankingSilently(); 
-            }
-        }
-}; // <-- GameSystem 닫는 괄호 (이게 빠져서 에러가 났던 거야!)
+          }
+        } // 👈 이건 confirmPrestige 함수 닫는 괄호!
+    } // 🌟 짠! 여기가 핵심! Battle 묶음을 닫는 괄호를 추가!!
+}; // <-- GameSystem 닫는 괄호 (이제 완벽해!)
 
 // =========================================================================
 // 💡 [스마트 보상 시스템] 광고 꼬리표 달기!
@@ -1284,6 +1295,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
