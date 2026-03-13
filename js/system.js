@@ -1169,81 +1169,39 @@ enterDungeon() {
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
             
-           if (mInfo.img) {
-                // 1. 이미지가 있으면 <img> 태그로 그려줌! 
-                spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] mix-blend-multiply" onerror="this.outerHTML='${mInfo.e}'">`;
-                
-                // 💡 [핵심] 답답한 상자를 투명하게 날려버리기!
-                avatarWrap.style.background = "transparent";
-                avatarWrap.style.border = "none";
-                avatarWrap.style.boxShadow = "none";
-                
-                // 👇 [🌟진짜 완벽한 중앙 정렬 마법🌟]
-                // 껍데기(avatarWrap)는 가로 100%로 쫙 펴주고, 안의 내용물을 정중앙에 오게 합니다!
-                avatarWrap.style.width = "100%";
-                avatarWrap.style.display = "flex";
-                avatarWrap.style.justifyContent = "center";
-                avatarWrap.style.alignItems = "center";
-                
-                // 아까 넣었던 부작용 심한 위치 이동 마법은 싹 지워줍니다 (초기화)!
-                avatarWrap.style.position = "static";
-                avatarWrap.style.left = "auto";
-                avatarWrap.style.transform = "none";
-                
-                // 🌟 [🔥크기 조절은 껍데기가 아니라 알맹이(spriteBox)한테 직접 걸어줍니다!!🔥]
-                if (isBoss) {
-                    spriteBox.style.width = "380px"; 
-                    spriteBox.style.height = "380px";
-                    spriteBox.style.flexShrink = "0"; // 🌟 카드를 뚫고 나가도 안 찌그러지게 방어!
-                } else {
-                    spriteBox.style.width = "220px"; 
-                    spriteBox.style.height = "220px";
-                    spriteBox.style.flexShrink = "0";
-                }
-                
-            } else {
-                // 2. 이미지가 없어서 이모지가 나올 때는 예전처럼 예쁜 박스 모양으로 복구!
-                spriteBox.innerHTML = '';
-                spriteBox.innerText = mInfo.e;
-                spriteBox.style.width = "auto";
-                spriteBox.style.height = "auto";
-                
-                // 박스 CSS 초기화
-                avatarWrap.style.background = ""; 
-                avatarWrap.style.border = "";
-                avatarWrap.style.boxShadow = "";
-                avatarWrap.style.width = ""; 
-                avatarWrap.style.height = "";
-                
-                // 🌟 아까 넣었던 중앙 정렬 마법들도 이모지일 땐 꺼줍니다!
-                avatarWrap.style.display = "";
-                avatarWrap.style.justifyContent = "";
-                avatarWrap.style.alignItems = "";
-                avatarWrap.style.position = "";
-                avatarWrap.style.left = "";
-                avatarWrap.style.transform = "";
-                spriteBox.style.flexShrink = "";
-            }
-           document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
+        // 🌟 [이모지 롤백 & 비밀 프리로딩 엔진 탑재!]
+            const spriteBox = document.getElementById('monster-sprite');
+            const avatarWrap = document.getElementById('monster-avatar-wrap');
+            const battleCard = document.getElementById('battle-card');
+
+            // 1. 복잡했던 배경, 크기, 레이어 스타일 싹 다 초기화! (쾌적한 순정 상태)
+            battleCard.style.backgroundImage = "none";
+            avatarWrap.style.cssText = ""; // 껍데기 설정 초기화
+            spriteBox.style.cssText = "";  // 알맹이 설정 초기화
+            
+            // 아까 넣었던 레이어(z-index) 샌드위치 마법도 깔끔하게 해제!
+            Array.from(battleCard.children).forEach(child => {
+                child.style.position = "";
+                child.style.zIndex = ""; 
+            });
+
+            // 2. 빠릿빠릿한 타격감의 근본! 이모지로 출력!
+            spriteBox.innerHTML = '';
+            spriteBox.innerText = mInfo.e;
+
+            
+
+            // (기존 UI 업데이트 코드 복구)
+            document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
             document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
             
-            // 👇 [🌟여기에 레이어 구출 마법 추가!!🌟]
-            const battleCardZ = document.getElementById('battle-card');
-            const wrapForLayer = document.getElementById('monster-avatar-wrap');
-            
-            // 1. 몬스터 이미지는 1층(바닥)에 고정!
-            wrapForLayer.style.position = "relative";
-            wrapForLayer.style.zIndex = "1"; 
-            
-            // 2. 몬스터 빼고 이름, HP바 등은 전부 10층(꼭대기)으로 끌어올림!
-            Array.from(battleCardZ.children).forEach(child => {
-                if (child.id !== 'monster-avatar-wrap') {
-                    child.style.position = "relative";
-                    child.style.zIndex = "10"; 
-                }
-            });
-            // 👆 [레이어 구출 마법 끝!]
+            // 👇 [레이어 구출 마법 끝!] 이라고 적혀있던 곳 아래에 있던 원래 코드들
+            document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
+            document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
+            this.lastAttackTime = 0; this.updateBattleUI();
+            clearInterval(this.battleInterval); 
+            this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
 
             document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
             document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
@@ -1580,6 +1538,54 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
+// 🌟 [초거대 글로벌 프리로더 엔진] - 몬스터, 배경, 미래의 장비까지 싹쓸이 캐싱!
+const AssetPreloader = {
+    preloadAll() {
+        console.log("🔄 [프리로더 가동] 마스터, 백그라운드에서 리소스 싹쓸이를 시작합니다!");
+        const imageUrls = [];
+
+        // 1. 배경화면 1~10구역 장전!
+        for(let i = 1; i <= 10; i++) {
+            imageUrls.push(`assets/backgrounds/bg_zone${i}.png`);
+        }
+
+        if (window.GameData) {
+            // 2. 몬스터(일반/보스) 이미지 싹쓸이!
+            if (GameData.monsters) {
+                // 일반 몬스터
+                for (const zone in GameData.monsters.normal) {
+                    GameData.monsters.normal[zone].forEach(m => {
+                        if (m.img) imageUrls.push(`assets/monster/${m.img}`);
+                    });
+                }
+                // 보스 몬스터
+                for (const stage in GameData.monsters.boss) {
+                    const boss = GameData.monsters.boss[stage];
+                    if (boss.img) imageUrls.push(`assets/monster/${boss.img}`);
+                }
+            }
+
+            // 3. 미래를 위한 장비/치장품/미소녀 펫 이미지 싹쓸이 준비! (데이터만 넣으면 알아서 작동함!)
+            if (GameData.items) {
+                for (const key in GameData.items) {
+                    const item = GameData.items[key];
+                    if (item.img) imageUrls.push(`assets/items/${item.img}`); 
+                }
+            }
+        }
+
+        // 중복 제거 후 몰래 다운로드 시작!
+        const uniqueUrls = [...new Set(imageUrls)];
+        uniqueUrls.forEach(url => {
+            const img = new Image();
+            img.src = url; // 👈 이 순간 컴퓨터가 몰래 이미지를 다운받아 저장해 둡니다!
+        });
+        
+        console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
+    }
+};
+
 
 
 
