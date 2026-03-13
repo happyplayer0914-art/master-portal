@@ -221,21 +221,25 @@ const GameSystem = {
             
             // 📺 1. [광고 보고 2배!] 버튼을 눌렀을 때
             if (isAd) {
-                // 플러터가 광고를 다 보고 나서 이 꼬리표를 보고 보상을 2배로 줄 수 있게 세팅!
+                // 꼬리표 달기!
                 window.currentAdAction = 'idle_double'; 
                 
-                // 💡 마스터가 기존에 쓰던 플러터 광고 호출 코드를 이 아래에 넣어주세요!
-                // 예: window.flutter_inappwebview.callHandler('showRewardAd');
-                // (만약 웹에서 바로 테스트하고 싶다면 아래 임시 코드를 켜서 테스트하세요!)
-                /*
-                UIManager.showToast("📺 광고 시청 중... (테스트)");
-                setTimeout(() => { if (window.onRewardEarned) window.onRewardEarned(); }, 1500); 
-                */
+                // 🔌 [핵심 추가] 진짜로 광고 호출하기!
+                if (window.flutter_inappwebview) {
+                    // 마스터의 플러터 앱에서 광고를 띄우는 진짜 명령어!
+                    window.flutter_inappwebview.callHandler('showRewardAd'); 
+                } else {
+                    // 💡 [웹 테스트용] PC 브라우저에서는 플러터가 없으니까 가짜로 2초 뒤에 보상 주기!
+                    UIManager.showToast("📺 (PC 테스트) 광고 시청 중... 2초 뒤 보상 지급!");
+                    setTimeout(() => { 
+                        if (window.onRewardEarned) window.onRewardEarned(); 
+                    }, 2000); 
+                }
                 
-                return; // 🚨 여기서 정지! 보상은 광고 다 보고 onRewardEarned 에서 줍니다!
+                return; // 여기서 멈추고 광고 다 볼 때까지 대기!
             }
 
-            // 💤 2. [그냥 받기] 버튼을 눌렀을 때 (마스터의 기존 로직 100% 동일)
+            // 💤 2. [그냥 받기] 버튼을 눌렀을 때 (기존 그대로)
             GameState.gold += amount;
             GameState.lastIdleCheck = Date.now();
             GameState.save();
@@ -1341,6 +1345,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
