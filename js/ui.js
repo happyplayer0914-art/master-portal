@@ -90,7 +90,7 @@ const UIManager = {
         }
     },
     
-   updateRpgLobbyUI() {
+updateRpgLobbyUI() {
         const stats = GameState.getTotalStats(); 
         document.getElementById('rpg-stage-display').innerText = GameState.rpgStage;
         
@@ -126,6 +126,11 @@ const UIManager = {
         renderSlot('lobby-slot-weapon', GameState.equippedWeapon, '무기');
         renderSlot('lobby-slot-armor', GameState.equippedArmor, '방어구');
         renderSlot('lobby-slot-accessory', GameState.equippedAccessory, '장신구');
+
+        // 🌟 [신규 추가] 프로필 화면의 고급 스탯들 업데이트!
+        if(document.getElementById('profile-def')) document.getElementById('profile-def').innerText = stats.def;
+        if(document.getElementById('profile-eva')) document.getElementById('profile-eva').innerText = stats.eva;
+        if(document.getElementById('profile-spd')) document.getElementById('profile-spd').innerText = stats.spd;
     },
     
     applyAvatarSkin() {
@@ -267,6 +272,7 @@ const UIManager = {
         drawBg();
     }
 };
+
 
 
 
