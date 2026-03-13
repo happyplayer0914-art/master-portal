@@ -1183,9 +1183,9 @@ enterDungeon() {
                 
                 // 🌟 [🔥보스 크기 뻥튀기 추가!!🔥]
                 if (isBoss) {
-                    // 보스면 화면을 꽉 채우게 압도적으로 키웁니다! (350px 정도, 더 키우고 싶으면 숫자를 올리세요!)
-                    avatarWrap.style.width = "350px"; 
-                    avatarWrap.style.height = "350px";
+                    // 보스면 화면을 꽉 채우게 압도적으로 키웁니다! (450px 정도, 더 키우고 싶으면 숫자를 올리세요!)
+                    avatarWrap.style.width = "450px"; 
+                    avatarWrap.style.height = "450px";
                 } else {
                     // 일반 몬스터는 기존 220px 유지!
                     avatarWrap.style.width = "220px"; 
@@ -1544,6 +1544,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
