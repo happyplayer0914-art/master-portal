@@ -1169,32 +1169,36 @@ enterDungeon() {
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
             
-            if (mInfo.img) {
-                // 1. 이미지가 있으면 <img> 태그로 그려줌! (그림자가 더 돋보이게 진하게 변경!)
-               spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] mix-blend-multiply" onerror="this.outerHTML='${mInfo.e}'">`;
+           if (mInfo.img) {
+                // 1. 이미지가 있으면 <img> 태그로 그려줌! 
+                spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)] mix-blend-multiply" onerror="this.outerHTML='${mInfo.e}'">`;
                 
-                // 이미지가 꽉 차게!
-                spriteBox.style.width = "100%";
-                spriteBox.style.height = "100%";
-                
-                // 💡 [핵심] 답답한 상자를 투명하게 날려버리고, 크기를 뻥튀기!
+                // 💡 [핵심] 답답한 상자를 투명하게 날려버리기!
                 avatarWrap.style.background = "transparent";
                 avatarWrap.style.border = "none";
                 avatarWrap.style.boxShadow = "none";
-               // 👇 [🌟수정된 중앙 정렬 마법🌟] 상자보다 큰 녀석도 강제로 멱살 잡아 중앙에 꽂아버리기!
-                avatarWrap.style.position = "relative";
-                avatarWrap.style.left = "50%";
-                avatarWrap.style.transform = "translateX(-50%)";
                 
-                // 🌟 [🔥보스 크기 뻥튀기 추가!!🔥]
+                // 👇 [🌟진짜 완벽한 중앙 정렬 마법🌟]
+                // 껍데기(avatarWrap)는 가로 100%로 쫙 펴주고, 안의 내용물을 정중앙에 오게 합니다!
+                avatarWrap.style.width = "100%";
+                avatarWrap.style.display = "flex";
+                avatarWrap.style.justifyContent = "center";
+                avatarWrap.style.alignItems = "center";
+                
+                // 아까 넣었던 부작용 심한 위치 이동 마법은 싹 지워줍니다 (초기화)!
+                avatarWrap.style.position = "static";
+                avatarWrap.style.left = "auto";
+                avatarWrap.style.transform = "none";
+                
+                // 🌟 [🔥크기 조절은 껍데기가 아니라 알맹이(spriteBox)한테 직접 걸어줍니다!!🔥]
                 if (isBoss) {
-                    // 보스면 화면을 꽉 채우게 압도적으로 키웁니다! (450px 정도, 더 키우고 싶으면 숫자를 올리세요!)
-                    avatarWrap.style.width = "450px"; 
-                    avatarWrap.style.height = "450px";
+                    spriteBox.style.width = "450px"; 
+                    spriteBox.style.height = "450px";
+                    spriteBox.style.flexShrink = "0"; // 🌟 카드를 뚫고 나가도 안 찌그러지게 방어!
                 } else {
-                    // 일반 몬스터는 기존 220px 유지!
-                    avatarWrap.style.width = "220px"; 
-                    avatarWrap.style.height = "220px";
+                    spriteBox.style.width = "220px"; 
+                    spriteBox.style.height = "220px";
+                    spriteBox.style.flexShrink = "0";
                 }
                 
             } else {
@@ -1210,6 +1214,15 @@ enterDungeon() {
                 avatarWrap.style.boxShadow = "";
                 avatarWrap.style.width = ""; 
                 avatarWrap.style.height = "";
+                
+                // 🌟 아까 넣었던 중앙 정렬 마법들도 이모지일 땐 꺼줍니다!
+                avatarWrap.style.display = "";
+                avatarWrap.style.justifyContent = "";
+                avatarWrap.style.alignItems = "";
+                avatarWrap.style.position = "";
+                avatarWrap.style.left = "";
+                avatarWrap.style.transform = "";
+                spriteBox.style.flexShrink = "";
             }
             document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
@@ -1549,6 +1562,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
