@@ -1181,11 +1181,10 @@ enterDungeon() {
                 avatarWrap.style.background = "transparent";
                 avatarWrap.style.border = "none";
                 avatarWrap.style.boxShadow = "none";
-                // 👇 [🌟여기 추가 2🌟] 무조건 정중앙에 오도록 마법진 그리기!
-                avatarWrap.style.margin = "0 auto";
-                avatarWrap.style.display = "flex";
-                avatarWrap.style.justifyContent = "center";
-                avatarWrap.style.alignItems = "center";
+               // 👇 [🌟수정된 중앙 정렬 마법🌟] 상자보다 큰 녀석도 강제로 멱살 잡아 중앙에 꽂아버리기!
+                avatarWrap.style.position = "relative";
+                avatarWrap.style.left = "50%";
+                avatarWrap.style.transform = "translateX(-50%)";
                 
                 // 🌟 [🔥보스 크기 뻥튀기 추가!!🔥]
                 if (isBoss) {
@@ -1550,6 +1549,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
