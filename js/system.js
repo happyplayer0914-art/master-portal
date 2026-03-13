@@ -850,8 +850,9 @@ const GameSystem = {
                 qProgress.claimed = true;
                 
                 // 골드와 젬을 동시에 지급!
-                GameState.gold += (qData.rewardGold || 0); 
-                GameState.gem += (qData.rewardGems || 0); 
+              // 👇 [이렇게 변경!]
+                GameState.gold += Number(qData.rewardGold || 0); 
+                GameState.gem += Number(qData.rewardGems || 0);
                 
                 GameState.save();
                 this.save();
@@ -1253,7 +1254,9 @@ enterDungeon() {
                     rewardGem = 10 * bossTier;  // 10, 20, 30... 이렇게 늘어남!
                 }
                 
-                GameState.gold += rewardGold; GameState.gem += rewardGem; 
+               // 👇 [이렇게 변경!] 무조건 숫자로 취급하도록 Number()로 감싸기!
+                GameState.gold += Number(rewardGold); 
+                GameState.gem += Number(rewardGem);
                 GameState.rpgStage++; GameState.save();
               // 👇 [여기를 통째로 교체!]
                 // 💡 [퀘스트 센서] 몬스터 처치 시!
@@ -1476,6 +1479,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
