@@ -148,7 +148,7 @@ updateRpgLobbyUI() {
         });
 
         const jobTitleEl = document.getElementById('profile-job-title');
-        const passiveEl = document.getElementById('profile-passive-title');
+        //const passiveEl = document.getElementById('profile-passive-title');
 
         // 💡 전직 조건: 신화 1개 + 전설 2개가 모두 장착되었을 때!
         if (mythicItem && legendaryCount === 2) {
@@ -157,10 +157,10 @@ updateRpgLobbyUI() {
                 jobTitleEl.innerText = `✨ ${mythicItem.job} [${mythicItem.mbti}] ✨`;
                 jobTitleEl.className = "text-red-400 font-black text-xs sm:text-sm tracking-widest uppercase mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all duration-300";
             }
-            if(passiveEl) {
-                passiveEl.innerText = `▶ 패시브: ${mythicItem.passive}`;
-                passiveEl.classList.remove('hidden');
-            }
+           // if(passiveEl) {
+           //     passiveEl.innerText = `▶ 패시브: ${mythicItem.passive}`;
+           //     passiveEl.classList.remove('hidden');
+           // }
 
             // 🏆 [최초 전직 업적 달성 로직!] (배열에 'class_advanced'가 없으면 최초 달성으로 인정)
             if (!GameState.questData.achievements.completed.includes('class_advanced')) {
@@ -182,9 +182,9 @@ updateRpgLobbyUI() {
                 jobTitleEl.innerText = "Master Profile";
                 jobTitleEl.className = "text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1 transition-all duration-300";
             }
-            if(passiveEl) {
-                passiveEl.classList.add('hidden');
-            }
+          //  if(passiveEl) {
+          //     passiveEl.classList.add('hidden');
+          //  }
         }
     },
     
@@ -327,6 +327,7 @@ updateRpgLobbyUI() {
         drawBg();
     }
 };
+
 
 
 
