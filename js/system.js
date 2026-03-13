@@ -162,7 +162,7 @@ const GameSystem = {
 
             GameState.gold -= cost;
             GameState.gem -= gemCost;
-            GameSystem.Quest.updateProgress('daily', 'd2');
+         
 
             UIManager.selectedItems.forEach(id => {
                 const idx = GameState.inventory.indexOf(id);
@@ -967,7 +967,7 @@ enterDungeon() {
             // 🔓 1. 최대 층수 100층으로 해제!
             if (GameState.rpgStage > 100) return UIManager.showToast("진(眞) 마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
             
-            GameSystem.Quest.updateProgress('daily', 'd1');
+           
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
             
@@ -1444,6 +1444,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
