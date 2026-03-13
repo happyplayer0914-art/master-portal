@@ -105,9 +105,9 @@ const GameData = {
             10:{e:'🐉',n:'오염된 나무정령', img:'boss_tree.png'}, 
             20:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
             30:{e:'🌋',n:'화산의 지배자', img:'boss_dragon.png'},
-            40:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
-            50:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
-            60:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            40:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            50:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'},
+            60:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'}, 
             70:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
             80:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'},
             90:{e:'🕷️',n:'지옥의 수문장', img:'boss_hell.png'},
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
