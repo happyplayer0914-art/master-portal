@@ -335,14 +335,15 @@ upgradeStat(t) {
         }
     },
     
-    Gacha: {
+   Gacha: {
         performGacha(times) {
-            const cost = times * 50; if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
- // 광고 보지 말고 무조건 젬 소모하고 뽑기 진행!
+            const cost = times * 50; 
+            if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
+            // 광고 보지 말고 무조건 젬 소모하고 뽑기 진행!
             this._executeGachaLogic(times);
         },
 
-        // 💡 [여기 추가됨!] 원래 performGacha 안에 있던 엄청 긴 가챠 로직들을 이 함수로 통째로 옮겨야 해!
+        // 💡 [대격변 완료!] 극악의 0.1% 확률 엔진과 신화(Mythic) 연출 탑재!
         _executeGachaLogic(times) {
             GameState.gem -= (times * 50); GameState.save(); UIManager.updateCurrencyUI();
             document.getElementById('bottom-nav').style.display = 'none'; 
@@ -353,10 +354,26 @@ upgradeStat(t) {
             
             let results = [];
             for(let i=0; i<times; i++) {
-                const roll = Math.random(); let rarity = 'common'; if(roll < 0.05) rarity = 'legendary'; else if(roll < 0.2) rarity = 'epic'; else if(roll < 0.5) rarity = 'rare';
+                // 🌟 [확률 엔진 교체] 마스터가 지시한 황금 밸런스 확률!
+                const roll = Math.random() * 100; 
+                let rarity = 'common'; 
+                
+                if (roll < 0.1) rarity = 'mythic';               // 🌟 0.1% (신화)
+                else if (roll < 0.1 + 2.5) rarity = 'legendary'; // 2.5% (전설)
+                else if (roll < 0.1 + 2.5 + 7.5) rarity = 'epic'; // 7.5% (영웅)
+                else if (roll < 0.1 + 2.5 + 7.5 + 25.0) rarity = 'rare'; // 25.0% (희귀)
+                else rarity = 'common';                          // 나머지 64.9% (일반)
+                
                 const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
-                const item = pool[Math.floor(Math.random() * pool.length)];
-                results.push(item); GameState.inventory.push(item.id);
+                // (방어막) 만약 해당 등급 템이 없으면 튕기지 않고 일반 템으로 대체!
+                const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
+                
+                const item = safePool[Math.floor(Math.random() * safePool.length)];
+                
+                // 마스터의 기존 인벤토리 저장 로직 유지 (item.id가 없으면 객체 키값을 찾아서 저장)
+                const itemId = item.id || Object.keys(GameData.items).find(key => GameData.items[key] === item);
+                results.push({ id: itemId, ...item }); 
+                GameState.inventory.push(itemId);
             }
             GameState.save();
             
@@ -367,10 +384,25 @@ upgradeStat(t) {
                 
                 results.forEach((item, index) => {
                     setTimeout(() => {
-                        let rarityLabel = item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${item.color} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
+                        // 🌟 [UI 업데이트] 신화(Mythic) 라벨 및 색상 처리!
+                        let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
+                        
+                        // 신화가 뜨면 텍스트가 빨간색으로 반짝거림!
+                        let colorClass = item.rarity === 'mythic' ? "text-red-400 font-extrabold animate-pulse" : (item.color || "text-gray-300");
+                        
+                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
+                        
                         resBox.insertAdjacentHTML('beforeend', cardHtml);
-                        if(item.rarity === 'legendary' || item.rarity === 'epic') UIManager.triggerHaptic(); 
+                        
+                        // 🌟 신화나 전설이 떴을 때 진동 빡! 오고 화면 덜덜 떨리기!
+                        if(item.rarity === 'mythic' || item.rarity === 'legendary') {
+                            if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
+                        }
+                        if(item.rarity === 'mythic') {
+                            const overlay = document.getElementById('gacha-overlay');
+                            overlay.classList.add('shake');
+                            setTimeout(() => overlay.classList.remove('shake'), 400); // 0.4초 뒤 진동 멈춤
+                        }
                     }, index * 100); 
                 });
                 setTimeout(() => { document.getElementById('gacha-close-btn').classList.remove('hidden'); }, results.length * 100 + 300);
@@ -1605,6 +1637,7 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
     }
 };
+
 
 
 
