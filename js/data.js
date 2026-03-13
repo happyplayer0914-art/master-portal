@@ -6,34 +6,56 @@ const GameData = {
         // 🟢 일반 (Common) - 초반용 깡스탯 위주
         'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', atkMult: 1.10 },
         'w_c2': { id: 'w_c2', type: 'gear', subType: 'weapon', name: '녹슨 단검', emoji: '🔪', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, critRate: 5 },
+        'w_c3': { id: 'w_c3', type: 'gear', subType: 'weapon', name: '거친 몽둥이', emoji: '🏏', rarity: 'common', color: 'text-slate-400', atkMult: 1.15 }, // 신규 추가 (높은 깡공격력)
+        
         'a_c1': { id: 'a_c1', type: 'gear', subType: 'armor', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', color: 'text-slate-400', hpMult: 1.10 },
+        'a_c2': { id: 'a_c2', type: 'gear', subType: 'armor', name: '빛바랜 천옷', emoji: '👕', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2 }, // 신규 추가 (미세한 회피)
+        
         'ac_c1': { id: 'ac_c1', type: 'gear', subType: 'accessory', name: '평범한 반지', emoji: '💍', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, hpMult: 1.05 },
-        
-        // 🔵 희귀 (Rare) - 약간의 특성 부여
-        'w_r1': { id: 'w_r1', type: 'gear', subType: 'weapon', name: '기사단의 롱소드', emoji: '⚔️', rarity: 'rare', color: 'text-blue-400', atkMult: 1.25 },
+        'ac_c2': { id: 'ac_c2', type: 'gear', subType: 'accessory', name: '행운의 동전', emoji: '🪙', rarity: 'common', color: 'text-slate-400', atkMult: 1.02, critRate: 3 }, // 신규 추가 (소소한 크리)
+
+        // 🔵 희귀 (Rare) - 약간의 특성 부여 (공속, 회피, 방어력 등 등장)
+        'w_r1': { id: 'w_r1', type: 'gear', subType: 'weapon', name: '기사단의 롱소드', emoji: '⚔️', rarity: 'rare', color: 'text-blue-400', atkMult: 1.25, def: 20 }, // 방어력 스탯 추가
         'w_r2': { id: 'w_r2', type: 'gear', subType: 'weapon', name: '암살자의 비수', emoji: '🗡️', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, critRate: 15, critDmg: 20 },
-        'a_r1': { id: 'a_r1', type: 'gear', subType: 'armor', name: '강철 대방패', emoji: '🛡️', rarity: 'rare', color: 'text-blue-400', hpMult: 1.30 },
+        'w_r3': { id: 'w_r3', type: 'gear', subType: 'weapon', name: '사냥꾼의 뿔활', emoji: '🏹', rarity: 'rare', color: 'text-blue-400', atkMult: 1.20, spd: 5 }, // 신규 추가 (공속 무기)
+        
+        'a_r1': { id: 'a_r1', type: 'gear', subType: 'armor', name: '강철 대방패', emoji: '🛡️', rarity: 'rare', color: 'text-blue-400', hpMult: 1.30, def: 50 }, // 방어력 스탯 추가
         'a_r2': { id: 'a_r2', type: 'gear', subType: 'armor', name: '가시 갑옷', emoji: '🧥', rarity: 'rare', color: 'text-blue-400', hpMult: 1.15, vamp: 2 },
-        'ac_r1': { id: 'ac_r1', type: 'gear', subType: 'accessory', name: '수호의 목걸이', emoji: '📿', rarity: 'rare', color: 'text-blue-400', atkMult: 1.10, hpMult: 1.15 },
+        'a_r3': { id: 'a_r3', type: 'gear', subType: 'armor', name: '도적의 망토', emoji: '🧣', rarity: 'rare', color: 'text-blue-400', hpMult: 1.20, eva: 8 }, // 신규 추가 (회피 갑옷)
+        
+        'ac_r1': { id: 'ac_r1', type: 'gear', subType: 'accessory', name: '수호의 목걸이', emoji: '📿', rarity: 'rare', color: 'text-blue-400', atkMult: 1.10, hpMult: 1.15, def: 30 }, // 방어력 추가
+        'ac_r2': { id: 'ac_r2', type: 'gear', subType: 'accessory', name: '바람의 장화', emoji: '🥾', rarity: 'rare', color: 'text-blue-400', hpMult: 1.10, spd: 10, eva: 3 }, // 신규 추가 (이동속도 컨셉)
+        'ac_r3': { id: 'ac_r3', type: 'gear', subType: 'accessory', name: '투사의 증표', emoji: '🏅', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, hpMult: 1.05, critDmg: 25 }, // 신규 추가 (크리 데미지 증폭)
+        
         's_r1': { id: 's_r1', type: 'skin', name: '은빛 테두리', emoji: '✨', rarity: 'rare', color: 'text-blue-400' },
-        
-        // 🟣 영웅 (Epic) - 뚜렷한 컨셉 (크리 몰빵 vs 피흡 좀비)
-        'w_e1': { id: 'w_e1', type: 'gear', subType: 'weapon', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', atkMult: 1.50, critRate: 10 },
+
+        // 🟣 영웅 (Epic) - 뚜렷한 컨셉 (크리 몰빵, 피흡 좀비, 쾌속 딜러 등)
+        'w_e1': { id: 'w_e1', type: 'gear', subType: 'weapon', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', atkMult: 1.50, critRate: 10, def: 30 },
         'w_e2': { id: 'w_e2', type: 'gear', subType: 'weapon', name: '그림자 낫', emoji: '🪝', rarity: 'epic', color: 'text-purple-400', atkMult: 1.30, critRate: 25, critDmg: 50 },
-        'w_e3': { id: 'w_e3', type: 'gear', subType: 'weapon', name: '흡혈귀의 이빨', emoji: '🦇', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8 },
-        'a_e1': { id: 'a_e1', type: 'gear', subType: 'armor', name: '성기사의 성갑', emoji: '🛡️', rarity: 'epic', color: 'text-purple-400', hpMult: 1.60 },
-        'a_e2': { id: 'a_e2', type: 'gear', subType: 'armor', name: '망령의 망토', emoji: '👻', rarity: 'epic', color: 'text-purple-400', hpMult: 1.30, vamp: 5, critRate: 10 },
-        'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25 },
-        's_e1': { id: 's_e1', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
+        'w_e3': { id: 'w_e3', type: 'gear', subType: 'weapon', name: '흡혈귀의 이빨', emoji: '🦇', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8, spd: 5 }, // 공속 추가
         
-     // 🟡 전설 (Legendary) - 사기적인 능력치!
-        'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50 },
-        'w_l2': { id: 'w_l2', type: 'gear', subType: 'weapon', name: '파멸의 마검', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.80, critRate: 40, critDmg: 100 },
-        'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주 지팡이', emoji: '🩸', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15 },
-        'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50 },
-        'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 심장', emoji: '❤️‍🔥', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.80, vamp: 10 },
-        'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15 },
-        's_l1': { id: 's_l1', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' },
+        'a_e1': { id: 'a_e1', type: 'gear', subType: 'armor', name: '성기사의 성갑', emoji: '🛡️', rarity: 'epic', color: 'text-purple-400', hpMult: 1.60, def: 100 }, // 방어력 대폭 추가
+        'a_e2': { id: 'a_e2', type: 'gear', subType: 'armor', name: '망령의 망토', emoji: '👻', rarity: 'epic', color: 'text-purple-400', hpMult: 1.30, vamp: 5, critRate: 10, eva: 8 },
+        'a_e3': { id: 'a_e3', type: 'gear', subType: 'armor', name: '닌자의 수의', emoji: '🥷', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15 }, // 신규 추가 (회피/공속 갑옷)
+        
+        'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25, def: 50 },
+        'ac_e2': { id: 'ac_e2', type: 'gear', subType: 'accessory', name: '광전사의 뿔피리', emoji: '📯', rarity: 'epic', color: 'text-purple-400', atkMult: 1.45, hpMult: 1.05, spd: 20 }, // 신규 추가 (공속 극대화)
+        'ac_e3': { id: 'ac_e3', type: 'gear', subType: 'accessory', name: '세계수의 잎사귀', emoji: '🍃', rarity: 'epic', color: 'text-purple-400', hpMult: 1.40, vamp: 10, eva: 5 }, // 신규 추가 (피흡 및 생존)
+        
+        's_e1': { id: 's_e1', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
+
+        // 🟡 전설 (Legendary) - 사기적인 능력치!
+        'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50, def: 100 },
+        'w_l2': { id: 'w_l2', type: 'gear', subType: 'weapon', name: '파멸의 마검', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.80, critRate: 40, critDmg: 100, spd: 15 },
+        'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주 지팡이', emoji: '🩸', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15, eva: 10 },
+        
+        'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50, def: 200 },
+        'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 심장', emoji: '❤️‍🔥', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.90, vamp: 12, def: 50 },
+        'a_l3': { id: 'a_l3', type: 'gear', subType: 'armor', name: '환영의 거울 갑옷', emoji: '🪞', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.10, eva: 25, spd: 20 }, // 신규 추가 (절대 회피 탱커)
+        
+        'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15, def: 100 },
+        'ac_l2': { id: 'ac_l2', type: 'gear', subType: 'accessory', name: '시간술사의 시계', emoji: '⏱️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.40, hpMult: 1.40, spd: 35, eva: 15 }, // 신규 추가 (공속 한계 돌파)
+        'ac_l3': { id: 'ac_l3', type: 'gear', subType: 'accessory', name: '파괴신의 눈물', emoji: '💧', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.00, critRate: 30, critDmg: 120 }, // 신규 추가 (한방 극딜)
 
 // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
@@ -147,6 +169,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
