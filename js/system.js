@@ -271,17 +271,34 @@ const GameSystem = {
             UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
         },
         getUpgradeCost(t) { return t === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); },
-  upgradeStat(t) {
-            const cost = this.getUpgradeCost(t); if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
+upgradeStat(t) {
+            const cost = this.getUpgradeCost(t); 
+            if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
+            
+            // 💡 [수정됨] 악덕 대장장이 검거! 결제는 딱 한 번만!
             GameState.gold -= cost; 
             
             // 💡 [퀘스트 센서 추가!] 스탯 1번 올릴 때마다 발동!
-            GameSystem.Quest.update('daily', 'd3', 1); 
-            GameSystem.Quest.update('weekly', 'w4', 1);
+            if(GameSystem.Quest) {
+                GameSystem.Quest.update('daily', 'd3', 1); 
+                GameSystem.Quest.update('weekly', 'w4', 1);
+            }
             
-            // ... (기존 코드 계속) if(t==='atk') ...
-            GameState.gold -= cost; if(t==='atk') GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; else { const h = Math.floor(GameState.rpgMaxHp * 0.2) + 20; GameState.rpgMaxHp += h; GameState.currentHp += h; }
-            GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.coin(); UIManager.triggerHaptic(); UIManager.showToast("스탯 강화 성공! ✨");
+            // 스탯 뻥튀기!
+            if(t==='atk') {
+                GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; 
+            } else { 
+                const h = Math.floor(GameState.rpgMaxHp * 0.2) + 20; 
+                GameState.rpgMaxHp += h; 
+                GameState.currentHp += h; 
+            }
+            
+            GameState.save(); 
+            UIManager.updateCurrencyUI(); 
+            UIManager.updateRpgLobbyUI(); 
+            AudioEngine.sfx.coin(); 
+            UIManager.triggerHaptic(); 
+            UIManager.showToast("스탯 강화 성공! ✨");
         },
         buyItem(t) {
             if(t==='potion') { if(GameState.gold < 30) return UIManager.showToast("골드가 부족합니다! 🪙"); GameState.gold -= 30; GameState.potions++; UIManager.showToast("물약을 구매했습니다! ❤️"); }
@@ -1520,6 +1537,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
