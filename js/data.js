@@ -26,7 +26,7 @@ const GameData = {
         'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25 },
         's_e1': { id: 's_e1', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
         
-        // 🟡 전설 (Legendary) - 사기적인 능력치!
+     // 🟡 전설 (Legendary) - 사기적인 능력치!
         'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50 },
         'w_l2': { id: 'w_l2', type: 'gear', subType: 'weapon', name: '파멸의 마검', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.80, critRate: 40, critDmg: 100 },
         'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주 지팡이', emoji: '🩸', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15 },
@@ -38,24 +38,24 @@ const GameData = {
         // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
         // ==========================================
-        'mythic_entj_w': { name: '태양의 심판검', type: 'weapon', rarity: 'mythic', emoji: '☀️', atkMult: 4.5, critDmg: 200, spd: 15, mbti: 'ENTJ', job: '전장을 지배하는 군주', passive: '절대 권력', desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.' },
-        'mythic_intj_w': { name: '금기된 마도서', type: 'weapon', rarity: 'mythic', emoji: '📖', atkMult: 5.0, critRate: 15, spd: 10, mbti: 'INTJ', job: '심연의 대마법사', passive: '천재의 영역', desc: '[INTJ 신화] 심연의 지식이 담긴 마도서.' },
-        'mythic_infp_w': { name: '세계수의 하프', type: 'weapon', rarity: 'mythic', emoji: '🌿', atkMult: 3.0, hpMult: 3.0, vamp: 20, mbti: 'INFP', job: '달빛의 은둔술사', passive: '요정의 축복', desc: '[INFP 신화] 상처를 치유하는 달빛의 선율.' },
-        'mythic_estp_w': { name: '전신의 쌍도끼', type: 'weapon', rarity: 'mythic', emoji: '🪓', atkMult: 3.5, spd: 45, critDmg: 150, mbti: 'ESTP', job: '폭풍의 무법자', passive: '아드레날린 폭주', desc: '[ESTP 신화] 멈추지 않는 폭풍의 연격.' },
-        'mythic_isfj_a': { name: '여신의 성배', type: 'accessory', rarity: 'mythic', emoji: '🏆', hpMult: 4.0, def: 250, vamp: 15, mbti: 'ISFJ', job: '성소를 지키는 가디언', passive: '불굴의 수호진', desc: '[ISFJ 신화] 아군을 지키는 절대적인 수호.' },
-        'mythic_istj_ar': { name: '서약의 대방패', type: 'armor', rarity: 'mythic', emoji: '🛡️', hpMult: 3.5, def: 400, eva: 5, mbti: 'ISTJ', job: '철의 규율 기사단장', passive: '절대 방벽', desc: '[ISTJ 신화] 어떤 공격도 뚫지 못하는 철의 방벽.' },
-        'mythic_isfp_w': { name: '숲의 숨결 플루트', type: 'weapon', rarity: 'mythic', emoji: '🎵', atkMult: 2.5, eva: 35, spd: 25, mbti: 'ISFP', job: '바람의 음유시인', passive: '정령의 속삭임', desc: '[ISFP 신화] 바람처럼 유려한 정령의 몸놀림.' },
-        'mythic_intp_a': { name: '현자의 돌', type: 'accessory', rarity: 'mythic', emoji: '🔮', atkMult: 3.0, critRate: 25, def: 100, mbti: 'INTP', job: '미궁의 연금술사', passive: '진리 탐구', desc: '[INTP 신화] 우주의 진리가 담긴 궁극의 돌.' },
-        'mythic_istp_w': { name: '흑요석 단검', type: 'weapon', rarity: 'mythic', emoji: '🗡️', atkMult: 3.0, critRate: 35, critDmg: 300, mbti: 'ISTP', job: '그림자의 암살자', passive: '치명적 포착', desc: '[ISTP 신화] 단 한 번의 틈을 노리는 그림자.' },
-        'mythic_esfp_w': { name: '환희의 쌍검', type: 'weapon', rarity: 'mythic', emoji: '⚔️', atkMult: 3.2, eva: 25, spd: 35, mbti: 'ESFP', job: '환희의 무희', passive: '스포트라이트', desc: '[ESFP 신화] 전장을 무대로 만드는 화려한 검무.' },
-        'mythic_enfp_a': { name: '별빛 나침반', type: 'accessory', rarity: 'mythic', emoji: '🧭', hpMult: 2.5, eva: 20, spd: 20, mbti: 'ENFP', job: '혜성의 탐험가', passive: '무한한 영감', desc: '[ENFP 신화] 미지의 세계로 인도하는 나침반.' },
-        'mythic_entp_w': { name: '차원 파괴포', type: 'weapon', rarity: 'mythic', emoji: '☄️', atkMult: 5.5, critRate: 10, critDmg: 250, mbti: 'ENTP', job: '혼돈의 마도공학자', passive: '변수 창출', desc: '[ENTP 신화] 차원을 찢어발기는 혼돈의 포격.' },
-        'mythic_estj_w': { name: '지배자의 군기', type: 'weapon', rarity: 'mythic', emoji: '🚩', atkMult: 3.8, def: 150, hpMult: 2.0, mbti: 'ESTJ', job: '강철의 총사령관', passive: '일제 사격', desc: '[ESTJ 신화] 승리를 이끄는 압도적인 지휘력.' },
-        'mythic_esfj_ar': { name: '여명의 방패', type: 'armor', rarity: 'mythic', emoji: '🔰', hpMult: 4.5, def: 300, vamp: 10, mbti: 'ESFJ', job: '여명의 성기사단장', passive: '구원의 빛', desc: '[ESFJ 신화] 어둠을 몰아내는 여명의 빛.' },
-        'mythic_enfj_w': { name: '태양의 지휘봉', type: 'weapon', rarity: 'mythic', emoji: '🪄', atkMult: 3.5, hpMult: 2.5, spd: 20, mbti: 'ENFJ', job: '태양의 선지자', passive: '군중의 찬가', desc: '[ENFJ 신화] 전군을 고양시키는 태양의 인도자.' },
-        'mythic_infj_a': { name: '운명의 수정구', type: 'accessory', rarity: 'mythic', emoji: '🔮', atkMult: 2.5, eva: 30, def: 150, mbti: 'INFJ', job: '별을 읽는 예언자', passive: '미래 예지', desc: '[INFJ 신화] 모든 공격을 꿰뚫어 보는 예지의 눈.' },
+        'mythic_entj_w': { id: 'mythic_entj_w', name: '태양의 심판검', type: 'weapon', rarity: 'mythic', emoji: '☀️', atkMult: 4.5, critDmg: 200, spd: 15, mbti: 'ENTJ', job: '전장을 지배하는 군주', passive: '절대 권력', desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.' },
+        'mythic_intj_w': { id: 'mythic_intj_w', name: '금기된 마도서', type: 'weapon', rarity: 'mythic', emoji: '📖', atkMult: 5.0, critRate: 15, spd: 10, mbti: 'INTJ', job: '심연의 대마법사', passive: '천재의 영역', desc: '[INTJ 신화] 심연의 지식이 담긴 마도서.' },
+        'mythic_infp_w': { id: 'mythic_infp_w', name: '세계수의 하프', type: 'weapon', rarity: 'mythic', emoji: '🌿', atkMult: 3.0, hpMult: 3.0, vamp: 20, mbti: 'INFP', job: '달빛의 은둔술사', passive: '요정의 축복', desc: '[INFP 신화] 상처를 치유하는 달빛의 선율.' },
+        'mythic_estp_w': { id: 'mythic_estp_w', name: '전신의 쌍도끼', type: 'weapon', rarity: 'mythic', emoji: '🪓', atkMult: 3.5, spd: 45, critDmg: 150, mbti: 'ESTP', job: '폭풍의 무법자', passive: '아드레날린 폭주', desc: '[ESTP 신화] 멈추지 않는 폭풍의 연격.' },
+        'mythic_isfj_a': { id: 'mythic_isfj_a', name: '여신의 성배', type: 'accessory', rarity: 'mythic', emoji: '🏆', hpMult: 4.0, def: 250, vamp: 15, mbti: 'ISFJ', job: '성소를 지키는 가디언', passive: '불굴의 수호진', desc: '[ISFJ 신화] 아군을 지키는 절대적인 수호.' },
+        'mythic_istj_ar': { id: 'mythic_istj_ar', name: '서약의 대방패', type: 'armor', rarity: 'mythic', emoji: '🛡️', hpMult: 3.5, def: 400, eva: 5, mbti: 'ISTJ', job: '철의 규율 기사단장', passive: '절대 방벽', desc: '[ISTJ 신화] 어떤 공격도 뚫지 못하는 철의 방벽.' },
+        'mythic_isfp_w': { id: 'mythic_isfp_w', name: '숲의 숨결 플루트', type: 'weapon', rarity: 'mythic', emoji: '🎵', atkMult: 2.5, eva: 35, spd: 25, mbti: 'ISFP', job: '바람의 음유시인', passive: '정령의 속삭임', desc: '[ISFP 신화] 바람처럼 유려한 정령의 몸놀림.' },
+        'mythic_intp_a': { id: 'mythic_intp_a', name: '현자의 돌', type: 'accessory', rarity: 'mythic', emoji: '🔮', atkMult: 3.0, critRate: 25, def: 100, mbti: 'INTP', job: '미궁의 연금술사', passive: '진리 탐구', desc: '[INTP 신화] 우주의 진리가 담긴 궁극의 돌.' },
+        'mythic_istp_w': { id: 'mythic_istp_w', name: '흑요석 단검', type: 'weapon', rarity: 'mythic', emoji: '🗡️', atkMult: 3.0, critRate: 35, critDmg: 300, mbti: 'ISTP', job: '그림자의 암살자', passive: '치명적 포착', desc: '[ISTP 신화] 단 한 번의 틈을 노리는 그림자.' },
+        'mythic_esfp_w': { id: 'mythic_esfp_w', name: '환희의 쌍검', type: 'weapon', rarity: 'mythic', emoji: '⚔️', atkMult: 3.2, eva: 25, spd: 35, mbti: 'ESFP', job: '환희의 무희', passive: '스포트라이트', desc: '[ESFP 신화] 전장을 무대로 만드는 화려한 검무.' },
+        'mythic_enfp_a': { id: 'mythic_enfp_a', name: '별빛 나침반', type: 'accessory', rarity: 'mythic', emoji: '🧭', hpMult: 2.5, eva: 20, spd: 20, mbti: 'ENFP', job: '혜성의 탐험가', passive: '무한한 영감', desc: '[ENFP 신화] 미지의 세계로 인도하는 나침반.' },
+        'mythic_entp_w': { id: 'mythic_entp_w', name: '차원 파괴포', type: 'weapon', rarity: 'mythic', emoji: '☄️', atkMult: 5.5, critRate: 10, critDmg: 250, mbti: 'ENTP', job: '혼돈의 마도공학자', passive: '변수 창출', desc: '[ENTP 신화] 차원을 찢어발기는 혼돈의 포격.' },
+        'mythic_estj_w': { id: 'mythic_estj_w', name: '지배자의 군기', type: 'weapon', rarity: 'mythic', emoji: '🚩', atkMult: 3.8, def: 150, hpMult: 2.0, mbti: 'ESTJ', job: '강철의 총사령관', passive: '일제 사격', desc: '[ESTJ 신화] 승리를 이끄는 압도적인 지휘력.' },
+        'mythic_esfj_ar': { id: 'mythic_esfj_ar', name: '여명의 방패', type: 'armor', rarity: 'mythic', emoji: '🔰', hpMult: 4.5, def: 300, vamp: 10, mbti: 'ESFJ', job: '여명의 성기사단장', passive: '구원의 빛', desc: '[ESFJ 신화] 어둠을 몰아내는 여명의 빛.' },
+        'mythic_enfj_w': { id: 'mythic_enfj_w', name: '태양의 지휘봉', type: 'weapon', rarity: 'mythic', emoji: '🪄', atkMult: 3.5, hpMult: 2.5, spd: 20, mbti: 'ENFJ', job: '태양의 선지자', passive: '군중의 찬가', desc: '[ENFJ 신화] 전군을 고양시키는 태양의 인도자.' },
+        'mythic_infj_a': { id: 'mythic_infj_a', name: '운명의 수정구', type: 'accessory', rarity: 'mythic', emoji: '🔮', atkMult: 2.5, eva: 30, def: 150, mbti: 'INFJ', job: '별을 읽는 예언자', passive: '미래 예지', desc: '[INFJ 신화] 모든 공격을 꿰뚫어 보는 예지의 눈.' },
     },
-  monsters: {
+    monsters: {
         // 💡 [테마별 구역 시스템] 10층 단위로 등장하는 몬스터가 바뀝니다!
         normal: {
             // 🌲 1구역 (1~9층) : 초보자의 숲
@@ -147,6 +147,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
