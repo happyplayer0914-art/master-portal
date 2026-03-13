@@ -1192,8 +1192,8 @@ enterDungeon() {
                 
                 // 🌟 [🔥크기 조절은 껍데기가 아니라 알맹이(spriteBox)한테 직접 걸어줍니다!!🔥]
                 if (isBoss) {
-                    spriteBox.style.width = "450px"; 
-                    spriteBox.style.height = "450px";
+                    spriteBox.style.width = "380px"; 
+                    spriteBox.style.height = "380px";
                     spriteBox.style.flexShrink = "0"; // 🌟 카드를 뚫고 나가도 안 찌그러지게 방어!
                 } else {
                     spriteBox.style.width = "220px"; 
@@ -1224,9 +1224,27 @@ enterDungeon() {
                 avatarWrap.style.transform = "";
                 spriteBox.style.flexShrink = "";
             }
-            document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
+           document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
             document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
+            
+            // 👇 [🌟여기에 레이어 구출 마법 추가!!🌟]
+            const battleCardZ = document.getElementById('battle-card');
+            const wrapForLayer = document.getElementById('monster-avatar-wrap');
+            
+            // 1. 몬스터 이미지는 1층(바닥)에 고정!
+            wrapForLayer.style.position = "relative";
+            wrapForLayer.style.zIndex = "1"; 
+            
+            // 2. 몬스터 빼고 이름, HP바 등은 전부 10층(꼭대기)으로 끌어올림!
+            Array.from(battleCardZ.children).forEach(child => {
+                if (child.id !== 'monster-avatar-wrap') {
+                    child.style.position = "relative";
+                    child.style.zIndex = "10"; 
+                }
+            });
+            // 👆 [레이어 구출 마법 끝!]
+
             document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
             document.getElementById('btn-attack').disabled = false; document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
             this.lastAttackTime = 0; this.updateBattleUI();
@@ -1562,6 +1580,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
