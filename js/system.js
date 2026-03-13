@@ -1085,7 +1085,7 @@ enterDungeon() {
             UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
         },
        //몬스터 스탯
-     initBattle(isBoss) {
+    initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-rpg-battle').classList.add('active');
             GameState.isBattling = true;
@@ -1101,7 +1101,24 @@ enterDungeon() {
             this.monsterCurrentHp = this.monsterMaxHp;
             this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
             
-            let mInfo = isBoss ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) : GameData.monsters.normal[(GameState.rpgStage - 1) % GameData.monsters.normal.length];
+            // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
+            // 예: 1~10층 = 1구역, 11~20층 = 2구역 ... 91~100층 = 10구역
+            let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
+            
+            // 100층을 넘어갈 경우를 대비해 1~10구역 무한 반복!
+            if (currentZone > 10) {
+                currentZone = ((currentZone - 1) % 10) + 1;
+            }
+
+            // 해당 구역의 일반 몬스터 배열 가져오기 (데이터가 혹시 없으면 기본 1구역으로 방어!)
+            let normalPool = GameData.monsters.normal[currentZone] || GameData.monsters.normal[1];
+            
+            // 💡 [수정됨] 보스면 보스 데이터에서 뽑고, 일반 몹이면 '현재 구역(normalPool)'에서 순서대로 뽑기!
+            let mInfo = isBoss 
+                ? (GameData.monsters.boss[GameState.rpgStage] || {e:'👑',n:'고대의 왕'}) 
+                : normalPool[(GameState.rpgStage - 1) % normalPool.length];
+            // 🌟 [여기까지 교체 완료!]
+
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             document.getElementById('monster-sprite').innerText = mInfo.e;
@@ -1439,6 +1456,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
