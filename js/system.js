@@ -995,7 +995,7 @@ enterDungeon() {
                 }
             }
         }, // 🚨 끝에 콤마(,) 잊지 마!
-      triggerRandomEvent(roll) {
+    triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             
@@ -1015,8 +1015,9 @@ enterDungeon() {
                 titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.15); 
                 descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; 
-                // 💡 [수정] 피 1 보장 안전벨트 제거! (Math.max(0)으로 변경)
-                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
+                
+                // 💡 [핵심] Math.max(1, ...) 로 아무리 맞아도 최소 피 1은 보장!!
+                GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 2) {
@@ -1029,8 +1030,9 @@ enterDungeon() {
                 titleEl.innerText = "미믹의 기습!"; iconEl.innerText = "👅"; titleEl.className = "text-2xl font-black text-red-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.2); 
                 descEl.innerText = `보물상자인 줄 알았지만 몬스터였습니다!\n상처를 입었지만 골드를 뱉어냈습니다.\n(-${dmg} HP, +50G)`;
-                // 💡 [수정] 피 1 보장 안전벨트 제거!
-                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
+                
+                // 💡 [핵심] 미믹한테 물려도 피 1은 남음!
+                GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
                 GameState.gold += 50;
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
                 
@@ -1047,49 +1049,31 @@ enterDungeon() {
                 titleEl.innerText = "저주받은 제단"; iconEl.innerText = "🩸"; titleEl.className = "text-2xl font-black text-rose-600 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.25); 
                 descEl.innerText = `제단에 마스터의 피를 바치고 젬을 얻었습니다.\n(-${dmg} HP, +15💎)`;
-                // 💡 [수정] 피 1 보장 안전벨트 제거!
-                GameState.currentHp = Math.max(0, GameState.currentHp - dmg); 
+                
+                // 💡 [핵심] 제단에 피를 바쳐도 1은 남김!
+                GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
                 GameState.gem += 15;
                 AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
             }
             
-            // 💡 [추가] 만약 이 이벤트로 피가 0이 되었다면 텍스트랑 버튼 빨갛게 바꾸기!
+            // 이제 절대 죽지 않으니까 '쓰러짐' 버튼 UI 로직은 싹 지우고 무조건 '돌아가기'!
             const btn = document.querySelector('#screen-rpg-event button');
-            if (GameState.currentHp <= 0) {
-                descEl.innerText += "\n\n💀 치명상! 마스터가 쓰러졌습니다...";
-                btn.innerText = "쓰러짐...";
-                btn.className = "w-full py-4 bg-red-900 hover:bg-red-800 text-white rounded-xl font-bold border border-red-700 active:scale-95 transition-all";
-            } else {
-                btn.innerText = "돌아가기";
-                btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all";
-            }
+            btn.innerText = "돌아가기";
+            btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all";
             
             UIManager.updateCurrencyUI(); 
         },
 
-       // 💡 [수정] 이벤트 끝날 때 피가 0이면 다음 층으로 안 가고 부활 모달 띄우기!
+        // 💡 [대수술 완] 이벤트에서는 죽지도 않고, 층수도 안 오름! 깔끔하게 로비 귀환!
         endEvent() { 
             document.getElementById('bottom-nav').style.display = 'flex'; 
             
-            if (GameState.currentHp <= 0) {
-                // 사망 처리
-                GameState.save();
-                UIManager.updateRpgLobbyUI();
-                document.getElementById('screen-rpg-event').classList.remove('active');
-                
-                // 0.5초 뒤에 익숙한 그 부활 팝업 띄우기!
-                setTimeout(() => {
-                    document.getElementById('revive-modal').classList.add('active');
-                }, 500);
-            } else {
-                // 살아있으면 정상적으로 다음 층으로 진입 (이 아니라, 층수 고정하고 로비로 귀환!)
-                
-                // 💀 [여기를 삭제!!] 이 줄을 과감하게 지워버리거나 주석(//) 처리하세요!
-                // GameState.rpgStage++; 
-                
-                GameState.save(); 
-                UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
-            }
+            GameState.save(); 
+            UIManager.updateRpgLobbyUI(); // 로비 HP바 갱신
+            document.getElementById('screen-rpg-event').classList.remove('active');
+            
+            // 부활 팝업 띄우는 복잡한 로직 다 버리고, 스무스하게 투기장(로비) 화면으로 돌아갑니다!
+            UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
         },
        //몬스터 스탯
      initBattle(isBoss) {
@@ -1446,6 +1430,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
