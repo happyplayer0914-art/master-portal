@@ -92,7 +92,7 @@ const GameData = {
                 { id: 'n16', e: '🦍', n: '불타는 해골전사', img: 'frie_sk.png' },
                 { id: 'n23', e: '🔥', n: '지옥 불개', img: 'hellhound.png' }
             ],
-            // 🌌 10구역 (91~99층) : 마왕의 심연
+            // 🌌 10구역 (91~99층) : 심연의 끝
             10: [
                 { id: 'n19', e: '👽', n: '심연의 감시자', img: 'abyss_eye.png' },
                 { id: 'n29', e: '🦴', n: '본 드래곤', img: 'bone_dragon.png' },
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
