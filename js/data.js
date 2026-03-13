@@ -102,16 +102,16 @@ const GameData = {
         
         // 보스 데이터도 동일하게 img 속성을 뚫어둘 수 있습니다!
         boss: {
-            5:{e:'🐉',n:'새끼 드래곤', img:'boss_dragon.png'}, 
-            10:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
-            15:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
-            20:{e:'🌋',n:'화산의 지배자', img:'boss_volcano.png'}, 
-            25:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
-            30:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
-            35:{e:'🕷️',n:'여왕 타란튤라', img:'boss_spider.png'}, 
-            40:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
-            45:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'}, 
-            50:{e:'👑',n:'마계의 군주', img:'boss_demonlord.png'}
+            10:{e:'🐉',n:'새끼 드래곤', img:'boss_dragon.png'}, 
+            20:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
+            30:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
+            40:{e:'🌋',n:'화산의 지배자', img:'boss_volcano.png'}, 
+            50:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            60:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
+            70:{e:'🕷️',n:'여왕 타란튤라', img:'boss_spider.png'}, 
+            80:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
+            90:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'}, 
+            100:{e:'👑',n:'마계의 군주', img:'boss_demonlord.png'}
         }
     },
     quests: {
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
