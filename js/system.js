@@ -783,12 +783,21 @@ const GameSystem = {
                 { id: 'd2', title: '트렌드 세터', desc: '인기 폭발 테스트 3회 참여', target: 3, rewardGold: 10, rewardGems: 10 },
                 { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 3회 강화', target: 3, rewardGold: 10, rewardGems: 10 }
             ],
-            weekly: [ // 주간 퀘스트 (보상 골드 추가)
-                { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 300마리 토벌', target: 300, rewardGold: 500, rewardGems: 100 },
-                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 30마리 토벌', target: 30, rewardGold: 1000, rewardGems: 150 },
+          weekly: [ 
+                // 1. 일반 몬스터 300마리 -> 30마리로 대폭 하향! (보상 유지: 500G / 100💎)
+                { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 30마리 토벌', target: 30, rewardGold: 500, rewardGems: 100 },
+                
+                // 2. 보스 30마리 -> 5마리로 하향! (보상 변경: 500G / 150💎)
+                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 500, rewardGems: 150 },
+                
+                // 3. 방치형 지원금 5회 수령 (유지, 보상 유지: 300G / 50💎)
                 { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGold: 300, rewardGems: 50 },
-                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 100회 강화', target: 100, rewardGold: 0, rewardGems: 100 },
-                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 5000, rewardGems: 300 }
+                
+                // 4. 스탯 강화 100회 -> 30회로 하향! (보상 변경: 500G / 100💎)
+                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 30회 강화', target: 30, rewardGold: 500, rewardGems: 100 },
+                
+                // 5. 환생 1회 달성 (유지, 보상 변경: 1000G / 300💎)
+                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 1000, rewardGems: 300 }
             ]
         },
 
@@ -1430,6 +1439,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
