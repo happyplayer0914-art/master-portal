@@ -270,8 +270,15 @@ const GameSystem = {
             UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
         },
         getUpgradeCost(t) { return t === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); },
-        upgradeStat(t) {
+  upgradeStat(t) {
             const cost = this.getUpgradeCost(t); if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
+            GameState.gold -= cost; 
+            
+            // 💡 [퀘스트 센서 추가!] 스탯 1번 올릴 때마다 발동!
+            GameSystem.Quest.update('daily', 'd3', 1); 
+            GameSystem.Quest.update('weekly', 'w4', 1);
+            
+            // ... (기존 코드 계속) if(t==='atk') ...
             GameState.gold -= cost; if(t==='atk') GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; else { const h = Math.floor(GameState.rpgMaxHp * 0.2) + 20; GameState.rpgMaxHp += h; GameState.currentHp += h; }
             GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.coin(); UIManager.triggerHaptic(); UIManager.showToast("스탯 강화 성공! ✨");
         },
@@ -765,88 +772,164 @@ const GameSystem = {
         }
     },
 
-    Quest: {
-        updateProgress(type, id, amount = 1) {
-            if (type === 'daily') {
-                const q = GameData.quests.daily.find(item => item.id === id);
-                if (!q) return;
-                const current = this.getDailyProgress(id);
-                if (current >= q.goal) return; 
-                
-                GameState.questData.daily.progress[id] = current + amount;
-                if (GameState.questData.daily.progress[id] >= q.goal) {
-                    this.giveReward(q.rewardGem, `일일 퀘스트 [${q.name}] 달성!`);
-                }
+  Quest: {
+        currentTab: 'daily',
+        
+        // 💡 마스터의 새로운 퀘스트 목록! (보상과 목표치는 여기서 수정하세요)
+        list: {
+            daily: [
+                { id: 'd1', title: '고블린 학살자', desc: '일반 몬스터 20마리 토벌', target: 20, rewardGems: 10 },
+                { id: 'd2', title: '보스 사냥꾼', desc: '보스 몬스터 3마리 토벌', target: 3, rewardGems: 20 },
+                { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 10회 강화', target: 10, rewardGems: 10 }
+            ],
+            weekly: [ // 🌟 5개로 꽉꽉 채운 주간 퀘스트!
+                { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 300마리 토벌', target: 300, rewardGems: 100 },
+                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 30마리 토벌', target: 30, rewardGems: 150 },
+                { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGems: 50 },
+                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 100회 강화', target: 100, rewardGems: 100 },
+                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGems: 300 }
+            ]
+        },
+
+        progress: { daily: {}, weekly: {} },
+
+        init() {
+            const saved = localStorage.getItem('master_quest_progress2'); // 기존 에러 방지를 위해 저장소 이름 변경
+            if (saved) {
+                this.progress = JSON.parse(saved);
             } else {
-                const q = GameData.quests.achievements.find(item => item.id === id);
-                if (!q || GameState.questData.achievements.completed.includes(id)) return;
+                this.list.daily.forEach(q => this.progress.daily[q.id] = { count: 0, claimed: false });
+                this.list.weekly.forEach(q => this.progress.weekly[q.id] = { count: 0, claimed: false });
+                this.save();
+            }
+        },
+
+        save() {
+            localStorage.setItem('master_quest_progress2', JSON.stringify(this.progress));
+        },
+
+        // 🌟 [핵심 센서 발동기] 다른 곳에서 퀘스트 수치를 올릴 때 부르는 함수!
+        update(type, questId, amount = 1) {
+            if (!this.progress[type] || !this.progress[type][questId]) return;
+            
+            let qProgress = this.progress[type][questId];
+            let qData = this.list[type].find(q => q.id === questId);
+            
+            if (qProgress.claimed) return; 
+            
+            if (qProgress.count < qData.target) {
+                qProgress.count += amount;
+                if (qProgress.count > qData.target) qProgress.count = qData.target;
+                this.save();
                 
-                const current = GameState.questData.achievements.progress[id] || 0;
-                GameState.questData.achievements.progress[id] = current + amount;
+                const modal = document.getElementById('quest-modal');
+                if (modal && !modal.classList.contains('opacity-0')) this.renderList();
                 
-                if (GameState.questData.achievements.progress[id] >= q.goal) {
-                    GameState.questData.achievements.completed.push(id);
-                    this.giveReward(q.rewardGem, `업적 달성! [${q.name}]`);
+                if (qProgress.count === qData.target) {
+                    UIManager.showToast(`📜 퀘스트 [${qData.title}] 달성! 젬을 수령하세요!`);
                 }
             }
-            GameState.save();
         },
-        getDailyProgress(id) { return GameState.questData.daily.progress[id] || 0; },
-        giveReward(gem, msg) {
-            GameState.gem += gem;
-            UIManager.showToast(`💎 ${msg} (+${gem})`);
-            UIManager.updateCurrencyUI();
-            AudioEngine.sfx.coin();
+
+        claimReward(type, questId) {
+            let qProgress = this.progress[type][questId];
+            let qData = this.list[type].find(q => q.id === questId);
+
+            if (qProgress.count >= qData.target && !qProgress.claimed) {
+                qProgress.claimed = true;
+                GameState.gem += qData.rewardGems; 
+                GameState.save();
+                this.save();
+                
+                UIManager.updateCurrencyUI();
+                AudioEngine.sfx.coin();
+                UIManager.triggerHaptic();
+                UIManager.showToast(`💎 ${qData.rewardGems}젬 획득!`);
+                this.renderList(); 
+            }
         },
+
         openModal() {
             AudioEngine.sfx.click();
             UIManager.triggerHaptic();
-            document.getElementById('quest-modal').classList.add('active');
-            this.switchTab('daily');
+            const modal = document.getElementById('quest-modal');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+                this.renderList(); // 열 때 화면 그리기
+            }
         },
+
         closeModal() {
             AudioEngine.sfx.click();
-            document.getElementById('quest-modal').classList.remove('active');
+            const modal = document.getElementById('quest-modal');
+            if (modal) {
+                modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            }
         },
-        switchTab(t) {
+
+        switchTab(tabName) {
             AudioEngine.sfx.click();
-            const isDaily = (t === 'daily');
-            document.getElementById('quest-tab-daily').className = isDaily ? "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded" : "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
-            document.getElementById('quest-tab-achieve').className = !isDaily ? "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded" : "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
-            this.renderList(t);
+            this.currentTab = tabName;
+            const btnDaily = document.getElementById('quest-tab-daily');
+            const btnWeekly = document.getElementById('quest-tab-weekly'); // HTML에 id="quest-tab-weekly" 로 되어있어야 함!
+            
+            if (tabName === 'daily') {
+                if(btnDaily) btnDaily.className = "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded";
+                if(btnWeekly) btnWeekly.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
+            } else {
+                if(btnDaily) btnDaily.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded";
+                if(btnWeekly) btnWeekly.className = "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded";
+            }
+            this.renderList();
         },
-        renderList(type) {
+
+        renderList() {
             const container = document.getElementById('quest-list-container');
-            container.innerHTML = '';
-            const list = (type === 'daily') ? GameData.quests.daily : GameData.quests.achievements;
+            if (!container) return;
+            container.innerHTML = ''; 
 
-            list.forEach(q => {
-                const progress = (type === 'daily') ? (GameState.questData.daily.progress[q.id] || 0) : (GameState.questData.achievements.progress[q.id] || 0);
-                const isCompleted = (type === 'daily') ? (progress >= q.goal) : GameState.questData.achievements.completed.includes(q.id);
-                const percent = Math.min(100, (progress / q.goal) * 100);
+            const currentQuests = this.list[this.currentTab];
+            
+            currentQuests.forEach(q => {
+                const progress = this.progress[this.currentTab][q.id] || { count: 0, claimed: false };
+                const isCompleted = progress.count >= q.target;
+                const percent = Math.min((progress.count / q.target) * 100, 100);
+                
+                let btnHtml = '';
+                if (progress.claimed) {
+                    btnHtml = `<button disabled class="px-3 py-1 bg-slate-800 text-slate-500 text-[10px] font-bold rounded border border-slate-700">완료됨</button>`;
+                } else if (isCompleted) {
+                    btnHtml = `<button onclick="GameSystem.Quest.claimReward('${this.currentTab}', '${q.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold rounded shadow-[0_0_10px_rgba(52,211,153,0.4)] animate-pulse">수령하기</button>`;
+                } else {
+                    btnHtml = `<div class="text-xs font-bold text-slate-400">${progress.count} / ${q.target}</div>`;
+                }
 
-                container.innerHTML += `
-                    <div class="p-4 bg-slate-900/60 rounded-xl border ${isCompleted ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/5'}">
-                        <div class="flex justify-between items-start mb-2">
+                const html = `
+                    <div class="glass-card p-4 border border-slate-700/50 flex flex-col gap-2 ${progress.claimed ? 'opacity-50' : ''}">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <h4 class="text-sm font-bold ${isCompleted ? 'text-emerald-400' : 'text-white'}">${q.name} ${isCompleted ? '✅' : ''}</h4>
-                                <p class="text-[10px] text-slate-400">${q.desc}</p>
+                                <h4 class="text-sm font-black text-white flex items-center gap-1">${q.title} ${isCompleted && !progress.claimed ? '✅' : ''}</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5">${q.desc}</p>
                             </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-cyan-400">💎 ${q.rewardGem}</span>
+                            <div class="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded border border-slate-700">
+                                <span class="text-xs">💎</span>
+                                <span class="text-xs font-bold text-indigo-300">${q.rewardGems}</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="progress-track h-1.5 flex-1">
-                                <div class="progress-fill ${isCompleted ? 'bg-emerald-500' : ''}" style="width: ${percent}%"></div>
+                        <div class="flex justify-between items-center mt-1">
+                            <div class="flex-1 bg-slate-800 h-1.5 rounded-full mr-3 overflow-hidden">
+                                <div class="bg-indigo-500 h-full rounded-full" style="width: ${percent}%"></div>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-500 whitespace-nowrap">${progress} / ${q.goal}</span>
+                            ${btnHtml}
                         </div>
                     </div>
                 `;
+                container.innerHTML += html;
             });
         }
-    },
+    }, // 👈 요 콤마 필수! (다음이 Battle 이니까)
     
     Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, battleInterval: null, lastAttackTime: 0,
@@ -1132,11 +1215,15 @@ enterDungeon() {
                 
                 GameState.gold += rewardGold; GameState.gem += rewardGem; 
                 GameState.rpgStage++; GameState.save();
-                
-                if (GameSystem.Quest) {
-                    GameSystem.Quest.updateProgress('achievements', 'a3'); 
-                    if (GameState.rpgStage >= 5) GameSystem.Quest.updateProgress('achievements', 'a1', 5); 
+              // 👇 [여기를 통째로 교체!]
+                // 💡 [퀘스트 센서] 몬스터 처치 시!
+                GameSystem.Quest.update('daily', 'd1', 1);
+                GameSystem.Quest.update('weekly', 'w1', 1);
+                if (isBoss) {
+                    GameSystem.Quest.update('daily', 'd2', 1);
+                    GameSystem.Quest.update('weekly', 'w2', 1);
                 }
+                // 👆 여기까지!
 
                 UIManager.updateCurrencyUI(); 
                 if (GameSystem.Ranking) GameSystem.Ranking.updateRankingSilently();
@@ -1193,6 +1280,8 @@ enterDungeon() {
             GameState.diamond = (GameState.diamond || 0) + rewardDiamond;
 
             GameState.save();
+            // 💡 [퀘스트 센서 추가!] 환생 성공 시!
+            GameSystem.Quest.update('weekly', 'w5', 1);
 
             UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 보상으로 다이아 ${rewardDiamond}개를 획득했습니다! 💎`);
             UIManager.updateRpgLobbyUI();
@@ -1264,6 +1353,8 @@ window.onRewardEarned = function() {
         const amount = GameSystem.Lobby.calculateIdleReward() * 2; 
         
         GameState.gold += amount;
+        // 💡 [퀘스트 센서 추가!] 방치형 보상 수령 시
+        GameSystem.Quest.update('weekly', 'w3', 1);
         GameState.lastIdleCheck = Date.now(); // 시간 초기화 
         GameState.save();
         
@@ -1345,5 +1436,6 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
