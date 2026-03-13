@@ -215,9 +215,27 @@ const GameSystem = {
             const elapsedHours = (now - GameState.lastIdleCheck) / (1000 * 60 * 60);
             return Math.min(100, Math.floor(elapsedHours * 12.5));
         },
-        claimIdleReward() {
+     claimIdleReward(isAd = false) {
             const amount = this.calculateIdleReward();
             if (amount <= 0) return UIManager.showToast("누적된 지원금이 없습니다. 💤");
+            
+            // 📺 1. [광고 보고 2배!] 버튼을 눌렀을 때
+            if (isAd) {
+                // 플러터가 광고를 다 보고 나서 이 꼬리표를 보고 보상을 2배로 줄 수 있게 세팅!
+                window.currentAdAction = 'idle_double'; 
+                
+                // 💡 마스터가 기존에 쓰던 플러터 광고 호출 코드를 이 아래에 넣어주세요!
+                // 예: window.flutter_inappwebview.callHandler('showRewardAd');
+                // (만약 웹에서 바로 테스트하고 싶다면 아래 임시 코드를 켜서 테스트하세요!)
+                /*
+                UIManager.showToast("📺 광고 시청 중... (테스트)");
+                setTimeout(() => { if (window.onRewardEarned) window.onRewardEarned(); }, 1500); 
+                */
+                
+                return; // 🚨 여기서 정지! 보상은 광고 다 보고 onRewardEarned 에서 줍니다!
+            }
+
+            // 💤 2. [그냥 받기] 버튼을 눌렀을 때 (마스터의 기존 로직 100% 동일)
             GameState.gold += amount;
             GameState.lastIdleCheck = Date.now();
             GameState.save();
@@ -1308,6 +1326,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
