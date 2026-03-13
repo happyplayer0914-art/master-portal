@@ -277,7 +277,25 @@ window.onload = function() {
         .damage-monster { color: #facc15; font-size: 2rem; text-shadow: 0 4px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5); } 
         .damage-crit { color: #c084fc; font-size: 2.5rem; text-shadow: 0 0 15px #c084fc, 0 4px 4px black; } 
         .damage-player { color: #ef4444; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        
+        /* 🌟 [✨신화✨] 등급 전용 영롱한 붉은색 테두리 이펙트! */
+.rarity-mythic {
+    border-color: rgba(239, 68, 68, 0.8) !  /* 붉은색 테두리 */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5), inset 0 0 5px rgba(239, 68, 68, 0.3);
+    color: rgba(239, 68, 68, 0.9) !  /* 텍스트 색상 */
+    transition: box-shadow 0.3s ease;
+}
+
+/* 신화 장비는 붉게 타오르며 반짝거립니다! 🔥 */
+.rarity-mythic:hover,
+.rarity-mythic.animate-pulse {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9), inset 0 0 10px rgba(239, 68, 68, 0.5);
+    animation: mythicPulse 1.5s infinite;
+}
+
+@keyframes mythicPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(239, 68, 68, 1); }
+}
     </style>
 </head>
 <body>
@@ -893,6 +911,7 @@ window.onload = function() {
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
