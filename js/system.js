@@ -1096,8 +1096,17 @@ enterDungeon() {
                 document.getElementById('bottom-nav').style.display = 'flex'; 
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 
-                let rewardGold = isBoss ? (GameState.rpgStage * 50) : (10 + (GameState.rpgStage * 5)); 
-                let rewardGem = isBoss ? (50 + (GameState.rpgStage * 2)) : 0;
+                // 💰 [마스터의 완벽한 밸런스 공식 적용!]
+                let rewardGold = 10; // 일반 몹은 고정 10골드!
+                let rewardGem = 0;   // 일반 몹은 다이아(젬) 없음!
+                
+                if (isBoss) {
+                    // 현재 몇 번째 보스인지 계산 (예: 10층=1, 20층=2, 30층=3)
+                    const bossTier = GameState.rpgStage / 10; 
+                    
+                    rewardGold = 50 * bossTier; // 50, 100, 150... 이렇게 늘어남!
+                    rewardGem = 10 * bossTier;  // 10, 20, 30... 이렇게 늘어남!
+                }
                 
                 GameState.gold += rewardGold; GameState.gem += rewardGem; 
                 GameState.rpgStage++; GameState.save();
@@ -1299,6 +1308,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
