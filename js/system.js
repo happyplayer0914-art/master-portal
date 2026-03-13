@@ -1102,14 +1102,10 @@ enterDungeon() {
             this.monsterCurrentHp = this.monsterMaxHp;
             this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
             
-            // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
-            // 예: 1~10층 = 1구역, 11~20층 = 2구역 ... 91~100층 = 10구역
+           // 🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
             let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
             
             // 100층을 넘어갈 경우를 대비해 1~10구역 무한 반복!
-           🌟 [여기서부터 신규 추가!] 현재 층수에 맞는 구역(Zone) 계산하기!
-            let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
-            
             if (currentZone > 10) {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
@@ -1132,11 +1128,10 @@ enterDungeon() {
 
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
-            // (기존) document.getElementById('monster-sprite').innerText = mInfo.e;
             
-            // 🌟 [신규 추가!] 도트 이미지 불러오기 마법!
+            // 🌟 [도트 이미지 불러오기 마법!]
             const spriteBox = document.getElementById('monster-sprite');
-            const avatarWrap = document.getElementById('monster-avatar-wrap'); // 📦 추가: 몬스터를 가두고 있는 상자!
+            const avatarWrap = document.getElementById('monster-avatar-wrap');
             
             if (mInfo.img) {
                 // 1. 이미지가 있으면 <img> 태그로 그려줌! (그림자가 더 돋보이게 진하게 변경!)
@@ -1507,6 +1502,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
