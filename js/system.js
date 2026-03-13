@@ -1148,6 +1148,7 @@ enterDungeon() {
             battleCard.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
             battleCard.style.backgroundSize = "cover";
             battleCard.style.backgroundPosition = "center";
+            battleCard.style.overflow = "hidden";
             
             // (혹시 몰라서 넣는 방어막) 아까 전체 화면에 잘못 발라둔 배경 벽지는 싹 뜯어냅니다! ㅋㅋㅋ
             document.getElementById('screen-rpg-battle').style.backgroundImage = "none";
@@ -1180,6 +1181,11 @@ enterDungeon() {
                 avatarWrap.style.background = "transparent";
                 avatarWrap.style.border = "none";
                 avatarWrap.style.boxShadow = "none";
+                // 👇 [🌟여기 추가 2🌟] 무조건 정중앙에 오도록 마법진 그리기!
+                avatarWrap.style.margin = "0 auto";
+                avatarWrap.style.display = "flex";
+                avatarWrap.style.justifyContent = "center";
+                avatarWrap.style.alignItems = "center";
                 
                 // 🌟 [🔥보스 크기 뻥튀기 추가!!🔥]
                 if (isBoss) {
@@ -1544,6 +1550,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
