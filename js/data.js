@@ -40,7 +40,7 @@ const GameData = {
         normal: {
             // 🌲 1구역 (1~9층) : 초보자의 숲
             1: [
-                { id: 'n1', e: '🦠', n: '초록 슬라임', img: 'slime.png' },
+                { id: 'n1', e: '🦠', n: '파랑 슬라임', img: 'slime.png' },
                 { id: 'n2', e: '🦇', n: '동굴 박쥐', img: 'bat.png' },
                 { id: 'n3', e: '👺', n: '고블린', img: 'goblin.png' }
             ],
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
