@@ -35,19 +35,83 @@ const GameData = {
         'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15 },
         's_l1': { id: 's_l1', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' }
     },
-   monsters: {
-        // 💡 [업데이트] 일반 몬스터 20종 대량 추가! (층수가 올라갈수록 번갈아가며 등장)
-        normal: [
-            {e:'🦠',n:'초록 슬라임'}, {e:'🦇',n:'동굴 박쥐'}, {e:'👺',n:'붉은 고블린'}, {e:'🐺',n:'굶주린 늑대'}, {e:'💀',n:'되살아난 해골'},
-            {e:'🦂',n:'맹독 전갈'}, {e:'🐍',n:'사막 뱀'}, {e:'🕷️',n:'거대 거미'}, {e:'🦅',n:'흉포한 독수리'}, {e:'🐗',n:'돌진하는 멧돼지'},
-            {e:'🧟',n:'떠도는 좀비'}, {e:'🧛',n:'하급 뱀파이어'}, {e:'🧞',n:'타락한 정령'}, {e:'🧜‍♂️',n:'심해의 괴수'}, {e:'🧌',n:'동굴 트롤'},
-            {e:'🦍',n:'광포한 유인원'}, {e:'🥷',n:'그림자 암살자'}, {e:'🤖',n:'고대 수호병'}, {e:'👽',n:'외계 생명체'}, {e:'👻',n:'원한 맺힌 악령'}
-        ],
-        // 💡 [업데이트] 5층마다 등장하는 보스 50층까지 대량 추가!
+  monsters: {
+        // 💡 [테마별 구역 시스템] 10층 단위로 등장하는 몬스터가 바뀝니다!
+        normal: {
+            // 🌲 1구역 (1~9층) : 초보자의 숲
+            1: [
+                { id: 'n1', e: '🦠', n: '초록 슬라임', img: 'slime.png' },
+                { id: 'n2', e: '🦇', n: '동굴 박쥐', img: 'bat.png' },
+                { id: 'n3', e: '👺', n: '붉은 고블린', img: 'goblin.png' }
+            ],
+            // 🏜️ 2구역 (11~19층) : 메마른 황무지
+            2: [
+                { id: 'n4', e: '🐺', n: '굶주린 늑대', img: 'wolf.png' },
+                { id: 'n6', e: '🦂', n: '맹독 전갈', img: 'scorpion.png' },
+                { id: 'n7', e: '🐍', n: '사막 뱀', img: 'snake.png' }
+            ],
+            // ⛰️ 3구역 (21~29층) : 거친 산맥
+            3: [
+                { id: 'n8', e: '🕷️', n: '거대 거미', img: 'spider.png' },
+                { id: 'n9', e: '🦅', n: '흉포한 독수리', img: 'eagle.png' },
+                { id: 'n10', e: '🐗', n: '돌진하는 멧돼지', img: 'boar.png' }
+            ],
+            // 🏚️ 4구역 (31~39층) : 버려진 유적
+            4: [
+                { id: 'n5', e: '💀', n: '되살아난 해골', img: 'skeleton.png' },
+                { id: 'n11', e: '🧟', n: '떠도는 좀비', img: 'zombie.png' },
+                { id: 'n26', e: '🧟‍♂️', n: '피에 굶주린 구울', img: 'ghoul.png' }
+            ],
+            // 🌊 5구역 (41~49층) : 오염된 심해/늪
+            5: [
+                { id: 'n14', e: '🧜‍♂️', n: '심해의 괴수', img: 'merman.png' },
+                { id: 'n24', e: '💩', n: '늪지대 머드맨', img: 'mudman.png' },
+                { id: 'n25', e: '🦑', n: '심연의 촉수', img: 'tentacle.png' }
+            ],
+            // 🩸 6구역 (51~59층) : 저주받은 핏빛 성
+            6: [
+                { id: 'n12', e: '🧛', n: '하급 뱀파이어', img: 'vampire.png' },
+                { id: 'n17', e: '🥷', n: '그림자 암살자', img: 'ninja.png' },
+                { id: 'n27', e: '🎎', n: '저주받은 인형', img: 'cursed_doll.png' }
+            ],
+            // 🗿 7구역 (61~69층) : 잊혀진 마법사의 탑
+            7: [
+                { id: 'n13', e: '🧞', n: '타락한 정령', img: 'spirit.png' },
+                { id: 'n18', e: '🤖', n: '고대 수호병', img: 'golem_ancient.png' },
+                { id: 'n28', e: '🧙‍♂️', n: '흑마법사', img: 'dark_mage.png' }
+            ],
+            // 🌑 8구역 (71~79층) : 타락한 기사단의 무덤
+            8: [
+                { id: 'n20', e: '👻', n: '원한 맺힌 악령', img: 'ghost.png' },
+                { id: 'n21', e: '🗿', n: '미쳐버린 가고일', img: 'gargoyle.png' },
+                { id: 'n22', e: '🤺', n: '타락한 흑기사', img: 'dark_knight.png' }
+            ],
+            // 🔥 9구역 (81~89층) : 불타는 지옥문
+            9: [
+                { id: 'n15', e: '🧌', n: '동굴 트롤', img: 'troll.png' },
+                { id: 'n16', e: '🦍', n: '광포한 유인원', img: 'ape.png' },
+                { id: 'n23', e: '🔥', n: '지옥 불개', img: 'hellhound.png' }
+            ],
+            // 🌌 10구역 (91~99층) : 마왕의 심연
+            10: [
+                { id: 'n19', e: '👽', n: '외계 생명체', img: 'alien.png' },
+                { id: 'n29', e: '🦴', n: '뼈 드래곤', img: 'bone_dragon.png' },
+                { id: 'n30', e: '🌌', n: '차원의 파괴자', img: 'void_walker.png' }
+            ]
+        },
+        
+        // 보스 데이터도 동일하게 img 속성을 뚫어둘 수 있습니다!
         boss: {
-            5:{e:'🐉',n:'새끼 드래곤'}, 10:{e:'🐙',n:'심해의 크라켄'}, 15:{e:'🦖',n:'폭군 렉스'},
-            20:{e:'🌋',n:'화산의 지배자'}, 25:{e:'❄️',n:'서리 여왕'}, 30:{e:'👁️',n:'주시하는 눈'},
-            35:{e:'🕷️',n:'여왕 타란튤라'}, 40:{e:'👹',n:'아수라'}, 45:{e:'💀',n:'죽음의 기사'}, 50:{e:'👑',n:'마계의 군주'}
+            5:{e:'🐉',n:'새끼 드래곤', img:'boss_dragon.png'}, 
+            10:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
+            15:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
+            20:{e:'🌋',n:'화산의 지배자', img:'boss_volcano.png'}, 
+            25:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
+            30:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
+            35:{e:'🕷️',n:'여왕 타란튤라', img:'boss_spider.png'}, 
+            40:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            45:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'}, 
+            50:{e:'👑',n:'마계의 군주', img:'boss_demonlord.png'}
         }
     },
     quests: {
@@ -63,4 +127,5 @@ const GameData = {
         ]
     }
 };
+
 
