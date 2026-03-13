@@ -33,7 +33,7 @@ const GameData = {
         'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50 },
         'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 심장', emoji: '❤️‍🔥', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.80, vamp: 10 },
         'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15 },
-        's_l1': { id: 's_l1', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' }
+        's_l1': { id: 's_l1', type: 'skin', name: '초월자의 불꽃 테두리', emoji: '🔥', rarity: 'legendary', color: 'text-yellow-400' },
 
         // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
@@ -147,6 +147,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
