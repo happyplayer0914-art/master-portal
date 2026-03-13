@@ -1206,31 +1206,36 @@ enterDungeon() {
             let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
             GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
         },
-     playerAttack() {
+playerAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
-            const ATTACK_COOLDOWN = 600;
+            
+            // 💡 [핵심] 스탯을 먼저 불러와서 공격 속도(SPD)를 계산합니다!
+            const stats = GameState.getTotalStats(); 
+            
+            // 🌟 1. 공격 속도(SPD) 적용! (기본 1초 = 1000ms)
+            let spdBonus = Math.min(stats.spd, 60); // 마스터 오더: 최대 60% 쿨감 제한!
+            const ATTACK_COOLDOWN = 1000 * (1 - (spdBonus / 100)); // 공속 0이면 1000ms, 공속 60이면 400ms!
+
             const now = Date.now();
             if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
             this.lastAttackTime = now;
             AudioEngine.sfx.hit(); UIManager.triggerHaptic();
             
-            // 💡 [핵심 1] 여기서 새로운 갓-스탯들을 불러옵니다!
-            const stats = GameState.getTotalStats(); 
             let myAtk = stats.atk; 
             let critChance = stats.critRate / 100;   // 예: 25% -> 0.25
             let critMultiplier = stats.critDmg / 100; // 예: 200% -> 2.0
             
-            // 💡 [핵심 2] 크리티컬 터졌는지 주사위 굴리기!
+            // 💡 [크리티컬 터졌는지 주사위 굴리기!]
             let isCrit = Math.random() < critChance; 
             let damage = isCrit ? Math.floor(myAtk * critMultiplier) : myAtk;
             this.monsterCurrentHp -= damage;
             
-            // 💡 [핵심 3] 흡혈(피흡) 로직! 데미지에 비례해서 피가 찹니다.
+            // 💡 [흡혈(피흡) 로직!] 데미지에 비례해서 피가 찹니다.
             if (stats.vamp > 0 && GameState.currentHp < stats.hp) {
                 let healAmount = Math.floor(damage * (stats.vamp / 100));
                 if (healAmount > 0) {
                     GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmount);
-                    // 마스터 머리 위에 초록색 피흡 숫자 띄우기! (타격 이펙트 재활용)
+                    // 마스터 머리 위에 초록색 피흡 숫자 띄우기! 
                     this.showDamageText('battle-player-hp-text', `+${healAmount}`, 'text-emerald-400 font-black text-xl drop-shadow-md');
                 }
             }
@@ -1246,7 +1251,19 @@ enterDungeon() {
             const btn = document.getElementById('btn-attack');
             btn.disabled = true; btn.classList.add('opacity-50');
             let timeLeft = ATTACK_COOLDOWN;
-            const cooldownTimer = setInterval(() => { timeLeft -= 100; if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { btn.disabled = false; btn.classList.remove('opacity-50'); btn.innerHTML = "⚔️ 공격 (TAP!)"; } } else { btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; } }, 100);
+            
+            // 🌟 버튼 쿨타임 애니메이션 (바뀐 공속에 맞춰서 돌아갑니다!)
+            const cooldownTimer = setInterval(() => { 
+                timeLeft -= 100; 
+                if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { 
+                    clearInterval(cooldownTimer); 
+                    if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { 
+                        btn.disabled = false; btn.classList.remove('opacity-50'); btn.innerHTML = "⚔️ 공격 (TAP!)"; 
+                    } 
+                } else { 
+                    btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; 
+                } 
+            }, 100);
             
             this.updateBattleUI(); 
             if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
@@ -1254,8 +1271,30 @@ enterDungeon() {
         
         monsterAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
+            
+            const stats = GameState.getTotalStats();
+
+            // 🌟 1. 회피율(EVA) 계산! (최대 50% 확률로 무시!)
+            let evaChance = Math.min(stats.eva, 50); // 마스터 오더: 최대 50% 제한!
+            let randomRoll = Math.random() * 100; // 0 ~ 99.99 사이의 주사위 굴리기
+            
+            if (randomRoll < evaChance) {
+                // 회피 성공!! (화면 흔들림도 없고 데미지도 없습니다!)
+                this.showDamageText('battle-card', "MISS!", 'text-gray-300 font-black text-2xl drop-shadow-md'); // 빗나감 텍스트
+                document.getElementById('battle-log').innerText = "💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)";
+                return; // 턴 강제 종료!
+            }
+
             AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
-            let damage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
+            
+            // 🌟 2. 방어력(DEF) 계산! (롤 공식 적용)
+            let rawDamage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
+            let defStat = stats.def;
+            let damageReduction = defStat / (defStat + 100); // 방어력이 오를수록 감소율이 커짐!
+            
+            // 최종 데미지 = 원래 데미지 * (1 - 감소율) (최소 1의 데미지는 들어오게 세팅!)
+            let damage = Math.max(1, Math.floor(rawDamage * (1 - damageReduction)));
+            
             GameState.currentHp -= damage; GameState.save(); 
             
             const battleCard = document.getElementById('battle-card');
@@ -1566,6 +1605,7 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
     }
 };
+
 
 
 
