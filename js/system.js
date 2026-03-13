@@ -1126,22 +1126,38 @@ enterDungeon() {
             
             // 🌟 [신규 추가!] 도트 이미지 불러오기 마법!
             const spriteBox = document.getElementById('monster-sprite');
+            const avatarWrap = document.getElementById('monster-avatar-wrap'); // 📦 추가: 몬스터를 가두고 있는 상자!
             
             if (mInfo.img) {
-                // 1. 이미지가 있으면 <img> 태그로 그려줌! 
-                // 💡 (주의: 이미지 파일이 들어있는 폴더 경로를 맞춰주세요! 예: 'assets/monsters/')
-                // 💡 (onerror 마법: 혹시 이미지 파일이 아직 없거나 깨지면, 자동으로 이모지로 돌아갑니다!)
-                spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" onerror="this.outerHTML='${mInfo.e}'">`;
+                // 1. 이미지가 있으면 <img> 태그로 그려줌! (그림자가 더 돋보이게 진하게 변경!)
+                spriteBox.innerHTML = `<img src="assets/monsters/${mInfo.img}" class="w-full h-full object-contain filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)]" onerror="this.outerHTML='${mInfo.e}'">`;
                 
-                // 이미지가 꽉 차게 보이도록 원래 있던 글자 크기(font-size) 클래스 무력화
-                spriteBox.style.width = "80%";
-                spriteBox.style.height = "80%";
+                // 이미지가 꽉 차게!
+                spriteBox.style.width = "100%";
+                spriteBox.style.height = "100%";
+                
+                // 💡 [핵심] 답답한 상자를 투명하게 날려버리고, 크기를 2배로 뻥튀기!
+                avatarWrap.style.background = "transparent";
+                avatarWrap.style.border = "none";
+                avatarWrap.style.boxShadow = "none";
+                
+                // 🔥 마스터 입맛대로 크기 조절 (현재 220px, 더 키우고 싶으면 250px 300px 등으로 조절!)
+                avatarWrap.style.width = "220px"; 
+                avatarWrap.style.height = "220px";
+                
             } else {
-                // 2. 이미지가 설정 안 되어 있으면 기존처럼 이모지 출력!
+                // 2. 이미지가 없어서 이모지가 나올 때는 예전처럼 예쁜 박스 모양으로 복구!
                 spriteBox.innerHTML = '';
                 spriteBox.innerText = mInfo.e;
                 spriteBox.style.width = "auto";
                 spriteBox.style.height = "auto";
+                
+                // 박스 CSS 초기화
+                avatarWrap.style.background = ""; 
+                avatarWrap.style.border = "";
+                avatarWrap.style.boxShadow = "";
+                avatarWrap.style.width = ""; 
+                avatarWrap.style.height = "";
             }
             document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
             document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
@@ -1481,6 +1497,7 @@ window.onRewardEarned = function() {
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+
 
 
 
