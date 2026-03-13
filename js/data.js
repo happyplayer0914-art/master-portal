@@ -65,8 +65,8 @@ const GameData = {
             // 🌊 5구역 (41~49층) : 오염된 심해
             5: [
                 { id: 'n14', e: '🧜‍♂️', n: '심해의 괴수', img: 'merman.png' },
-                { id: 'n24', e: '💩', n: '늪지대 머드맨', img: 'mudman.png' },
-                { id: 'n25', e: '🦑', n: '심연의 촉수', img: 'tentacle.png' }
+                { id: 'n24', e: '💩', n: '타락한 인어', img: 'siren.png' },
+                { id: 'n25', e: '🦑', n: '심해의 촉수', img: 'tentacle.png' }
             ],
             // 🩸 6구역 (51~59층) : 저주받은 핏빛 성
             6: [
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
