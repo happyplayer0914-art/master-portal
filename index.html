@@ -312,26 +312,31 @@ window.onload = function() {
                 </button>
             </div>
         </section>
-
-        <section class="mb-8">
-            <div class="glass-card p-5 relative overflow-hidden group border border-slate-700/50 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <h2 class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1">IDLE REWARD</h2>
-                        <h1 class="text-lg font-black text-white">방치형 지원금</h1>
-                    </div>
-                    <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700">
-                        <span class="text-xs font-bold text-slate-300">누적: </span>
-                        <span id="idle-amount-display" class="text-sm font-black text-slate-400">0 / 100 G</span>
-                    </div>
-                </div>
-                <p class="text-[11px] text-slate-400 mb-4 break-keep">접속을 종료해도 8시간 동안 최대 100G가 자동으로 누적됩니다.</p>
-                
-                <button onclick="GameSystem.Lobby.claimIdleReward()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <span>💤</span> 지원금 수령하기
-                </button>
+<section class="mb-8">
+    <div class="glass-card p-5 relative overflow-hidden group border border-slate-700/50 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h2 class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1">IDLE REWARD</h2>
+                <h1 class="text-lg font-black text-white">방치형 지원금</h1>
             </div>
-        </section>
+            <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                <span class="text-xs font-bold text-slate-300">누적: </span>
+                <span id="idle-amount-display" class="text-sm font-black text-slate-400">0 / 100 G</span>
+            </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4 break-keep">접속을 종료해도 8시간 동안 최대 100G가 자동으로 누적됩니다.</p>
+        
+        <div class="flex gap-2">
+            <button onclick="GameSystem.Lobby.claimIdleReward(false)" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs text-slate-300">
+                <span>💤</span> 그냥 받기
+            </button>
+            
+            <button onclick="GameSystem.Lobby.claimIdleReward(true)" class="flex-[1.5] py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border border-indigo-400/50 rounded-xl font-black text-white transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs shadow-[0_0_15px_rgba(79,70,229,0.4)]">
+                <span>📺</span> 광고 보고 2배!
+            </button>
+        </div>
+    </div>
+</section>
 
         <section class="mb-8">
             <button onclick="GameSystem.Quest.openModal()" class="w-full py-4 glass-card border-indigo-500/30 flex items-center justify-between px-6 group active:scale-95 transition-all">
@@ -868,6 +873,7 @@ window.onload = function() {
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
