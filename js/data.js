@@ -106,10 +106,10 @@ const GameData = {
             10:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
             15:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
             20:{e:'🌋',n:'화산의 지배자', img:'boss_volcano.png'}, 
-            25:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
+            25:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
             30:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
             35:{e:'🕷️',n:'여왕 타란튤라', img:'boss_spider.png'}, 
-            40:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            40:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
             45:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'}, 
             50:{e:'👑',n:'마계의 군주', img:'boss_demonlord.png'}
         }
@@ -127,5 +127,6 @@ const GameData = {
         ]
     }
 };
+
 
 
