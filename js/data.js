@@ -62,7 +62,7 @@ const GameData = {
                 { id: 'n11', e: '🧟', n: '떠도는 좀비', img: 'zombie.png' },
                 { id: 'n26', e: '🧟‍♂️', n: '피에 굶주린 구울', img: 'ghoul.png' }
             ],
-            // 🌊 5구역 (41~49층) : 오염된 심해/늪
+            // 🌊 5구역 (41~49층) : 오염된 심해
             5: [
                 { id: 'n14', e: '🧜‍♂️', n: '심해의 괴수', img: 'merman.png' },
                 { id: 'n24', e: '💩', n: '늪지대 머드맨', img: 'mudman.png' },
@@ -74,7 +74,7 @@ const GameData = {
                 { id: 'n17', e: '🥷', n: '그림자 암살자', img: 'ninja.png' },
                 { id: 'n27', e: '🎎', n: '저주받은 인형', img: 'cursed_doll.png' }
             ],
-            // 🗿 7구역 (61~69층) : 잊혀진 마법사의 탑
+            // 🗿 7구역 (61~69층) : 얼어붙은 왕국
             7: [
                 { id: 'n13', e: '🧞', n: '타락한 정령', img: 'spirit.png' },
                 { id: 'n18', e: '🤖', n: '고대 수호병', img: 'golem_ancient.png' },
@@ -88,30 +88,30 @@ const GameData = {
             ],
             // 🔥 9구역 (81~89층) : 불타는 지옥문
             9: [
-                { id: 'n15', e: '🧌', n: '동굴 트롤', img: 'troll.png' },
-                { id: 'n16', e: '🦍', n: '광포한 유인원', img: 'ape.png' },
+                { id: 'n15', e: '🧌', n: '지옥 슬라임', img: 'hell_slime.png' },
+                { id: 'n16', e: '🦍', n: '불타는 해골전사', img: 'frie_sk.png' },
                 { id: 'n23', e: '🔥', n: '지옥 불개', img: 'hellhound.png' }
             ],
             // 🌌 10구역 (91~99층) : 마왕의 심연
             10: [
-                { id: 'n19', e: '👽', n: '외계 생명체', img: 'alien.png' },
-                { id: 'n29', e: '🦴', n: '뼈 드래곤', img: 'bone_dragon.png' },
+                { id: 'n19', e: '👽', n: '심연의 감시자', img: 'abyss_eye.png' },
+                { id: 'n29', e: '🦴', n: '본 드래곤', img: 'bone_dragon.png' },
                 { id: 'n30', e: '🌌', n: '차원의 파괴자', img: 'void_walker.png' }
             ]
         },
         
         // 보스 데이터도 동일하게 img 속성을 뚫어둘 수 있습니다!
         boss: {
-            10:{e:'🐉',n:'새끼 드래곤', img:'boss_dragon.png'}, 
-            20:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
-            30:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
-            40:{e:'🌋',n:'화산의 지배자', img:'boss_volcano.png'}, 
-            50:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
-            60:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
-            70:{e:'🕷️',n:'여왕 타란튤라', img:'boss_spider.png'}, 
-            80:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
-            90:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'}, 
-            100:{e:'👑',n:'마계의 군주', img:'boss_demonlord.png'}
+            10:{e:'🐉',n:'오염된 나무정령', img:'boss_tree.png'}, 
+            20:{e:'🦖',n:'폭군 렉스', img:'boss_rex.png'},
+            30:{e:'🌋',n:'화산의 지배자', img:'boss_dragon.png'},
+            40:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},
+            50:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'}, 
+            60:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            70:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
+            80:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'},
+            90:{e:'🕷️',n:'지옥의 수문장', img:'boss_hell.png'},
+            100:{e:'👑',n:'심연의 군주', img:'boss_abysslord.png'}
         }
     },
     quests: {
@@ -127,6 +127,7 @@ const GameData = {
         ]
     }
 };
+
 
 
 
