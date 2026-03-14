@@ -142,8 +142,7 @@ const GameState = {
         localStorage.setItem('master_equipped_armor', this._encode(this.equippedArmor || 'none'));
         localStorage.setItem('master_equipped_accessory', this._encode(this.equippedAccessory || 'none'));
     },
-
-  checkDailyReset() {
+checkDailyReset() {
         // 🛡️ [절대 방어] 데이터가 정상적인 객체(Object)가 아니거나 꼬여있으면 아예 새 뼈대로 싹 갈아끼웁니다!
         if (!this.questData || typeof this.questData !== 'object' || Array.isArray(this.questData)) {
             this.questData = { daily: { date: "", progress: {} }, achievements: { progress: {}, completed: [] } };
@@ -158,7 +157,16 @@ const GameState = {
             this.questData.daily.progress = {}; 
             this.save(); 
         }
-    },
+    }, // 👈 콤마 필수!
+    
+    // 🚑 실수로 지워졌던 부활 함수 완벽 복구!
+    checkAndRevive() {
+        const today = new Date().toLocaleDateString();
+        if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
+            this.currentHp = this.rpgMaxHp; 
+            localStorage.setItem('master_last_revive', today);
+        }
+    }, // 👈 콤마 필수!
 
     getTotalStats() {
         let finalAtkMult = 1.0; let finalHpMult = 1.0;
