@@ -1263,7 +1263,7 @@ enterDungeon() {
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-      // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
+     // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
             // 🚨 (여기에 있던 const battleCard = ... 줄을 삭제했습니다! 위에서 이미 선언했기 때문이에요)
@@ -1321,7 +1321,7 @@ enterDungeon() {
             this.updateBattleUI();
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
-    },
+        },
         updateBattleUI() {
             const stats = GameState.getTotalStats(); 
             document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
@@ -1739,7 +1739,6 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 리소스 장전 및 보호 완료!`);
     }
 };
-
 
 
 
