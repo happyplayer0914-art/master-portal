@@ -521,10 +521,10 @@ const UIManager = {
         this.showToast(isDefault ? "✨ 기본 상태로 변경되었습니다." : "✅ 장착되었습니다!");
         
         // 화면 즉시 반영!
-        if (type === 'border' || type === 'profile') { 
-            this.applyAvatarSkin(); 
-            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
-        }
+      if (type === 'border' || type === 'profile') {
+    this.applyAvatarSkin();
+    if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
+}
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
              GameSystem.Lobby.applyBackground(); 
         }
