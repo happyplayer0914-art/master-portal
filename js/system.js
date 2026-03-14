@@ -608,23 +608,37 @@ upgradeStat(t) {
             });
         },
 
-        renderMessages(messages) {
+     renderMessages(messages) {
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
             
-            // 기존 공지 그리는 로직은 제거됨! (위에 전용칸이 생겼으니까!)
             chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">매너 채팅 부탁드립니다! ✨</div>`;
             
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                // 💡 칭호가 있다면 닉네임 옆이나 위에 작게 띄워줍니다!
-                let titleHtml = msg.titleShort ? `<span class="text-[8px] text-red-400 font-bold ml-1 drop-shadow-md">${msg.titleShort}</span>` : '';
                 
+                // 💡 [수정] 칭호 HTML (닉네임 옆에 나란히 배치될 용도)
+                let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
+                
+                // 💡 [추가] 치장품(테두리) 클래스 계산
+                let skinClass = "bg-slate-700"; 
+                let sId = msg.skin;
+                // 옛날 데이터 호환성 보정
+                if(sId === 'r3') sId = 's_r1'; if(sId === 'e3') sId = 's_e1'; if(sId === 'l3') sId = 's_l1';
+                
+                if(sId && sId !== 'none' && GameData && GameData.items && GameData.items[sId]) {
+                    skinClass = `skin-${GameData.items[sId].rarity}`;
+                }
+
                 if (isMe) {
+                    // 내가 보낸 메시지 위에도 칭호를 우측 정렬로 작게 띄워줍니다
+                    let myTitleHtml = msg.titleShort ? `<div class="w-full text-right text-[9px] text-red-400 font-bold mb-0.5 drop-shadow-md pr-1">${msg.titleShort}</div>` : '';
+                    
                     chatList.innerHTML += `
                         <div class="flex justify-end mb-2">
                             <div class="flex flex-col items-end max-w-[75%]">
+                                ${myTitleHtml}
                                 <div class="flex items-end gap-1">
                                     <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
                                     <div class="bg-indigo-600 text-white text-sm px-3 py-2 rounded-2xl rounded-tr-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
@@ -632,11 +646,15 @@ upgradeStat(t) {
                             </div>
                         </div>`;
                 } else {
+                    // 남이 보낸 메시지
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0 border border-slate-600">${msg.nickname.charAt(0)}</div>
+                            <div class="master-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${msg.nickname.charAt(0)}</div>
                             <div class="flex flex-col items-start max-w-[75%]">
-                                <span class="text-[10px] text-slate-400 mb-0.5 font-bold">${msg.nickname}</span>
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="text-[10px] text-slate-400 font-bold">${msg.nickname}</span>
+                                    ${titleHtml}
+                                </div>
                                 <div class="flex items-end gap-1">
                                     <div class="bg-slate-700 text-white text-sm px-3 py-2 rounded-2xl rounded-tl-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
                                     <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
@@ -675,11 +693,14 @@ upgradeStat(t) {
             // 💡 현재 내 칭호 정보 가져오기!
             const titleInfo = GameSystem.Lobby.getCurrentTitle();
 
-            try {
+          try {
+                // 👇 [수정됨] 여기에 skin 정보를 추가로 담아서 파이어베이스로 쏩니다!
                 await window.addDoc(window.collection(window.db, collectionName), {
                     uid: uid,
                     nickname: GameState.nickname,
                     text: text,
+                    titleShort: titleInfo ? titleInfo.short : null, 
+                    skin: GameState.equippedSkin || 'none', // ✨ 치장품(테두리) 정보 추가!
                     timestamp: window.serverTimestamp()
                 });
 
