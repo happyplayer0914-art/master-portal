@@ -235,29 +235,23 @@ const GameSystem = {
             });
             if (dynamicBg) dynamicBg.style.display = 'block'; 
         },
-        // 👇 여기서부터 복사해서 끼워넣기!
+     // 👇 여기서부터 복사해서 끼워넣기!
         getCurrentTitle() {
-            const equippedIds = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
-            const gears = equippedIds.filter(id => id !== null).map(id => GameData.items[id]).filter(item => item !== undefined);
+            // 이제 장비 스탯을 보지 않고, 유저가 직접 장착한 칭호(equippedTitle)를 확인합니다!
+            const tId = GameState.equippedTitle;
             
-            let mythicItem = null;
-            let legendaryCount = 0;
-            
-            gears.forEach(g => {
-                if (g.rarity === 'mythic') mythicItem = g;
-                if (g.rarity === 'legendary') legendaryCount++;
-            });
-
-            // 신화 1개 + 전설 2개 장착 시 칭호 발급!
-            if (mythicItem && legendaryCount === 2) {
-                // '전장을 지배하는 군주' -> 띄어쓰기로 분리 후 맨 마지막 '군주'만 추출!
-                const words = mythicItem.job.split(' ');
-                const shortJob = words[words.length - 1]; 
-                
-                return {
-                    full: `✨ ${mythicItem.job} [${mythicItem.mbti}] ✨`, // 랭킹용 (전체)
-                    short: `✨ ${shortJob} [${mythicItem.mbti}] ✨`       // 채팅용 (축약)
-                };
+            if (tId && tId !== 'none' && tId !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
+                const tItem = GameData.cosmetics.titles.find(t => t.id === tId);
+                if (tItem) {
+                    // 긴 이름에서 끝 단어만 추출 (예: 전장을 지배하는 '군주')
+                    const words = tItem.name.split(' ');
+                    const shortJob = words[words.length - 1]; 
+                    
+                    return {
+                        full: `✨ ${tItem.name} [${tItem.reqMbti}] ✨`, // 랭킹용 (전체)
+                        short: `✨ ${shortJob} [${tItem.reqMbti}] ✨`       // 채팅용 (축약)
+                    };
+                }
             }
             return null; // 조건 미달 시 칭호 없음
         },
