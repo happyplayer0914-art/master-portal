@@ -27,8 +27,7 @@ const GameData = {
         'ac_r2': { id: 'ac_r2', type: 'gear', subType: 'accessory', name: '바람의 장화', emoji: '🥾', rarity: 'rare', color: 'text-blue-400', hpMult: 1.10, spd: 10, eva: 3 }, // 신규 추가 (이동속도 컨셉)
         'ac_r3': { id: 'ac_r3', type: 'gear', subType: 'accessory', name: '투사의 증표', emoji: '🏅', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, hpMult: 1.05, critDmg: 25 }, // 신규 추가 (크리 데미지 증폭)
         
-        's_r1': { id: 's_r1', type: 'skin', name: '은빛 테두리', emoji: '✨', rarity: 'rare', color: 'text-blue-400' },
-
+        
         // 🟣 영웅 (Epic) - 뚜렷한 컨셉 (크리 몰빵, 피흡 좀비, 쾌속 딜러 등)
         'w_e1': { id: 'w_e1', type: 'gear', subType: 'weapon', name: '마력의 지팡이', emoji: '🪄', rarity: 'epic', color: 'text-purple-400', atkMult: 1.50, critRate: 10, def: 30 },
         'w_e2': { id: 'w_e2', type: 'gear', subType: 'weapon', name: '그림자 낫', emoji: '🪝', rarity: 'epic', color: 'text-purple-400', atkMult: 1.30, critRate: 25, critDmg: 50 },
@@ -42,7 +41,7 @@ const GameData = {
         'ac_e2': { id: 'ac_e2', type: 'gear', subType: 'accessory', name: '광전사의 뿔피리', emoji: '📯', rarity: 'epic', color: 'text-purple-400', atkMult: 1.45, hpMult: 1.05, spd: 20 }, // 신규 추가 (공속 극대화)
         'ac_e3': { id: 'ac_e3', type: 'gear', subType: 'accessory', name: '세계수의 잎사귀', emoji: '🍃', rarity: 'epic', color: 'text-purple-400', hpMult: 1.40, vamp: 10, eva: 5 }, // 신규 추가 (피흡 및 생존)
         
-        's_e1': { id: 's_e1', type: 'skin', name: '보랏빛 테두리', emoji: '🌌', rarity: 'epic', color: 'text-purple-400' },
+        
 
         // 🟡 전설 (Legendary) - 사기적인 능력치!
         'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50, def: 100 },
@@ -155,20 +154,24 @@ const GameData = {
             90:{e:'🕷️',n:'지옥의 수문장', img:'boss_hell.png'},
             100:{e:'👑',n:'심연의 군주', img:'boss_abysslord.png'}
         }
-    },
-    quests: {
-        daily: [
-            { id: 'd1', name: '전투 전문가', desc: '심연의 탑 3회 진입', goal: 3, rewardGem: 10 },
-            { id: 'd2', name: '연금술사의 조수', desc: '아이템 연성 1회 시도', goal: 1, rewardGem: 15 },
-            { id: 'd3', name: '탐험의 즐거움', desc: '테스트 플레이 1회 완료', goal: 1, rewardGem: 5 }
+  }, // <-- quests 닫는 괄호
+
+    // 🌟 [신규 추가] 치장품(Cosmetics) 상점 데이터
+    cosmetics: {
+        borders: [
+            { id: 'bd_fire', name: '지옥불 테두리', desc: '프로필을 불태우는 화염', price: 100, type: 'border', cssClass: 'ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]' },
+            { id: 'bd_ice', name: '서리꽃 테두리', desc: '얼어붙은 냉기의 오라', price: 100, type: 'border', cssClass: 'ring-2 ring-cyan-300 shadow-[0_0_15px_rgba(103,232,249,0.8)]' },
+            { id: 'bd_king', name: '마왕의 관', desc: '절대적인 힘의 상징', price: 300, type: 'border', cssClass: 'ring-2 ring-purple-600 shadow-[0_0_20px_rgba(147,51,234,0.9)] animate-pulse' }
         ],
-        achievements: [
-            { id: 'a1', name: '초보 정복자', desc: '심연의 탑 5층 도달', goal: 5, rewardGem: 50 },
-            { id: 'a2', name: '숙련된 연금술사', desc: '희귀 등급 이상 아이템 획득', goal: 1, rewardGem: 100 },
-            { id: 'a3', name: '몬스터 학살자', desc: '누적 몬스터 50마리 토벌', goal: 50, rewardGem: 200 }
+        backgrounds: [
+            { id: 'bg_guild', name: '길드장의 집무실', desc: '포근하고 아늑한 나의 공간', price: 200, type: 'bg', img: 'bg_guild.png' },
+            { id: 'bg_abyss', name: '심연의 옥좌', desc: '마왕이 머물던 서늘한 공간', price: 300, type: 'bg', img: 'bg_abyss.png' }
+        ],
+        bubbles: [
+            { id: 'bb_gold', name: '황금빛 외침', desc: '채팅창의 시선을 독점하세요', price: 150, type: 'bubble', bgClass: 'bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-bold' }
         ]
     }
-};
+}; // GameData 객체 끝 (파일의 진짜 마지막 줄)
 
 
 
