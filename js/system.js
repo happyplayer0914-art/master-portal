@@ -1476,7 +1476,8 @@ playerAttack() {
             const now = Date.now();
             if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
             this.lastAttackTime = now;
-            AudioEngine.sfx.hit(); UIManager.triggerHaptic();
+            
+            // 🚨 (여기에 원래 있던 sfx.hit() 삭제 완료! 아래에서 상황별로 소리가 납니다)
             
             let myAtk = stats.atk; 
             let critChance = stats.critRate / 100;   // 예: 25% -> 0.25
@@ -1485,6 +1486,16 @@ playerAttack() {
             // 💡 [크리티컬 터졌는지 주사위 굴리기!]
             let isCrit = Math.random() < critChance; 
             let damage = isCrit ? Math.floor(myAtk * critMultiplier) : myAtk;
+
+            // 🎧 [사운드 분기점] 크리티컬이면 경쾌한 소리+강한 진동, 아니면 평타 소리!
+            if (isCrit) {
+                AudioEngine.sfx.hit_crit();
+                UIManager.triggerHeavyHaptic();
+            } else {
+                AudioEngine.sfx.hit_normal();
+                UIManager.triggerHaptic();
+            }
+
             this.monsterCurrentHp -= damage;
             
             // 💡 [흡혈(피흡) 로직!] 데미지에 비례해서 피가 찹니다.
@@ -1547,6 +1558,8 @@ playerAttack() {
             let randomRoll = Math.random() * 100; 
             
             if (randomRoll < evaChance) {
+                // 🎧 [회피 사운드 추가] 바람을 가르는 소리!
+                AudioEngine.sfx.evade();
                 this.showDamageText('battle-card', "MISS!", 'text-gray-300 font-black text-2xl drop-shadow-md'); 
                 document.getElementById('battle-log').innerText = "💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)";
                 return; 
@@ -1586,8 +1599,8 @@ playerAttack() {
                 this.showDamageText('battle-card', `FATAL! -${damage}`, 'text-red-500 font-black text-4xl drop-shadow-[0_0_15px_rgba(239,68,68,1)]');
                 document.getElementById('battle-log').innerText = `☠️ 보스의 필살기!! ${damage}의 치명적인 피해!`;
             } else {
-                // 일반 몬스터 & 보스 평타 연출
-                AudioEngine.sfx.hit(); 
+                // 🎧 [유저 피격 사운드] 둔탁하게 맞는 소리로 변경!
+                AudioEngine.sfx.hit_player(); 
                 UIManager.triggerHaptic();
                 if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
                 this.showDamageText('battle-card', `-${damage}`, 'damage-player');
