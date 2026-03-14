@@ -143,15 +143,20 @@ const GameState = {
         localStorage.setItem('master_equipped_accessory', this._encode(this.equippedAccessory || 'none'));
     },
 
-    checkDailyReset() {
+   checkDailyReset() {
+        // 🛡️ [안전장치] 만약 옛날 데이터가 깨져서 daily 방이 없다면 새로 튼튼하게 만들어줍니다!
+        if (!this.questData) {
+            this.questData = { daily: { date: "", progress: {} }, achievements: { progress: {}, completed: [] } };
+        }
+        if (!this.questData.daily) {
+            this.questData.daily = { date: "", progress: {} };
+        }
+
         const today = new Date().toDateString();
-        if (this.questData.daily.date !== today) { this.questData.daily.date = today; this.questData.daily.progress = {}; this.save(); }
-    },
-    
-    checkAndRevive() {
-        const today = new Date().toLocaleDateString();
-        if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
-            this.currentHp = this.rpgMaxHp; localStorage.setItem('master_last_revive', today);
+        if (this.questData.daily.date !== today) { 
+            this.questData.daily.date = today; 
+            this.questData.daily.progress = {}; 
+            this.save(); 
         }
     },
 
