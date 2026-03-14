@@ -1321,6 +1321,7 @@ enterDungeon() {
             this.updateBattleUI();
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
+    },
         updateBattleUI() {
             const stats = GameState.getTotalStats(); 
             document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
