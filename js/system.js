@@ -1679,8 +1679,10 @@ window.onRewardEarned = function() {
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
 setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
 
-// 🌟 [초거대 글로벌 프리로더 엔진] - 몬스터, 배경, 미래의 장비까지 싹쓸이 캐싱!
+// 🌟 [초거대 글로벌 프리로더 엔진] - 몬스터, 배경 싹쓸이 캐싱 (가비지 컬렉터 방어 탑재!)
 const AssetPreloader = {
+    cachedImages: [], // 💡 [핵심] 브라우저가 몰래 이미지를 지우지 못하게 붙잡아두는 창고!
+
     preloadAll() {
         console.log("🔄 [프리로더 가동] 마스터, 백그라운드에서 리소스 싹쓸이를 시작합니다!");
         const imageUrls = [];
@@ -1693,20 +1695,18 @@ const AssetPreloader = {
         if (window.GameData) {
             // 2. 몬스터(일반/보스) 이미지 싹쓸이!
             if (GameData.monsters) {
-                // 일반 몬스터
                 for (const zone in GameData.monsters.normal) {
                     GameData.monsters.normal[zone].forEach(m => {
                         if (m.img) imageUrls.push(`assets/monster/${m.img}`);
                     });
                 }
-                // 보스 몬스터
                 for (const stage in GameData.monsters.boss) {
                     const boss = GameData.monsters.boss[stage];
                     if (boss.img) imageUrls.push(`assets/monster/${boss.img}`);
                 }
             }
 
-            // 3. 미래를 위한 장비/치장품/미소녀 펫 이미지 싹쓸이 준비! (데이터만 넣으면 알아서 작동함!)
+            // 3. 아이템 이미지 준비
             if (GameData.items) {
                 for (const key in GameData.items) {
                     const item = GameData.items[key];
@@ -1715,17 +1715,18 @@ const AssetPreloader = {
             }
         }
 
-        // 중복 제거 후 몰래 다운로드 시작!
         const uniqueUrls = [...new Set(imageUrls)];
         uniqueUrls.forEach(url => {
             const img = new Image();
-            img.src = url; // 👈 이 순간 컴퓨터가 몰래 이미지를 다운받아 저장해 둡니다!
+            img.src = url; 
+            
+            // 💡 [핵심 추가] 창고에 밀어 넣어서 브라우저가 절대 지우거나 취소하지 못하게 멱살 잡기!
+            this.cachedImages.push(img); 
         });
         
-        console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 숨겨진 리소스 장전 완료!`);
+        console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 리소스 장전 및 보호 완료!`);
     }
 };
-
 
 
 
