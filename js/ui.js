@@ -492,7 +492,7 @@ const UIManager = {
         }
     },
 
-   // 👗 장착 로직 (기본 아이템 선택 시 해제 효과 발동!)
+  // 👗 장착 로직 (기본 아이템 선택 시 해제 효과 발동!)
     equipCosmetic(id, type) {
         // 아이디가 'default'라면 장착 해제(null) 처리합니다!
         const isDefault = (id === 'default');
@@ -501,7 +501,7 @@ const UIManager = {
         if (type === 'bg') GameState.equippedBg = isDefault ? null : id;
         if (type === 'bubble') GameState.equippedBubble = isDefault ? null : id;
         if (type === 'profile') GameState.equippedProfile = isDefault ? null : id;
-        if (type === 'title') GameState.equippedTitle = isDefault ? null : id; // 미리 칭호용 세팅!
+        if (type === 'title') GameState.equippedTitle = isDefault ? null : id;
         
         GameState.save();
         this.showToast(isDefault ? "✨ 기본 상태로 변경되었습니다." : "✅ 장착되었습니다!");
@@ -509,10 +509,16 @@ const UIManager = {
         // 화면 즉시 반영!
         if (type === 'border' || type === 'profile') { 
             this.applyAvatarSkin(); 
-            if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
+            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
         }
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
              GameSystem.Lobby.applyBackground(); 
+        }
+        
+        // 👇 [여기가 빠져있었습니다!] 칭호를 꼈을 때 내 정보 창(UI)을 즉시 새로고침하는 마법!
+        if (type === 'title') {
+            this.updateRpgLobbyUI(); 
+            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
         }
         
         this.renderCosmeticsShop();
