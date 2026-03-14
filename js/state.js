@@ -39,19 +39,17 @@ const GameState = {
         try { return JSON.parse(decodeURIComponent(atob(value))); } catch (e) { return null; }
     },
 
-    // 🛡️ [안전 장치] 옛날 데이터(쌩얼)와 암호화 데이터를 알아서 구분해서 불러오는 스마트 로더
+   // 🛡️ [안전 장치] 스마트 로더 수정본 (길이 제한 삭제로 완벽 복호화)
     _safeLoad(key, defaultValue) {
         const val = localStorage.getItem(key);
         if (val === null || val === 'null') return defaultValue;
         
-        // 1. 암호화 해독 시도 (Base64 외계어 형식이면)
-        if (val.length > 5 && (val.endsWith('=') || val.startsWith('ey'))) {
-            const decoded = this._decode(val);
-            if (decoded !== null) return decoded;
-        }
+        // 1. 무조건 암호화 해독 시도! (실패하면 내부 catch에서 null 반환)
+        const decoded = this._decode(val);
+        if (decoded !== null) return decoded;
         
         // 2. 옛날 쌩얼 데이터 호환성 유지 (JSON인 경우)
-        try { if (val.startsWith('[') || val.startsWith('{')) return JSON.parse(val); } catch(e) {}
+        try { if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) return JSON.parse(val); } catch(e) {}
         
         // 3. 숫자나 일반 문자열인 경우
         if (!isNaN(val) && val !== '') return Number(val);
@@ -59,7 +57,7 @@ const GameState = {
     },
     
     load() {
-        // 닉네임과 기기 ID는 암호화하지 않고 그대로 유지 (인증 호환용)
+        // (닉네임, deviceId 불러오는 앞부분 코드는 그대로 유지)
         this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
         let storedId = localStorage.getItem('master_device_id');
         if(!storedId) {
@@ -68,7 +66,6 @@ const GameState = {
         }
         this.deviceId = storedId;
 
-        // 💡 모든 데이터를 안전한 _safeLoad로 불러옵니다!
         this.synthPity = this._safeLoad('master_synth_pity', { rare: 0, epic: 0 });
         this.gold = this._safeLoad('master_gold', 0);
         this.gem = this._safeLoad('master_gem', 0);
@@ -100,8 +97,17 @@ const GameState = {
         let a = this._safeLoad('master_equipped_armor', 'none'); this.equippedArmor = (a === 'none' ? null : a);
         let ac = this._safeLoad('master_equipped_accessory', 'none'); this.equippedAccessory = (ac === 'none' ? null : ac);
 
-        const questRaw = this._safeLoad('master_quest_data', null);
-        if (questRaw) this.questData = questRaw;
+        // 💡 퀘스트 데이터 보호 로직 (에러 발생 시 강제 초기화)
+        const defaultQuestData = {
+            daily: { date: "", progress: {} }, 
+            achievements: { progress: {}, completed: [] } 
+        };
+        const questRaw = this._safeLoad('master_quest_data', defaultQuestData);
+        if (questRaw && questRaw.daily && questRaw.daily.date !== undefined) {
+            this.questData = questRaw;
+        } else {
+            this.questData = defaultQuestData;
+        }
         
         this.checkDailyReset();
         this.checkAndRevive();
