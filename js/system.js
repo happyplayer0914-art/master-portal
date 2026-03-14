@@ -203,9 +203,9 @@ const GameSystem = {
 
     Lobby: {
         // 👇 여기서부터 복사해서 끼워 넣기!
-        applyBackground() {
-            const appBody = document.body; // 앱 전체를 감싸는 태그
-            const dynamicBg = document.getElementById('dynamic-bg'); // 기존 보라색 파티클 캔버스
+      applyBackground() {
+            const appBody = document.body; 
+            const dynamicBg = document.getElementById('dynamic-bg'); 
             const bgId = GameState.equippedBg;
 
             if (bgId && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
@@ -215,13 +215,25 @@ const GameSystem = {
                     appBody.style.backgroundSize = "cover";
                     appBody.style.backgroundPosition = "center";
                     appBody.style.backgroundAttachment = "fixed";
-                    if (dynamicBg) dynamicBg.style.display = 'none'; // 파티클 끄기
+                    
+                    // 🌟 [핵심 해결책] 배경을 꽉 막고 있던 게임 화면(.screen)들을 반투명하게 만듭니다!
+                    document.querySelectorAll('.screen').forEach(s => {
+                        s.style.backgroundColor = 'rgba(15, 23, 42, 0.6)'; // 살짝 어두운 반투명 색상
+                        s.style.backdropFilter = 'blur(2px)'; // 뒷배경이 살짝 흐릿하게 보이게 뽀샤시 효과 (선택사항)
+                    });
+
+                    if (dynamicBg) dynamicBg.style.display = 'none'; 
                     return;
                 }
             }
-            // 장착 해제 시 기본 상태로 롤백
+            
+            // 장착 해제 시 원상복구 (다시 까만 화면으로!)
             appBody.style.backgroundImage = "none";
-            if (dynamicBg) dynamicBg.style.display = 'block'; // 파티클 다시 켜기
+            document.querySelectorAll('.screen').forEach(s => {
+                s.style.backgroundColor = ''; 
+                s.style.backdropFilter = '';
+            });
+            if (dynamicBg) dynamicBg.style.display = 'block'; 
         },
         // 👇 여기서부터 복사해서 끼워넣기!
         getCurrentTitle() {
@@ -483,6 +495,8 @@ upgradeStat(t) {
                     skin: GameState.equippedSkin || 'none', 
                     prestige: GameState.prestigeCount || 0, 
                     title: titleInfo ? titleInfo.full : null, // 👈 파이어베이스에 풀버전 칭호 저장!
+                    // 🌟 [추가할 핵심 코드!!] 내가 지금 끼고 있는 테두리 정보를 서버로 보냅니다!
+                skin: GameState.equippedSkin || 'none',
                     timestamp: window.serverTimestamp()
                 }, { merge: true }); 
             } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
