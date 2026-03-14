@@ -54,6 +54,9 @@ const GameState = {
 
         // 👇 [여기에 4줄 추가!!] 껐다 켜도 치장품을 그대로 입혀줍니다!
         this.ownedCosmetics = JSON.parse(localStorage.getItem('master_ownedCosmetics') || "[]");
+        // 👇 칭호 장착 상태도 불러오기!
+        let title = localStorage.getItem('master_equippedTitle');
+        this.equippedTitle = (title === 'none' ? null : title);
         
         let bg = localStorage.getItem('master_equippedBg');
         this.equippedBg = (bg === 'none' ? null : bg);
@@ -114,6 +117,8 @@ const GameState = {
 
         // 👇 프로필 장착 상태 저장!
         localStorage.setItem('master_equippedProfile', this.equippedProfile || 'none');
+        // 👇 칭호 장착 상태도 저장!
+        localStorage.setItem('master_equippedTitle', this.equippedTitle || 'none');
         
         // 🌟 [신규 스탯 저장 기능 추가!]
         localStorage.setItem('master_def', this.rpgDef);
