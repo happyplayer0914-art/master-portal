@@ -1285,7 +1285,7 @@ enterDungeon() {
             avatarWrap.className = "w-full flex items-center justify-center relative z-0";
             
             // 보스는 화면에 꽉 차게 거대하게! 일반몹도 넉넉하게 크기 조절
-            spriteBox.style.cssText = isBoss ? "width: 100%; height: 260px; margin: 10px 0;" : "width: 100%; height: 160px; margin: 10px 0;";
+            spriteBox.style.cssText = isBoss ? "width: 100%; height: 320px; margin: 10px 0;" : "width: 100%; height: 160px; margin: 10px 0;";
             
             // 5. 카드 기본 구조 개선 (위아래 간격 벌리기)
             battleCard.className = isBoss 
