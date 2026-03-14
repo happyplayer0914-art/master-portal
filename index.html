@@ -639,12 +639,13 @@
     </div>
 
     <div class="flex gap-1 px-1">
-        <button id="btn-room-I" onclick="GameSystem.Chat.switchRoom('I')" class="flex-1 bg-indigo-600 text-white py-2 rounded-t-xl font-bold text-sm border border-indigo-500 border-b-0 transition-all shadow-md">I (내향) 주점</button>
-        <button id="btn-room-E" onclick="GameSystem.Chat.switchRoom('E')" class="flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-sm border border-slate-700 border-b-0 hover:text-white transition-all">E (외향) 주점</button>
+        <button id="btn-room-G" onclick="GameSystem.Chat.switchRoom('G')" class="flex-1 bg-emerald-600 text-white py-2 rounded-t-xl font-bold text-xs border border-emerald-500 border-b-0 transition-all shadow-md">광장(통합)</button>
+        <button id="btn-room-I" onclick="GameSystem.Chat.switchRoom('I')" class="flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all">I (내향)</button>
+        <button id="btn-room-E" onclick="GameSystem.Chat.switchRoom('E')" class="flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all">E (외향)</button>
     </div>
 
-    <div id="chat-messages" class="bg-slate-900/90 rounded-b-xl rounded-tr-xl border border-slate-700/50 p-4 mb-4 flex flex-col gap-3 shadow-inner overflow-y-auto" style="min-height: 35vh; max-height: 38vh;">
-        </div>
+    <div id="chat-messages" class="bg-slate-900/90 rounded-b-xl rounded-tr-xl border border-slate-700/50 p-4 mb-4 flex flex-col gap-3 shadow-inner overflow-y-auto custom-scrollbar" style="height: 55vh;">
+    </div>
 
     <div class="flex gap-2 relative z-10">
         <input type="text" id="chat-input" maxlength="40" placeholder="메시지를 입력하세요... (최대 40자)" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-500">
