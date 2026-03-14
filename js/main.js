@@ -6,6 +6,7 @@ window.onload = function() {
     GameSystem.Auth.init();
 // 게임 시작 코드들 어딘가에 이 한 줄을 추가!
     AssetPreloader.preloadAll();
+    GameSystem.Lobby.applyBackground();
     
     try {
         GameState.load();
