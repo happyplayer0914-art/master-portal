@@ -857,11 +857,12 @@ upgradeStat(t) {
         }
     },
 
-// 🔒 [오토 세이브/로드] 실시간 중복 접속 차단 및 강제 로그아웃 시스템!
+// 🔒 [오토 세이브/로드] 무결점 동접 방어 & 선로딩 후저장 시스템!
     Auth: {
         mySessionId: "sess_" + Date.now() + "_" + Math.floor(Math.random() * 99999),
         isSessionValid: true,
         sessionUnsub: null,
+        autoSaveTimer: null, // 타이머 변수 추가!
 
         init() {
             window.auth.onAuthStateChanged((user) => {
@@ -874,45 +875,51 @@ upgradeStat(t) {
                     const authEmail = document.getElementById('auth-email');
                     if(authEmail) authEmail.innerText = user.email;
 
-                    // 🛡️ [1단계] 로그인 시, 서버에 "내가 최신 접속자다!" 하고 입장권 갱신
+                    // 1. 서버에 내 입장권 등록
                     window.setDoc(window.doc(window.db, "users", user.uid), {
                         currentSession: this.mySessionId
                     }, { merge: true });
 
-                    // 🛡️ [2단계] 서버의 입장권이 탈취되는지 실시간 감시 (소름 돋는 보안!)
+                    // 2. 동접 감지 & 강제 로그아웃
                     if (this.sessionUnsub) this.sessionUnsub();
                     this.sessionUnsub = window.onSnapshot(window.doc(window.db, "users", user.uid), (docSnap) => {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
-                            
-                            // 내 입장권 번호랑 서버 번호가 다르다? = 누군가 다른 기기에서 로그인했다!
                             if (data.currentSession && data.currentSession !== this.mySessionId) {
-                                this.isSessionValid = false; // 내 저장 권한 즉시 박탈
+                                this.isSessionValid = false; 
                                 if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                                 if(this.sessionUnsub) { this.sessionUnsub(); this.sessionUnsub = null; }
 
-                                // 🚨 [핵심] 묻지도 따지지도 않고 즉시 강제 로그아웃 & 화면 초기화!
-                                alert("🚨 다른 기기에서 로그인이 감지되었습니다.\n안전을 위해 현재 기기에서 강제 로그아웃 됩니다.");
-                                
+                                alert("🚨 다른 기기에서 로그인이 감지되었습니다.\n데이터 꼬임을 막기 위해 강제 로그아웃 됩니다.");
                                 window.signOut(window.auth).then(() => {
                                     localStorage.removeItem('master_uid');
-                                    location.reload(); // 새로고침해서 완벽하게 게스트 상태로 돌려버림!
+                                    location.reload(); 
                                 });
                             }
                         }
                     });
 
-                    this.silentLoadFromCloud(user.uid);
-
-                    if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
-                    this.autoSaveTimer = setInterval(() => {
-                        if (!document.hidden && this.isSessionValid) {
-                            this.silentSaveToCloud(user.uid);
-                            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
-                                GameSystem.Ranking.updateRankingSilently();
+                    // 🌟 [핵심 수술 1] 무조건 서버에서 로딩(다운로드)부터 끝마친 다음에!!
+                    this.silentLoadFromCloud(user.uid).then(() => {
+                        // 다운로드가 완전히 끝난 직후에 자동 저장 타이머를 돌립니다. (덮어쓰기 절대 방지)
+                        if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                        this.autoSaveTimer = setInterval(() => {
+                            if (!document.hidden && this.isSessionValid) {
+                                this.silentSaveToCloud(user.uid);
+                                if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
+                                    GameSystem.Ranking.updateRankingSilently();
+                                }
                             }
+                        }, 10000);
+                    });
+
+                    // 🌟 [핵심 수술 2] 10초를 안 기다려도, 앱을 백그라운드로 내리거나 탭을 바꿀 때 '즉시 저장' 발동!
+                    document.addEventListener("visibilitychange", () => {
+                        if (document.visibilityState === 'hidden' && this.isSessionValid) {
+                            this.silentSaveToCloud(user.uid);
                         }
-                    }, 10000);
+                    });
+
                 } else {
                     localStorage.removeItem('master_uid');
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
@@ -920,6 +927,73 @@ upgradeStat(t) {
                 }
             });
         },
+        
+        loginWithGoogle() {
+            const provider = new window.GoogleAuthProvider();
+            window.signInWithPopup(window.auth, provider).then((result) => {
+                UIManager.showToast(`환영합니다, ${result.user.displayName}님! ✨`);
+            }).catch((error) => console.error("로그인 에러:", error));
+        },
+        
+        logout() {
+            if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
+            window.signOut(window.auth).then(() => {
+                document.getElementById('btn-google-login').classList.remove('hidden');
+                document.getElementById('auth-user-info').classList.add('hidden');
+                location.reload(); // 로그아웃 시 깔끔하게 화면 리셋
+            });
+        },
+        
+        silentSaveToCloud(uid) {
+            if (!this.isSessionValid) return; 
+
+            const allMyData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('master_') || key === 'last_checkin')) {
+                    allMyData[key] = localStorage.getItem(key);
+                }
+            }
+            if(Object.keys(allMyData).length === 0) return;
+
+            const nowTime = Date.now().toString();
+            localStorage.setItem('master_lastSaveTime', nowTime);
+            allMyData['master_lastSaveTime'] = nowTime;
+
+            window.setDoc(window.doc(window.db, "users", uid), {
+                saveData: allMyData,
+                lastSaved: window.serverTimestamp(),
+                currentSession: this.mySessionId 
+            }, { merge: true }).catch(e => console.log("자동 저장 중 오류:", e));
+        },
+        
+        // 🌟 [핵심 수술 3] 방해꾼을 없애고 꼼꼼하게 시간표시를 대조하는 무적의 다운로드 엔진!
+        async silentLoadFromCloud(uid) {
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "users", uid));
+                if (docSnap.exists() && docSnap.data().saveData) {
+                    const cloudData = docSnap.data().saveData;
+
+                    const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
+                    const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
+
+                    // 💡 클라우드의 시간이 내 폰/PC보다 "확실하게 최신일 때만" 덮어씌움! (같거나 옛날이면 무시)
+                    if (cloudTime > localTime) {
+                        console.log("☁️ 클라우드에 더 최신 데이터가 있습니다. 덮어씌우는 중...");
+                        for (const key in cloudData) {
+                            localStorage.setItem(key, cloudData[key]);
+                        }
+                        // 다운로드 완료 후 새로고침해서 완벽하게 적용!
+                        location.reload(); 
+                    } else {
+                        console.log("📱 현재 기기의 데이터가 가장 최신입니다. 백섭 방어 완료!");
+                    }
+                }
+            } catch (e) {
+                console.error("클라우드 로딩 오류:", e);
+            }
+        }
+    },
         
         loginWithGoogle() {
             const provider = new window.GoogleAuthProvider();
