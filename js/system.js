@@ -579,60 +579,69 @@ upgradeStat(t) {
         }
     }, // 🚨 [랭킹 끝]
 // 💬 [개편] 실시간 다중 채널 채팅 & 공지 시스템!
+   // ... (기존 GameSystem 코드) ...
     Chat: {
         lastChatTime: 0,
         unsubChat: null,
-        unsubNotice: null, // 공지용 수신기 따로 추가!
+        unsubNotice: null, 
         initialLoadDone: false,
-        currentRoom: 'I', // 기본 채널은 I (내향인) 주점!
+        
+        // 💡 [수정] 기본 채널을 통합 광장(G)으로 변경!
+        currentRoom: 'G', 
 
         init() {
+            // ... (기존 init 로직 동일) ...
             if (!window.db) return;
-
-            // 📢 1. 공지사항 전용 수신기 가동 (모든 채널 공통)
             const qNotice = window.query(window.collection(window.db, "notices"), window.orderBy("timestamp", "desc"), window.limit(10));
             this.unsubNotice = window.onSnapshot(qNotice, (snapshot) => {
+                // ... (공지사항 수신 로직 동일) ...
                 const noticeBox = document.getElementById('notice-box');
                 if (!noticeBox) return;
-                
                 let notices = [];
                 snapshot.forEach(doc => notices.push(doc.data()));
-                
                 if (notices.length === 0) {
                     noticeBox.innerHTML = '<div class="text-center text-yellow-500/50 mt-2">최근 공지가 없습니다. 평화롭네요! 🕊️</div>';
                 } else {
-                    // 최신 공지가 맨 위로 오도록 그림
                     noticeBox.innerHTML = notices.map(n => `<div class="mb-1.5 border-b border-yellow-700/30 pb-1"><span class="text-yellow-400 font-bold">📢 [시스템]</span> <span class="text-yellow-100">${this.escapeHTML(n.text)}</span></div>`).join('');
                 }
             });
 
-            // 💬 2. 현재 선택된 채널(I 또는 E) 채팅 수신기 가동!
             this.listenRoom(this.currentRoom);
         },
 
-        // 📺 [신규] 채널 변경 마법!
+        // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직!
         switchRoom(roomName) {
-            if (this.currentRoom === roomName) return; // 이미 그 방이면 무시
+            if (this.currentRoom === roomName) return; 
             this.currentRoom = roomName;
 
-            // UI 탭 색상 변경 로직
+            const btnG = document.getElementById('btn-room-G');
             const btnI = document.getElementById('btn-room-I');
             const btnE = document.getElementById('btn-room-E');
-            if (roomName === 'I') {
-                btnI.className = "flex-1 bg-indigo-600 text-white py-2 rounded-t-xl font-bold text-sm border border-indigo-500 border-b-0 transition-all shadow-md";
-                btnE.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-sm border border-slate-700 border-b-0 hover:text-white transition-all";
-            } else {
-                btnE.className = "flex-1 bg-orange-600 text-white py-2 rounded-t-xl font-bold text-sm border border-orange-500 border-b-0 transition-all shadow-md";
-                btnI.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-sm border border-slate-700 border-b-0 hover:text-white transition-all";
+            
+            // 1. 일단 모든 버튼을 회색(비활성화)으로 초기화
+            [btnG, btnI, btnE].forEach(btn => {
+                if(btn) btn.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
+            });
+
+            // 2. 선택된 방만 고유의 색상으로 칠하기
+            if (roomName === 'G' && btnG) {
+                btnG.className = "flex-1 bg-emerald-600 text-white py-2 rounded-t-xl font-bold text-xs border border-emerald-500 border-b-0 transition-all shadow-md";
+            } else if (roomName === 'I' && btnI) {
+                btnI.className = "flex-1 bg-indigo-600 text-white py-2 rounded-t-xl font-bold text-xs border border-indigo-500 border-b-0 transition-all shadow-md";
+            } else if (roomName === 'E' && btnE) {
+                btnE.className = "flex-1 bg-orange-600 text-white py-2 rounded-t-xl font-bold text-xs border border-orange-500 border-b-0 transition-all shadow-md";
             }
 
-            // 새 방에 들어왔으니 채팅창 비우기
-            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomName}] 채널 주점에 입장했습니다!</div>`;
+            // 3. 새 방에 들어왔으니 채팅창 안내 메시지 띄우기
+            const roomTitle = roomName === 'G' ? '통합 광장' : roomName === 'I' ? 'I (내향) 주점' : 'E (외향) 주점';
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomTitle}] 채널에 입장했습니다!</div>`;
 
-            // 기존 방 수신기 끄고, 새 방 수신기 켜기!
+            // 4. 기존 방 수신기 끄고, 새 방 수신기 켜기!
             if (this.unsubChat) this.unsubChat();
             this.listenRoom(roomName);
         },
+
+        // ... (아래 listenRoom, renderMessages, sendMessage 등은 기존 코드 그대로 유지) ...
 
         // 🎧 특정 방의 채팅만 듣는 수신기!
         listenRoom(roomName) {
