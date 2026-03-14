@@ -435,19 +435,33 @@ const UIManager = {
                 }
             }
 
-            // 아이콘 렌더링
+          // 🌟 [미리보기 대격변] 텍스트 이모티콘을 버리고 실제 이미지를 렌더링합니다!
             let finalIconHtml = item.iconHtml;
             if (!finalIconHtml) {
                 if(item.type === 'border') {
-                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white ${item.cssClass}">M</div>`;
+                    // 1. 테두리: '현재 내가 끼고 있는 프로필 아이콘'에 테두리를 직접 씌워서 보여줌!
+                    let displayIcon = myIcon;
+                    if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default') {
+                        const pfItem = GameData.cosmetics.profiles?.find(p => p.id === GameState.equippedProfile);
+                        if (pfItem) displayIcon = pfItem.icon;
+                    }
+                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xl font-black text-white flex-shrink-0 ${item.cssClass}">${displayIcon}</div>`;
+                
                 } else if (item.type === 'bg') {
-                    finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🖼️</div>`;
+                    // 2. 배경화면: 진짜 맵 이미지를 축소해서 액자(썸네일)처럼 보여줌!
+                    finalIconHtml = `<div class="w-10 h-10 rounded-lg border border-slate-500 shadow-inner flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/backgrounds/${item.img}')"></div>`;
+                
                 } else if (item.type === 'bubble') {
-                    finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">💬</div>`;
+                    // 3. 말풍선: 황금빛 등 실제 그라데이션/색상이 들어간 미니 말풍선을 그려줌!
+                    finalIconHtml = `<div class="w-10 h-10 rounded-lg flex items-center justify-center bg-slate-800/50 border border-slate-600 flex-shrink-0"><div class="${item.bgClass} text-[7px] px-1.5 py-1 rounded-xl rounded-tr-sm shadow-sm">미리보기</div></div>`;
+                
                 } else if (item.type === 'profile') {
-                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner">${item.icon}</div>`;
+                    // 4. 프로필: 해골, 고양이 등 진짜 아이콘 렌더링!
+                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner flex-shrink-0">${item.icon}</div>`;
+                
                 } else if (item.type === 'title') {
-                    finalIconHtml = `<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🏷️</div>`;
+                    // 5. 칭호: 미니 붉은색 뱃지로 직업 이름(MBTI)을 예쁘게 표시!
+                    finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800/50 flex items-center justify-center border border-slate-600 flex-shrink-0"><div class="px-1 py-0.5 rounded bg-red-900/40 border border-red-500/50 text-red-400 text-[6px] font-black uppercase drop-shadow-md tracking-wider">${item.reqMbti}</div></div>`;
                 }
             }
 
