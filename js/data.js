@@ -158,6 +158,25 @@ const GameData = {
 
     // 🌟 [신규 추가] 치장품(Cosmetics) 상점 데이터
     cosmetics: {
+        // 👇 profiles, borders 아래에 titles 배열을 추가합니다!
+        titles: [
+            { id: 't_entj', name: '전장을 지배하는 군주', desc: 'ENTJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ENTJ' },
+            { id: 't_intj', name: '심연의 대마법사', desc: 'INTJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'INTJ' },
+            { id: 't_infp', name: '달빛의 은둔술사', desc: 'INFP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'INFP' },
+            { id: 't_estp', name: '폭풍의 무법자', desc: 'ESTP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ESTP' },
+            { id: 't_isfj', name: '성소를 지키는 가디언', desc: 'ISFJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ISFJ' },
+            { id: 't_istj', name: '철의 규율 기사단장', desc: 'ISTJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ISTJ' },
+            { id: 't_isfp', name: '바람의 음유시인', desc: 'ISFP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ISFP' },
+            { id: 't_intp', name: '미궁의 연금술사', desc: 'INTP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'INTP' },
+            { id: 't_istp', name: '그림자의 암살자', desc: 'ISTP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ISTP' },
+            { id: 't_esfp', name: '환희의 무희', desc: 'ESFP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ESFP' },
+            { id: 't_enfp', name: '혜성의 탐험가', desc: 'ENFP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ENFP' },
+            { id: 't_entp', name: '혼돈의 마도공학자', desc: 'ENTP 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ENTP' },
+            { id: 't_estj', name: '강철의 총사령관', desc: 'ESTJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ESTJ' },
+            { id: 't_esfj', name: '여명의 성기사단장', desc: 'ESFJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ESFJ' },
+            { id: 't_enfj', name: '태양의 선지자', desc: 'ENFJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'ENFJ' },
+            { id: 't_infj', name: '별을 읽는 예언자', desc: 'INFJ 신화 1 + 전설 2 장착 시 해금', type: 'title', reqMbti: 'INFJ' }
+        ],
         // 👇 profiles 배열을 borders 바로 위나 아래에 쏙 끼워 넣어줘!
         profiles: [
             { id: 'pf_cat', name: '검은 고양이', desc: '어둠 속에서 빛나는 눈동자', price: 100, type: 'profile', icon: '🐱' },
