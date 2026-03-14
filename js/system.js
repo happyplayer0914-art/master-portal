@@ -857,8 +857,13 @@ upgradeStat(t) {
         }
     },
 
-  // 🔒 [오토 세이브/로드] 유령 탭 완벽 방어 시스템 탑재!
+ // 🔒 [오토 세이브/로드] 실시간 중복 접속 방어 시스템! (백섭 절대 금지)
     Auth: {
+        // 💡 1. 게임을 켤 때마다 나만의 고유한 입장권(세션 ID)을 만듭니다!
+        mySessionId: "sess_" + Date.now() + "_" + Math.floor(Math.random() * 99999),
+        isSessionValid: true,
+        sessionUnsub: null,
+
         init() {
             window.auth.onAuthStateChanged((user) => {
                 if (user) {
@@ -867,26 +872,60 @@ upgradeStat(t) {
                     const userInfo = document.getElementById('auth-user-info');
                     if(loginBtn) loginBtn.classList.add('hidden');
                     if(userInfo) userInfo.classList.remove('hidden');
+                    const authEmail = document.getElementById('auth-email');
+                    if(authEmail) authEmail.innerText = user.email;
+
+                    // 🛡️ [동접 방어 1단계] 접속하자마자 서버에 "내가 진짜 마스터다!" 하고 내 입장권 번호를 쾅 박습니다.
+                    window.setDoc(window.doc(window.db, "users", user.uid), {
+                        currentSession: this.mySessionId
+                    }, { merge: true });
+
+                    // 🛡️ [동접 방어 2단계] 누군가 폰(또는 PC)으로 새로 접속해서 내 입장권을 뺏어가는지 실시간으로 감시!
+                    if (this.sessionUnsub) this.sessionUnsub();
+                    this.sessionUnsub = window.onSnapshot(window.doc(window.db, "users", user.uid), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            
+                            // 서버의 입장권 번호가 내 번호랑 다르다면?! = 다른 곳에서 방금 게임을 켰다!
+                            if (data.currentSession && data.currentSession !== this.mySessionId) {
+                                this.isSessionValid = false; // 내 연결고리 즉시 차단 (저장 영구 금지)
+                                if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+
+                                // 🚨 화면 다 가려버리는 치명적 차단막 생성! (백섭 테러 원천 봉쇄)
+                                const blocker = document.createElement('div');
+                                blocker.innerHTML = `
+                                    <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.95); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; backdrop-filter:blur(5px);">
+                                        <div style="font-size:60px; margin-bottom:15px; text-shadow: 0 0 20px rgba(239,68,68,0.8);">🚨</div>
+                                        <h1 style="font-size:26px; font-weight:900; color:#ef4444; margin-bottom:10px;">중복 접속 감지!</h1>
+                                        <p style="font-size:13px; color:#cbd5e1; margin-bottom:24px; line-height:1.6; font-weight:bold;">다른 기기(또는 다른 탭)에서 게임이 실행되어<br>데이터 롤백을 막기 위해 현재 화면을 <b>강제 차단</b>했습니다.</p>
+                                        <button onclick="location.reload()" style="padding:12px 24px; background-color:#4f46e5; color:white; font-weight:900; border-radius:12px; border:none; box-shadow:0 4px 15px rgba(79,70,229,0.4); cursor:pointer;">새로고침하여 권한 다시 가져오기</button>
+                                    </div>
+                                `;
+                                document.body.appendChild(blocker);
+                            }
+                        }
+                    });
 
                     this.silentLoadFromCloud(user.uid);
 
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     this.autoSaveTimer = setInterval(() => {
-                        // 🛡️ [1차 방패] 화면이 켜져 있을 때(활성화)만 10초마다 저장! 백그라운드 탭은 기절시킴!
-                        if (!document.hidden) {
+                        // 세션이 살아있고, 화면이 켜져있을 때만 조심스럽게 저장!
+                        if (!document.hidden && this.isSessionValid) {
                             this.silentSaveToCloud(user.uid);
-                            // 랭킹도 화면 켜져 있을 때만 조용히 갱신
                             if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
                                 GameSystem.Ranking.updateRankingSilently();
                             }
                         }
-                    }, 10000); 
+                    }, 10000);
                 } else {
                     localStorage.removeItem('master_uid');
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                    if(this.sessionUnsub) { this.sessionUnsub(); this.sessionUnsub = null; }
                 }
             });
         },
+        
         loginWithGoogle() {
             const provider = new window.GoogleAuthProvider();
             UIManager.showToast("구글 로그인을 요청합니다...");
@@ -898,6 +937,7 @@ upgradeStat(t) {
                     UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
                 });
         },
+        
         logout() {
             if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
             window.signOut(window.auth).then(() => {
@@ -906,7 +946,11 @@ upgradeStat(t) {
                 document.getElementById('auth-user-info').classList.add('hidden');
             });
         },
+        
         silentSaveToCloud(uid) {
+            // 💡 [핵심 방어] 권한 뺏겼으면 절대 데이터 못 올리게 막아버림!
+            if (!this.isSessionValid) return; 
+
             const allMyData = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -916,38 +960,36 @@ upgradeStat(t) {
             }
             if(Object.keys(allMyData).length === 0) return;
 
-            // 🛡️ [시간표시 기록] 로컬과 클라우드에 현재 시간을 도장 찍어둡니다!
             const nowTime = Date.now().toString();
             localStorage.setItem('master_lastSaveTime', nowTime);
             allMyData['master_lastSaveTime'] = nowTime;
 
             window.setDoc(window.doc(window.db, "users", uid), {
                 saveData: allMyData,
-                lastSaved: window.serverTimestamp()
-            }).catch(e => console.log("자동 저장 중...", e));
+                lastSaved: window.serverTimestamp(),
+                currentSession: this.mySessionId // 💡 저장할 때도 내 입장권 번호 제출!
+            }, { merge: true }).catch(e => console.log("자동 저장 중...", e));
         },
+        
         silentLoadFromCloud(uid) {
             if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
             window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
                 if (docSnap.exists() && docSnap.data().saveData) {
                     const cloudData = docSnap.data().saveData;
 
-                    // 🛡️ [2차 방패] 내 폰 데이터와 클라우드 데이터의 '시간표시' 비교!
                     const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
                     const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
 
-                    // 폰을 새로 바꿨거나(localTime 0), 클라우드 시간이 더 미래일 때만 덮어씌움!
                     if (localTime === 0 || cloudTime > localTime) {
                         for (const key in cloudData) {
                             localStorage.setItem(key, cloudData[key]);
                         }
                         sessionStorage.setItem('cloud_loaded_once', 'true'); 
-                        console.log("☁️ 클라우드 동기화 완료! (클라우드가 최신)");
+                        console.log("☁️ 클라우드 동기화 완료!");
                         location.reload(); 
                     } else {
-                        // 내 폰이 더 최신이면 백섭(덮어쓰기)을 막아버리고 하던 게임 계속함!
                         sessionStorage.setItem('cloud_loaded_once', 'true'); 
-                        console.log("📱 로컬 데이터가 최신입니다. 백섭 방어 성공!");
+                        console.log("📱 로컬 데이터가 최신입니다.");
                     }
                 } else {
                     sessionStorage.setItem('cloud_loaded_once', 'true');
