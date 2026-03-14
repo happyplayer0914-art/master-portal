@@ -953,6 +953,8 @@ upgradeStat(t) {
             if (!confirm("현재 기기의 데이터를 지우고 클라우드 데이터로 덮어씌우시겠습니까?")) return;
             
             try {
+                // 💡 [핵심 방어막] 다운로드 중에 폰이 옛날 데이터를 올리지 못하게 타이머를 부숴버립니다!
+                if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                 const docSnap = await window.getDoc(window.doc(window.db, "users", uid));
                 if (docSnap.exists() && docSnap.data().saveData) {
                     const cloudData = docSnap.data().saveData;
