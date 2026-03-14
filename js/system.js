@@ -862,7 +862,7 @@ upgradeStat(t) {
         mySessionId: "sess_" + Date.now() + "_" + Math.floor(Math.random() * 99999),
         isSessionValid: true,
         sessionUnsub: null,
-        autoSaveTimer: null, // 타이머 변수 추가!
+        autoSaveTimer: null,
 
         init() {
             window.auth.onAuthStateChanged((user) => {
@@ -875,12 +875,10 @@ upgradeStat(t) {
                     const authEmail = document.getElementById('auth-email');
                     if(authEmail) authEmail.innerText = user.email;
 
-                    // 1. 서버에 내 입장권 등록
                     window.setDoc(window.doc(window.db, "users", user.uid), {
                         currentSession: this.mySessionId
                     }, { merge: true });
 
-                    // 2. 동접 감지 & 강제 로그아웃
                     if (this.sessionUnsub) this.sessionUnsub();
                     this.sessionUnsub = window.onSnapshot(window.doc(window.db, "users", user.uid), (docSnap) => {
                         if (docSnap.exists()) {
@@ -899,9 +897,7 @@ upgradeStat(t) {
                         }
                     });
 
-                    // 🌟 [핵심 수술 1] 무조건 서버에서 로딩(다운로드)부터 끝마친 다음에!!
                     this.silentLoadFromCloud(user.uid).then(() => {
-                        // 다운로드가 완전히 끝난 직후에 자동 저장 타이머를 돌립니다. (덮어쓰기 절대 방지)
                         if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                         this.autoSaveTimer = setInterval(() => {
                             if (!document.hidden && this.isSessionValid) {
@@ -913,7 +909,6 @@ upgradeStat(t) {
                         }, 10000);
                     });
 
-                    // 🌟 [핵심 수술 2] 10초를 안 기다려도, 앱을 백그라운드로 내리거나 탭을 바꿀 때 '즉시 저장' 발동!
                     document.addEventListener("visibilitychange", () => {
                         if (document.visibilityState === 'hidden' && this.isSessionValid) {
                             this.silentSaveToCloud(user.uid);
@@ -940,7 +935,7 @@ upgradeStat(t) {
             window.signOut(window.auth).then(() => {
                 document.getElementById('btn-google-login').classList.remove('hidden');
                 document.getElementById('auth-user-info').classList.add('hidden');
-                location.reload(); // 로그아웃 시 깔끔하게 화면 리셋
+                location.reload(); 
             });
         },
         
@@ -967,7 +962,6 @@ upgradeStat(t) {
             }, { merge: true }).catch(e => console.log("자동 저장 중 오류:", e));
         },
         
-        // 🌟 [핵심 수술 3] 방해꾼을 없애고 꼼꼼하게 시간표시를 대조하는 무적의 다운로드 엔진!
         async silentLoadFromCloud(uid) {
             try {
                 const docSnap = await window.getDoc(window.doc(window.db, "users", uid));
@@ -977,13 +971,11 @@ upgradeStat(t) {
                     const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
                     const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
 
-                    // 💡 클라우드의 시간이 내 폰/PC보다 "확실하게 최신일 때만" 덮어씌움! (같거나 옛날이면 무시)
                     if (cloudTime > localTime) {
                         console.log("☁️ 클라우드에 더 최신 데이터가 있습니다. 덮어씌우는 중...");
                         for (const key in cloudData) {
                             localStorage.setItem(key, cloudData[key]);
                         }
-                        // 다운로드 완료 후 새로고침해서 완벽하게 적용!
                         location.reload(); 
                     } else {
                         console.log("📱 현재 기기의 데이터가 가장 최신입니다. 백섭 방어 완료!");
@@ -993,79 +985,7 @@ upgradeStat(t) {
                 console.error("클라우드 로딩 오류:", e);
             }
         }
-    },
-        
-        loginWithGoogle() {
-            const provider = new window.GoogleAuthProvider();
-            UIManager.showToast("구글 로그인을 요청합니다...");
-            window.signInWithPopup(window.auth, provider)
-                .then((result) => {
-                    UIManager.showToast(`환영합니다, ${result.user.displayName}님! ✨`);
-                }).catch((error) => {
-                    console.error("로그인 에러:", error);
-                    UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
-                });
-        },
-        
-        logout() {
-            if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
-            window.signOut(window.auth).then(() => {
-                UIManager.showToast("안전하게 로그아웃 되었습니다.");
-                document.getElementById('btn-google-login').classList.remove('hidden');
-                document.getElementById('auth-user-info').classList.add('hidden');
-            });
-        },
-        
-        silentSaveToCloud(uid) {
-            // 권한 뺏겼으면 절대 데이터 못 올리게 철벽 방어!
-            if (!this.isSessionValid) return; 
-
-            const allMyData = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && (key.startsWith('master_') || key === 'last_checkin')) {
-                    allMyData[key] = localStorage.getItem(key);
-                }
-            }
-            if(Object.keys(allMyData).length === 0) return;
-
-            const nowTime = Date.now().toString();
-            localStorage.setItem('master_lastSaveTime', nowTime);
-            allMyData['master_lastSaveTime'] = nowTime;
-
-            window.setDoc(window.doc(window.db, "users", uid), {
-                saveData: allMyData,
-                lastSaved: window.serverTimestamp(),
-                currentSession: this.mySessionId // 저장할 때 내 입장권 번호 유지
-            }, { merge: true }).catch(e => console.log("자동 저장 중...", e));
-        },
-        
-        silentLoadFromCloud(uid) {
-            if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
-            window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
-                if (docSnap.exists() && docSnap.data().saveData) {
-                    const cloudData = docSnap.data().saveData;
-
-                    const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
-                    const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
-
-                    if (localTime === 0 || cloudTime > localTime) {
-                        for (const key in cloudData) {
-                            localStorage.setItem(key, cloudData[key]);
-                        }
-                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
-                        console.log("☁️ 클라우드 동기화 완료!");
-                        location.reload(); 
-                    } else {
-                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
-                        console.log("📱 로컬 데이터가 최신입니다.");
-                    }
-                } else {
-                    sessionStorage.setItem('cloud_loaded_once', 'true');
-                }
-            });
-        }
-    },
+    }, // 👈 완벽한 콤마 마무리! 여기서부터 Quest: { 로 이어집니다!
   Quest: {
         currentTab: 'daily',
         
