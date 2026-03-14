@@ -365,7 +365,10 @@ const UIManager = {
             } else if (this.currentCosmeticTab === 'title') {
                 currentItems = GameData.cosmetics.titles || [];
                 emptyMessage = "칭호 시스템이 곧 해금됩니다! (작업 중 🛠️)";
-            }
+           // 👇 [추가] 프로필 미리보기 아이콘!
+                } else if (item.type === 'profile') {
+                    iconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner">${item.icon}</div>`;
+                }
         }
 
         // 데이터가 없으면 '작업 중' 메시지 띄우기
@@ -445,13 +448,13 @@ const UIManager = {
         if (type === 'border') GameState.equippedSkin = id;
         if (type === 'bg') GameState.equippedBg = id;
         if (type === 'bubble') GameState.equippedBubble = id;
+        if (type === 'profile') GameState.equippedProfile = id; // 👈 추가!
         
         GameState.save();
         this.showToast("✅ 장착되었습니다!");
         
-        if (type === 'border') {
+        if (type === 'border' || type === 'profile') { // 👈 프로필도 즉시 적용되게 묶어줌!
             this.applyAvatarSkin(); 
-            // 👇 [핵심 추가] 테두리를 바꾸면 랭킹 서버에도 내 새 옷을 즉시 자랑하기!
             if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
         }
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
@@ -467,13 +470,13 @@ const UIManager = {
         if (type === 'border' && GameState.equippedSkin === id) GameState.equippedSkin = null;
         if (type === 'bg' && GameState.equippedBg === id) GameState.equippedBg = null;
         if (type === 'bubble' && GameState.equippedBubble === id) GameState.equippedBubble = null;
+        if (type === 'profile' && GameState.equippedProfile === id) GameState.equippedProfile = null; // 👈 추가!
         
         GameState.save();
         this.showToast("❌ 장착 해제되었습니다.");
         
-        if (type === 'border') {
+      if (type === 'border' || type === 'profile') { // 👈 프로필도 묶어줌!
             this.applyAvatarSkin();
-            // 👇 [핵심 추가] 테두리 해제 시에도 랭킹 서버 즉시 반영!
             if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
         }
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
