@@ -1263,25 +1263,28 @@ enterDungeon() {
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-            // 🌟 [이모지 롤백 엔진 탑재!]
+           // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
 
-            // 1. 복잡했던 배경, 크기, 레이어 스타일 싹 다 초기화! (쾌적한 순정 상태)
-            battleCard.style.backgroundImage = "none";
-            avatarWrap.style.cssText = ""; 
-            spriteBox.style.cssText = "";  
-            
-            // 레이어(z-index) 샌드위치 마법 깔끔하게 해제!
+            // 1. 구역 테마에 맞는 배경화면 쫙 깔아주기!
+            const battleScreen = document.getElementById('screen-rpg-battle');
+            battleScreen.style.backgroundImage = `linear-gradient(rgba(5, 5, 10, 0.7), rgba(5, 5, 10, 0.9)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
+            battleScreen.style.backgroundSize = "cover";
+            battleScreen.style.backgroundPosition = "center";
+            battleScreen.style.backgroundRepeat = "no-repeat";
+
+            // 레이어 겹침 방지 초기화
             Array.from(battleCard.children).forEach(child => {
                 child.style.position = "";
                 child.style.zIndex = ""; 
             });
 
-            // 2. 빠릿빠릿한 타격감의 근본! 이모지로 출력!
-            spriteBox.innerHTML = '';
-            spriteBox.innerText = mInfo.e;
-
+            // 2. 이모지 대신 고퀄리티 몬스터/보스 이미지 출력! (하얀 테두리를 살짝 감춰주는 그림자 마법 추가)
+            spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]" alt="${mInfo.n}">`;
+            
+            // 이미지 크기가 꽉 차도록 패딩 조절 (보스는 덜 깎고, 일반은 살짝 여백 줌)
+            spriteBox.style.cssText = isBoss ? "width: 100%; height: 100%; padding: 10px;" : "width: 100%; height: 100%; padding: 20px;";
             
 
            // (기존 UI 업데이트 코드)
