@@ -302,10 +302,11 @@ const UIManager = {
             }
         };
 
-        renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
+       renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
         renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
         renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
-    },
+    }, // <-- renderInventory 끝나는 괄호
+
     // 🌟 [신규 추가] 치장품 상점 렌더링 엔진!
     renderCosmeticsShop() {
         const panel = document.getElementById('inv-panel-cosmetics');
@@ -405,8 +406,10 @@ const UIManager = {
         GameState.save();
         this.showToast("✅ 장착되었습니다!");
         
-        if (type === 'border') this.applyAvatarSkin(); // 테두리는 즉시 적용
-        if (type === 'bg') GameSystem.Lobby.applyBackground(); // 배경 즉시 적용 (다음 스텝에서 만들 함수)
+        if (type === 'border') this.applyAvatarSkin(); 
+        if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+             GameSystem.Lobby.applyBackground(); 
+        }
         
         this.renderCosmeticsShop();
         this.triggerHaptic();
@@ -422,12 +425,15 @@ const UIManager = {
         this.showToast("❌ 장착 해제되었습니다.");
         
         if (type === 'border') this.applyAvatarSkin();
-        if (type === 'bg') GameSystem.Lobby.applyBackground();
+        if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+             GameSystem.Lobby.applyBackground(); 
+        }
         
         this.renderCosmeticsShop();
         this.triggerHaptic();
-    }
-}; // <-- 기존 UIManager 객체를 닫는 진짜 마지막 괄호!
+    },
+    
+    // 🌌 원래 있던 백그라운드 함수 부활!
     initBackground() { 
         const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
         let width, height; let particles = [];
@@ -443,7 +449,7 @@ const UIManager = {
         };
         drawBg();
     }
-};
+}; // <-- 이게 진짜 UIManager를 닫는 마지막 괄호입니다!
 
 
 
