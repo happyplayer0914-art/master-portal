@@ -143,12 +143,12 @@ const GameState = {
         localStorage.setItem('master_equipped_accessory', this._encode(this.equippedAccessory || 'none'));
     },
 
-   checkDailyReset() {
-        // 🛡️ [안전장치] 만약 옛날 데이터가 깨져서 daily 방이 없다면 새로 튼튼하게 만들어줍니다!
-        if (!this.questData) {
+  checkDailyReset() {
+        // 🛡️ [절대 방어] 데이터가 정상적인 객체(Object)가 아니거나 꼬여있으면 아예 새 뼈대로 싹 갈아끼웁니다!
+        if (!this.questData || typeof this.questData !== 'object' || Array.isArray(this.questData)) {
             this.questData = { daily: { date: "", progress: {} }, achievements: { progress: {}, completed: [] } };
         }
-        if (!this.questData.daily) {
+        if (!this.questData.daily || typeof this.questData.daily !== 'object') {
             this.questData.daily = { date: "", progress: {} };
         }
 
