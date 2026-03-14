@@ -199,7 +199,7 @@ const UIManager = {
             }
         }
 
-        // 🌟 2. 내 정보 창에 '내가 치장품 탭에서 장착한 칭호' 보여주기
+       // 🌟 2. 내 정보 창에 '내가 치장품 탭에서 장착한 칭호' 뱃지로 띄워주기
         const jobTitleEl = document.getElementById('profile-job-title');
         if (jobTitleEl) {
             const eqTitleId = GameState.equippedTitle;
@@ -207,15 +207,17 @@ const UIManager = {
             if (eqTitleId && eqTitleId !== 'none' && eqTitleId !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
                 const tItem = GameData.cosmetics.titles.find(t => t.id === eqTitleId);
                 if (tItem) {
+                    // 칭호를 장착하면 붉게 타오르는 뱃지로 변신!
                     jobTitleEl.innerText = `✨ ${tItem.name} [${tItem.reqMbti}] ✨`;
-                    jobTitleEl.className = "text-red-400 font-black text-xs sm:text-sm tracking-widest uppercase mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all duration-300";
+                    jobTitleEl.className = "px-2 py-1.5 rounded-md bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[11px] tracking-widest uppercase mb-2 animate-pulse drop-shadow-md inline-block transition-all";
                 }
             } else {
-                jobTitleEl.innerText = "Master Profile";
-                jobTitleEl.className = "text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1 transition-all duration-300";
+                // 칭호를 빼면 다시 기본 에메랄드색 뱃지로 원상복구!
+                jobTitleEl.innerText = "MASTER PROFILE";
+                jobTitleEl.className = "px-2 py-1.5 rounded-md bg-slate-800 border border-slate-700 text-emerald-400 font-bold text-[10px] tracking-widest uppercase mb-2 inline-block shadow-inner transition-all";
             }
         }
-    },
+    }, // <-- updateRpgLobbyUI 끝나는 괄호
     
    applyAvatarSkin() {
         const skinId = GameState.equippedSkin;
