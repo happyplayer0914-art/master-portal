@@ -1442,6 +1442,7 @@ enterDungeon() {
             document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
             
             this.lastAttackTime = 0; 
+            this.bossAttackCount = 0; // 💡 [신규] 보스 공격 횟수 카운터 초기화!
             this.updateBattleUI();
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
@@ -1525,41 +1526,74 @@ playerAttack() {
             if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
         },
         
-        monsterAttack() {
+      monsterAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
             
             const stats = GameState.getTotalStats();
+            const isBoss = (GameState.rpgStage % 10 === 0);
+            let isUltimate = false;
 
-            // 🌟 1. 회피율(EVA) 계산! (최대 50% 확률로 무시!)
-            let evaChance = Math.min(stats.eva, 50); // 마스터 오더: 최대 50% 제한!
-            let randomRoll = Math.random() * 100; // 0 ~ 99.99 사이의 주사위 굴리기
-            
-            if (randomRoll < evaChance) {
-                // 회피 성공!! (화면 흔들림도 없고 데미지도 없습니다!)
-                this.showDamageText('battle-card', "MISS!", 'text-gray-300 font-black text-2xl drop-shadow-md'); // 빗나감 텍스트
-                document.getElementById('battle-log').innerText = "💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)";
-                return; // 턴 강제 종료!
+            // 🌟 [필살기 카운터] 보스일 경우 4타마다 필살기 장전!
+            if (isBoss) {
+                this.bossAttackCount = (this.bossAttackCount || 0) + 1;
+                if (this.bossAttackCount >= 4) {
+                    isUltimate = true;
+                    this.bossAttackCount = 0; // 카운터 초기화
+                }
             }
 
-            AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic();
+            // 1. 회피율(EVA) 계산!
+            let evaChance = Math.min(stats.eva, 50); 
+            let randomRoll = Math.random() * 100; 
             
-            // 🌟 2. 방어력(DEF) 계산! (롤 공식 적용)
+            if (randomRoll < evaChance) {
+                this.showDamageText('battle-card', "MISS!", 'text-gray-300 font-black text-2xl drop-shadow-md'); 
+                document.getElementById('battle-log').innerText = "💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)";
+                return; 
+            }
+
+            // 2. 방어력(DEF) 및 데미지 계산!
             let rawDamage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
-            let defStat = stats.def;
-            let damageReduction = defStat / (defStat + 100); // 방어력이 오를수록 감소율이 커짐!
             
-            // 최종 데미지 = 원래 데미지 * (1 - 감소율) (최소 1의 데미지는 들어오게 세팅!)
+            // 💥 [필살기 데미지 폭발!] 필살기면 원래 데미지의 2.5배 뻥튀기!
+            if (isUltimate) {
+                rawDamage = Math.floor(rawDamage * 2.5);
+            }
+
+            let defStat = stats.def;
+            let damageReduction = defStat / (defStat + 100); 
             let damage = Math.max(1, Math.floor(rawDamage * (1 - damageReduction)));
             
             GameState.currentHp -= damage; GameState.save(); 
             
             const battleCard = document.getElementById('battle-card');
-            if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
             
-            // 💡 [핵심 연동] 마스터(전투 창 전체) 위에 빨간색 데미지 띄우기!
-            this.showDamageText('battle-card', `-${damage}`, 'damage-player');
+            // 🎬 [필살기 연출] 화면 붉은 점멸 + 사운드 + 강력한 진동!
+            if (isUltimate) {
+                AudioEngine.sfx.boss(); // 묵직한 사운드
+                UIManager.triggerHeavyHaptic(); // 3단 진동
+                
+                // 전체 화면 붉은색 점멸 이펙트 추가
+                document.body.classList.add('boss-ultimate-flash'); 
+                if(battleCard) battleCard.classList.add('shake'); 
+                
+                setTimeout(() => { 
+                    document.body.classList.remove('boss-ultimate-flash');
+                    if(battleCard) battleCard.classList.remove('shake'); 
+                }, 300);
+                
+                // 큼직하고 강렬한 전용 데미지 텍스트
+                this.showDamageText('battle-card', `FATAL! -${damage}`, 'text-red-500 font-black text-4xl drop-shadow-[0_0_15px_rgba(239,68,68,1)]');
+                document.getElementById('battle-log').innerText = `☠️ 보스의 필살기!! ${damage}의 치명적인 피해!`;
+            } else {
+                // 일반 몬스터 & 보스 평타 연출
+                AudioEngine.sfx.hit(); 
+                UIManager.triggerHaptic();
+                if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
+                this.showDamageText('battle-card', `-${damage}`, 'damage-player');
+                document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
+            }
 
-            document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${damage} 피해!`;
             this.updateBattleUI(); 
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
