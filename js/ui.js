@@ -12,6 +12,8 @@ const UIManager = {
         this.updateIdleUI(); 
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
         this.updateRpgLobbyUI();
+        // 👇 여기에 한 줄 쓱 추가!
+        this.GachaSlider.init();
 
         // 👇 [핵심 추가] 게임 켤 때 내가 낀 배경화면 불러오기! (시스템 로딩을 위해 0.5초 기다림)
         setTimeout(() => {
@@ -560,7 +562,7 @@ const UIManager = {
         this.renderCosmeticsShop();
         this.triggerHaptic();
     },
-    // =========================================================================
+// =========================================================================
     // 🌟 [신규 추가] 가챠샵 슬라이딩 배너 모터
     // =========================================================================
     GachaSlider: {
@@ -581,7 +583,7 @@ const UIManager = {
             this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: true});
             this.container.addEventListener('touchend', () => this.handleTouchEnd());
             
-            // PC 마우스 드래그 이벤트 (테스트용)
+            // PC 마우스 드래그 이벤트
             this.container.addEventListener('mousedown', (e) => this.handleMouseDown(e));
             this.container.addEventListener('mousemove', (e) => this.handleMouseMove(e));
             this.container.addEventListener('mouseup', () => this.handleMouseUp());
@@ -599,9 +601,9 @@ const UIManager = {
             if (this.dots) {
                 Array.from(this.dots).forEach((dot, idx) => {
                     if (idx === this.currentIndex) {
-                        dot.className = "w-4 h-2 rounded-full bg-white transition-all shadow-md"; // 활성화(길어짐)
+                        dot.className = "w-4 h-2 rounded-full bg-white transition-all shadow-md"; 
                     } else {
-                        dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; // 비활성화(작아짐)
+                        dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; 
                     }
                 });
             }
@@ -619,21 +621,20 @@ const UIManager = {
 
         startAuto() {
             this.stopAuto();
-            this.intervalId = setInterval(() => this.next(), 5000); // 5초마다 자동 넘김
+            this.intervalId = setInterval(() => this.next(), 5000); // 5초마다 휙!
         },
 
         stopAuto() {
             if (this.intervalId) clearInterval(this.intervalId);
         },
 
-        // 터치 및 마우스 판정 로직
         handleTouchStart(e) { this.startX = e.touches[0].clientX; this.stopAuto(); },
         handleTouchMove(e) { this.endX = e.touches[0].clientX; },
         handleTouchEnd() {
             if (!this.startX || !this.endX) return;
             const diff = this.startX - this.endX;
-            if (diff > 50) this.next(); // 왼쪽으로 밀면 다음
-            else if (diff < -50) this.prev(); // 오른쪽으로 밀면 이전
+            if (diff > 50) this.next(); 
+            else if (diff < -50) this.prev(); 
             this.startX = 0; this.endX = 0;
             this.startAuto();
         },
