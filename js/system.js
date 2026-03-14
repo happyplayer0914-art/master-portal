@@ -546,12 +546,13 @@ upgradeStat(t) {
                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
-                    // 👇 [수정됨] 랭킹 테두리 불러오기 로직 교체!
+                  // 👇 [수정됨] 랭킹 테두리 불러오기 로직 교체!
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
                     let sId = d.skin;
                     if(sId && sId !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                         const bItem = GameData.cosmetics.borders.find(x => x.id === sId);
-                        if(bItem) skinClass = bItem.cssClass; // 새로운 CSS 클래스 적용!
+                        // 💡 여기에 bg-slate-800 을 추가했습니다!
+                        if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
                     }
                     // 👆 여기까지!
                     
@@ -675,11 +676,12 @@ upgradeStat(t) {
                 // 💡 [수정] 칭호 HTML (닉네임 옆에 나란히 배치될 용도)
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
-               // 👇 [수정됨] 채팅 프로필 테두리 불러오기
+              // 👇 [수정됨] 채팅 프로필 테두리 불러오기
                 let skinClass = "bg-slate-700 border border-slate-600"; 
                 if(msg.skin && msg.skin !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                     const bItem = GameData.cosmetics.borders.find(x => x.id === msg.skin);
-                    if(bItem) skinClass = bItem.cssClass;
+                    // 💡 여기도 bg-slate-800 을 추가했습니다!
+                    if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`;
                 }
 
            // 👇 [추가됨] 채팅 말풍선 불러오기
