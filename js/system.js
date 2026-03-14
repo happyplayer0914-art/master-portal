@@ -1263,16 +1263,21 @@ enterDungeon() {
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-           // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
+         // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
+            const battleCard = document.getElementById('battle-card');
 
-            // 1. 구역 테마에 맞는 배경화면 쫙 깔아주기!
+            // 1. 전체 화면 배경은 치장품을 위해 싹 비워주기 (원상복구!)
             const battleScreen = document.getElementById('screen-rpg-battle');
-            battleScreen.style.backgroundImage = `linear-gradient(rgba(5, 5, 10, 0.7), rgba(5, 5, 10, 0.9)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
-            battleScreen.style.backgroundSize = "cover";
-            battleScreen.style.backgroundPosition = "center";
-            battleScreen.style.backgroundRepeat = "no-repeat";
+            battleScreen.style.backgroundImage = "none";
+
+            // 2. 전투 '카드' 내부에만 구역 테마 배경화면 쫙 깔아주기!
+            // (텍스트가 잘 보이도록 배경 이미지 위에 살짝 어두운 그라데이션을 덮어줍니다)
+            battleCard.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
+            battleCard.style.backgroundSize = "cover";
+            battleCard.style.backgroundPosition = "center";
+            battleCard.style.backgroundRepeat = "no-repeat";
 
             // 레이어 겹침 방지 초기화
             Array.from(battleCard.children).forEach(child => {
@@ -1280,11 +1285,16 @@ enterDungeon() {
                 child.style.zIndex = ""; 
             });
 
-            // 2. 이모지 대신 고퀄리티 몬스터/보스 이미지 출력! (하얀 테두리를 살짝 감춰주는 그림자 마법 추가)
+            // 3. 고퀄리티 몬스터/보스 이미지 출력!
             spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]" alt="${mInfo.n}">`;
             
-            // 이미지 크기가 꽉 차도록 패딩 조절 (보스는 덜 깎고, 일반은 살짝 여백 줌)
+            // 이미지 크기가 꽉 차도록 패딩 조절
             spriteBox.style.cssText = isBoss ? "width: 100%; height: 100%; padding: 10px;" : "width: 100%; height: 100%; padding: 20px;";
+            
+            // 4. (기존 UI 업데이트) 카드 기본 색상을 투명하게 날려서 배경 이미지가 돋보이게!
+            battleCard.className = isBoss 
+                ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)] bg-transparent overflow-hidden" 
+                : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30 bg-transparent overflow-hidden";
             
 
            // (기존 UI 업데이트 코드)
