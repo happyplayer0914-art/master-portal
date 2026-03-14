@@ -1278,8 +1278,11 @@ enterDungeon() {
             battleCard.style.backgroundPosition = "center";
             battleCard.style.backgroundRepeat = "no-repeat";
 
-            // 3. 고퀄리티 몬스터/보스 이미지 출력! (그림자 유지)
-            spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]" alt="${mInfo.n}">`;
+           // 3. 고퀄리티 몬스터/보스 이미지 출력!
+            // 💡 콘솔에서 찾은 최고의 scale과 translateY 숫자를 여기에 적어주세요!
+            const scaleStyle = isBoss ? "transform: scale(1.2) translateY(20px);" : "transform: scale(1.0);";
+            
+            spriteBox.innerHTML = `<img src="assets/monster/${mInfo.img}" class="w-full h-full object-contain drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]" style="${scaleStyle}" alt="${mInfo.n}">`;
             
             // 4. [핵심] 작은 상자의 족쇄를 풀고, 몬스터가 큼직하게 나오도록 사이즈 해방!
             avatarWrap.className = "w-full flex items-center justify-center relative z-0";
