@@ -1266,7 +1266,7 @@ enterDungeon() {
       // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
-            const battleCard = document.getElementById('battle-card');
+            // 🚨 (여기에 있던 const battleCard = ... 줄을 삭제했습니다! 위에서 이미 선언했기 때문이에요)
 
             // 1. 전체 화면 배경은 치장품을 위해 싹 비워주기
             const battleScreen = document.getElementById('screen-rpg-battle');
@@ -1320,8 +1320,7 @@ enterDungeon() {
             this.lastAttackTime = 0; 
             this.updateBattleUI();
             clearInterval(this.battleInterval); 
-            this.battleInterval = setInterval(() => this.monsterAttack(), 1500); 
-        },
+            this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
         updateBattleUI() {
             const stats = GameState.getTotalStats(); 
             document.getElementById('battle-player-hp-text').innerText = `${Math.max(0, GameState.currentHp)} / ${stats.hp}`;
