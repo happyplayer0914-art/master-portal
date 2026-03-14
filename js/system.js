@@ -202,6 +202,33 @@ const GameSystem = {
     },
 
     Lobby: {
+        // 👇 여기서부터 복사해서 끼워넣기!
+        getCurrentTitle() {
+            const equippedIds = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+            const gears = equippedIds.filter(id => id !== null).map(id => GameData.items[id]).filter(item => item !== undefined);
+            
+            let mythicItem = null;
+            let legendaryCount = 0;
+            
+            gears.forEach(g => {
+                if (g.rarity === 'mythic') mythicItem = g;
+                if (g.rarity === 'legendary') legendaryCount++;
+            });
+
+            // 신화 1개 + 전설 2개 장착 시 칭호 발급!
+            if (mythicItem && legendaryCount === 2) {
+                // '전장을 지배하는 군주' -> 띄어쓰기로 분리 후 맨 마지막 '군주'만 추출!
+                const words = mythicItem.job.split(' ');
+                const shortJob = words[words.length - 1]; 
+                
+                return {
+                    full: `✨ ${mythicItem.job} [${mythicItem.mbti}] ✨`, // 랭킹용 (전체)
+                    short: `✨ ${shortJob} [${mythicItem.mbti}] ✨`       // 채팅용 (축약)
+                };
+            }
+            return null; // 조건 미달 시 칭호 없음
+        },
+        // 👆 여기까지!
         handleItemClick(id) {
             const synthModal = document.getElementById('synth-modal');
             if (synthModal && synthModal.classList.contains('active')) {
