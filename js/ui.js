@@ -198,22 +198,33 @@ const UIManager = {
         }
     },
     
-    applyAvatarSkin() {
+   applyAvatarSkin() {
         const skinId = GameState.equippedSkin;
-        let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; // 기본 테두리
+        let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; 
         
-        // 새로 만든 치장품 데이터에서 내가 낀 테두리의 화려한 CSS 클래스를 찾아옵니다!
-        if (skinId && GameData.cosmetics && GameData.cosmetics.borders) {
+        if (skinId && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
             const borderItem = GameData.cosmetics.borders.find(b => b.id === skinId);
-            if (borderItem) borderClass = borderItem.cssClass; 
+            if (borderItem) borderClass = `bg-slate-800 ${borderItem.cssClass}`; 
+        }
+
+        // 🌟 [추가됨] 내가 장착한 프로필(내부 아이콘) 찾아오기!
+        const profileId = GameState.equippedProfile;
+        // 장착한 게 없으면 원래대로 닉네임 첫 글자(M) 출력
+        let innerIcon = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0); 
+        
+        if (profileId && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
+            const profileItem = GameData.cosmetics.profiles.find(p => p.id === profileId);
+            if (profileItem) innerIcon = profileItem.icon; // 고양이(🐱) 등으로 교체!
         }
 
         const avatars = document.querySelectorAll('.master-avatar');
         avatars.forEach(a => {
-          // 💡 [여기가 수정됨!] flex-shrink-0 을 추가해서 동그라미가 타원형으로 눌리는 걸 막습니다!
             a.className = "master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all " 
-                        + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-3xl ' : 'w-10 h-10 text-sm ')
+                        + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-4xl ' : 'w-10 h-10 text-xl ')
                         + borderClass;
+            
+            // 🌟 아바타 안쪽의 글씨(M)를 싹 지우고 새로운 아이콘으로 덮어씌웁니다!
+            a.innerHTML = innerIcon; 
         });
     },
     
