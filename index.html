@@ -562,25 +562,64 @@
         </div>
     </main>
 
-    <main id="screen-gacha-shop" class="screen pt-24 px-5">
+  <main id="screen-gacha-shop" class="screen pt-24 px-5">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-black text-white mb-2"><span class="text-gradient">프리미엄 소환</span></h1>
             <p class="text-slate-400 text-sm">보스를 토벌해 얻은 젬(💎)으로 전설의 장비를 획득하세요.</p>
         </div>
 
-        <div class="glass-card p-0 mb-6 overflow-hidden border border-yellow-500/50 relative shadow-[0_0_30px_rgba(251,191,36,0.15)]">
-            <div class="absolute inset-0 bg-gradient-to-r from-yellow-600/20 to-purple-600/20"></div>
-            <div class="p-6 relative z-10 flex items-center justify-between">
-                <div>
-                    <span class="bg-yellow-500 text-slate-900 text-[10px] font-black px-2 py-1 rounded mb-2 inline-block">픽업 진행중</span>
-                    <h3 class="text-lg font-black text-white mb-1">전설의 군주 장비</h3>
-                    <p class="text-xs text-slate-300">최상위 등급 출현 확률 상승!</p>
+        <div class="relative w-full h-[180px] rounded-2xl overflow-hidden mb-4 border-2 border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.3)] touch-pan-y group cursor-pointer" id="gacha-slider-container">
+            
+            <div id="gacha-slide-track" class="flex h-full transition-transform duration-500 ease-out" style="transform: translateX(0%);">
+                
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-600/40 to-purple-600/40 z-10"></div>
+                    <img src="assets/banners/banner_1.png" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="신화 픽업">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-yellow-500 text-slate-900 text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">절찬 픽업 중!</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">전설의 군주 강림</h3>
+                            <p class="text-[11px] text-yellow-300 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">✨신화 등급 출현 확률 UP!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)] animate-pulse">👑</div>
+                    </div>
                 </div>
-                <div class="text-6xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)] animate-pulse">👑</div>
+
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-600/40 to-rose-600/40 z-10"></div>
+                    <img src="assets/banners/banner_2.png" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="무기 픽업">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">신규 장비</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">파멸의 마검</h3>
+                            <p class="text-[11px] text-red-200 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">압도적인 파괴력을 경험하라!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">🗡️</div>
+                    </div>
+                </div>
+
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 z-10"></div>
+                    <img src="assets/banners/banner_3.png" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="여신 축복">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">초보자 환영</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">차원의 여신상</h3>
+                            <p class="text-[11px] text-cyan-200 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">광고 보고 무료 다이아 지원!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(56,189,248,0.8)]">💎</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute bottom-3 left-0 w-full flex justify-center gap-2 z-30" id="gacha-slider-dots">
+                <div class="w-4 h-2 rounded-full bg-white transition-all shadow-md"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"></div>
             </div>
         </div>
 
-       <div class="flex justify-between items-center text-[10px] sm:text-xs font-bold px-3 py-3 bg-slate-800/80 rounded-xl mb-4 border border-slate-700 shadow-inner">
+        <div class="flex justify-between items-center text-[10px] sm:text-xs font-bold px-3 py-3 bg-slate-800/80 rounded-xl mb-4 border border-slate-700 shadow-inner">
             <span class="text-slate-400">일반 <span class="font-black">64.9%</span></span>
             <span class="text-blue-300">희귀 <span class="font-black">25%</span></span>
             <span class="text-purple-400">영웅 <span class="font-black">7.5%</span></span>
@@ -599,10 +638,11 @@
                 <span class="text-white mb-1">10회 연속 소환</span>
                 <span class="text-cyan-400 text-sm font-bold bg-black/30 px-3 py-1 rounded-full border border-purple-400/50">💎 500</span>
             </button>
-              </div>
-     <button onclick="window.watchAdForGems()" class="w-full py-3 mt-4 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-blue-400 transition-all active:scale-95 flex items-center justify-center gap-2">
-    📺 광고 보고 <span class="text-cyan-300">50 💎</span> 무료 획득!
-</button>
+        </div>
+        
+        <button onclick="window.watchAdForGems()" class="w-full py-3 mt-4 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-blue-400 transition-all active:scale-95 flex items-center justify-center gap-2">
+            📺 광고 보고 <span class="text-cyan-300">50 💎</span> 무료 획득!
+        </button>
     </main>
 
     <main id="screen-ranking" class="screen pt-24 px-5">
