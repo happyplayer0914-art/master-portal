@@ -863,6 +863,7 @@ upgradeStat(t) {
         isSessionValid: true,
         sessionUnsub: null,
         autoSaveTimer: null,
+        isCloudLoaded: false, // 💡 [신규 추가] 로딩 완료를 체크하는 안전핀!
 
         init() {
             window.auth.onAuthStateChanged((user) => {
@@ -899,6 +900,7 @@ upgradeStat(t) {
 
                     this.silentLoadFromCloud(user.uid).then(() => {
                         if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                        this.isCloudLoaded = true; // 💡 [신규 추가] 다운로드가 끝났으니 저장소 봉인 해제!
                         this.autoSaveTimer = setInterval(() => {
                             if (!document.hidden && this.isSessionValid) {
                                 this.silentSaveToCloud(user.uid);
@@ -910,13 +912,15 @@ upgradeStat(t) {
                     });
 
                     document.addEventListener("visibilitychange", () => {
-                        if (document.visibilityState === 'hidden' && this.isSessionValid) {
+                   // 💡 [수정] 탭을 이동할 때도 다운로드가 끝난 상태에서만 저장 허용!
+                        if (document.visibilityState === 'hidden' && this.isSessionValid && this.isCloudLoaded) {
                             this.silentSaveToCloud(user.uid);
                         }
                     });
 
                 } else {
-                    localStorage.removeItem('master_uid');
+                   localStorage.removeItem('master_uid');
+                    this.isCloudLoaded = false; // 💡 [신규 추가] 로그아웃 시 봉인
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     if(this.sessionUnsub) { this.sessionUnsub(); this.sessionUnsub = null; }
                 }
