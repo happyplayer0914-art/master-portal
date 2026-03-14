@@ -831,15 +831,18 @@ upgradeStat(t) {
                 return alert(`'${finalNick}'(은)는 이미 다른 마스터가 사용 중인 닉네임입니다. 😭 다른 이름을 지어주세요!`);
             }
 
-            if (confirm(`[${finalNick}] - 이 닉네임으로 확정하시겠습니까?`)) {
-                await window.setDoc(nickRef, { uid: uid, createdAt: window.serverTimestamp() });
-                GameState.nickname = finalNick;
-                GameState.save();
-                this.applyNicknameUI();
-                this.Auth.silentSaveToCloud(uid);
-                UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
-                UIManager.updateProfileUI(); 
-            }
+           if (confirm(`[${finalNick}] - 이 닉네임으로 확정하시겠습니까?`)) {
+            await window.setDoc(nickRef, { uid: uid, createdAt: window.serverTimestamp() });
+            GameState.nickname = finalNick;
+            GameState.save();
+            this.applyNicknameUI();
+            this.Auth.silentSaveToCloud(uid);
+            UIManager.showToast(`환영합니다, [${GameState.nickname}] 마스터! 🎉`);
+            
+            // 🚨 [수정됨] 없는 함수(updateProfileUI)를 지우고 아래 두 줄로 교체!
+            UIManager.applyAvatarSkin(); 
+            UIManager.updateRpgLobbyUI(); 
+        }
         } catch (e) {
             console.error("닉네임 설정 오류:", e);
             alert("서버 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
@@ -941,6 +944,30 @@ upgradeStat(t) {
                 document.getElementById('auth-user-info').classList.add('hidden');
                 location.reload(); 
             });
+        },
+        
+        // 💡 [신규 추가] 꼬인 타임스탬프를 무시하고 무조건 클라우드에서 내려받는 비기!
+        async forceLoadFromCloud() {
+            const uid = localStorage.getItem('master_uid');
+            if (!uid) return UIManager.showToast("로그인이 필요합니다.");
+            if (!confirm("현재 기기의 데이터를 지우고 클라우드 데이터로 덮어씌우시겠습니까?")) return;
+            
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "users", uid));
+                if (docSnap.exists() && docSnap.data().saveData) {
+                    const cloudData = docSnap.data().saveData;
+                    for (const key in cloudData) {
+                        localStorage.setItem(key, cloudData[key]);
+                    }
+                    alert("✨ 클라우드 동기화 완료! 게임을 재시작합니다.");
+                    location.reload();
+                } else {
+                    alert("클라우드에 저장된 데이터가 없습니다.");
+                }
+            } catch(e) {
+                console.error(e);
+                alert("불러오기에 실패했습니다.");
+            }
         },
         
         silentSaveToCloud(uid) {
