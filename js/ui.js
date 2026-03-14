@@ -12,6 +12,13 @@ const UIManager = {
         this.updateIdleUI(); 
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
         this.updateRpgLobbyUI();
+
+        // 👇 [핵심 추가] 게임 켤 때 내가 낀 배경화면 불러오기! (시스템 로딩을 위해 0.5초 기다림)
+        setTimeout(() => {
+            if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+                GameSystem.Lobby.applyBackground();
+            }
+        }, 500);
         
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
@@ -406,7 +413,11 @@ const UIManager = {
         GameState.save();
         this.showToast("✅ 장착되었습니다!");
         
-        if (type === 'border') this.applyAvatarSkin(); 
+        if (type === 'border') {
+            this.applyAvatarSkin(); 
+            // 👇 [핵심 추가] 테두리를 바꾸면 랭킹 서버에도 내 새 옷을 즉시 자랑하기!
+            if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
+        }
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
              GameSystem.Lobby.applyBackground(); 
         }
@@ -424,7 +435,11 @@ const UIManager = {
         GameState.save();
         this.showToast("❌ 장착 해제되었습니다.");
         
-        if (type === 'border') this.applyAvatarSkin();
+        if (type === 'border') {
+            this.applyAvatarSkin();
+            // 👇 [핵심 추가] 테두리 해제 시에도 랭킹 서버 즉시 반영!
+            if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
+        }
         if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
              GameSystem.Lobby.applyBackground(); 
         }
