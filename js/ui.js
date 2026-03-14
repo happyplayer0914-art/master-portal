@@ -192,13 +192,21 @@ const UIManager = {
     },
     
     applyAvatarSkin() {
-        // (기존 코드와 동일)
-        const skin = GameState.equippedSkin;
+        const skinId = GameState.equippedSkin;
+        let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; // 기본 테두리
+        
+        // 새로 만든 치장품 데이터에서 내가 낀 테두리의 화려한 CSS 클래스를 찾아옵니다!
+        if (skinId && GameData.cosmetics && GameData.cosmetics.borders) {
+            const borderItem = GameData.cosmetics.borders.find(b => b.id === skinId);
+            if (borderItem) borderClass = borderItem.cssClass; 
+        }
+
         const avatars = document.querySelectorAll('.master-avatar');
         avatars.forEach(a => {
-            a.className = "master-avatar rounded-full flex items-center justify-center font-black text-white shadow-md transition-all " + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-3xl' : 'w-8 h-8 text-sm');
-            if(skin && GameData.items[skin]) a.classList.add('skin-' + GameData.items[skin].rarity);
-            else a.classList.add('bg-gradient-to-tr', 'from-slate-600', 'to-slate-400');
+            // 과거의 잔재 클래스들을 깔끔하게 지워주고, 새로운 테두리를 씌웁니다
+            a.className = "master-avatar rounded-full flex items-center justify-center font-black text-white transition-all " 
+                        + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-3xl ' : 'w-10 h-10 text-sm ')
+                        + borderClass;
         });
     },
     
@@ -298,7 +306,128 @@ const UIManager = {
         renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
         renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
     },
-    
+    // 🌟 [신규 추가] 치장품 상점 렌더링 엔진!
+    renderCosmeticsShop() {
+        const panel = document.getElementById('inv-panel-cosmetics');
+        if(!panel) return;
+
+        // 유저 데이터에 치장품 보관함이 없으면 새로 만들어줍니다 (안전장치)
+        if(!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+        
+        let html = '';
+
+        // 카테고리별로 리스트를 예쁘게 그려주는 내부 함수
+        const renderCategory = (title, items) => {
+            if(!items || items.length === 0) return;
+            html += `<div class="text-xs font-bold text-pink-300 mt-2 mb-2 border-b border-slate-700/50 pb-1">${title}</div>`;
+            
+            items.forEach(item => {
+                const isOwned = GameState.ownedCosmetics.includes(item.id);
+                
+                // 장착 여부 확인
+                let isEquipped = false;
+                if(item.type === 'border' && GameState.equippedSkin === item.id) isEquipped = true;
+                if(item.type === 'bg' && GameState.equippedBg === item.id) isEquipped = true;
+                if(item.type === 'bubble' && GameState.equippedBubble === item.id) isEquipped = true;
+
+                // 상태에 따른 버튼 HTML 생성
+                let btnHtml = '';
+                if (isEquipped) {
+                    btnHtml = `<button onclick="UIManager.unequipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-slate-700 text-slate-300 text-[10px] font-bold rounded shadow-inner border border-slate-600">장착중</button>`;
+                } else if (isOwned) {
+                    btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400">장착하기</button>`;
+                } else {
+                    btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center gap-1 border border-pink-400 active:scale-95">💎 ${item.price}</button>`;
+                }
+
+                // 치장품 종류에 따른 미리보기 아이콘
+                let iconHtml = '<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl">✨</div>';
+                if(item.type === 'border') {
+                    // 테두리는 실제 CSS 클래스를 적용해서 어떻게 생겼는지 미리 보여줌!
+                    iconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white ${item.cssClass}">M</div>`;
+                } else if (item.type === 'bg') {
+                    iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🖼️</div>`;
+                } else if (item.type === 'bubble') {
+                    iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">💬</div>`;
+                }
+
+                html += `
+                    <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 shadow-sm mb-2 hover:bg-slate-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            ${iconHtml}
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold text-[11px]">${item.name}</span>
+                                <span class="text-slate-400 text-[9px] mt-0.5 break-keep">${item.desc}</span>
+                            </div>
+                        </div>
+                        <div>
+                            ${btnHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        if (GameData.cosmetics) {
+            renderCategory('✨ 프로필 테두리', GameData.cosmetics.borders);
+            renderCategory('🖼️ 로비 배경화면', GameData.cosmetics.backgrounds);
+            renderCategory('💬 채팅 말풍선', GameData.cosmetics.bubbles);
+        }
+
+        panel.innerHTML = html;
+    },
+
+    // 💸 구매 로직
+    buyCosmetic(id, price) {
+        if (GameState.gem < price) {
+            this.showToast("💎 젬이 부족합니다!");
+            this.triggerHaptic();
+            return;
+        }
+        if (confirm(`💎 ${price} 젬을 사용하여 구매하시겠습니까?`)) {
+            GameState.gem -= price;
+            if(!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+            GameState.ownedCosmetics.push(id);
+            GameState.save();
+            this.updateCurrencyUI();
+            this.showToast("✨ 구매 완료! 이제 장착할 수 있습니다.");
+            this.renderCosmeticsShop();
+            this.triggerHeavyHaptic();
+        }
+    },
+
+    // 👗 장착 로직
+    equipCosmetic(id, type) {
+        if (type === 'border') GameState.equippedSkin = id;
+        if (type === 'bg') GameState.equippedBg = id;
+        if (type === 'bubble') GameState.equippedBubble = id;
+        
+        GameState.save();
+        this.showToast("✅ 장착되었습니다!");
+        
+        if (type === 'border') this.applyAvatarSkin(); // 테두리는 즉시 적용
+        if (type === 'bg') GameSystem.Lobby.applyBackground(); // 배경 즉시 적용 (다음 스텝에서 만들 함수)
+        
+        this.renderCosmeticsShop();
+        this.triggerHaptic();
+    },
+
+    // 👕 장착 해제 로직
+    unequipCosmetic(id, type) {
+        if (type === 'border' && GameState.equippedSkin === id) GameState.equippedSkin = null;
+        if (type === 'bg' && GameState.equippedBg === id) GameState.equippedBg = null;
+        if (type === 'bubble' && GameState.equippedBubble === id) GameState.equippedBubble = null;
+        
+        GameState.save();
+        this.showToast("❌ 장착 해제되었습니다.");
+        
+        if (type === 'border') this.applyAvatarSkin();
+        if (type === 'bg') GameSystem.Lobby.applyBackground();
+        
+        this.renderCosmeticsShop();
+        this.triggerHaptic();
+    }
+}; // <-- 기존 UIManager 객체를 닫는 진짜 마지막 괄호!
     initBackground() { 
         const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
         let width, height; let particles = [];
