@@ -662,14 +662,16 @@
                     <p class="text-sm text-green-400 font-bold">클라우드 저장소 연동 완료!</p>
                 </div>
                 <p id="auth-email" class="text-xs text-slate-300 bg-slate-800 px-3 py-1 rounded-full border border-slate-600 mb-3">
-                    user@gmail.com
-                </p>
-                
-               
-                
-                <button onclick="GameSystem.Auth.logout()" class="text-xs text-slate-400 underline hover:text-slate-200">
-                    로그아웃 및 기기 데이터 분리
-                </button>
+            user@gmail.com
+        </p>
+        
+        <button onclick="GameSystem.Auth.forceLoadFromCloud()" class="w-full py-2 mb-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all active:scale-95 shadow-md">
+            ☁️ 클라우드 강제 동기화 (내려받기)
+        </button>
+        
+        <button onclick="GameSystem.Auth.logout()" class="text-xs text-slate-400 underline hover:text-slate-200">
+            로그아웃 및 기기 데이터 분리
+        </button>
             </div>
         </div>
         
