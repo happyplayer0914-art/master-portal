@@ -518,13 +518,30 @@ upgradeStat(t) {
                         skinClass = `skin-${GameData.items[sId].rarity}`;
                     }
                     
-                    const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
-                    // 💡 [추가] 칭호가 있으면 반짝이는 붉은 글씨로 닉네임 위에 렌더링!
-                    let titleHtml = d.title ? `<div class="text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
+                  const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     
-                    // 💡 [수정됨] 닉네임 <p> 태그 바로 앞에 ${titleHtml} 을 끼워 넣었어!
-                    list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class="master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div>${titleHtml}<p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
+                    // 💡 [수정1] 환생 텍스트가 절대 줄바꿈 되지 않도록 whitespace-nowrap 추가!
+                    let prestigeText = d.prestige ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${d.prestige}환생]</span>` : '';
+                    
+                    // 💡 [수정2] 칭호가 너무 길면 말줄임표(...)로 잘리도록 truncate와 너비 속성 추가!
+                    let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md truncate w-full">${d.title}</div>` : '';
+                    
+                    // 💡 [수정3] 오른쪽 구역이 찌그러지지 않게 flex-shrink-0, 왼쪽은 유연하게 줄어들게 flex-1 min-w-0 적용!
+                    list.innerHTML += `
+                        <div class="p-3 sm:p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
+                            <div class="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                                <div class="w-10 sm:w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} flex-shrink-0">${rankIcon}</div>
+                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} flex-shrink-0">${d.nickname.charAt(0)}</div>
+                                <div class="flex flex-col min-w-0 flex-1">
+                                    ${titleHtml}
+                                    <p class="font-bold text-white text-sm flex items-center gap-1.5 truncate">${d.nickname} ${isMe ? '<span class="text-[9px] bg-indigo-500 px-1 py-0.5 rounded text-white font-normal flex-shrink-0">ME</span>' : ''}</p>
+                                </div>
+                            </div>
+                            <div class="text-right flex-shrink-0 whitespace-nowrap">
+                                <p class="text-[10px] sm:text-xs text-slate-400">도달 층수</p>
+                                <p class="text-base sm:text-lg font-black text-gradient-gold flex items-center justify-end">${prestigeText}${d.stage}F</p>
+                            </div>
+                        </div>`;
                 });
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
