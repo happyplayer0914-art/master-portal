@@ -75,6 +75,10 @@ const GameState = {
         // 💡 [핵심 추가] 브라우저야, 내 환생 횟수를 기억해!!
         this.prestigeCount = parseInt(localStorage.getItem('master_prestige') || "0");
         
+        // 👇 프로필 장착 상태 불러오기!
+        let pf = localStorage.getItem('master_equippedProfile');
+        this.equippedProfile = (pf === 'none' ? null : pf);
+        
         // 💡 3개의 장비 슬롯 로드
         const w = localStorage.getItem('master_equipped_weapon'); this.equippedWeapon = (w === "null" || !w) ? null : w;
         const a = localStorage.getItem('master_equipped_armor'); this.equippedArmor = (a === "null" || !a) ? null : a;
@@ -107,6 +111,9 @@ const GameState = {
         localStorage.setItem('master_equippedBg', this.equippedBg || 'none');
         localStorage.setItem('master_equippedBubble', this.equippedBubble || 'none');
         localStorage.setItem('master_equippedSkin', this.equippedSkin || 'none'); // 테두리도 확실히 저장!
+
+        // 👇 프로필 장착 상태 저장!
+        localStorage.setItem('master_equippedProfile', this.equippedProfile || 'none');
         
         // 🌟 [신규 스탯 저장 기능 추가!]
         localStorage.setItem('master_def', this.rpgDef);
