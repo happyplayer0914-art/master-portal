@@ -9,6 +9,7 @@ const GameState = {
     lastCheckIn: "",
     lastPlayRewards: {}, 
     lastIdleCheck: Date.now(),
+    ownedCosmetics: [],
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     
     // 🌟 [신규 스탯 3인방 추가!]
@@ -50,6 +51,18 @@ const GameState = {
         this.rpgAtk = parseInt(localStorage.getItem('master_atk') || "10");
         this.rpgMaxHp = parseInt(localStorage.getItem('master_max_hp') || "100");
         this.currentHp = parseInt(localStorage.getItem('master_current_hp') || this.rpgMaxHp);
+
+        // 👇 [여기에 4줄 추가!!] 껐다 켜도 치장품을 그대로 입혀줍니다!
+        this.ownedCosmetics = JSON.parse(localStorage.getItem('master_ownedCosmetics') || "[]");
+        
+        let bg = localStorage.getItem('master_equippedBg');
+        this.equippedBg = (bg === 'none' ? null : bg);
+        
+        let bubble = localStorage.getItem('master_equippedBubble');
+        this.equippedBubble = (bubble === 'none' ? null : bubble);
+        
+        let skin = localStorage.getItem('master_equippedSkin');
+        this.equippedSkin = (skin === 'none' ? null : skin);
         
         // 🌟 [신규 스탯 로드 기능 추가!]
         this.rpgDef = parseInt(localStorage.getItem('master_def') || "0");
@@ -88,6 +101,12 @@ const GameState = {
         localStorage.setItem('master_atk', this.rpgAtk);
         localStorage.setItem('master_max_hp', this.rpgMaxHp);
         localStorage.setItem('master_current_hp', this.currentHp);
+        
+        // 👇 [여기에 3줄 추가!!] 치장품 데이터를 세이브 파일에 콱 박아줍니다!
+        localStorage.setItem('master_ownedCosmetics', JSON.stringify(this.ownedCosmetics || []));
+        localStorage.setItem('master_equippedBg', this.equippedBg || 'none');
+        localStorage.setItem('master_equippedBubble', this.equippedBubble || 'none');
+        localStorage.setItem('master_equippedSkin', this.equippedSkin || 'none'); // 테두리도 확실히 저장!
         
         // 🌟 [신규 스탯 저장 기능 추가!]
         localStorage.setItem('master_def', this.rpgDef);
