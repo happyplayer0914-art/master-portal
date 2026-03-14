@@ -1370,7 +1370,7 @@ enterDungeon() {
             // 🌟 2. 난이도 폭발 구역 계산 및 배율 적용 (1.1배씩 중첩)
             // effStage를 기준으로 10층마다 배율이 1.1배씩 곱해집니다.
             let effectiveZone = Math.floor((effStage - 1) / 10);
-            let zoneMultiplier = Math.pow(1.1, effectiveZone);
+            let zoneMultiplier = Math.pow(1.05, effectiveZone);
 
             // 🌟 3. [공식 적용] 몬스터 기본 스탯 (1층당 공 4, 체 40 고정 증가)
             let baseHp = (effStage * 40) + (isBoss ? 200 : 0);
