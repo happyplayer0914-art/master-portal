@@ -210,8 +210,8 @@ const UIManager = {
 
         const avatars = document.querySelectorAll('.master-avatar');
         avatars.forEach(a => {
-            // 과거의 잔재 클래스들을 깔끔하게 지워주고, 새로운 테두리를 씌웁니다
-            a.className = "master-avatar rounded-full flex items-center justify-center font-black text-white transition-all " 
+          // 💡 [여기가 수정됨!] flex-shrink-0 을 추가해서 동그라미가 타원형으로 눌리는 걸 막습니다!
+            a.className = "master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all " 
                         + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-3xl ' : 'w-10 h-10 text-sm ')
                         + borderClass;
         });
@@ -244,24 +244,27 @@ const UIManager = {
             const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider">장착중</div>` : '';
             const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
             
-            let effectText = '';
-            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold">공격력 +${Math.round((item.atkMult - 1)*100)}%</span><br>`;
-            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold">체력 +${Math.round((item.hpMult - 1)*100)}%</span><br>`;
-            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold">크리티컬 +${item.critRate}%</span><br>`;
-            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold">크리데미지 +${item.critDmg}%</span><br>`;
-            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold">피흡 +${item.vamp}%</span><br>`;
-            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold">공속 +${item.spd}%</span><br>`;
-            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold">회피 +${item.eva}%</span><br>`;
-            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold">방어력 +${item.def}</span>`;
+          let effectText = '';
+            // 💡 [수정 1] <br> 태그를 전부 지우고, leading-none(기본 줄간격 제거)을 추가!
+            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold leading-none">공격력 +${Math.round((item.atkMult - 1)*100)}%</span>`;
+            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold leading-none">체력 +${Math.round((item.hpMult - 1)*100)}%</span>`;
+            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold leading-none">크리티컬 +${item.critRate}%</span>`;
+            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold leading-none">크리데미지 +${item.critDmg}%</span>`;
+            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold leading-none">피흡 +${item.vamp}%</span>`;
+            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold leading-none">공속 +${item.spd}%</span>`;
+            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none">회피 +${item.eva}%</span>`;
+            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none">방어력 +${item.def}</span>`;
             
             const card = `
                 <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-2 h-[140px] !important">
                     ${badgeHTML}
                     <div class="text-3xl mb-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
                     <h4 class="text-white font-bold text-[10px] text-center break-keep leading-tight min-h-[24px] flex items-center mb-1">${item.name}</h4>
-                    <div class="flex flex-col items-center leading-tight">
+                    
+                    <div class="flex flex-col items-center gap-[2px]">
                         ${effectText}
                     </div>
+                    
                     ${countHTML}
                 </div>
             `;
