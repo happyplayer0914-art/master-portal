@@ -857,7 +857,7 @@ upgradeStat(t) {
         }
     },
 
-    // 🔒 [오토 세이브/로드] 구글 로그인 + 닌자 백업 시스템
+  // 🔒 [오토 세이브/로드] 유령 탭 완벽 방어 시스템 탑재!
     Auth: {
         init() {
             window.auth.onAuthStateChanged((user) => {
@@ -867,15 +867,19 @@ upgradeStat(t) {
                     const userInfo = document.getElementById('auth-user-info');
                     if(loginBtn) loginBtn.classList.add('hidden');
                     if(userInfo) userInfo.classList.remove('hidden');
-                    document.getElementById('auth-email').innerText = user.email;
 
                     this.silentLoadFromCloud(user.uid);
 
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     this.autoSaveTimer = setInterval(() => {
-                        this.silentSaveToCloud(user.uid);
-                        // 💡 세이브할 때 내 랭킹도 10초마다 자동 갱신!
-                        GameSystem.Ranking.updateRankingSilently();
+                        // 🛡️ [1차 방패] 화면이 켜져 있을 때(활성화)만 10초마다 저장! 백그라운드 탭은 기절시킴!
+                        if (!document.hidden) {
+                            this.silentSaveToCloud(user.uid);
+                            // 랭킹도 화면 켜져 있을 때만 조용히 갱신
+                            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
+                                GameSystem.Ranking.updateRankingSilently();
+                            }
+                        }
                     }, 10000); 
                 } else {
                     localStorage.removeItem('master_uid');
@@ -911,6 +915,12 @@ upgradeStat(t) {
                 }
             }
             if(Object.keys(allMyData).length === 0) return;
+
+            // 🛡️ [시간표시 기록] 로컬과 클라우드에 현재 시간을 도장 찍어둡니다!
+            const nowTime = Date.now().toString();
+            localStorage.setItem('master_lastSaveTime', nowTime);
+            allMyData['master_lastSaveTime'] = nowTime;
+
             window.setDoc(window.doc(window.db, "users", uid), {
                 saveData: allMyData,
                 lastSaved: window.serverTimestamp()
@@ -920,18 +930,31 @@ upgradeStat(t) {
             if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
             window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
                 if (docSnap.exists() && docSnap.data().saveData) {
-                    const data = docSnap.data().saveData;
-                    for (const key in data) {
-                        localStorage.setItem(key, data[key]);
+                    const cloudData = docSnap.data().saveData;
+
+                    // 🛡️ [2차 방패] 내 폰 데이터와 클라우드 데이터의 '시간표시' 비교!
+                    const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
+                    const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
+
+                    // 폰을 새로 바꿨거나(localTime 0), 클라우드 시간이 더 미래일 때만 덮어씌움!
+                    if (localTime === 0 || cloudTime > localTime) {
+                        for (const key in cloudData) {
+                            localStorage.setItem(key, cloudData[key]);
+                        }
+                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
+                        console.log("☁️ 클라우드 동기화 완료! (클라우드가 최신)");
+                        location.reload(); 
+                    } else {
+                        // 내 폰이 더 최신이면 백섭(덮어쓰기)을 막아버리고 하던 게임 계속함!
+                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
+                        console.log("📱 로컬 데이터가 최신입니다. 백섭 방어 성공!");
                     }
-                    sessionStorage.setItem('cloud_loaded_once', 'true'); 
-                    console.log("☁️ 클라우드 동기화 완료!");
-                    location.reload(); 
-            }
+                } else {
+                    sessionStorage.setItem('cloud_loaded_once', 'true');
+                }
             });
         }
     },
-
   Quest: {
         currentTab: 'daily',
         
