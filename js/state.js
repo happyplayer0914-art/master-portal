@@ -39,15 +39,16 @@ const GameState = {
         try { return JSON.parse(decodeURIComponent(atob(value))); } catch (e) { return null; }
     },
 
-    // 🛡️ [안전 장치] 옛날 데이터(쌩얼)와 암호화 데이터를 알아서 구분해서 불러오는 스마트 로더
+   // 🛡️ [안전 장치] 옛날 데이터와 암호화 데이터를 알아서 구분해서 불러오는 스마트 로더
     _safeLoad(key, defaultValue) {
         const val = localStorage.getItem(key);
         if (val === null || val === 'null') return defaultValue;
         
-        // 1. 암호화 해독 시도 (Base64 외계어 형식이면)
-        if (val.length > 5 && (val.endsWith('=') || val.startsWith('ey'))) {
-            const decoded = this._decode(val);
-            if (decoded !== null) return decoded;
+        // 1. 암호화 해독 시도 (길이 제한 삭제!)
+        // _decode 자체에 try-catch가 있으므로 무조건 디코딩을 시도해봅니다.
+        const decoded = this._decode(val);
+        if (decoded !== null) {
+            return decoded; // 디코딩 성공 시 정상 데이터 반환
         }
         
         // 2. 옛날 쌩얼 데이터 호환성 유지 (JSON인 경우)
