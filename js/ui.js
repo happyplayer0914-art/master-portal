@@ -11,6 +11,8 @@ const UIManager = {
         this.initCheckinButton(); 
         this.updateIdleUI(); 
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
+        // 👇 [버그 픽스] 게임 켜질 때 장착 상태를 읽어서 칭호와 스탯을 즉시 그려주기!
+        this.updateRpgLobbyUI();
         
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
