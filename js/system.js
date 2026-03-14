@@ -324,7 +324,18 @@ const GameSystem = {
             AudioEngine.sfx.coin(); 
             UIManager.showToast("탐험 지원금 10G 획득 🪙"); 
         },
-        getUpgradeCost(t) { return t === 'atk' ? Math.floor(GameState.rpgAtk * 5) : Math.floor(GameState.rpgMaxHp * 0.5); },
+        getUpgradeCost(t) { 
+            // 💡 [공식 적용] 기본 비용 50G 시작, 1업당 20G씩 증가
+            if (t === 'atk') {
+                // (현재 공격력 - 10) / 4를 하면 현재 몇 번 업글했는지 나옴!
+                const upgradeCount = Math.floor((GameState.rpgAtk - 10) / 4);
+                return 50 + (upgradeCount * 20); 
+            } else { 
+                // (현재 체력 - 100) / 40을 하면 현재 몇 번 업글했는지 나옴!
+                const upgradeCount = Math.floor((GameState.rpgMaxHp - 100) / 40);
+                return 50 + (upgradeCount * 20); 
+            }
+        },
 upgradeStat(t) {
             const cost = this.getUpgradeCost(t); 
             if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
@@ -338,13 +349,12 @@ upgradeStat(t) {
                 GameSystem.Quest.update('weekly', 'w4', 1);
             }
             
-            // 스탯 뻥튀기!
-            if(t==='atk') {
-                GameState.rpgAtk += Math.floor(GameState.rpgAtk * 0.2) + 2; 
+          // 💡 [공식 적용] 오직 + 로만 깔끔하게 증가!
+            if(t === 'atk') {
+                GameState.rpgAtk += 4; 
             } else { 
-                const h = Math.floor(GameState.rpgMaxHp * 0.2) + 20; 
-                GameState.rpgMaxHp += h; 
-                GameState.currentHp += h; 
+                GameState.rpgMaxHp += 40; 
+                GameState.currentHp += 40; 
             }
             
             GameState.save(); 
@@ -1340,29 +1350,37 @@ enterDungeon() {
             // 부활 팝업 띄우는 복잡한 로직 다 버리고, 스무스하게 투기장(로비) 화면으로 돌아갑니다!
             UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
         },
-       //몬스터 스탯
+ //몬스터 스탯
     initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-rpg-battle').classList.add('active');
             GameState.isBattling = true;
             localStorage.setItem('master_in_battle', 'true');
 
-            // 💡 [핵심 수정] 환생 횟수에 따라 베이스 층수를 50씩 더해줌! (1환생 1층 = 51층 스펙)
+            // 💡 [수정 완료] 환생은 100층 기준! (1환생 1층 = 101층 스펙으로 계산)
             let prestigeCount = GameState.prestigeCount || 0;
-            let prestigeMult = 1.0 + prestigeCount;
-            let effStage = GameState.rpgStage + (prestigeCount * 50);
+            let effStage = GameState.rpgStage + (prestigeCount * 100);
 
-            // 뻥튀기된 effStage를 기준으로 몬스터 스탯 재계산!
-            this.monsterMaxHp = Math.floor((effStage * 40 + (isBoss ? 200 : 0)) * prestigeMult); 
-            this.monsterCurrentHp = this.monsterMaxHp;
-            this.monsterAtkObj = Math.floor((effStage * 3 + (isBoss ? 15 : 0)) * prestigeMult);
-            
-            // 🌟 현재 층수에 맞는 구역(Zone) 계산하기!
+            // 🌟 1. 시각적 테마 구역 계산 (1~10구역 반복)
             let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
             if (currentZone > 10) {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
 
+            // 🌟 2. 난이도 폭발 구역 계산 및 배율 적용 (1.1배씩 중첩)
+            // effStage를 기준으로 10층마다 배율이 1.1배씩 곱해집니다.
+            let effectiveZone = Math.floor((effStage - 1) / 10);
+            let zoneMultiplier = Math.pow(1.1, effectiveZone);
+
+            // 🌟 3. [공식 적용] 몬스터 기본 스탯 (1층당 공 4, 체 40 고정 증가)
+            let baseHp = (effStage * 40) + (isBoss ? 200 : 0);
+            let baseAtk = (effStage * 4) + (isBoss ? 15 : 0);
+
+            // 🌟 4. 최종 스탯 = 기본 스탯 * 1.1배수 중첩
+            this.monsterMaxHp = Math.floor(baseHp * zoneMultiplier); 
+            this.monsterCurrentHp = this.monsterMaxHp;
+            this.monsterAtkObj = Math.floor(baseAtk * zoneMultiplier);
+            
             // 🌟 구역별 테마 이름 사전 만들기!
             const zoneNames = {
                 1: "🌲 초보자의 숲",
@@ -1371,7 +1389,7 @@ enterDungeon() {
                 4: "🏚️ 버려진 유적",
                 5: "🌊 오염된 심해",
                 6: "🩸 저주받은 핏빛 성",
-                7: "🧊 얼어붙은 왕",
+                7: "🧊 얼어붙은 왕국", 
                 8: "🌑 기사단의 무덤",
                 9: "🔥 불타는 지옥문",
                 10: "🌌 마왕의 심연"
@@ -1632,15 +1650,15 @@ playerAttack() {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 
                 // 💰 [마스터의 완벽한 밸런스 공식 적용!]
-                let rewardGold = 10; // 일반 몹은 고정 10골드!
+                let rewardGold = 15; // 일반 몹은 고정 15골드!
                 let rewardGem = 0;   // 일반 몹은 다이아(젬) 없음!
                 
                 if (isBoss) {
                     // 현재 몇 번째 보스인지 계산 (예: 10층=1, 20층=2, 30층=3)
                     const bossTier = GameState.rpgStage / 10; 
                     
-                    rewardGold = 50 * bossTier; // 50, 100, 150... 이렇게 늘어남!
-                    rewardGem = 10 * bossTier;  // 10, 20, 30... 이렇게 늘어남!
+                    rewardGold = 100 * bossTier; // 10, 200, 300... 이렇게 늘어남!
+                    rewardGem = 50 * bossTier;  // 50, 100, 150... 이렇게 늘어남!
                 }
                 
                // 👇 [이렇게 변경!] 무조건 숫자로 취급하도록 Number()로 감싸기!
