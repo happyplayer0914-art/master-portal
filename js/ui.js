@@ -560,7 +560,94 @@ const UIManager = {
         this.renderCosmeticsShop();
         this.triggerHaptic();
     },
-    
+    // =========================================================================
+    // 🌟 [신규 추가] 가챠샵 슬라이딩 배너 모터
+    // =========================================================================
+    GachaSlider: {
+        currentIndex: 0,
+        totalSlides: 3, 
+        intervalId: null,
+        startX: 0,
+        endX: 0,
+
+        init() {
+            this.track = document.getElementById('gacha-slide-track');
+            this.container = document.getElementById('gacha-slider-container');
+            this.dots = document.getElementById('gacha-slider-dots')?.children;
+            if (!this.track || !this.container) return;
+
+            // 모바일 터치(스와이프) 이벤트
+            this.container.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: true});
+            this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: true});
+            this.container.addEventListener('touchend', () => this.handleTouchEnd());
+            
+            // PC 마우스 드래그 이벤트 (테스트용)
+            this.container.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+            this.container.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            this.container.addEventListener('mouseup', () => this.handleMouseUp());
+            this.container.addEventListener('mouseleave', () => { this.isDragging = false; this.startAuto(); });
+
+            this.startAuto();
+        },
+
+        updateUI() {
+            if (!this.track) return;
+            // 기차를 옆으로 스으윽 밀기
+            this.track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+            
+            // 하단 점(인디케이터) 모양 바꾸기
+            if (this.dots) {
+                Array.from(this.dots).forEach((dot, idx) => {
+                    if (idx === this.currentIndex) {
+                        dot.className = "w-4 h-2 rounded-full bg-white transition-all shadow-md"; // 활성화(길어짐)
+                    } else {
+                        dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; // 비활성화(작아짐)
+                    }
+                });
+            }
+        },
+
+        next() {
+            this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+            this.updateUI();
+        },
+
+        prev() {
+            this.currentIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+            this.updateUI();
+        },
+
+        startAuto() {
+            this.stopAuto();
+            this.intervalId = setInterval(() => this.next(), 5000); // 5초마다 자동 넘김
+        },
+
+        stopAuto() {
+            if (this.intervalId) clearInterval(this.intervalId);
+        },
+
+        // 터치 및 마우스 판정 로직
+        handleTouchStart(e) { this.startX = e.touches[0].clientX; this.stopAuto(); },
+        handleTouchMove(e) { this.endX = e.touches[0].clientX; },
+        handleTouchEnd() {
+            if (!this.startX || !this.endX) return;
+            const diff = this.startX - this.endX;
+            if (diff > 50) this.next(); // 왼쪽으로 밀면 다음
+            else if (diff < -50) this.prev(); // 오른쪽으로 밀면 이전
+            this.startX = 0; this.endX = 0;
+            this.startAuto();
+        },
+        handleMouseDown(e) { this.startX = e.clientX; this.isDragging = true; this.stopAuto(); },
+        handleMouseMove(e) { if(this.isDragging) this.endX = e.clientX; },
+        handleMouseUp() {
+            if(!this.isDragging || !this.startX || !this.endX) { this.isDragging = false; return; }
+            const diff = this.startX - this.endX;
+            if (diff > 50) this.next(); 
+            else if (diff < -50) this.prev(); 
+            this.isDragging = false; this.startX = 0; this.endX = 0;
+            this.startAuto();
+        }
+    },
     // 🌌 원래 있던 백그라운드 함수 부활!
     initBackground() { 
         const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
