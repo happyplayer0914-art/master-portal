@@ -446,10 +446,13 @@ upgradeStat(t) {
             const modal = document.getElementById('nickname-modal');
             if(modal) modal.classList.remove('active');
         },
-        async updateRankingSilently() {
+       async updateRankingSilently() {
             if (GameState.nickname === "위대한 길드장" || !window.db) return;
             const uid = localStorage.getItem('master_uid');
             if (!uid) return;
+
+            // 💡 현재 내 칭호를 판독기에서 가져옴!
+            const titleInfo = GameSystem.Lobby.getCurrentTitle();
 
             try { 
                 await window.setDoc(window.doc(window.db, "rankings", uid), { 
@@ -458,6 +461,7 @@ upgradeStat(t) {
                     stage: GameState.rpgStage, 
                     skin: GameState.equippedSkin || 'none', 
                     prestige: GameState.prestigeCount || 0, 
+                    title: titleInfo ? titleInfo.full : null, // 👈 파이어베이스에 풀버전 칭호 저장!
                     timestamp: window.serverTimestamp()
                 }, { merge: true }); 
             } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
@@ -516,6 +520,8 @@ upgradeStat(t) {
                     
                     const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     let prestigeText = d.prestige ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${d.prestige}환생]</span>` : '';
+                    // 💡 [추가] 칭호가 있으면 반짝이는 붉은 글씨로 닉네임 위에 렌더링!
+                    let titleHtml = d.title ? `<div class="text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
                     
                     list.innerHTML += `<div class="p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3"><div class="flex items-center gap-4"><div class="w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'}">${rankIcon}</div><div class=\"master-avatar w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass}">${d.nickname.charAt(0)}</div><div><p class="font-bold text-white text-sm flex items-center gap-2">${d.nickname} ${isMe ? '<span class="text-[10px] bg-indigo-500 px-1.5 py-0.5 rounded text-white font-normal">ME</span>' : ''}</p></div></div><div class="text-right"><p class="text-xs text-slate-400">도달 층수</p><p class="text-lg font-black text-gradient-gold">${prestigeText}${d.stage}F</p></div></div>`;
                 });
@@ -612,6 +618,8 @@ upgradeStat(t) {
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
+                // 💡 칭호가 있다면 닉네임 옆이나 위에 작게 띄워줍니다!
+                let titleHtml = msg.titleShort ? `<span class="text-[8px] text-red-400 font-bold ml-1 drop-shadow-md">${msg.titleShort}</span>` : '';
                 
                 if (isMe) {
                     chatList.innerHTML += `
@@ -664,6 +672,8 @@ upgradeStat(t) {
 
             // 💡 핵심: 현재 방 이름에 맞춰서 폴더를 골라 전송!
             const collectionName = `chats_${this.currentRoom}`;
+            // 💡 현재 내 칭호 정보 가져오기!
+            const titleInfo = GameSystem.Lobby.getCurrentTitle();
 
             try {
                 await window.addDoc(window.collection(window.db, collectionName), {
