@@ -2,6 +2,11 @@
 // 🚀 앱 부팅 (초기화)
 // =========================================================================
 window.onload = function() {
+    // 🚨 [진짜 최종 원인 해결!] 자바스크립트의 함정 돌파 마법의 2줄!
+    // 시스템이 데이터를 못 찾는 버그를 강제 연결로 박살냅니다!
+    window.GameData = GameData;
+    window.GameSystem = GameSystem;
+
     // 💡 자동 로그인 및 오토 세이브 감시자 출동!
     GameSystem.Auth.init();
     AssetPreloader.preloadAll();
@@ -15,7 +20,7 @@ window.onload = function() {
         GameSystem.applyNicknameUI();
         UIManager.init();
 
-        // 🌟 3. [핵심] 세이브 데이터를 모두 불러온 '직후'에 배경화면을 입혀줍니다!
+        // 🌟 3. 세이브 데이터를 모두 불러온 '직후'에 배경화면을 입혀줍니다!
         if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
             GameSystem.Lobby.applyBackground();
         }
