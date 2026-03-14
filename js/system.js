@@ -668,28 +668,26 @@ upgradeStat(t) {
                     if(bItem) skinClass = bItem.cssClass;
                 }
 
-                // 👇 [추가됨] 채팅 말풍선 불러오기
+           // 👇 [추가됨] 채팅 말풍선 불러오기
                 let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; // 기본 말풍선
                 if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
                     const bubItem = GameData.cosmetics.bubbles.find(x => x.id === msg.bubble);
-                    if(bubI
+                    if(bubItem) bubbleClass = bubItem.bgClass; // 황금빛 외침 등 커스텀 말풍선 적용!
+                }
 
                 if (isMe) {
-                    // 내가 보낸 메시지 위에도 칭호를 우측 정렬로 작게 띄워줍니다
                     let myTitleHtml = msg.titleShort ? `<div class="w-full text-right text-[9px] text-red-400 font-bold mb-0.5 drop-shadow-md pr-1">${msg.titleShort}</div>` : '';
-                    
                     chatList.innerHTML += `
                         <div class="flex justify-end mb-2">
                             <div class="flex flex-col items-end max-w-[75%]">
                                 ${myTitleHtml}
                                 <div class="flex items-end gap-1">
                                     <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
-                                    <div class="bg-indigo-600 text-white text-sm px-3 py-2 rounded-2xl rounded-tr-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
+                                    <div class="${bubbleClass} text-sm px-3 py-2 rounded-2xl rounded-tr-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
                                 </div>
                             </div>
                         </div>`;
                 } else {
-                    // 남이 보낸 메시지
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
                             <div class="master-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${msg.nickname.charAt(0)}</div>
@@ -699,7 +697,7 @@ upgradeStat(t) {
                                     ${titleHtml}
                                 </div>
                                 <div class="flex items-end gap-1">
-                                    <div class="bg-slate-700 text-white text-sm px-3 py-2 rounded-2xl rounded-tl-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
+                                    <div class="${bubbleClass} text-sm px-3 py-2 rounded-2xl rounded-tl-sm shadow-md break-all">${this.escapeHTML(msg.text)}</div>
                                     <span class="text-[9px] text-slate-500 mb-1">${timeStr}</span>
                                 </div>
                             </div>
