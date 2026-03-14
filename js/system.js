@@ -857,9 +857,8 @@ upgradeStat(t) {
         }
     },
 
- // 🔒 [오토 세이브/로드] 실시간 중복 접속 방어 시스템! (백섭 절대 금지)
+// 🔒 [오토 세이브/로드] 실시간 중복 접속 차단 및 강제 로그아웃 시스템!
     Auth: {
-        // 💡 1. 게임을 켤 때마다 나만의 고유한 입장권(세션 ID)을 만듭니다!
         mySessionId: "sess_" + Date.now() + "_" + Math.floor(Math.random() * 99999),
         isSessionValid: true,
         sessionUnsub: null,
@@ -875,33 +874,30 @@ upgradeStat(t) {
                     const authEmail = document.getElementById('auth-email');
                     if(authEmail) authEmail.innerText = user.email;
 
-                    // 🛡️ [동접 방어 1단계] 접속하자마자 서버에 "내가 진짜 마스터다!" 하고 내 입장권 번호를 쾅 박습니다.
+                    // 🛡️ [1단계] 로그인 시, 서버에 "내가 최신 접속자다!" 하고 입장권 갱신
                     window.setDoc(window.doc(window.db, "users", user.uid), {
                         currentSession: this.mySessionId
                     }, { merge: true });
 
-                    // 🛡️ [동접 방어 2단계] 누군가 폰(또는 PC)으로 새로 접속해서 내 입장권을 뺏어가는지 실시간으로 감시!
+                    // 🛡️ [2단계] 서버의 입장권이 탈취되는지 실시간 감시 (소름 돋는 보안!)
                     if (this.sessionUnsub) this.sessionUnsub();
                     this.sessionUnsub = window.onSnapshot(window.doc(window.db, "users", user.uid), (docSnap) => {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
                             
-                            // 서버의 입장권 번호가 내 번호랑 다르다면?! = 다른 곳에서 방금 게임을 켰다!
+                            // 내 입장권 번호랑 서버 번호가 다르다? = 누군가 다른 기기에서 로그인했다!
                             if (data.currentSession && data.currentSession !== this.mySessionId) {
-                                this.isSessionValid = false; // 내 연결고리 즉시 차단 (저장 영구 금지)
+                                this.isSessionValid = false; // 내 저장 권한 즉시 박탈
                                 if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+                                if(this.sessionUnsub) { this.sessionUnsub(); this.sessionUnsub = null; }
 
-                                // 🚨 화면 다 가려버리는 치명적 차단막 생성! (백섭 테러 원천 봉쇄)
-                                const blocker = document.createElement('div');
-                                blocker.innerHTML = `
-                                    <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.95); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; backdrop-filter:blur(5px);">
-                                        <div style="font-size:60px; margin-bottom:15px; text-shadow: 0 0 20px rgba(239,68,68,0.8);">🚨</div>
-                                        <h1 style="font-size:26px; font-weight:900; color:#ef4444; margin-bottom:10px;">중복 접속 감지!</h1>
-                                        <p style="font-size:13px; color:#cbd5e1; margin-bottom:24px; line-height:1.6; font-weight:bold;">다른 기기(또는 다른 탭)에서 게임이 실행되어<br>데이터 롤백을 막기 위해 현재 화면을 <b>강제 차단</b>했습니다.</p>
-                                        <button onclick="location.reload()" style="padding:12px 24px; background-color:#4f46e5; color:white; font-weight:900; border-radius:12px; border:none; box-shadow:0 4px 15px rgba(79,70,229,0.4); cursor:pointer;">새로고침하여 권한 다시 가져오기</button>
-                                    </div>
-                                `;
-                                document.body.appendChild(blocker);
+                                // 🚨 [핵심] 묻지도 따지지도 않고 즉시 강제 로그아웃 & 화면 초기화!
+                                alert("🚨 다른 기기에서 로그인이 감지되었습니다.\n안전을 위해 현재 기기에서 강제 로그아웃 됩니다.");
+                                
+                                window.signOut(window.auth).then(() => {
+                                    localStorage.removeItem('master_uid');
+                                    location.reload(); // 새로고침해서 완벽하게 게스트 상태로 돌려버림!
+                                });
                             }
                         }
                     });
@@ -910,7 +906,6 @@ upgradeStat(t) {
 
                     if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
                     this.autoSaveTimer = setInterval(() => {
-                        // 세션이 살아있고, 화면이 켜져있을 때만 조심스럽게 저장!
                         if (!document.hidden && this.isSessionValid) {
                             this.silentSaveToCloud(user.uid);
                             if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
@@ -925,6 +920,78 @@ upgradeStat(t) {
                 }
             });
         },
+        
+        loginWithGoogle() {
+            const provider = new window.GoogleAuthProvider();
+            UIManager.showToast("구글 로그인을 요청합니다...");
+            window.signInWithPopup(window.auth, provider)
+                .then((result) => {
+                    UIManager.showToast(`환영합니다, ${result.user.displayName}님! ✨`);
+                }).catch((error) => {
+                    console.error("로그인 에러:", error);
+                    UIManager.showToast("로그인이 취소되었거나 실패했습니다. 😢");
+                });
+        },
+        
+        logout() {
+            if(!confirm("로그아웃 하시겠습니까? (현재 기기의 데이터는 유지됩니다)")) return;
+            window.signOut(window.auth).then(() => {
+                UIManager.showToast("안전하게 로그아웃 되었습니다.");
+                document.getElementById('btn-google-login').classList.remove('hidden');
+                document.getElementById('auth-user-info').classList.add('hidden');
+            });
+        },
+        
+        silentSaveToCloud(uid) {
+            // 권한 뺏겼으면 절대 데이터 못 올리게 철벽 방어!
+            if (!this.isSessionValid) return; 
+
+            const allMyData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('master_') || key === 'last_checkin')) {
+                    allMyData[key] = localStorage.getItem(key);
+                }
+            }
+            if(Object.keys(allMyData).length === 0) return;
+
+            const nowTime = Date.now().toString();
+            localStorage.setItem('master_lastSaveTime', nowTime);
+            allMyData['master_lastSaveTime'] = nowTime;
+
+            window.setDoc(window.doc(window.db, "users", uid), {
+                saveData: allMyData,
+                lastSaved: window.serverTimestamp(),
+                currentSession: this.mySessionId // 저장할 때 내 입장권 번호 유지
+            }, { merge: true }).catch(e => console.log("자동 저장 중...", e));
+        },
+        
+        silentLoadFromCloud(uid) {
+            if(sessionStorage.getItem('cloud_loaded_once') === 'true') return; 
+            window.getDoc(window.doc(window.db, "users", uid)).then((docSnap) => {
+                if (docSnap.exists() && docSnap.data().saveData) {
+                    const cloudData = docSnap.data().saveData;
+
+                    const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
+                    const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
+
+                    if (localTime === 0 || cloudTime > localTime) {
+                        for (const key in cloudData) {
+                            localStorage.setItem(key, cloudData[key]);
+                        }
+                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
+                        console.log("☁️ 클라우드 동기화 완료!");
+                        location.reload(); 
+                    } else {
+                        sessionStorage.setItem('cloud_loaded_once', 'true'); 
+                        console.log("📱 로컬 데이터가 최신입니다.");
+                    }
+                } else {
+                    sessionStorage.setItem('cloud_loaded_once', 'true');
+                }
+            });
+        }
+    },
         
         loginWithGoogle() {
             const provider = new window.GoogleAuthProvider();
