@@ -1263,17 +1263,16 @@ enterDungeon() {
             document.getElementById('battle-stage-title').innerText = `STAGE ${GameState.rpgStage} - ${zoneNames[currentZone]} ${isBoss ? '🔥' : ''}`;
             document.getElementById('battle-monster-name').innerText = mInfo.n; 
             
-         // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
+       // 🌟 [이미지 모드 ON!] 봉인 해제된 에셋 렌더링 시스템
             const spriteBox = document.getElementById('monster-sprite');
             const avatarWrap = document.getElementById('monster-avatar-wrap');
-            const battleCard = document.getElementById('battle-card');
+            // 🚨 (여기에 있던 const battleCard 중복 선언 줄은 삭제했습니다!)
 
             // 1. 전체 화면 배경은 치장품을 위해 싹 비워주기 (원상복구!)
             const battleScreen = document.getElementById('screen-rpg-battle');
             battleScreen.style.backgroundImage = "none";
 
             // 2. 전투 '카드' 내부에만 구역 테마 배경화면 쫙 깔아주기!
-            // (텍스트가 잘 보이도록 배경 이미지 위에 살짝 어두운 그라데이션을 덮어줍니다)
             battleCard.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('assets/backgrounds/bg_zone${currentZone}.png')`;
             battleCard.style.backgroundSize = "cover";
             battleCard.style.backgroundPosition = "center";
@@ -1291,17 +1290,17 @@ enterDungeon() {
             // 이미지 크기가 꽉 차도록 패딩 조절
             spriteBox.style.cssText = isBoss ? "width: 100%; height: 100%; padding: 10px;" : "width: 100%; height: 100%; padding: 20px;";
             
-            // 4. (기존 UI 업데이트) 카드 기본 색상을 투명하게 날려서 배경 이미지가 돋보이게!
+            // 4. 카드 기본 색상을 투명하게 날려서 배경 이미지가 돋보이게!
             battleCard.className = isBoss 
                 ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)] bg-transparent overflow-hidden" 
                 : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30 bg-transparent overflow-hidden";
             
-
-           // (기존 UI 업데이트 코드)
-            document.getElementById('battle-card').className = isBoss ? "glass-card battle-card p-6 mb-6 text-center relative border border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.3)]" : "glass-card battle-card p-6 mb-6 text-center relative border border-purple-500/30";
-            document.getElementById('monster-avatar-wrap').className = isBoss ? "monster-avatar-container boss-avatar-container" : "monster-avatar-container";
-            document.getElementById('monster-sprite').className = isBoss ? "monster-emoji boss-emoji" : "monster-emoji";
-            
+            // 5. 몬스터 뒤에 깔려있던 둥근 검은색 배경(avatarWrap)도 투명하게 날려주기!
+            avatarWrap.className = isBoss 
+                ? "monster-avatar-container boss-avatar-container bg-transparent border-none shadow-none" 
+                : "monster-avatar-container bg-transparent border-none shadow-none";
+            spriteBox.className = ""; // 이모지용 글자 크기 클래스 지우기
+        
             document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
             document.getElementById('btn-attack').disabled = false; 
             document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
