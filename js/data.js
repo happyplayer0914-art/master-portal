@@ -132,7 +132,7 @@ const GameData = {
             9: [
                 { id: 'n15', e: '🧌', n: '지옥 슬라임', img: 'hell_slime.png' },
                 { id: 'n16', e: '🦍', n: '용암 골렘', img: 'magma_golem.png' },
-                { id: 'n23', e: '🔥', n: '지옥 불개', img: 'hellhound.png' }
+                { id: 'n23', e: '🔥', n: '불의 정령', img: 'firesp.png' }
             ],
             // 🌌 10구역 (91~99층) : 심연의 끝
             10: [
