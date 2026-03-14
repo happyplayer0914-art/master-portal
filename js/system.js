@@ -609,7 +609,7 @@ upgradeStat(t) {
             this.listenRoom(this.currentRoom);
         },
 
-        // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직!
+        // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직 (완벽 픽스!)
         switchRoom(roomName) {
             if (this.currentRoom === roomName) return; 
             this.currentRoom = roomName;
@@ -618,12 +618,12 @@ upgradeStat(t) {
             const btnI = document.getElementById('btn-room-I');
             const btnE = document.getElementById('btn-room-E');
             
-            // 1. 일단 모든 버튼을 회색(비활성화)으로 초기화
-            [btnG, btnI, btnE].forEach(btn => {
-                if(btn) btn.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
-            });
+            // 1. 일단 3개 버튼의 불을 전부 확실하게 끕니다! (회색으로 초기화)
+            if (btnG) btnG.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
+            if (btnI) btnI.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
+            if (btnE) btnE.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
 
-            // 2. 선택된 방만 고유의 색상으로 칠하기
+            // 2. 지금 들어간 방의 버튼만 예쁜 색깔로 불을 켭니다!
             if (roomName === 'G' && btnG) {
                 btnG.className = "flex-1 bg-emerald-600 text-white py-2 rounded-t-xl font-bold text-xs border border-emerald-500 border-b-0 transition-all shadow-md";
             } else if (roomName === 'I' && btnI) {
@@ -632,8 +632,8 @@ upgradeStat(t) {
                 btnE.className = "flex-1 bg-orange-600 text-white py-2 rounded-t-xl font-bold text-xs border border-orange-500 border-b-0 transition-all shadow-md";
             }
 
-            // 3. 새 방에 들어왔으니 채팅창 안내 메시지 띄우기
-            const roomTitle = roomName === 'G' ? '통합 광장' : roomName === 'I' ? 'I (내향) 주점' : 'E (외향) 주점';
+            // 3. 새 방에 들어왔으니 채팅창 안내 메시지 띄우기 (이름 변경 반영)
+            const roomTitle = roomName === 'G' ? '통합 주점' : roomName === 'I' ? 'I (내향) 주점' : 'E (외향) 주점';
             document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomTitle}] 채널에 입장했습니다!</div>`;
 
             // 4. 기존 방 수신기 끄고, 새 방 수신기 켜기!
