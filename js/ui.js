@@ -350,85 +350,98 @@ const UIManager = {
         this.renderCosmeticsShop();
     },
 
-    // 🌟 3. [업그레이드된] 치장품 상점 렌더링 엔진! (선택한 탭의 데이터만 보여줌)
+   // 🌟 [업그레이드] 치장품 상점 렌더링 엔진! (기본 항목 자동 생성 기능 탑재)
     renderCosmeticsShop() {
-        // 이제 전체 패널이 아니라, 하단 리스트 구역에만 그림을 그립니다!
         const container = document.getElementById('cosmetics-list-container');
         if(!container) return;
 
         if(!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
         let html = '';
         
-        // 💡 현재 선택된 탭에 맞는 데이터를 가져옵니다!
+        // 1️⃣ 현재 선택된 탭에 맞는 데이터와 '기본(Default)' 아이템을 준비합니다!
         let currentItems = [];
-        let emptyMessage = "이 카테고리에는 아직 아이템이 없습니다.";
+        let defaultItem = null;
+        let myIcon = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
 
         if (window.GameData && GameData.cosmetics) {
             if (this.currentCosmeticTab === 'profile') {
                 currentItems = GameData.cosmetics.profiles || [];
-                emptyMessage = "나만의 프로필 아이콘이 곧 업데이트됩니다! (작업 중 🛠️)";
+                defaultItem = { id: 'default', name: '기본 프로필', desc: '내 닉네임 첫 글자', type: 'profile', isDefault: true, iconHtml: `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl font-black text-white border border-slate-500 shadow-inner">${myIcon}</div>` };
             } else if (this.currentCosmeticTab === 'border') {
                 currentItems = GameData.cosmetics.borders || [];
+                defaultItem = { id: 'default', name: '기본 테두리', desc: '심플하고 깔끔한 기본 테두리', type: 'border', isDefault: true, iconHtml: `<div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black text-white bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600">M</div>` };
             } else if (this.currentCosmeticTab === 'bg') {
                 currentItems = GameData.cosmetics.backgrounds || [];
+                defaultItem = { id: 'default', name: '기본 로비 배경', desc: '보랏빛 우주의 심연', type: 'bg', isDefault: true, iconHtml: `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🌌</div>` };
             } else if (this.currentCosmeticTab === 'bubble') {
                 currentItems = GameData.cosmetics.bubbles || [];
+                defaultItem = { id: 'default', name: '기본 말풍선', desc: '가장 익숙한 기본 말풍선', type: 'bubble', isDefault: true, iconHtml: `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">💬</div>` };
             } else if (this.currentCosmeticTab === 'title') {
                 currentItems = GameData.cosmetics.titles || [];
-                emptyMessage = "칭호 시스템이 곧 해금됩니다! (작업 중 🛠️)";
-           // 👇 [추가] 프로필 미리보기 아이콘!
-                } else if (item.type === 'profile') {
-                    iconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner">${item.icon}</div>`;
-                }
+                defaultItem = { id: 'default', name: '칭호 숨기기', desc: '머리 위를 깔끔하게 비웁니다', type: 'title', isDefault: true, iconHtml: `<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">➖</div>` };
+            }
         }
 
-        // 데이터가 없으면 '작업 중' 메시지 띄우기
-        if (currentItems.length === 0) {
-            html = `<div class="text-center py-10 bg-slate-800/30 border border-dashed border-slate-700 rounded-xl mt-2"><div class="text-3xl mb-2 opacity-50">🚧</div><p class="text-slate-400 text-[10px] font-bold">${emptyMessage}</p></div>`;
-        } else {
-            // 데이터가 있으면 리스트 예쁘게 그리기!
-            currentItems.forEach(item => {
-                const isOwned = GameState.ownedCosmetics.includes(item.id);
-                
-                let isEquipped = false;
-                if(item.type === 'border' && GameState.equippedSkin === item.id) isEquipped = true;
-                if(item.type === 'bg' && GameState.equippedBg === item.id) isEquipped = true;
-                if(item.type === 'bubble' && GameState.equippedBubble === item.id) isEquipped = true;
+        // 2️⃣ 리스트 맨 앞에 '기본' 아이템을 쏙 끼워 넣습니다.
+        let renderList = [];
+        if (defaultItem) renderList.push(defaultItem);
+        renderList = renderList.concat(currentItems);
 
-                let btnHtml = '';
-                if (isEquipped) {
-                    btnHtml = `<button onclick="UIManager.unequipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-slate-700 text-slate-300 text-[10px] font-bold rounded shadow-inner border border-slate-600 w-[65px]">장착중</button>`;
-                } else if (isOwned) {
-                    btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400 w-[65px]">장착하기</button>`;
-                } else {
-                    btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center justify-center gap-1 border border-pink-400 active:scale-95 w-[65px]">💎 ${item.price}</button>`;
-                }
+        // 3️⃣ 리스트를 화면에 예쁘게 그립니다.
+        renderList.forEach(item => {
+            // '기본' 아이템은 무조건 보유(Owned)한 것으로 처리!
+            const isOwned = item.isDefault ? true : GameState.ownedCosmetics.includes(item.id);
 
-                let iconHtml = '<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl">✨</div>';
+            let isEquipped = false;
+            // 💡 장착한 게 없으면(null) 자동으로 '기본' 아이템이 장착 중인 것으로 표시!
+            if(item.type === 'border' && (GameState.equippedSkin === item.id || (item.isDefault && !GameState.equippedSkin))) isEquipped = true;
+            if(item.type === 'bg' && (GameState.equippedBg === item.id || (item.isDefault && !GameState.equippedBg))) isEquipped = true;
+            if(item.type === 'bubble' && (GameState.equippedBubble === item.id || (item.isDefault && !GameState.equippedBubble))) isEquipped = true;
+            if(item.type === 'profile' && (GameState.equippedProfile === item.id || (item.isDefault && !GameState.equippedProfile))) isEquipped = true;
+            if(item.type === 'title' && (GameState.equippedTitle === item.id || (item.isDefault && !GameState.equippedTitle))) isEquipped = true;
+
+            let btnHtml = '';
+            if (isEquipped) {
+                // 혼란을 주던 장착해제 기능을 없애고, [장착중] 버튼은 아예 못 누르게 잠가버립니다!
+                btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-700 text-slate-400 text-[10px] font-bold rounded shadow-inner border border-slate-600 w-[65px]">장착중</button>`;
+            } else if (isOwned) {
+                btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400 w-[65px]">장착하기</button>`;
+            } else {
+                btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center justify-center gap-1 border border-pink-400 active:scale-95 w-[65px]">💎 ${item.price}</button>`;
+            }
+
+            // 아이콘 렌더링
+            let finalIconHtml = item.iconHtml;
+            if (!finalIconHtml) {
                 if(item.type === 'border') {
-                    iconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white ${item.cssClass}">M</div>`;
+                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white ${item.cssClass}">M</div>`;
                 } else if (item.type === 'bg') {
-                    iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🖼️</div>`;
+                    finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🖼️</div>`;
                 } else if (item.type === 'bubble') {
-                    iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">💬</div>`;
+                    finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">💬</div>`;
+                } else if (item.type === 'profile') {
+                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner">${item.icon}</div>`;
+                } else if (item.type === 'title') {
+                    finalIconHtml = `<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🏷️</div>`;
                 }
+            }
 
-                html += `
-                    <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 shadow-sm mt-2 hover:bg-slate-800 transition-colors">
-                        <div class="flex items-center gap-3">
-                            ${iconHtml}
-                            <div class="flex flex-col">
-                                <span class="text-white font-bold text-[11px]">${item.name}</span>
-                                <span class="text-slate-400 text-[9px] mt-0.5 break-keep">${item.desc}</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            ${btnHtml}
+            html += `
+                <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 shadow-sm mt-2 hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        ${finalIconHtml}
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-[11px]">${item.name}</span>
+                            <span class="text-slate-400 text-[9px] mt-0.5 break-keep">${item.desc}</span>
                         </div>
                     </div>
-                `;
-            });
-        }
+                    <div class="flex-shrink-0">
+                        ${btnHtml}
+                    </div>
+                </div>
+            `;
+        });
+
         container.innerHTML = html;
     },
 
@@ -454,17 +467,22 @@ const UIManager = {
         }
     },
 
-    // 👗 장착 로직
+   // 👗 장착 로직 (기본 아이템 선택 시 해제 효과 발동!)
     equipCosmetic(id, type) {
-        if (type === 'border') GameState.equippedSkin = id;
-        if (type === 'bg') GameState.equippedBg = id;
-        if (type === 'bubble') GameState.equippedBubble = id;
-        if (type === 'profile') GameState.equippedProfile = id; // 👈 추가!
+        // 아이디가 'default'라면 장착 해제(null) 처리합니다!
+        const isDefault = (id === 'default');
+
+        if (type === 'border') GameState.equippedSkin = isDefault ? null : id;
+        if (type === 'bg') GameState.equippedBg = isDefault ? null : id;
+        if (type === 'bubble') GameState.equippedBubble = isDefault ? null : id;
+        if (type === 'profile') GameState.equippedProfile = isDefault ? null : id;
+        if (type === 'title') GameState.equippedTitle = isDefault ? null : id; // 미리 칭호용 세팅!
         
         GameState.save();
-        this.showToast("✅ 장착되었습니다!");
+        this.showToast(isDefault ? "✨ 기본 상태로 변경되었습니다." : "✅ 장착되었습니다!");
         
-        if (type === 'border' || type === 'profile') { // 👈 프로필도 즉시 적용되게 묶어줌!
+        // 화면 즉시 반영!
+        if (type === 'border' || type === 'profile') { 
             this.applyAvatarSkin(); 
             if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
         }
