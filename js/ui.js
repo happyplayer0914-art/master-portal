@@ -161,6 +161,9 @@ const UIManager = {
         if(document.getElementById('profile-eva')) document.getElementById('profile-eva').innerText = stats.eva;
         if(document.getElementById('profile-spd')) document.getElementById('profile-spd').innerText = stats.spd;
 
+        // =========================================================================
+        // 🔥 [엔드 콘텐츠] 신화(1) + 전설(2) 칭호 해금 로직!!
+        // =========================================================================
         const equippedIds = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
         const gears = equippedIds.filter(id => id !== null).map(id => GameData.items[id]).filter(item => item !== undefined);
         
@@ -172,26 +175,42 @@ const UIManager = {
             if (g.rarity === 'legendary') legendaryCount++;
         });
 
-        const jobTitleEl = document.getElementById('profile-job-title');
-
+        // 🌟 1. 칭호 자동 해금 로직 (신화 1 + 전설 2 장착 시)
         if (mythicItem && legendaryCount === 2) {
-            if(jobTitleEl) {
-                jobTitleEl.innerText = `✨ ${mythicItem.job} [${mythicItem.mbti}] ✨`;
-                jobTitleEl.className = "text-red-400 font-black text-xs sm:text-sm tracking-widest uppercase mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all duration-300";
-            }
-            if (!GameState.questData.achievements.completed.includes('class_advanced')) {
-                GameState.questData.achievements.completed.push('class_advanced');
-                GameState.gem += 5000; 
+            const targetTitleId = 't_' + mythicItem.mbti.toLowerCase(); // 예: t_entj
+            if (!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+
+            // 아직 해금 안 한 칭호라면? 칭호 창고에 쏙 넣어줌!
+            if (!GameState.ownedCosmetics.includes(targetTitleId)) {
+                GameState.ownedCosmetics.push(targetTitleId);
+                
+                if (!GameState.questData.achievements.completed.includes('class_advanced')) {
+                    GameState.questData.achievements.completed.push('class_advanced');
+                    GameState.gem += 5000; 
+                    if(UIManager.updateCurrencyUI) UIManager.updateCurrencyUI(); 
+                }
                 GameState.save();
                 
-                if(UIManager.updateCurrencyUI) UIManager.updateCurrencyUI(); 
+                // 알림 빵!
                 if(UIManager.showToast) {
-                    setTimeout(() => UIManager.showToast(`🏆 [히든 업적] ${mythicItem.job} 전직 완료! (보상: 5000💎)`), 500);
+                    setTimeout(() => UIManager.showToast(`🎉 [히든 업적] '${mythicItem.job}' 칭호 해금 완료! (칭호 탭을 확인하세요)`), 500);
                 }
                 if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
             }
-        } else {
-            if(jobTitleEl) {
+        }
+
+        // 🌟 2. 내 정보 창에 '내가 치장품 탭에서 장착한 칭호' 보여주기
+        const jobTitleEl = document.getElementById('profile-job-title');
+        if (jobTitleEl) {
+            const eqTitleId = GameState.equippedTitle;
+            
+            if (eqTitleId && eqTitleId !== 'none' && eqTitleId !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
+                const tItem = GameData.cosmetics.titles.find(t => t.id === eqTitleId);
+                if (tItem) {
+                    jobTitleEl.innerText = `✨ ${tItem.name} [${tItem.reqMbti}] ✨`;
+                    jobTitleEl.className = "text-red-400 font-black text-xs sm:text-sm tracking-widest uppercase mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all duration-300";
+                }
+            } else {
                 jobTitleEl.innerText = "Master Profile";
                 jobTitleEl.className = "text-emerald-400 font-bold text-xs tracking-widest uppercase mb-1 transition-all duration-300";
             }
@@ -400,14 +419,18 @@ const UIManager = {
             if(item.type === 'profile' && (GameState.equippedProfile === item.id || (item.isDefault && !GameState.equippedProfile))) isEquipped = true;
             if(item.type === 'title' && (GameState.equippedTitle === item.id || (item.isDefault && !GameState.equippedTitle))) isEquipped = true;
 
-            let btnHtml = '';
+           let btnHtml = '';
             if (isEquipped) {
-                // 혼란을 주던 장착해제 기능을 없애고, [장착중] 버튼은 아예 못 누르게 잠가버립니다!
                 btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-700 text-slate-400 text-[10px] font-bold rounded shadow-inner border border-slate-600 w-[65px]">장착중</button>`;
             } else if (isOwned) {
                 btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400 w-[65px]">장착하기</button>`;
             } else {
-                btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center justify-center gap-1 border border-pink-400 active:scale-95 w-[65px]">💎 ${item.price}</button>`;
+                // 👇 [추가됨] 칭호는 돈 주고 사는 게 아니라 해금하는 거니까 자물쇠로 잠가둡니다!
+                if (item.type === 'title') {
+                    btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded shadow-inner border border-slate-700 w-[65px]">🔒 미해금</button>`;
+                } else {
+                    btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center justify-center gap-1 border border-pink-400 active:scale-95 w-[65px]">💎 ${item.price}</button>`;
+                }
             }
 
             // 아이콘 렌더링
