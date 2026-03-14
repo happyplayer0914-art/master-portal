@@ -317,44 +317,81 @@ const UIManager = {
         renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
     }, // <-- renderInventory 끝나는 괄호
 
-    // 🌟 [신규 추가] 치장품 상점 렌더링 엔진!
-    renderCosmeticsShop() {
-        const panel = document.getElementById('inv-panel-cosmetics');
-        if(!panel) return;
+    // ... (기존 renderInventory 끝나는 부분 아래) ...
 
-        // 유저 데이터에 치장품 보관함이 없으면 새로 만들어줍니다 (안전장치)
-        if(!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+    // 🌟 1. 치장품 서브 탭을 관리하는 변수 (기본값: 프로필)
+    currentCosmeticTab: 'profile',
+
+    // 🌟 2. 서브 탭을 누를 때마다 버튼 색상을 바꾸고 화면을 다시 그리는 마법!
+    switchCosmeticTab(tab) {
+        if(AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+        this.currentCosmeticTab = tab;
         
-        let html = '';
+        const tabs = ['profile', 'border', 'bg', 'bubble', 'title'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`cos-tab-${t}`);
+            if (btn) {
+                if (t === tab) btn.className = "flex-1 py-1.5 bg-slate-600 text-white font-bold rounded shadow-inner border border-slate-500 text-[10px] transition-all";
+                else btn.className = "flex-1 py-1.5 bg-transparent text-slate-400 hover:text-slate-200 font-bold rounded border border-transparent text-[10px] transition-all";
+            }
+        });
+        
+        this.renderCosmeticsShop();
+    },
 
-        // 카테고리별로 리스트를 예쁘게 그려주는 내부 함수
-        const renderCategory = (title, items) => {
-            if(!items || items.length === 0) return;
-            html += `<div class="text-xs font-bold text-pink-300 mt-2 mb-2 border-b border-slate-700/50 pb-1">${title}</div>`;
-            
-            items.forEach(item => {
+    // 🌟 3. [업그레이드된] 치장품 상점 렌더링 엔진! (선택한 탭의 데이터만 보여줌)
+    renderCosmeticsShop() {
+        // 이제 전체 패널이 아니라, 하단 리스트 구역에만 그림을 그립니다!
+        const container = document.getElementById('cosmetics-list-container');
+        if(!container) return;
+
+        if(!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+        let html = '';
+        
+        // 💡 현재 선택된 탭에 맞는 데이터를 가져옵니다!
+        let currentItems = [];
+        let emptyMessage = "이 카테고리에는 아직 아이템이 없습니다.";
+
+        if (window.GameData && GameData.cosmetics) {
+            if (this.currentCosmeticTab === 'profile') {
+                currentItems = GameData.cosmetics.profiles || [];
+                emptyMessage = "나만의 프로필 아이콘이 곧 업데이트됩니다! (작업 중 🛠️)";
+            } else if (this.currentCosmeticTab === 'border') {
+                currentItems = GameData.cosmetics.borders || [];
+            } else if (this.currentCosmeticTab === 'bg') {
+                currentItems = GameData.cosmetics.backgrounds || [];
+            } else if (this.currentCosmeticTab === 'bubble') {
+                currentItems = GameData.cosmetics.bubbles || [];
+            } else if (this.currentCosmeticTab === 'title') {
+                currentItems = GameData.cosmetics.titles || [];
+                emptyMessage = "칭호 시스템이 곧 해금됩니다! (작업 중 🛠️)";
+            }
+        }
+
+        // 데이터가 없으면 '작업 중' 메시지 띄우기
+        if (currentItems.length === 0) {
+            html = `<div class="text-center py-10 bg-slate-800/30 border border-dashed border-slate-700 rounded-xl mt-2"><div class="text-3xl mb-2 opacity-50">🚧</div><p class="text-slate-400 text-[10px] font-bold">${emptyMessage}</p></div>`;
+        } else {
+            // 데이터가 있으면 리스트 예쁘게 그리기!
+            currentItems.forEach(item => {
                 const isOwned = GameState.ownedCosmetics.includes(item.id);
                 
-                // 장착 여부 확인
                 let isEquipped = false;
                 if(item.type === 'border' && GameState.equippedSkin === item.id) isEquipped = true;
                 if(item.type === 'bg' && GameState.equippedBg === item.id) isEquipped = true;
                 if(item.type === 'bubble' && GameState.equippedBubble === item.id) isEquipped = true;
 
-                // 상태에 따른 버튼 HTML 생성
                 let btnHtml = '';
                 if (isEquipped) {
-                    btnHtml = `<button onclick="UIManager.unequipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-slate-700 text-slate-300 text-[10px] font-bold rounded shadow-inner border border-slate-600">장착중</button>`;
+                    btnHtml = `<button onclick="UIManager.unequipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-slate-700 text-slate-300 text-[10px] font-bold rounded shadow-inner border border-slate-600 w-[65px]">장착중</button>`;
                 } else if (isOwned) {
-                    btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400">장착하기</button>`;
+                    btnHtml = `<button onclick="UIManager.equipCosmetic('${item.id}', '${item.type}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all border border-indigo-400 w-[65px]">장착하기</button>`;
                 } else {
-                    btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center gap-1 border border-pink-400 active:scale-95">💎 ${item.price}</button>`;
+                    btnHtml = `<button onclick="UIManager.buyCosmetic('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-[10px] font-bold rounded shadow transition-all flex items-center justify-center gap-1 border border-pink-400 active:scale-95 w-[65px]">💎 ${item.price}</button>`;
                 }
 
-                // 치장품 종류에 따른 미리보기 아이콘
                 let iconHtml = '<div class="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-xl">✨</div>';
                 if(item.type === 'border') {
-                    // 테두리는 실제 CSS 클래스를 적용해서 어떻게 생겼는지 미리 보여줌!
                     iconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white ${item.cssClass}">M</div>`;
                 } else if (item.type === 'bg') {
                     iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl border border-slate-600 shadow-inner">🖼️</div>`;
@@ -363,7 +400,7 @@ const UIManager = {
                 }
 
                 html += `
-                    <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 shadow-sm mb-2 hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 shadow-sm mt-2 hover:bg-slate-800 transition-colors">
                         <div class="flex items-center gap-3">
                             ${iconHtml}
                             <div class="flex flex-col">
@@ -371,22 +408,18 @@ const UIManager = {
                                 <span class="text-slate-400 text-[9px] mt-0.5 break-keep">${item.desc}</span>
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-shrink-0">
                             ${btnHtml}
                         </div>
                     </div>
                 `;
             });
-        };
-
-        if (GameData.cosmetics) {
-            renderCategory('✨ 프로필 테두리', GameData.cosmetics.borders);
-            renderCategory('🖼️ 로비 배경화면', GameData.cosmetics.backgrounds);
-            renderCategory('💬 채팅 말풍선', GameData.cosmetics.bubbles);
         }
-
-        panel.innerHTML = html;
+        container.innerHTML = html;
     },
+
+    // 💸 구매 로직
+    // ... (이 아래로 buyCosmetic, equipCosmetic 등은 기존 그대로 유지!) ...
 
     // 💸 구매 로직
     buyCosmetic(id, price) {
