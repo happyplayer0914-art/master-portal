@@ -202,6 +202,27 @@ const GameSystem = {
     },
 
     Lobby: {
+        // 👇 여기서부터 복사해서 끼워 넣기!
+        applyBackground() {
+            const appBody = document.body; // 앱 전체를 감싸는 태그
+            const dynamicBg = document.getElementById('dynamic-bg'); // 기존 보라색 파티클 캔버스
+            const bgId = GameState.equippedBg;
+
+            if (bgId && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
+                const bgItem = GameData.cosmetics.backgrounds.find(b => b.id === bgId);
+                if (bgItem) {
+                    appBody.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+                    appBody.style.backgroundSize = "cover";
+                    appBody.style.backgroundPosition = "center";
+                    appBody.style.backgroundAttachment = "fixed";
+                    if (dynamicBg) dynamicBg.style.display = 'none'; // 파티클 끄기
+                    return;
+                }
+            }
+            // 장착 해제 시 기본 상태로 롤백
+            appBody.style.backgroundImage = "none";
+            if (dynamicBg) dynamicBg.style.display = 'block'; // 파티클 다시 켜기
+        },
         // 👇 여기서부터 복사해서 끼워넣기!
         getCurrentTitle() {
             const equippedIds = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
@@ -508,15 +529,17 @@ upgradeStat(t) {
                 list.innerHTML = '';
                 
                 uniqueTop10.forEach((d, i) => {
-                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
+                   let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
-                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400"; 
+                    // 👇 [수정됨] 랭킹 테두리 불러오기 로직 교체!
+                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
                     let sId = d.skin;
-                    if(sId === 'r3') sId = 's_r1'; if(sId === 'e3') sId = 's_e1'; if(sId === 'l3') sId = 's_l1';
-                    if(sId && sId !== 'none' && GameData && GameData.items && GameData.items[sId]) {
-                        skinClass = `skin-${GameData.items[sId].rarity}`;
+                    if(sId && sId !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
+                        const bItem = GameData.cosmetics.borders.find(x => x.id === sId);
+                        if(bItem) skinClass = bItem.cssClass; // 새로운 CSS 클래스 적용!
                     }
+                    // 👆 여기까지!
                     
                   const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     
@@ -635,19 +658,21 @@ upgradeStat(t) {
             messages.forEach(msg => {
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                
                 // 💡 [수정] 칭호 HTML (닉네임 옆에 나란히 배치될 용도)
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
-                // 💡 [추가] 치장품(테두리) 클래스 계산
-                let skinClass = "bg-slate-700"; 
-                let sId = msg.skin;
-                // 옛날 데이터 호환성 보정
-                if(sId === 'r3') sId = 's_r1'; if(sId === 'e3') sId = 's_e1'; if(sId === 'l3') sId = 's_l1';
-                
-                if(sId && sId !== 'none' && GameData && GameData.items && GameData.items[sId]) {
-                    skinClass = `skin-${GameData.items[sId].rarity}`;
+               // 👇 [수정됨] 채팅 프로필 테두리 불러오기
+                let skinClass = "bg-slate-700 border border-slate-600"; 
+                if(msg.skin && msg.skin !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
+                    const bItem = GameData.cosmetics.borders.find(x => x.id === msg.skin);
+                    if(bItem) skinClass = bItem.cssClass;
                 }
+
+                // 👇 [추가됨] 채팅 말풍선 불러오기
+                let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; // 기본 말풍선
+                if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
+                    const bubItem = GameData.cosmetics.bubbles.find(x => x.id === msg.bubble);
+                    if(bubI
 
                 if (isMe) {
                     // 내가 보낸 메시지 위에도 칭호를 우측 정렬로 작게 띄워줍니다
@@ -719,6 +744,7 @@ upgradeStat(t) {
                     text: text,
                     titleShort: titleInfo ? titleInfo.short : null, 
                     skin: GameState.equippedSkin || 'none', // ✨ 치장품(테두리) 정보 추가!
+                    bubble: GameState.equippedBubble || 'none', // 👈 [추가됨] 말풍선 정보도 랭킹 서버로 슝!
                     timestamp: window.serverTimestamp()
                 });
 
