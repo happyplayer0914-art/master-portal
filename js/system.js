@@ -500,8 +500,9 @@ upgradeStat(t) {
                     skin: GameState.equippedSkin || 'none', 
                     prestige: GameState.prestigeCount || 0, 
                     title: titleInfo ? titleInfo.full : null, // 👈 파이어베이스에 풀버전 칭호 저장!
-                    // 🌟 [추가할 핵심 코드!!] 내가 지금 끼고 있는 테두리 정보를 서버로 보냅니다!
-                skin: GameState.equippedSkin || 'none',
+                   // 🌟 [추가됨!] 내가 낀 프로필 정보도 서버로 보냅니다!
+                    profile: GameState.equippedProfile || 'none',  
+                    skin: GameState.equippedSkin || 'none',
                     timestamp: window.serverTimestamp()
                 }, { merge: true }); 
             } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
@@ -560,6 +561,12 @@ upgradeStat(t) {
                         if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
                     }
                     // 👆 여기까지!
+                        // 🌟 [추가됨!] 프로필 아이콘 찾아오기 (없으면 기존처럼 이름 첫 글자)
+                    let innerIcon = d.nickname.charAt(0);
+                    if (d.profile && d.profile !== 'none' && d.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
+                        const pfItem = GameData.cosmetics.profiles.find(x => x.id === d.profile);
+                        if (pfItem) innerIcon = pfItem.icon;
+                    }
                     
                   const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     
@@ -574,7 +581,7 @@ upgradeStat(t) {
                         <div class="p-3 sm:p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
                             <div class="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                                 <div class="w-10 sm:w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} flex-shrink-0">${rankIcon}</div>
-                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} flex-shrink-0">${d.nickname.charAt(0)}</div>
+                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} flex-shrink-0">${innerIcon}</div>
                                 <div class="flex flex-col min-w-0 flex-1">
                                     ${titleHtml}
                                     <p class="font-bold text-white text-sm flex items-center gap-1.5 truncate">${d.nickname} ${isMe ? '<span class="text-[9px] bg-indigo-500 px-1 py-0.5 rounded text-white font-normal flex-shrink-0">ME</span>' : ''}</p>
@@ -697,7 +704,12 @@ upgradeStat(t) {
                     // 💡 여기도 bg-slate-800 을 추가했습니다!
                     if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`;
                 }
-
+// 🌟 [추가됨!] 채팅 프로필 아이콘 불러오기
+                let innerIcon = msg.nickname.charAt(0);
+                if (msg.profile && msg.profile !== 'none' && msg.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
+                    const pfItem = GameData.cosmetics.profiles.find(x => x.id === msg.profile);
+                    if (pfItem) innerIcon = pfItem.icon;
+                }
            // 👇 [추가됨] 채팅 말풍선 불러오기
                 let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; // 기본 말풍선
                 if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
@@ -720,7 +732,7 @@ upgradeStat(t) {
                 } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div class="master-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${msg.nickname.charAt(0)}</div>
+                            <div class="master-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${innerIcon}</div>
                             <div class="flex flex-col items-start max-w-[75%]">
                                 <div class="flex items-center gap-1.5 mb-0.5">
                                     <span class="text-[10px] text-slate-400 font-bold">${msg.nickname}</span>
@@ -773,6 +785,8 @@ upgradeStat(t) {
                     titleShort: titleInfo ? titleInfo.short : null, 
                     skin: GameState.equippedSkin || 'none', // ✨ 치장품(테두리) 정보 추가!
                     bubble: GameState.equippedBubble || 'none', // 👈 [추가됨] 말풍선 정보도 랭킹 서버로 슝!
+                        // 🌟 [추가됨!] 채팅 칠 때 프로필 정보도 묶어서 쏩니다!
+                    profile: GameState.equippedProfile || 'none',
                     timestamp: window.serverTimestamp()
                 });
 
