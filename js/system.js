@@ -1215,7 +1215,12 @@ upgradeStat(t) {
         },
 
         progress: { daily: {}, weekly: {} },
-      
+          
+// 🚨 [진범 검거!] 제가 빼먹었던 퀘스트 전용 저장 함수 부활!!!
+        save() {
+            localStorage.setItem('master_quest_progress2', JSON.stringify(this.progress));
+        },
+          
         init() {
             const saved = localStorage.getItem('master_quest_progress2'); 
             
