@@ -811,11 +811,18 @@
         
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4 shadow-inner">
             <h3 class="text-white font-bold mb-3 text-sm flex justify-between items-center">
-                <span>🔥 강화 가능한 장비</span>
+            <span>🔥 강화 가능한 장비</span>
                 <span class="text-[10px] text-red-400 bg-red-900/50 px-2 py-1 rounded">※ 장착 해제된 장비만 표시</span>
             </h3>
-            <div id="forge-item-list" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+            
+            <div class="flex gap-2 mb-3">
+                <button onclick="GameSystem.Forge.switchTab('weapon')" id="forge-tab-weapon" class="flex-1 py-1.5 bg-purple-600 text-white text-[10px] font-bold rounded border border-purple-500 shadow-inner">무기</button>
+                <button onclick="GameSystem.Forge.switchTab('armor')" id="forge-tab-armor" class="flex-1 py-1.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded border border-slate-700 hover:text-white transition-colors">방어구</button>
+                <button onclick="GameSystem.Forge.switchTab('accessory')" id="forge-tab-accessory" class="flex-1 py-1.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded border border-slate-700 hover:text-white transition-colors">장신구</button>
             </div>
+
+            <div id="forge-item-list" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                </div>
         </div>
 
         <div id="forge-details" class="hidden bg-slate-900 border border-purple-500/50 rounded-xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
