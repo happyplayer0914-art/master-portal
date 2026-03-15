@@ -198,13 +198,14 @@ const UIManager = {
         const panelCosmetics = document.getElementById('inv-panel-cosmetics');
         
         if(btnGear && btnCosmetics) {
+            // 🚨 [진범 박멸] w-full을 모조리 flex-1로 교체 완료!!
             btnGear.className = t === 'gear' 
-                ? "w-full py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors" 
-                : "w-full py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors";
+                ? "flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors whitespace-nowrap" 
+                : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
                 
             btnCosmetics.className = t === 'cosmetics' 
-                ? "w-full py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors" 
-                : "w-full py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors";
+                ? "flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors whitespace-nowrap" 
+                : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
         }
 
         if(panelGear) panelGear.classList.toggle('hidden', t !== 'gear');
