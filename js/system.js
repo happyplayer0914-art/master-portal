@@ -2126,7 +2126,7 @@ GameSystem.Profile = {
                 nickname: GameState.nickname,
                 uid: GameState.uid || "0000",
                 statusMessage: GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!",
-                highestStage: GameState.maxStage || 1,
+               highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
                 prestige: GameState.prestige || 0,
                 bgSkin: GameState.equippedBg || 'none', // 남의 팝업창 배경 띄울 때 사용
                 equipment: {
