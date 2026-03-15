@@ -149,9 +149,8 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-               // 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
-                // 부모의 overflow-hidden이 왼쪽 위 둥근 모서리를 알아서 잘라줍니다.
-                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-br-[8px] z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
+              // 🌟 [UI 완벽 픽스] 뱃지 자체의 왼쪽 위(tl)를 둥글게 깎고, 위아래 여백(leading-none, py-1)을 최적화!
+const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-1 leading-none rounded-tl-xl rounded-br-lg z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
@@ -354,9 +353,8 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-                // 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
-                // 부모의 overflow-hidden이 왼쪽 위 둥근 모서리를 알아서 잘라줍니다.
-                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-br-[8px] z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
+               // 🌟 [UI 완벽 픽스] 뱃지 자체의 왼쪽 위(tl)를 둥글게 깎고, 위아래 여백(leading-none, py-1)을 최적화!
+const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-1 leading-none rounded-tl-xl rounded-br-lg z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
