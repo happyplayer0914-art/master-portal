@@ -1080,7 +1080,7 @@ upgradeStat(t) {
                 { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 30마리 토벌', target: 30, rewardGold: 500, rewardGems: 100 },
                 
                 // 2. 보스 30마리 -> 5마리로 하향! (보상 변경: 500G / 150💎)
-                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 1500, rewardGems: 300 },
+                { id: 'w2', title: '심연의 군주 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 1500, rewardGems: 300 },
                 
                 // 3. 방치형 지원금 5회 수령 (유지, 보상 유지: 300G / 50💎)
                 { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGold: 300, rewardGems: 50 },
@@ -1267,7 +1267,7 @@ enterDungeon() {
             if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
             
             // 🔓 1. 최대 층수 100층으로 해제!
-            if (GameState.rpgStage > 100) return UIManager.showToast("진(眞) 마왕을 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
+            if (GameState.rpgStage > 100) return UIManager.showToast("심연의 군주를 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
             
            
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
@@ -1419,7 +1419,7 @@ enterDungeon() {
                 7: "🧊 얼어붙은 왕국", 
                 8: "🌑 기사단의 무덤",
                 9: "🔥 불타는 지옥문",
-                10: "🌌 마왕의 심연"
+                10: "🌌 군주의 심연"
             };
 
             const battleCard = document.getElementById('battle-card');
@@ -1733,7 +1733,7 @@ playerAttack() {
      // 💡 [신규] 차원의 여신 환생 시스템
         doPrestige() {
             if (GameState.rpgStage <= 100) {
-                return UIManager.showToast("100층의 진(眞) 마왕을 토벌해야 차원의 여신을 만날 수 있습니다! 👑");
+                return UIManager.showToast("100층의 심연의 군주를 토벌해야 차원의 여신을 만날 수 있습니다! 👑");
             }
             
             const modal = document.getElementById('goddess-modal');
