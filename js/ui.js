@@ -52,38 +52,34 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-init() { 
+// 🌟 [최종 진화] 무한 추적 로딩 엔진 탑재!
+    init() { 
         this.initBackground(); 
         
-        // 🚨 [최종 보스 박멸] 데이터가 완벽하게 로드될 때까지 집요하게 화면을 갱신하는 엔진!
-        if (window.GameState && typeof GameState.load === 'function') {
-            GameState.load(); // 폰에 저장된 데이터 멱살 잡고 끌어오기
-        }
+        // 🚨 [좀비 추적 엔진] 화면이 0원이면 진짜 돈이 로딩될 때까지 0.3초마다 강제로 다시 그립니다!
+        const bootEngine = setInterval(() => {
+            if (window.GameState) {
+                if (typeof GameState.load === 'function') GameState.load(); // 금고 강제 개방
+                
+                this.updateCurrencyUI(); 
+                this.applyAvatarSkin(); 
+                this.initCheckinButton(); 
+                this.updateIdleUI(); 
+                if(document.getElementById('profile-nickname-display')) {
+                    document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+                }
+                this.updateRpgLobbyUI();
+                this.updateProfileUI();
 
-        // 화면 전체를 싹 다 다시 그리는 핵심 묶음
-        const forceUpdateAll = () => {
-            this.updateCurrencyUI(); 
-            this.applyAvatarSkin(); 
-            this.initCheckinButton(); 
-            this.updateIdleUI(); 
-            if(document.getElementById('profile-nickname-display')) {
-                document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+                // 💡 골드가 0이 아니거나 정상적으로 로딩되었으면 엔진 정지! (깜빡임 완벽 박멸)
+                if (Number(GameState.gold) > 0) {
+                    clearInterval(bootEngine);
+                }
             }
-            this.updateRpgLobbyUI();
-            this.updateProfileUI();
-            if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
-                GameSystem.Lobby.applyBackground();
-            }
-        };
+        }, 300);
 
-        // 즉시 1번 실행
-        forceUpdateAll();
-
-        // 💡 [핵심] 0.1초, 0.5초, 1초, 2초에 걸쳐 총 4번 더 확인 사살! (어떤 로딩 지연이 와도 무조건 잡아냅니다)
-        setTimeout(forceUpdateAll, 100);
-        setTimeout(forceUpdateAll, 500);
-        setTimeout(forceUpdateAll, 1000);
-        setTimeout(forceUpdateAll, 2000);
+        // 아무리 늦어도 3초 뒤에는 엔진 강제 종료 (무한 루프 방지)
+        setTimeout(() => clearInterval(bootEngine), 3000);
 
         // 파이어베이스(서버)에서 한줄소개/인기도 땡겨오기
         if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
@@ -91,6 +87,13 @@ init() {
         }
 
         if(this.GachaSlider) this.GachaSlider.init();
+
+        // 게임 켤 때 내가 낀 배경화면 불러오기
+        setTimeout(() => {
+            if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+                GameSystem.Lobby.applyBackground();
+            }
+        }, 500);
         
         // 탈주 페널티 로직
         if (localStorage.getItem('master_in_battle') === 'true') {
@@ -106,6 +109,26 @@ init() {
                 this.updateRpgLobbyUI();
             }, 1000);
         }
+
+        // 방치형 지원금 1분마다 UI 갱신
+        setInterval(() => {
+            const homeScreen = document.getElementById('screen-home');
+            if (homeScreen && homeScreen.classList.contains('active')) {
+                this.updateIdleUI();
+            }
+        }, 60000);
+
+        // 체력 회복 1초 스케줄러
+        setInterval(() => {
+            if (window.GameState && GameState.recoverHpOverTime) {
+                GameState.recoverHpOverTime();
+            }
+            const arenaScreen = document.getElementById('screen-arena');
+            if (arenaScreen && arenaScreen.classList.contains('active')) {
+                this.updateHpRecoveryText();
+            }
+        }, 1000);
+    },
 
         // 방치형 지원금 1분마다 UI 갱신
         setInterval(() => {
@@ -210,22 +233,23 @@ init() {
         }
     },
     
-  // 🌟 [수정됨] 재화 표시 시스템 (문자열 변환 버그 원천 차단!)
+  // 🌟 [최종 진화] 재화 표시 시스템 (문자 강제 숫자 변환 + 에러 방어!)
     updateCurrencyUI() {
+        // 💡 [핵심 방어막] 데이터가 글자로 오든 빈칸으로 오든 무조건 숫자로 강제 멱살잡이!
+        let g = Number(GameState.gold) || 0;
+        let m = Number(GameState.gem) || 0;
+
         const formatBigNumber = (num) => {
-            // 💡 [핵심 방어막] 문자가 들어와도 무조건 숫자로 강제 변환! 데이터가 없으면 0 처리!
-            const safeNum = Number(num) || 0; 
-            
-            if (safeNum >= 100000000) return (safeNum / 100000000).toFixed(2) + '억';
-            if (safeNum >= 10000) return (safeNum / 10000).toFixed(1) + '만';
-            return safeNum.toLocaleString();
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
+            if (num >= 10000) return (num / 10000).toFixed(1) + '만';
+            return num.toLocaleString();
         };
 
         const goldEl = document.getElementById('gold-display');
         const gemEl = document.getElementById('gem-display');
-
-        if (goldEl) goldEl.innerText = formatBigNumber(GameState.gold);
-        if (gemEl) gemEl.innerText = formatBigNumber(GameState.gem);
+        
+        if (goldEl) goldEl.innerText = formatBigNumber(g);
+        if (gemEl) gemEl.innerText = formatBigNumber(m);
     },
     
     initCheckinButton() { 
