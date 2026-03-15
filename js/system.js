@@ -1186,41 +1186,54 @@ upgradeStat(t) {
             }
         }
     }, // 👈 완벽한 콤마 마무리! 여기서부터 Quest: { 로 이어집니다!
-  Quest: {
+ Quest: {
         currentTab: 'daily',
         
-        // 💡 마스터의 새로운 퀘스트 목록! (보상과 목표치는 여기서 수정하세요)
-      list: {
+        list: {
             daily: [
                 { id: 'd1', title: '심연의 도전자', desc: '심연의 탑 3층(회) 클리어', target: 3, rewardGold: 50, rewardGems: 15 },
                 { id: 'd2', title: '트렌드 세터', desc: '인기 폭발 테스트 3회 참여', target: 3, rewardGold: 50, rewardGems: 20 },
                 { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 3회 강화', target: 3, rewardGold: 50, rewardGems: 15 }
             ],
-          weekly: [ 
-                // 1. 일반 몬스터 300마리 -> 30마리로 대폭 하향! (보상 유지: 500G / 100💎)
+            weekly: [
                 { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 30마리 토벌', target: 30, rewardGold: 500, rewardGems: 100 },
-                
-                // 2. 보스 30마리 -> 5마리로 하향! (보상 변경: 500G / 150💎)
                 { id: 'w2', title: '심연의 군주 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 1500, rewardGems: 300 },
-                
-                // 3. 방치형 지원금 5회 수령 (유지, 보상 유지: 300G / 50💎)
                 { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGold: 300, rewardGems: 50 },
-                
-                // 4. 스탯 강화 100회 -> 30회로 하향! (보상 변경: 500G / 100💎)
                 { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 30회 강화', target: 30, rewardGold: 1000, rewardGems: 200 },
-                
-                // 5. 환생 1회 달성 (유지, 보상 변경: 1000G / 300💎)
                 { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 5000, rewardGems: 500 }
             ]
         },
 
         progress: { daily: {}, weekly: {} },
-          
-// 🚨 [진범 검거!] 제가 빼먹었던 퀘스트 전용 저장 함수 부활!!!
+      
+        // 🚨 [누락 복구] 퀘스트 진행도 저장 장치
         save() {
             localStorage.setItem('master_quest_progress2', JSON.stringify(this.progress));
         },
-          
+
+        // 🚨 [진범 박멸!!] 퀘스트 카운트를 올려주는 수신기 엔진 드디어 탑재!!
+        update(type, questId, amount) {
+            if (!this.progress[type] || !this.progress[type][questId]) return;
+            
+            let q = this.progress[type][questId];
+            let targetData = this.list[type].find(x => x.id === questId);
+            if (!targetData) return;
+
+            // 이미 달성했거나 보상받은 퀘스트면 무시
+            if (q.count >= targetData.target || q.claimed) return;
+
+            q.count += amount;
+            
+            // 목표치 달성!
+            if (q.count >= targetData.target) {
+                q.count = targetData.target;
+                if(window.UIManager && UIManager.showToast) {
+                    UIManager.showToast(`🔔 퀘스트 달성: [${targetData.title}]`);
+                }
+            }
+            this.save(); // 진척도 오를 때마다 안전하게 저장
+        },
+
         init() {
             const saved = localStorage.getItem('master_quest_progress2'); 
             
@@ -1238,20 +1251,17 @@ upgradeStat(t) {
                 this.progress = { daily: {}, weekly: {}, lastDailyDate: '', lastWeeklyDate: '' };
             }
 
-            // 🚨 [핵심 방어막] 예전 데이터라서 구조가 안 맞으면 빈 뼈대 다시 세워주기!
             if (!this.progress.daily) this.progress.daily = {};
             if (!this.progress.weekly) this.progress.weekly = {};
 
             let needsSave = false;
 
-            // ☀️ 일일 퀘스트 초기화
             if (this.progress.lastDailyDate !== todayStr) {
                 this.list.daily.forEach(q => this.progress.daily[q.id] = { count: 0, claimed: false });
                 this.progress.lastDailyDate = todayStr; 
                 needsSave = true;
             }
 
-            // 📆 주간 퀘스트 초기화
             if (this.progress.lastWeeklyDate !== weekStr) {
                 this.list.weekly.forEach(q => this.progress.weekly[q.id] = { count: 0, claimed: false });
                 this.progress.lastWeeklyDate = weekStr; 
@@ -1267,67 +1277,30 @@ upgradeStat(t) {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
             
-            // 🌟 [핵심 해결책] 퀘스트 창을 열 때마다 달력 검사기를 돌립니다! (12시 땡! 지났으면 열리는 순간 싹 비워짐)
             this.init(); 
 
             const modal = document.getElementById('quest-modal');
             if (modal) {
                 modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
                 modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
-                this.renderList(); // 열 때 깔끔하게 0/3 으로 렌더링!
-            }
-        },
-
-        // 💡 2. 골드와 젬을 동시에 주도록 보상 수령 함수 업그레이드!
-        claimReward(type, questId) {
-            let qProgress = this.progress[type][questId];
-            let qData = this.list[type].find(q => q.id === questId);
-
-            if (qProgress.count >= qData.target && !qProgress.claimed) {
-                qProgress.claimed = true;
-                
-                // 골드와 젬을 동시에 지급!
-              // 👇 [이렇게 변경!]
-                GameState.gold += Number(qData.rewardGold || 0); 
-                GameState.gem += Number(qData.rewardGems || 0);
-                
-                GameState.save();
-                this.save();
-                
-                UIManager.updateCurrencyUI();
-                AudioEngine.sfx.coin();
-                UIManager.triggerHaptic();
-                UIManager.showToast(`🎁 보상 획득! 🪙 ${qData.rewardGold} / 💎 ${qData.rewardGems}`);
                 this.renderList(); 
-            }
-        },
-       openModal() {
-            AudioEngine.sfx.click();
-            UIManager.triggerHaptic();
-            const modal = document.getElementById('quest-modal');
-            if (modal) {
-                // 💡 [핵심] 뚫려있던 클릭 판정을 막아주는 마스터의 'active' 클래스 추가!
-                modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
-                this.renderList(); // 열 때 화면 그리기
             }
         },
 
         closeModal() {
-            AudioEngine.sfx.click();
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             const modal = document.getElementById('quest-modal');
             if (modal) {
-                // 💡 [핵심] 닫을 때 'active' 클래스도 같이 빼주기!
                 modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
                 modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
             }
         },
 
         switchTab(tabName) {
-            AudioEngine.sfx.click();
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             this.currentTab = tabName;
             const btnDaily = document.getElementById('quest-tab-daily');
-            const btnWeekly = document.getElementById('quest-tab-weekly'); // HTML에 id="quest-tab-weekly" 로 되어있어야 함!
+            const btnWeekly = document.getElementById('quest-tab-weekly'); 
             
             if (tabName === 'daily') {
                 if(btnDaily) btnDaily.className = "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded";
@@ -1337,6 +1310,29 @@ upgradeStat(t) {
                 if(btnWeekly) btnWeekly.className = "flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded";
             }
             this.renderList();
+        },
+
+        claimReward(type, questId) {
+            let qProgress = this.progress[type][questId];
+            let qData = this.list[type].find(q => q.id === questId);
+
+            if (qProgress.count >= qData.target && !qProgress.claimed) {
+                qProgress.claimed = true;
+                
+                GameState.gold += Number(qData.rewardGold || 0); 
+                GameState.gem += Number(qData.rewardGems || 0);
+                
+                if(GameState.save) GameState.save();
+                this.save();
+                
+                if(window.UIManager) {
+                    UIManager.updateCurrencyUI();
+                    if(UIManager.triggerHaptic) UIManager.triggerHaptic();
+                    UIManager.showToast(`🎁 보상 획득! 🪙 ${qData.rewardGold} / 💎 ${qData.rewardGems}`);
+                }
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+                this.renderList(); 
+            }
         },
 
         renderList() {
@@ -1360,7 +1356,6 @@ upgradeStat(t) {
                     btnHtml = `<div class="text-xs font-bold text-slate-400">${progress.count} / ${q.target}</div>`;
                 }
 
-              // (renderList 함수 안쪽의 html 변수 덮어씌우기)
                 const html = `
                     <div class="glass-card p-4 border border-slate-700/50 flex flex-col gap-2 ${progress.claimed ? 'opacity-50' : ''}">
                         <div class="flex justify-between items-start">
