@@ -142,18 +142,17 @@ const UIManager = {
         document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
         document.getElementById('potion-count-display').innerText = GameState.potions;
 
-     const renderSlot = (slotId, itemId, label) => {
+    const renderSlot = (slotId, itemId, label) => {
             const el = document.getElementById(slotId);
             if (!el) return;
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
-                
-                // 🌟 [추가] 장비의 강화 수치를 불러와서 예쁜 보라색 뱃지로 만들기!
                 const level = GameState.itemUpgrades[itemId] || 0;
+                
                 // 💡 [UI 픽스] 밖으로 튀어나가지 않게 모서리에 딱 맞춤! (top-0 left-0)
                 const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
                 
-                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
+                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
                 el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
@@ -345,23 +344,24 @@ const UIManager = {
         document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
         
-        // 🌟 내 정보 탭의 장비 슬롯도 뱃지 표시되게 변경!
+     // 🌟 내 정보 탭의 장비 슬롯도 뱃지 표시되게 변경!
         const renderProfileSlot = (slotId, itemId, label) => {
             const el = document.getElementById(slotId);
             if (!el) return;
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
-               // 💡 [UI 픽스] 여기도 동일하게 모서리 핏으로 교체!
+                
+                // 💡 [UI 픽스] 여기도 동일하게 모서리 핏으로 교체!
                 const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
                 
-                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
+                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
                 el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
                 el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
             }
-        };
+        };;
 
         renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
         renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
