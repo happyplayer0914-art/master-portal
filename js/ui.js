@@ -1,8 +1,59 @@
 // =========================================================================
 // 4. UI MANAGER
 // =========================================================================
+// =========================================================================
+// 4. UI MANAGER
+// =========================================================================
 const UIManager = {
     selectedItems: [],
+
+    // 🌟 [신규 추가] 랜덤 휴식 멘트 리스트
+    recoveryTexts: [
+        "향긋한 에일 맥주와 바삭한 고기 파이로 피로를 녹이는 중...",
+        "주점에서 다른 길드장들과 떠드는 중...",
+        "모닥불에서 길드원들과 마시멜로 굽는 중...",
+        "혼자 고요한 밤하늘을 올려보며 감상하는 중...",
+        "현실에서 중요한 일을 해결하는 중..."
+    ],
+    currentRecoveryText: "",
+
+    // 🌟 [신규 추가] 1초마다 타이머와 멘트를 갱신해 주는 전광판 엔진!
+    updateHpRecoveryText() {
+        const el = document.getElementById('hp-recovery-text');
+        if (!el) return;
+
+        const maxHp = GameState.getTotalStats().hp;
+        
+        // 풀피(100%)거나 전투 중일 때는 텍스트 숨기기
+        if (GameState.currentHp >= maxHp || GameState.isBattling) {
+            el.classList.add('hidden');
+            this.currentRecoveryText = ""; // 멘트 초기화
+            return;
+        }
+
+        // 멘트가 비어있다면 리스트에서 랜덤으로 하나 뽑기
+        if (!this.currentRecoveryText) {
+            this.currentRecoveryText = this.recoveryTexts[Math.floor(Math.random() * this.recoveryTexts.length)];
+        }
+
+        // 남은 시간 정밀 계산 (총 필요한 시간 - 현재 틱에서 흘러간 시간)
+        const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+        const missingHp = maxHp - GameState.currentHp;
+        const msPerHp = EIGHT_HOURS / maxHp;
+        
+        let remainingMs = (missingHp * msPerHp) - (Date.now() - GameState.lastHpUpdate);
+        if (remainingMs < 0) remainingMs = 0;
+
+        // 보기 예쁜 00:00:00 포맷으로 변환
+        const totalSeconds = Math.floor(remainingMs / 1000);
+        const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(totalSeconds % 60).padStart(2, '0');
+
+        // 화면에 출력!
+        el.innerHTML = `☕ ${this.currentRecoveryText} <span class="text-emerald-400 font-bold ml-1">(${h}:${m}:${s})</span>`;
+        el.classList.remove('hidden');
+    },
 
     init() { 
         this.initBackground(); 
@@ -45,6 +96,12 @@ const UIManager = {
         setInterval(() => {
             if (window.GameState && GameState.recoverHpOverTime) {
                 GameState.recoverHpOverTime();
+            }
+            
+            // 💡 [추가] 투기장 화면을 보고 있을 때만 1초마다 전광판 갱신!
+            const arenaScreen = document.getElementById('screen-arena');
+            if (arenaScreen && arenaScreen.classList.contains('active')) {
+                this.updateHpRecoveryText();
             }
         }, 1000);
     },
