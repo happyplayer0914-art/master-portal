@@ -9,6 +9,7 @@ const GameState = {
     lastCheckIn: "",
     lastPlayRewards: {}, 
     lastIdleCheck: Date.now(),
+    lastHpUpdate: Date.now(), // 💡 [추가] 마지막으로 체력을 회복한 시간!
     ownedCosmetics: [],
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     
@@ -72,6 +73,7 @@ const GameState = {
         this.lastCheckIn = this._safeLoad('last_checkin', "");
         this.lastPlayRewards = this._safeLoad('master_play_rewards_map', {});
         this.lastIdleCheck = this._safeLoad('master_last_idle', Date.now());
+        this.lastHpUpdate = this._safeLoad('master_last_hp_update', Date.now()); // 💡 [추가]
         
         this.rpgStage = this._safeLoad('master_stage', 1);
         this.rpgAtk = this._safeLoad('master_atk', 10);
@@ -117,8 +119,9 @@ const GameState = {
             this.questData = defaultQuestData;
         }
         
-        this.checkDailyReset();
-        this.checkAndRevive();
+       this.checkDailyReset();
+        // this.checkAndRevive(); ❌ [삭제] 기존 하루 1번 부활 로직 지우기!
+        this.recoverHpOverTime(); // 💡 [추가] 새로운 실시간 회복 로직 실행!
     },
 
     save() {
@@ -131,6 +134,7 @@ const GameState = {
         localStorage.setItem('master_synth_pity', this._encode(this.synthPity)); 
         localStorage.setItem('master_play_rewards_map', this._encode(this.lastPlayRewards));
         localStorage.setItem('master_last_idle', this._encode(this.lastIdleCheck));
+        localStorage.setItem('master_last_hp_update', this._encode(this.lastHpUpdate)); // 💡 [추가]
         localStorage.setItem('master_stage', this._encode(this.rpgStage));
         localStorage.setItem('master_atk', this._encode(this.rpgAtk));
         localStorage.setItem('master_max_hp', this._encode(this.rpgMaxHp));
@@ -164,10 +168,45 @@ const GameState = {
         if (this.questData.daily.date !== today) { this.questData.daily.date = today; this.questData.daily.progress = {}; this.save(); }
     },
     
-    checkAndRevive() {
-        const today = new Date().toLocaleDateString();
-        if (isNaN(this.currentHp) || (this.currentHp <= 0 && localStorage.getItem('master_last_revive') !== today)) {
-            this.currentHp = this.rpgMaxHp; localStorage.setItem('master_last_revive', today);
+   // ❌ 기존 checkAndRevive() 함수는 삭제
+
+    // 🌟 [신규] 8시간(100%) 비례 실시간 체력 회복 엔진!
+    recoverHpOverTime() {
+        const now = Date.now();
+        if (!this.lastHpUpdate) this.lastHpUpdate = now;
+        
+        // 전투 중일 때는 자동 회복을 멈춰서 밸런스 붕괴 방지!
+        if (this.isBattling) {
+            this.lastHpUpdate = now; 
+            return; 
+        }
+
+        const maxHp = this.getTotalStats().hp;
+        
+        if (this.currentHp < maxHp) {
+            const elapsedMs = now - this.lastHpUpdate;
+            const EIGHT_HOURS = 8 * 60 * 60 * 1000; // 8시간을 밀리초(ms)로 변환
+            
+            // 8시간(EIGHT_HOURS)에 걸쳐 최대 체력(maxHp)만큼 회복
+            const recovered = (elapsedMs / EIGHT_HOURS) * maxHp;
+            
+            // 💡 1 이상 찼을 때만 틱(Tick) 단위로 깔끔하게 피를 채워줌!
+            if (recovered >= 1) {
+                this.currentHp = Math.min(maxHp, this.currentHp + Math.floor(recovered));
+                
+                // 회복에 써먹은 시간만큼만 계산해서 더해줌 (소수점 시간 손실 방지)
+                const timeUsed = (Math.floor(recovered) / maxHp) * EIGHT_HOURS;
+                this.lastHpUpdate += timeUsed;
+                this.save();
+                
+                // 로비(투기장) 화면을 보고 있다면 체력바 실시간으로 갱신!
+                if (window.UIManager && document.getElementById('screen-arena').classList.contains('active')) {
+                    UIManager.updateRpgLobbyUI();
+                }
+            }
+        } else {
+            // 풀피(100%)일 때는 시간만 계속 현재로 갱신 (시간 누적 방지)
+            this.lastHpUpdate = now;
         }
     },
 
