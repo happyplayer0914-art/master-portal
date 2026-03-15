@@ -2124,6 +2124,7 @@ GameSystem.Profile = {
             const userRef = window.doc(window.db, "users", GameState.nickname);
             await window.setDoc(userRef, {
                 nickname: GameState.nickname,
+                totalStats: GameState.getTotalStats(), // 🌟 [여기 추가!] 내 최종 스탯도 서버로 같이 전송!
                 uid: GameState.uid || "0000",
                 statusMessage: GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!",
                highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
