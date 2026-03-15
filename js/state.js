@@ -195,11 +195,16 @@ const GameState = {
         
         let prestigeMultiplier = 1.0 + (this.prestigeCount || 0);
 
+      // 💡 [수정됨] 0.00000001 처럼 길어지는 소수점을 1자리로 깔끔하게 절삭!
         return { 
             atk: Math.floor(this.rpgAtk * finalAtkMult * prestigeMultiplier), 
             hp: Math.floor(this.rpgMaxHp * finalHpMult * prestigeMultiplier),
-            critRate: finalCritRate, critDmg: finalCritDmg, vamp: finalVamp,
-            def: finalDef, eva: finalEva, spd: finalSpd
+            critRate: Number(finalCritRate.toFixed(1)), 
+            critDmg: Number(finalCritDmg.toFixed(1)), 
+            vamp: Number(finalVamp.toFixed(1)),
+            def: Math.floor(finalDef), 
+            eva: Number(finalEva.toFixed(1)), 
+            spd: Number(finalSpd.toFixed(1))
         };
     }
 };
