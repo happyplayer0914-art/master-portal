@@ -288,18 +288,15 @@ const UIManager = {
             </div>
         `;
 
-        const modal = document.getElementById('stats-modal');
+       const modal = document.getElementById('stats-modal');
         modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
         modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
     },
 
-        // 팝업 애니메이션 켜기
-        const modal = document.getElementById('stats-modal');
-        modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-        modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
-    },
- // 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
+    
+    // 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
     async openUserProfile(nickname, icon, title, stage, skinClass) {
+        
         if (nickname === GameState.nickname) return;
         window.currentTargetUser = nickname;
 
