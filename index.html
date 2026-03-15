@@ -433,13 +433,15 @@
         <div class="glass-card p-6 mb-6 text-center border-t-4 border-t-purple-500">
             <p class="text-purple-400 font-bold text-xs tracking-widest uppercase mb-1">Current Stage</p>
             <h2 class="text-4xl font-black text-white mb-6">층수: <span id="rpg-stage-display" class="text-gradient-gold">1</span>층</h2>
-         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-4">
-                <div class="flex justify-between text-xs font-bold text-emerald-400 mb-2 px-1">
-                    <span>마스터의 체력 (HP)</span>
-                    <span id="lobby-hp-text">100 / 100</span>
-                </div>
-                <div class="progress-track h-3"><div id="lobby-hp-bar" class="hp-fill"></div></div>
+       <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-4">
+            <div class="flex justify-between text-xs font-bold text-emerald-400 mb-2 px-1">
+                <span>마스터의 체력 (HP)</span>
+                <span id="lobby-hp-text">100 / 100</span>
             </div>
+            <div class="progress-track h-3"><div id="lobby-hp-bar" class="hp-fill"></div></div>
+            
+            <p id="hp-recovery-text" class="text-[10px] text-slate-400 mt-2.5 text-center font-medium tracking-tight hidden"></p>
+        </div>
             
             
            <div class="flex justify-center gap-4 mt-2 mb-4">
