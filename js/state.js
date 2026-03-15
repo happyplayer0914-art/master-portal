@@ -99,10 +99,15 @@ const GameState = {
         let w = this._safeLoad('master_equipped_weapon', 'none'); this.equippedWeapon = (w === 'none' ? null : w);
         let a = this._safeLoad('master_equipped_armor', 'none'); this.equippedArmor = (a === 'none' ? null : a);
         let ac = this._safeLoad('master_equipped_accessory', 'none'); this.equippedAccessory = (ac === 'none' ? null : ac);
-        // 💡 [여기에 추가!] 강화 데이터 불러오기!
+   // 💡 [여기에 추가!] 강화 데이터 불러오기! (에러 방어막 탑재)
         const savedUpgrades = localStorage.getItem('master_itemUpgrades');
         if (savedUpgrades) {
-            this.itemUpgrades = JSON.parse(savedUpgrades);
+            try {
+                this.itemUpgrades = JSON.parse(savedUpgrades);
+            } catch(e) {
+                console.warn("강화 데이터 손상, 초기화합니다.");
+                this.itemUpgrades = {};
+            }
         } else {
             this.itemUpgrades = {};
         }
