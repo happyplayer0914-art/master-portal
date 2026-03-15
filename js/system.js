@@ -1842,7 +1842,7 @@ window.giveUpBattle = function() {
 window.onRewardEarned = function() {
     console.log("광고 시청 완료! 꼬리표 확인 중...", window.currentAdAction);
     
-    // 꼬리표가 'gems' 일 때
+    // 💎 1. 꼬리표가 'gems' 일 때
     if (window.currentAdAction === 'gems') {
         GameState.gem += 50;
         GameState.save();
@@ -1851,37 +1851,40 @@ window.onRewardEarned = function() {
         UIManager.triggerHaptic();
         UIManager.showToast("📺 광고 시청 보상! 50 💎 획득!");
     } 
-        // 🌟 [여기 추가!!] 꼬리표가 'idle_double' (방치형 2배) 일 때!!
+    // 💰 2. 꼬리표가 'idle_double' (방치형 2배) 일 때
     else if (window.currentAdAction === 'idle_double') {
-        // 방치형 지원금 계산 함수를 불러와서 금액을 가져오고, x 2 를 때려버립니다!!
         const amount = GameSystem.Lobby.calculateIdleReward() * 2; 
         
         GameState.gold += amount;
-        // 💡 [퀘스트 센서 추가!] 방치형 보상 수령 시
         GameSystem.Quest.update('weekly', 'w3', 1);
-        GameState.lastIdleCheck = Date.now(); // 시간 초기화 
+        GameState.lastIdleCheck = Date.now(); 
         GameState.save();
         
         UIManager.updateCurrencyUI();
-        UIManager.updateIdleUI(); // 화면 0G로 리셋
+        UIManager.updateIdleUI(); 
         AudioEngine.sfx.coin();
         UIManager.triggerHaptic();
         UIManager.showToast(`📺 광고 보상! 방치 지원금 ${amount}G (2배) 수령 완료! 💰✨`);
     }
-    // 꼬리표가 'revive' 일 때
+    // 🌟 3. [신규 장착!!] 꼬리표가 'prestige_double' (환생 2배) 일 때
+    else if (window.currentAdAction === 'prestige_double') {
+        if (window.GameSystem && GameSystem.Battle) {
+            // 마스터가 만든 환생 엔진을 2배(multiplier = 2)로 풀가동!!
+            GameSystem.Battle.executePrestige(2); 
+        }
+    }
+    // 💀 4. 꼬리표가 'revive' 일 때
     else if (window.currentAdAction === 'revive') {
-        // 🌟 [수정된 부분] 낡은 'active' 대신 Tailwind 애니메이션으로 스르륵 끄기!
         const reviveModal = document.getElementById('revive-modal');
         if (reviveModal) {
             reviveModal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
             reviveModal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
         }
         
-        // (혹시 몰라서 남겨두는 옛날 death-modal 안전장치)
         const deathModal = document.getElementById('death-modal');
         if (deathModal) deathModal.classList.remove('active');
         
-        GameState.currentHp = GameState.getTotalStats().hp; // 체력 100% 회복!
+        GameState.currentHp = GameState.getTotalStats().hp; 
         GameState.save();
         
         UIManager.triggerHaptic();
@@ -1890,9 +1893,7 @@ window.onRewardEarned = function() {
         const battleScreen = document.getElementById('screen-rpg-battle');
         const isBattleScreen = battleScreen ? battleScreen.classList.contains('active') || battleScreen.style.display !== 'none' : false;
 
-        // 👇 여기서부터는 마스터가 짜둔 기적의 부활 로직 그대로!
         if (isBattleScreen) {
-            // ⚔️ 1. 전투 중에 죽었을 때 -> 전투 이어서 하기!
             GameState.isBattling = true; 
             localStorage.setItem('master_in_battle', 'true'); 
             const battleLog = document.getElementById('battle-log');
@@ -1912,7 +1913,6 @@ window.onRewardEarned = function() {
             
             UIManager.showToast("✨ 기적적으로 부활했습니다! 전투를 이어갑니다.");
         } else {
-            // ☠️ 2. 안전하게 로비로 귀환!
             GameState.isBattling = false;
             localStorage.setItem('master_in_battle', 'false');
 
