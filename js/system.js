@@ -1628,7 +1628,10 @@ playerAttack() {
             }
 
             let defStat = stats.def;
-            let damageReduction = defStat / (defStat + 100); 
+            // 💡 [방어력 공식 변경] 방어력 수치 = % 뎀감! 
+            // 단, 무적(100% 뎀감)이 되어 게임이 멈추는 걸 막기 위해 최대 90%까지만 적용됩니다.
+            let damageReduction = Math.min(defStat, 90) / 100; 
+            
             let damage = Math.max(1, Math.floor(rawDamage * (1 - damageReduction)));
             
             GameState.currentHp -= damage; GameState.save(); 
