@@ -992,7 +992,7 @@
                         </div>
                     </div>
                     
-                    <button onclick="UIManager.showToast('💖 좋아요를 보냈습니다! (서버 연동 전)')" class="bg-slate-900/80 border border-pink-500/50 hover:bg-pink-900/40 rounded-lg px-2 py-1.5 flex flex-col items-center backdrop-blur-sm shadow-lg transition-colors active:scale-95">
+                    <button onclick="GameSystem.Profile.addLike(window.currentTargetUser)" class="bg-slate-900/80 border border-pink-500/50 hover:bg-pink-900/40 rounded-lg px-2 py-1.5 flex flex-col items-center backdrop-blur-sm shadow-lg transition-colors active:scale-95">
                         <span class="text-[9px] text-pink-300 font-bold mb-0.5 tracking-widest">인기도</span>
                         <div class="flex items-center gap-1 text-white font-black text-xs">
                             <span class="text-pink-500 text-sm">💖</span> <span id="target-user-likes">0</span>
