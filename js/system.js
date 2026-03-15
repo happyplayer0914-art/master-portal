@@ -183,24 +183,33 @@ const GameSystem = {
         },
 
     Lobby: {
-        // 👇 여기서부터 복사해서 끼워 넣기!
-      applyBackground() {
-            const appBody = document.body; 
+        applyBackground() {
+            // 💡 [핵심] 모바일 스크롤 버그를 막기 위해 '고정된 배경 전용 도화지'를 하나 만듭니다!
+            let fixedBg = document.getElementById('fixed-custom-bg');
+            if (!fixedBg) {
+                fixedBg = document.createElement('div');
+                fixedBg.id = 'fixed-custom-bg';
+                // 화면 전체를 덮고 맨 뒤(-2)로 빠지며, 절대 움직이지 않는(fixed) 설정!
+                fixedBg.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-size: cover; background-position: center; background-repeat: no-repeat; pointer-events: none;';
+                document.body.prepend(fixedBg);
+            }
+
             const dynamicBg = document.getElementById('dynamic-bg'); 
             const bgId = GameState.equippedBg;
 
             if (bgId && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
                 const bgItem = GameData.cosmetics.backgrounds.find(b => b.id === bgId);
                 if (bgItem) {
-                    appBody.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
-                    appBody.style.backgroundSize = "cover";
-                    appBody.style.backgroundPosition = "center";
-                    appBody.style.backgroundAttachment = "fixed";
+                    // 이제 body가 아니라 고정된 도화지에 배경을 그립니다!
+                    fixedBg.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+                    fixedBg.style.display = 'block';
                     
-                    // 🌟 [핵심 해결책] 배경을 꽉 막고 있던 게임 화면(.screen)들을 반투명하게 만듭니다!
+                    // 기존에 body에 발려있던 에러투성이 배경은 싹 지웁니다.
+                    document.body.style.backgroundImage = "none";
+                    
                     document.querySelectorAll('.screen').forEach(s => {
-                        s.style.backgroundColor = 'rgba(15, 23, 42, 0.6)'; // 살짝 어두운 반투명 색상
-                        s.style.backdropFilter = 'blur(2px)'; // 뒷배경이 살짝 흐릿하게 보이게 뽀샤시 효과 (선택사항)
+                        s.style.backgroundColor = 'rgba(15, 23, 42, 0.6)'; 
+                        s.style.backdropFilter = 'blur(2px)'; 
                     });
 
                     if (dynamicBg) dynamicBg.style.display = 'none'; 
@@ -209,7 +218,8 @@ const GameSystem = {
             }
             
             // 장착 해제 시 원상복구 (다시 까만 화면으로!)
-            appBody.style.backgroundImage = "none";
+            if (fixedBg) fixedBg.style.display = 'none';
+            document.body.style.backgroundImage = "none";
             document.querySelectorAll('.screen').forEach(s => {
                 s.style.backgroundColor = ''; 
                 s.style.backdropFilter = '';
