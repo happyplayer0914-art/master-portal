@@ -705,6 +705,47 @@ upgradeStat(t) {
                 UIManager.showToast("신고 접수에 실패했습니다 😢");
             }
         },
+            // 📋 [신규] 차단된 유저 목록 화면에 그리기
+        renderBlockedUsers() {
+            const listContainer = document.getElementById('blocked-users-list');
+            if (!listContainer) return;
+            
+            listContainer.innerHTML = '';
+            
+            if (!GameState.blockedUsers || GameState.blockedUsers.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-slate-500 text-xs py-8">차단한 유저가 없습니다.</div>';
+                return;
+            }
+            
+            GameState.blockedUsers.forEach(nickname => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-sm";
+                div.innerHTML = `
+                    <span class="text-white font-bold text-sm truncate pr-2">${nickname}</span>
+                    <button onclick="GameSystem.Chat.unblockUser('${nickname}')" class="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all active:scale-95">해제</button>
+                `;
+                listContainer.appendChild(div);
+            });
+        },
+
+        // 🔓 [신규] 유저 차단 해제하기
+        unblockUser(nickname) {
+            if (!GameState.blockedUsers) return;
+            
+            // 블랙리스트에서 해당 닉네임 지우기
+            GameState.blockedUsers = GameState.blockedUsers.filter(name => name !== nickname);
+            GameState.save();
+            
+            UIManager.showToast(`✅ [${nickname}] 유저의 차단이 해제되었습니다.`);
+            
+            // 화면 목록 다시 그리기 (방금 해제한 사람 사라짐)
+            this.renderBlockedUsers();
+            
+            // 채팅창 새로고침 (차단 해제된 사람 글이 마법처럼 다시 등장!)
+            const tempRoom = this.currentRoom;
+            this.currentRoom = null; 
+            this.switchRoom(tempRoom);
+        },
         // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직 (완벽 픽스!)
         switchRoom(roomName) {
             if (this.currentRoom === roomName) return; 
