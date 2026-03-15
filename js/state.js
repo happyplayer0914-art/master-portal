@@ -161,25 +161,35 @@ const GameState = {
         }
     },
 
-    getTotalStats() {
+ getTotalStats() {
+        // 💡 [추가] 강화 데이터베이스(빈 창고)가 없으면 만들어주기!
+        if(!this.itemUpgrades) this.itemUpgrades = {};
+
         let finalAtkMult = 1.0; let finalHpMult = 1.0;
         let finalCritRate = 10; let finalCritDmg = 150; let finalVamp = 0;      
         
-        let finalDef = this.rpgDef; let finalEva = this.rpgEva; let finalSpd = this.rpgSpd;
+        let finalDef = this.rpgDef || 0; let finalEva = this.rpgEva || 0; let finalSpd = this.rpgSpd || 0;
 
         const gears = [this.equippedWeapon, this.equippedArmor, this.equippedAccessory];
         
         gears.forEach(id => {
             if (id && GameData.items[id]) {
                 const item = GameData.items[id];
-                if (item.atkMult) finalAtkMult += (item.atkMult - 1.0);
-                if (item.hpMult) finalHpMult += (item.hpMult - 1.0);
-                if (item.critRate) finalCritRate += item.critRate;
-                if (item.critDmg) finalCritDmg += item.critDmg;
-                if (item.vamp) finalVamp += item.vamp;
-                if (item.def) finalDef += item.def;
-                if (item.eva) finalEva += item.eva;
-                if (item.spd) finalSpd += item.spd;
+                
+                // 🌟 [핵심] 이 장비가 몇 강인지 확인하고 배율(1.0, 1.1, 1.2...) 만들기!
+                const level = this.itemUpgrades[id] || 0;
+                const upgMult = 1.0 + (level * 0.1); 
+
+                // 💡 아이템이 올려주는 수치에 강화 배율(upgMult)을 곱해서 더해줍니다!
+                // (예: 기본 공증가율이 +50%(0.5)인 무기가 2강(1.2배)이면 -> +60%(0.6)가 됨!)
+                if (item.atkMult) finalAtkMult += ((item.atkMult - 1.0) * upgMult);
+                if (item.hpMult) finalHpMult += ((item.hpMult - 1.0) * upgMult);
+                if (item.critRate) finalCritRate += (item.critRate * upgMult);
+                if (item.critDmg) finalCritDmg += (item.critDmg * upgMult);
+                if (item.vamp) finalVamp += (item.vamp * upgMult);
+                if (item.def) finalDef += (item.def * upgMult);
+                if (item.eva) finalEva += (item.eva * upgMult);
+                if (item.spd) finalSpd += (item.spd * upgMult);
             }
         });
         
