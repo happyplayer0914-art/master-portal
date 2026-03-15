@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <script>
+    // 🚨 시스템 에러 감지 레이더
+    window.onerror = function(message, source, lineno, colno, error) {
+        alert("🚨 치명적 에러 감지!\n\n내용: " + message + "\n줄 번호: " + lineno);
+        return true; 
+    };
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>마스터의 놀이터 | 프리미엄 테스트 & 미니게임 포털</title>
