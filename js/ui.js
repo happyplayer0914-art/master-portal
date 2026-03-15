@@ -605,10 +605,10 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
-        // 👑 최고 기록 (환생 + 층수 통합!)
+      // 👑 최고 기록 (환생 + 층수 통합! - 버그 1 해결)
         if(recordEl) {
-            const prestigeText = GameState.prestige > 0 ? `[${GameState.prestige}환생] ` : "";
-          recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
+            const prestigeText = (GameState.prestige && GameState.prestige > 0) ? `[${GameState.prestige}환생] ` : "";
+            recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
         }
 
         // 💬 한 줄 소개
@@ -616,13 +616,25 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             statusEl.innerText = GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!";
         }
 
-        // 💖 좋아요 (일단 로컬 데이터 0으로 표시, 나중에 서버랑 연결!)
+        // 💖 좋아요
         if(likesEl) {
             likesEl.innerText = GameState.likes || 0;
         }
 
+        // 🖼️ 내 프로필 배경 스킨 적용 (버그 4 해결)
+        const bgEl = document.getElementById('profile-bg-image');
+        if (bgEl) {
+            if (GameState.equippedBg && GameState.equippedBg !== 'none' && GameState.equippedBg !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
+                const bgItem = GameData.cosmetics.backgrounds.find(x => x.id === GameState.equippedBg);
+                if (bgItem) bgEl.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+            } else {
+                bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
+            }
+        }
+
         // ⚔️ 장비 슬롯 그리기 함수 호출
         this.updateProfileEquipmentSlots();
+        
         // 🌟 [여기 추가!] 화면 갱신이 끝날 때마다 파이어베이스 서버로 내 정보 쏴주기!
         if (window.GameSystem && GameSystem.Profile) {
             GameSystem.Profile.syncToServer();
