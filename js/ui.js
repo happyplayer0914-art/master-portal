@@ -117,10 +117,16 @@ const UIManager = {
 
     updateIdleUI() {
         const amount = GameSystem.Lobby.calculateIdleReward();
+      // 💡 [추가됨] 시스템에서 내 최대 한도가 얼만지 가져와서 UI에 뿌려줍니다!
+        const maxGold = GameSystem.Lobby.getMaxIdleReward();
+        
         const display = document.getElementById('idle-amount-display');
         if (display) {
-            display.innerText = `${amount} / 100 G`;
-            display.className = amount >= 100 ? "text-sm font-black text-emerald-400 animate-pulse" : "text-sm font-black text-slate-400";
+            // "현재 모인 돈 / 최대 한도 G" 형태로 출력
+            display.innerText = `${amount.toLocaleString()} / ${maxGold.toLocaleString()} G`;
+            
+            // 꽉 찼을 때만 초록색으로 반짝이게!
+            display.className = amount >= maxGold ? "text-sm font-black text-emerald-400 animate-pulse" : "text-sm font-black text-slate-400";
         }
     },
     
