@@ -150,7 +150,8 @@ const UIManager = {
                 
                 // 🌟 [추가] 장비의 강화 수치를 불러와서 예쁜 보라색 뱃지로 만들기!
                 const level = GameState.itemUpgrades[itemId] || 0;
-                const levelBadge = level > 0 ? `<div class="absolute -top-2 -left-2 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-purple-400 z-10 shadow">+${level}</div>` : '';
+                // 💡 [UI 픽스] 밖으로 튀어나가지 않게 모서리에 딱 맞춤! (top-0 left-0)
+                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
                 
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
@@ -351,7 +352,8 @@ const UIManager = {
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
-                const levelBadge = level > 0 ? `<div class="absolute -top-2 -left-2 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-purple-400 z-10 shadow">+${level}</div>` : '';
+               // 💡 [UI 픽스] 여기도 동일하게 모서리 핏으로 교체!
+                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
                 
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
