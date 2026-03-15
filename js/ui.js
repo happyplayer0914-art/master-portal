@@ -149,12 +149,8 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-             // 🌟 [UI 대혁신] 밋밋한 보라색 원형 뱃지 탈피! 
-// 왼쪽 위에 딱 붙는 세련된 다크 그레이 플래그 + 영롱한 골드 텍스트 조합!
-const levelBadge = level > 0 ? `
-    <div class="absolute top-0 left-0 bg-slate-900/90 text-yellow-300 text-[11px] font-black px-2 py-0.5 rounded-br-lg z-10 border-b border-r border-slate-600 shadow-md tracking-tighter" style="font-family: 'Pretendard', sans-serif; text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">
-        +${level}
-    </div>` : '';
+           // 🌟 [UI 완벽 픽스] 줄바꿈(엔터)을 없애서 투명한 여백 제거! 슬림하고 핏한 플래그 완성!
+const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-slate-900/90 text-yellow-300 text-[10px] font-black px-1.5 py-0.5 rounded-br-md z-10 border-b border-r border-slate-600 shadow-md leading-none tracking-tighter" style="text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
@@ -356,12 +352,8 @@ const levelBadge = level > 0 ? `
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
-             // 🌟 [UI 대혁신] 밋밋한 보라색 원형 뱃지 탈피! 
-// 왼쪽 위에 딱 붙는 세련된 다크 그레이 플래그 + 영롱한 골드 텍스트 조합!
-const levelBadge = level > 0 ? `
-    <div class="absolute top-0 left-0 bg-slate-900/90 text-yellow-300 text-[11px] font-black px-2 py-0.5 rounded-br-lg z-10 border-b border-r border-slate-600 shadow-md tracking-tighter" style="font-family: 'Pretendard', sans-serif; text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">
-        +${level}
-    </div>` : '';
+             // 🌟 [UI 완벽 픽스] 줄바꿈(엔터)을 없애서 투명한 여백 제거! 슬림하고 핏한 플래그 완성!
+const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-slate-900/90 text-yellow-300 text-[10px] font-black px-1.5 py-0.5 rounded-br-md z-10 border-b border-r border-slate-600 shadow-md leading-none tracking-tighter" style="text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
