@@ -660,7 +660,51 @@ upgradeStat(t) {
 
             this.listenRoom(this.currentRoom);
         },
+// 🚫 [신규] 유저 차단하기 (로컬 저장소에 블랙리스트 작성)
+        blockUser() {
+            if (!window.currentTargetUser) return;
+            if (!GameState.blockedUsers) GameState.blockedUsers = []; // 블랙리스트 수첩 만들기
+            
+            if (!GameState.blockedUsers.includes(window.currentTargetUser)) {
+                GameState.blockedUsers.push(window.currentTargetUser);
+                GameState.save();
+                UIManager.showToast(`🚫 [${window.currentTargetUser}] 유저를 차단했습니다. 이제 채팅이 보이지 않습니다.`);
+            } else {
+                UIManager.showToast(`이미 차단된 유저입니다.`);
+            }
+            
+            UIManager.closeUserProfile();
+            
+            // 채팅창을 새로고침해서 차단한 사람 글 싹 날려버리기!
+            const tempRoom = this.currentRoom;
+            this.currentRoom = null; 
+            this.switchRoom(tempRoom);
+        },
 
+        // 🚨 [신규] 파이어베이스에 진짜로 신고장 쏘기!
+        async submitReport() {
+            const reason = document.getElementById('report-reason-input').value.trim();
+            if (!reason) return UIManager.showToast("🚨 신고 사유를 작성해주세요!");
+            if (!window.db || !window.currentTargetUser) return;
+
+            try {
+                // 파이어베이스에 'reports' 라는 새 폴더를 만들어서 찔러넣기!
+                await window.addDoc(window.collection(window.db, "reports"), {
+                    reporter: GameState.nickname,
+                    target: window.currentTargetUser,
+                    reason: reason,
+                    timestamp: window.serverTimestamp()
+                });
+                
+                UIManager.showToast("🚨 신고가 정상적으로 접수되었습니다. 깨끗한 랩을 위해 노력하겠습니다!");
+                document.getElementById('report-reason-input').value = ''; // 썼던 내용 지우기
+                UIManager.closeReportModal();
+                UIManager.closeUserProfile();
+            } catch(e) {
+                console.error("신고 실패:", e);
+                UIManager.showToast("신고 접수에 실패했습니다 😢");
+            }
+        },
         // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직 (완벽 픽스!)
         switchRoom(roomName) {
             if (this.currentRoom === roomName) return; 
@@ -719,36 +763,37 @@ upgradeStat(t) {
             });
         },
 
-     renderMessages(messages) {
+   renderMessages(messages) {
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
             
             chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">매너 채팅 부탁드립니다! ✨</div>`;
             
             messages.forEach(msg => {
+                // 🚫 [핵심 1] 내가 차단한 블랙리스트 유저면 여기서 바로 컷! (화면에 안 그립니다)
+                if (GameState.blockedUsers && GameState.blockedUsers.includes(msg.nickname)) return;
+
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                // 💡 [수정] 칭호 HTML (닉네임 옆에 나란히 배치될 용도)
+                
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
-              // 👇 [수정됨] 채팅 프로필 테두리 불러오기
                 let skinClass = "bg-slate-700 border border-slate-600"; 
                 if(msg.skin && msg.skin !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                     const bItem = GameData.cosmetics.borders.find(x => x.id === msg.skin);
-                    // 💡 여기도 bg-slate-800 을 추가했습니다!
                     if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`;
                 }
-// 🌟 [추가됨!] 채팅 프로필 아이콘 불러오기
+
                 let innerIcon = msg.nickname.charAt(0);
                 if (msg.profile && msg.profile !== 'none' && msg.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
                     const pfItem = GameData.cosmetics.profiles.find(x => x.id === msg.profile);
                     if (pfItem) innerIcon = pfItem.icon;
                 }
-           // 👇 [추가됨] 채팅 말풍선 불러오기
-                let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; // 기본 말풍선
+           
+                let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; 
                 if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
                     const bubItem = GameData.cosmetics.bubbles.find(x => x.id === msg.bubble);
-                    if(bubItem) bubbleClass = bubItem.bgClass; // 황금빛 외침 등 커스텀 말풍선 적용!
+                    if(bubItem) bubbleClass = bubItem.bgClass; 
                 }
 
                 if (isMe) {
@@ -766,7 +811,8 @@ upgradeStat(t) {
                 } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div class="master-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${innerIcon}</div>
+                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${innerIcon}', '${msg.titleShort || ''}', '', '${skinClass.replace(/'/g, "\\'")}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${innerIcon}</div>
+                            
                             <div class="flex flex-col items-start max-w-[75%]">
                                 <div class="flex items-center gap-1.5 mb-0.5">
                                     <span class="text-[10px] text-slate-400 font-bold">${msg.nickname}</span>
