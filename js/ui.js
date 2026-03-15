@@ -615,9 +615,11 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
-      // 👑 최고 기록 (환생 + 층수 통합! - 버그 1 해결)
+      // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
-            const prestigeText = (GameState.prestige && GameState.prestige > 0) ? `[${GameState.prestige}환생] ` : "";
+            // 💡 prestige 대신 prestigeCount 로 수정!
+            const pCount = GameState.prestigeCount || 0;
+            const prestigeText = pCount > 0 ? `[${pCount}환생] ` : "";
             recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
         }
 
@@ -1006,12 +1008,13 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         }
         
         // 👇 [여기가 빠져있었습니다!] 칭호를 꼈을 때 내 정보 창(UI)을 즉시 새로고침하는 마법!
-        if (type === 'title') {
+      if (type === 'title') {
             this.updateRpgLobbyUI(); 
             if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
         }
         
         this.renderCosmeticsShop();
+        this.updateProfileUI(); // 🌟 [여기 추가!] 치장품 끼면 프로필 창 즉시 새로고침!
         this.triggerHaptic();
     },
 
@@ -1029,11 +1032,12 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             this.applyAvatarSkin();
             if (window.GameSystem && GameSystem.Ranking) GameSystem.Ranking.updateMyRanking();
         }
-        if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+       if (type === 'bg' && window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
              GameSystem.Lobby.applyBackground(); 
         }
         
         this.renderCosmeticsShop();
+        this.updateProfileUI(); // 🌟 [여기 추가!] 치장품 빼도 프로필 창 즉시 새로고침!
         this.triggerHaptic();
     },
 // =========================================================================
