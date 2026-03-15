@@ -583,11 +583,12 @@ upgradeStat(t) {
                     // 1. py-3 pl-2 pr-3 로 왼쪽 여백을 줄여서 '1위'를 왼쪽으로 바싹 붙였습니다.
                     // 2. w-10 텍스트 크기를 살짝 줄여서 공간을 더 확보했습니다.
                     // 3. 닉네임과 칭호에 마스터의 아이디어인 'rank-marquee-box' (슬라이딩)를 씌웠습니다!
-                    list.innerHTML += `
+                list.innerHTML += `
                         <div class="py-3 pl-2 pr-3 sm:py-4 sm:pl-3 sm:pr-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
                             <div class="flex items-center gap-2 flex-1 min-w-0">
                                 <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
-                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0">${innerIcon}</div>
+                                
+                                <div onclick="UIManager.openUserProfile('${d.nickname}', '${innerIcon}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${skinClass.replace(/'/g, "\\'")}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0 relative z-10">${innerIcon}</div>
                                 
                                 <div class="rank-marquee-box flex-1 min-w-0">
                                     <div class="rank-marquee-text">
