@@ -1730,49 +1730,71 @@ playerAttack() {
                 }
             }
         }, // 👈 콤마 잊지 마!
-     // 💡 [신규] 차원의 여신 환생 시스템
-        doPrestige() {
-            if (GameState.rpgStage <= 100) {
-                return UIManager.showToast("100층의 심연의 군주를 토벌해야 차원의 여신을 만날 수 있습니다! 👑");
+    // 🌟 [대격변] 차원의 여신 환생 시스템 (광고 연동 및 길드장님 전용 보상 공식 적용!)
+        doPrestige(isAd = false) {
+            if (GameState.rpgStage < 100) {
+                return UIManager.showToast("100층의 심연의 군주를 토벌해야 환생할 수 있습니다! 👑");
             }
-            
-            const modal = document.getElementById('goddess-modal');
-            if (modal) modal.classList.remove('hidden');
-            AudioEngine.sfx.coin(); 
+
+            // 📺 1. [광고 보고 2배!] 버튼을 눌렀을 때
+            if (isAd) {
+                window.currentAdAction = 'prestige_double'; // 꼬리표 달기!
+                
+                if (window.flutter_inappwebview) {
+                    window.flutter_inappwebview.callHandler('showRewardAd'); 
+                } else {
+                    UIManager.showToast("📺 (테스트) 광고 시청 중... 2초 뒤 2배 환생!");
+                    setTimeout(() => { 
+                        if (window.onRewardEarned) window.onRewardEarned(); 
+                    }, 2000); 
+                }
+                return; // 광고 끝날 때까지 여기서 정지!
+            }
+
+            // 💎 2. [그냥 환생] 버튼을 눌렀을 때 (1배 보상)
+            this.executePrestige(1);
         },
 
-        // 💡 모달창에서 '환생 수락' 버튼을 눌렀을 때 실행되는 진짜 환생 로직!
-        confirmPrestige() {
-            const modal = document.getElementById('goddess-modal');
-            if (modal) modal.classList.add('hidden'); // 모달 닫기
+        // ⚙️ [신규] 실제 환생 처리 및 보상 지급을 담당하는 핵심 엔진! (구 confirmPrestige 역할)
+        executePrestige(multiplier = 1) {
+            // 💡 길드장님 전용 공식: 다이아 = 층수 * 10, 골드 = 층수 * 30
+            const rewardDiamond = (GameState.rpgStage * 10) * multiplier;
+            const rewardGold = (GameState.rpgStage * 30) * multiplier;
 
+            // 1. 내 지갑에 젬과 골드 꽂아주기
+            GameState.gem += rewardDiamond;
+            GameState.gold += rewardGold;
+            
+            // 2. 환생 횟수 증가 및 1층으로 강등
             GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
             GameState.rpgStage = 1; 
             
-            // 골드로 올린 스탯 초기화
+            // 3. 골드로 올린 스탯 초기화 (기존 로직 유지)
             GameState.rpgAtk = 10;
             GameState.rpgMaxHp = 100;
-            GameState.currentHp = GameState.getTotalStats().hp; 
-
-         // 💎 [보상 추가] 100층 환생 기념 초대박 보상! 
-            // 기본 1000개 + (환생 횟수 * 500개) 씩 점점 더 많이 줌!
-            const rewardDiamond = 1000 + (GameState.prestigeCount * 500);
             
-            // 💡 [수정됨] 엉뚱한 diamond 지갑 버리고 진짜 gem 지갑에 넣기!
-            GameState.gem += rewardDiamond;
-
+            // 4. 저장 및 체력 풀피 회복
             GameState.save();
-            // 💡 [퀘스트 센서 추가!] 환생 성공 시!
-            GameSystem.Quest.update('weekly', 'w5', 1);
+            GameState.currentHp = GameState.getTotalStats().hp; 
+            GameState.save(); // 풀피 갱신을 위해 한 번 더 저장
 
-            UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! 보상으로 다이아 ${rewardDiamond}개를 획득했습니다! 💎`);
+            // 💡 [퀘스트 센서 유지] 환생 성공 시 주간 퀘스트 달성!
+            if (window.GameSystem && GameSystem.Quest) {
+                GameSystem.Quest.update('weekly', 'w5', 1);
+            }
+
+            UIManager.updateCurrencyUI();
             UIManager.updateRpgLobbyUI();
+            if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
             
             // 랭킹에도 환생 횟수 업데이트!
-            if (GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
+            if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) {
                 GameSystem.Ranking.updateRankingSilently(); 
-          }
-        } // 👈 이건 confirmPrestige 함수 닫는 괄호!
+            }
+
+            const adText = multiplier > 1 ? "(광고 2배 보너스!) " : "";
+            UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! ${adText}다이아 ${rewardDiamond.toLocaleString()}개, 골드 ${rewardGold.toLocaleString()}G 획득! 💎`);
+        }
     } // 🌟 짠! 여기가 핵심! Battle 묶음을 닫는 괄호를 추가!!
 }; // <-- GameSystem 닫는 괄호 (이제 완벽해!)
 
