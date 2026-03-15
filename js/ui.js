@@ -52,38 +52,42 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-// 🌟 [최종 진화] 프레임워크 덮어쓰기 완벽 방어 엔진!
+// 🌟 [진짜 최종] 문법 오류 박멸! 무조건 화면 즉시 렌더링 엔진!
     init() { 
         this.initBackground(); 
 
-        // 🚨 [진짜 원인 파악 완료!] 웹사이트가 로딩 직후 화면을 기본값(0원)으로 덮어씌우는 현상 방어!
-        // 웹사이트가 무슨 짓을 하든, 2초 동안은 0.1초 간격으로 내 900만 골드와 프사를 강제로 우겨넣습니다.
+        // 🚨 1. 게임 켜지자마자 기다리지 않고 무조건 1번 강제 렌더링!
+        if (typeof GameState !== 'undefined') {
+            if (typeof GameState.load === 'function') GameState.load(); 
+            this.updateCurrencyUI(); 
+            this.applyAvatarSkin(); 
+            this.initCheckinButton(); 
+            this.updateIdleUI(); 
+            if(document.getElementById('profile-nickname-display')) {
+                document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+            }
+            this.updateRpgLobbyUI();
+            this.updateProfileUI();
+        }
+
+        // 🚨 2. 혹시 모를 로딩 지연을 대비한 2초 덧칠 엔진! (window. 족쇄 삭제 완!)
         let guardCount = 0;
         const uiGuard = setInterval(() => {
-            if (window.GameState) {
-                // 금고 한 번 더 확실하게 열기
-                if (typeof GameState.load === 'function') GameState.load(); 
-                
+            if (typeof GameState !== 'undefined') {
                 this.updateCurrencyUI(); 
                 this.applyAvatarSkin(); 
-                this.initCheckinButton(); 
-                this.updateIdleUI(); 
-                if(document.getElementById('profile-nickname-display')) {
-                    document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
-                }
                 this.updateRpgLobbyUI();
                 this.updateProfileUI();
             }
 
             guardCount++;
-            // 0.1초 x 20번 = 딱 2초 동안 철통 방어 후 엔진 안전하게 종료!
             if (guardCount >= 20) { 
                 clearInterval(uiGuard);
             }
         }, 100);
 
         // 파이어베이스(서버)에서 한줄소개/인기도 땡겨오기
-        if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
+        if (typeof GameSystem !== 'undefined' && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
             GameSystem.Profile.loadMyProfile();
         }
 
@@ -91,7 +95,7 @@ const UIManager = {
 
         // 게임 켤 때 내가 낀 배경화면 불러오기
         setTimeout(() => {
-            if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
+            if (typeof GameSystem !== 'undefined' && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
                 GameSystem.Lobby.applyBackground();
             }
         }, 500);
@@ -99,7 +103,7 @@ const UIManager = {
         // 탈주 페널티 로직
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
-            if (window.GameState) {
+            if (typeof GameState !== 'undefined') {
                 GameState.currentHp = 0; 
                 GameState.isBattling = false;
                 if(GameState.save) GameState.save();
@@ -121,7 +125,7 @@ const UIManager = {
 
         // 체력 회복 1초 스케줄러
         setInterval(() => {
-            if (window.GameState && GameState.recoverHpOverTime) {
+            if (typeof GameState !== 'undefined' && GameState.recoverHpOverTime) {
                 GameState.recoverHpOverTime();
             }
             const arenaScreen = document.getElementById('screen-arena');
