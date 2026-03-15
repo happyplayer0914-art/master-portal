@@ -288,45 +288,95 @@ const UIManager = {
         modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
         modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
     },
-    // 👤 [전면 개편] 타 유저 궁극의 프로필 조회 모달 컨트롤러
-    openUserProfile(nickname, icon, title, stage, skinClass) {
-        // 본인 프로필은 누를 필요 없으니 컷!
+ // 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
+    async openUserProfile(nickname, icon, title, stage, skinClass) {
         if (nickname === GameState.nickname) return;
-
-        // 현재 선택한 타겟 유저 기억해두기 (차단/신고할 때 쓰기 위함)
         window.currentTargetUser = nickname;
 
-        // 1. 기본 정보 꽂아넣기
+        // 1. 기본 껍데기 세팅 (빠르게 먼저 띄움)
         document.getElementById('target-user-nickname').innerText = nickname;
         document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' ? `✨ ${title} ✨` : "✨ 칭호 없음 ✨";
         document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
-        
-        // 2. 아바타 & 테두리 꽂아넣기
         document.getElementById('target-user-avatar').innerHTML = icon;
-        // 내 프로필처럼 동그라미 테두리가 예쁘게 씌워지도록 조정!
         document.getElementById('target-user-avatar').className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass.replace('bg-slate-700', 'bg-slate-800')}`;
-
-        // 💡 3. 서버 연동 전 임시 텍스트 처리 (5단계에서 서버 연동 시 채워질 부분들!)
-        document.getElementById('target-user-uid').innerText = "????";
+        
+        // 로딩용 임시 텍스트
+        document.getElementById('target-user-uid').innerText = "로딩중...";
         document.getElementById('target-user-status').innerText = "서버에서 정보를 불러오는 중입니다...";
-        document.getElementById('target-user-likes').innerText = "???";
+        document.getElementById('target-user-likes').innerText = "0";
 
-        // 장비 슬롯도 일단 '로딩 중' 빈칸으로 둡니다.
-        const slots = ['weapon', 'armor', 'accessory'];
-        slots.forEach(type => {
-            const el = document.getElementById(`target-slot-${type}`);
-            if(el) {
-                const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
-                el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
-                el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
-            }
-        });
-
-        // 4. 모달창 짠! 하고 열기
+        // 창 열기
         const modal = document.getElementById('user-profile-modal');
         if (modal) {
             modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
             modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+
+        // 🌟 2. 파이어베이스에서 진짜 데이터 땡겨와서 덮어씌우기!
+        if (window.db) {
+            try {
+                const userRef = window.doc(window.db, "users", nickname);
+                const docSnap = await window.getDoc(userRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // 텍스트 정보 덮어씌우기
+                    document.getElementById('target-user-uid').innerText = data.uid || "0000";
+                    document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
+                    document.getElementById('target-user-likes').innerText = data.likes || 0;
+                    
+                    const prestigeText = data.prestige > 0 ? `[${data.prestige}환생] ` : "";
+                    document.getElementById('target-user-stage').innerText = `${prestigeText}${data.highestStage || stage}F`;
+
+                    // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
+                    const bgEl = document.getElementById('target-profile-bg');
+                    if (data.bgSkin && data.bgSkin !== 'none' && data.bgSkin !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
+                        const bgItem = GameData.cosmetics.backgrounds.find(x => x.id === data.bgSkin);
+                        if (bgItem) bgEl.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+                    } else {
+                        bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
+                    }
+                    
+                    // 상대방 장비 렌더링 엔진
+                    const renderTargetSlot = (type, itemId, level) => {
+                        const el = document.getElementById(`target-slot-${type}`);
+                        if (!el) return;
+                        
+                        if (itemId && window.GameData && GameData.items[itemId]) {
+                            const item = GameData.items[itemId];
+                            let rarityClass = "border-slate-600 bg-slate-800";
+                            if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
+                            else if(item.rarity === 'epic') rarityClass = "rarity-epic";
+                            else if(item.rarity === 'rare') rarityClass = "rarity-rare";
+                            else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+                            
+                            el.className = `w-[30%] aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                            el.innerHTML = `
+                                <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
+                                <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
+                                <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level || 0}</div>
+                            `;
+                            // 남의 장비 터치하면 텍스트로 살짝 옵션 보여주기!
+                            el.onclick = () => { UIManager.showToast(`[${item.name}] Lv.${level || 0} 장착 중!`); }; 
+                        } else {
+                            const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
+                            el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
+                            el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
+                            el.onclick = null;
+                        }
+                    };
+                    
+                    // 무기, 방어구, 장신구 뿌려주기
+                    renderTargetSlot('weapon', data.equipment?.weapon, data.itemUpgrades?.weapon);
+                    renderTargetSlot('armor', data.equipment?.armor, data.itemUpgrades?.armor);
+                    renderTargetSlot('accessory', data.equipment?.accessory, data.itemUpgrades?.accessory);
+                } else {
+                    document.getElementById('target-user-status').innerText = "최근 접속 기록이 없는 유저입니다.";
+                }
+            } catch (e) {
+                console.error("프로필 불러오기 실패:", e);
+            }
         }
     },
 
@@ -564,6 +614,10 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
         // ⚔️ 장비 슬롯 그리기 함수 호출
         this.updateProfileEquipmentSlots();
+        // 🌟 [여기 추가!] 화면 갱신이 끝날 때마다 파이어베이스 서버로 내 정보 쏴주기!
+        if (window.GameSystem && GameSystem.Profile) {
+            GameSystem.Profile.syncToServer();
+        }
     },
 
     // ⚔️ [신규] 프로필 전용 장비 슬롯 그리기
