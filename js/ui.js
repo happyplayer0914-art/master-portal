@@ -52,28 +52,35 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-// 🌟 [최종 진화] 무조건 즉시 렌더링 엔진!
+// 🌟 [최종 진화] 프레임워크 덮어쓰기 완벽 방어 엔진!
     init() { 
         this.initBackground(); 
-        
-        // 🚨 0.3초 타이머 삭제! 무조건 게임 켜자마자 화면부터 완벽하게 쫙 그립니다!
-        this.updateCurrencyUI(); 
-        this.applyAvatarSkin(); 
-        this.initCheckinButton(); 
-        this.updateIdleUI(); 
-        if(document.getElementById('profile-nickname-display')) {
-            document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
-        }
-        this.updateRpgLobbyUI();
-        this.updateProfileUI();
 
-        // 만약을 대비해 0.5초 뒤에 한 번 더 확실하게 덧칠 (0원 깜빡임 원천 차단)
-        setTimeout(() => {
-            this.updateCurrencyUI();
-            this.applyAvatarSkin();
-            this.updateRpgLobbyUI();
-            this.updateProfileUI();
-        }, 500);
+        // 🚨 [진짜 원인 파악 완료!] 웹사이트가 로딩 직후 화면을 기본값(0원)으로 덮어씌우는 현상 방어!
+        // 웹사이트가 무슨 짓을 하든, 2초 동안은 0.1초 간격으로 내 900만 골드와 프사를 강제로 우겨넣습니다.
+        let guardCount = 0;
+        const uiGuard = setInterval(() => {
+            if (window.GameState) {
+                // 금고 한 번 더 확실하게 열기
+                if (typeof GameState.load === 'function') GameState.load(); 
+                
+                this.updateCurrencyUI(); 
+                this.applyAvatarSkin(); 
+                this.initCheckinButton(); 
+                this.updateIdleUI(); 
+                if(document.getElementById('profile-nickname-display')) {
+                    document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+                }
+                this.updateRpgLobbyUI();
+                this.updateProfileUI();
+            }
+
+            guardCount++;
+            // 0.1초 x 20번 = 딱 2초 동안 철통 방어 후 엔진 안전하게 종료!
+            if (guardCount >= 20) { 
+                clearInterval(uiGuard);
+            }
+        }, 100);
 
         // 파이어베이스(서버)에서 한줄소개/인기도 땡겨오기
         if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
