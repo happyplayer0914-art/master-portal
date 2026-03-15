@@ -336,6 +336,26 @@ const UIManager = {
             modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
         }
     },
+    // 🚫 [신규] 차단 목록 관리 모달 컨트롤러
+    openBlockManageModal() {
+        const modal = document.getElementById('block-manage-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+        // 창 열 때 목록 바로 새로고침!
+        if (window.GameSystem && GameSystem.Chat) {
+            GameSystem.Chat.renderBlockedUsers();
+        }
+    },
+
+    closeBlockManageModal() {
+        const modal = document.getElementById('block-manage-modal');
+        if (modal) {
+            modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        }
+    },
     // 🌟 [신규] 차원의 여신(환생) 모달 열기 및 보상 계산!
     openGoddessModal() {
         // 1. 100층 미만이면 컷! (길드장님이 설정하신 층수가 있다면 거기에 맞춰주세요)
