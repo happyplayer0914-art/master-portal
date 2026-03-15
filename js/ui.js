@@ -117,19 +117,21 @@ const UIManager = {
 
     updateIdleUI() {
         const amount = GameSystem.Lobby.calculateIdleReward();
-      // 💡 [추가됨] 시스템에서 내 최대 한도가 얼만지 가져와서 UI에 뿌려줍니다!
+    // 시스템에서 내 최대 한도가 얼만지 가져오기
         const maxGold = GameSystem.Lobby.getMaxIdleReward();
         
         const display = document.getElementById('idle-amount-display');
         if (display) {
-            // "현재 모인 돈 / 최대 한도 G" 형태로 출력
             display.innerText = `${amount.toLocaleString()} / ${maxGold.toLocaleString()} G`;
-            
-            // 꽉 찼을 때만 초록색으로 반짝이게!
             display.className = amount >= maxGold ? "text-sm font-black text-emerald-400 animate-pulse" : "text-sm font-black text-slate-400";
         }
+
+        // 💡 [신규 추가] 설명 텍스트도 실시간 한도에 맞춰서 싹 바꿔주기!
+        const descDisplay = document.getElementById('idle-desc-display');
+        if (descDisplay) {
+            descDisplay.innerText = `접속을 종료해도 8시간 동안 최대 ${maxGold.toLocaleString()}G가 자동으로 누적됩니다.`;
+        }
     },
-    
     updateRpgLobbyUI() {
         // ... (기존 updateRpgLobbyUI 코드 내용 완벽히 동일하게 유지) ...
         const stats = GameState.getTotalStats(); 
