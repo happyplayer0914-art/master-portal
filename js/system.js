@@ -1219,45 +1219,57 @@ upgradeStat(t) {
         init() {
             const saved = localStorage.getItem('master_quest_progress2'); 
             
-            // 📅 1. 오늘의 날짜와 이번 주 월요일 날짜 구하기!
-            const todayStr = new Date().toDateString(); // 예: "Mon Mar 16 2026"
-            
+            const todayStr = new Date().toDateString(); 
             const now = new Date();
-            const day = now.getDay() || 7; // 일요일(0)을 7로 변환해서 계산하기 쉽게!
+            const day = now.getDay() || 7; 
             const monday = new Date(now);
-            monday.setDate(monday.getDate() - day + 1); // 이번 주 월요일로 시간 돌리기
+            monday.setDate(monday.getDate() - day + 1); 
             monday.setHours(0,0,0,0);
-            const weekStr = monday.toDateString(); // 예: "Mon Mar 16 2026"
+            const weekStr = monday.toDateString(); 
 
-            // 💾 2. 일단 저장된 데이터 불러오기
             if (saved) {
                 this.progress = JSON.parse(saved);
             } else {
-                // 처음 킨 유저면 뼈대부터 만들어주기
                 this.progress = { daily: {}, weekly: {}, lastDailyDate: '', lastWeeklyDate: '' };
             }
 
+            // 🚨 [핵심 방어막] 예전 데이터라서 구조가 안 맞으면 빈 뼈대 다시 세워주기!
+            if (!this.progress.daily) this.progress.daily = {};
+            if (!this.progress.weekly) this.progress.weekly = {};
+
             let needsSave = false;
 
-            // ☀️ 3. 일일 퀘스트 초기화 검사 (마지막 접속일이 오늘이 아니면 리셋!)
+            // ☀️ 일일 퀘스트 초기화
             if (this.progress.lastDailyDate !== todayStr) {
                 this.list.daily.forEach(q => this.progress.daily[q.id] = { count: 0, claimed: false });
-                this.progress.lastDailyDate = todayStr; // 오늘 날짜로 도장 쾅!
+                this.progress.lastDailyDate = todayStr; 
                 needsSave = true;
-                console.log("☀️ 일일 퀘스트 초기화 완료!");
             }
 
-            // 📆 4. 주간 퀘스트 초기화 검사 (마지막 접속 주간이 이번 주가 아니면 리셋!)
+            // 📆 주간 퀘스트 초기화
             if (this.progress.lastWeeklyDate !== weekStr) {
                 this.list.weekly.forEach(q => this.progress.weekly[q.id] = { count: 0, claimed: false });
-                this.progress.lastWeeklyDate = weekStr; // 이번 주 월요일 도장 쾅!
+                this.progress.lastWeeklyDate = weekStr; 
                 needsSave = true;
-                console.log("📆 주간 퀘스트 초기화 완료!");
             }
 
-            // 초기화된 게 있거나 처음 켰다면 저장소 업데이트!
             if (needsSave || !saved) {
                 this.save();
+            }
+        },
+
+        openModal() {
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+            
+            // 🌟 [핵심 해결책] 퀘스트 창을 열 때마다 달력 검사기를 돌립니다! (12시 땡! 지났으면 열리는 순간 싹 비워짐)
+            this.init(); 
+
+            const modal = document.getElementById('quest-modal');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
+                this.renderList(); // 열 때 깔끔하게 0/3 으로 렌더링!
             }
         },
 
