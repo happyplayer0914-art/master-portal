@@ -58,48 +58,48 @@ const UIManager = {
 init() { 
         this.initBackground(); 
         
-        // 🚨 [최종 방어선] 데이터를 강제로 먼저 꺼내오고 화면을 두 번에 걸쳐 확실하게 렌더링!
-        const forceDrawUI = () => {
-            // 1. 화면 그리기 전에 금고(저장소)에서 데이터부터 멱살 잡고 강제로 꺼내오기!
-            if (window.GameState && typeof GameState.load === 'function') {
-                GameState.load(); 
+        // 🚨 [궁극의 방어막] 데이터 로딩 속도와 화면 그리기 속도의 엇박자를 잡는 '추적 렌더링 엔진'
+        let syncCount = 0;
+        const syncEngine = setInterval(() => {
+            // 금고(GameState)가 열려있다면 0.1초마다 화면을 최신 상태로 강제 덧칠합니다!
+            if (window.GameState) {
+                this.updateCurrencyUI(); 
+                this.applyAvatarSkin(); 
+                this.updateIdleUI(); 
+                if(document.getElementById('profile-nickname-display')) {
+                    document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+                }
+                this.updateRpgLobbyUI();
+                this.updateProfileUI();
             }
-            
-            // 2. 빵빵해진 데이터로 화면 그리기
-            this.updateCurrencyUI(); 
-            this.applyAvatarSkin(); 
-            this.initCheckinButton(); 
-            this.updateIdleUI(); 
-            if(document.getElementById('profile-nickname-display')) {
-                document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
-            }
-            this.updateRpgLobbyUI();
-            this.updateProfileUI();
-        };
+            syncCount++;
+            if (syncCount >= 10) clearInterval(syncEngine); // 1초(10번) 동안 찰떡같이 맞춰주고 엔진 정지!
+        }, 100);
 
-        // 게임 켜자마자 즉시 그리기!
-        forceDrawUI();
-        // 혹시 모를 서버 로딩 지연을 대비해 0.5초 뒤에 한 번 더 확실하게 덧칠하기! (이러면 절대 0원 안 뜸)
-        setTimeout(forceDrawUI, 500);
+        this.initCheckinButton(); 
 
-        // 새로고침 시 서버 최신 데이터(한줄소개 등) 로딩
+        // 파이어베이스(서버)에서 한줄소개/인기도 땡겨오기
         if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
             GameSystem.Profile.loadMyProfile();
         }
 
         if(this.GachaSlider) this.GachaSlider.init();
 
+        // 게임 켤 때 내가 낀 배경화면 불러오기
         setTimeout(() => {
             if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
                 GameSystem.Lobby.applyBackground();
             }
         }, 500);
         
+        // 탈주 페널티 로직
         if (localStorage.getItem('master_in_battle') === 'true') {
             localStorage.removeItem('master_in_battle');
-            GameState.currentHp = 0; 
-            GameState.isBattling = false;
-            if(window.GameState && GameState.save) GameState.save();
+            if (window.GameState) {
+                GameState.currentHp = 0; 
+                GameState.isBattling = false;
+                if(GameState.save) GameState.save();
+            }
             setTimeout(() => {
                 this.triggerHeavyHaptic();
                 this.showToast("🚨 탈주 페널티: 전투 이탈로 체력이 0이 되었습니다.");
@@ -107,6 +107,7 @@ init() {
             }, 1000);
         }
 
+        // 방치형 지원금 1분마다 UI 갱신
         setInterval(() => {
             const homeScreen = document.getElementById('screen-home');
             if (homeScreen && homeScreen.classList.contains('active')) {
@@ -114,6 +115,7 @@ init() {
             }
         }, 60000);
 
+        // 체력 회복 1초 스케줄러
         setInterval(() => {
             if (window.GameState && GameState.recoverHpOverTime) {
                 GameState.recoverHpOverTime();
