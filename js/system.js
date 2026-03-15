@@ -2,204 +2,161 @@
 // 5. GAME SYSTEM
 // =========================================================================
 const GameSystem = {
-    Synthesis: {
-        currentTier: 'common',
-        config: {
-            'common': { next: 'rare', rate: 100, pityAdd: 0, baseGold: 300, inflation: 15, gem: 0 },
-            'rare':   { next: 'epic', rate: 65, pityAdd: 15, baseGold: 1500, inflation: 50, gem: 0 },
-            'epic':   { next: 'legendary', rate: 25, pityAdd: 20, baseGold: 5000, inflation: 100, gem: 50 }
-        },
-
-        openModal() {
-            AudioEngine.sfx.click();
-            UIManager.triggerHaptic();
-            document.getElementById('synth-modal').classList.add('active');
-            UIManager.selectedItems = [];
-            this.selectTier('common');
-        },
-
-        closeModal() {
-            AudioEngine.sfx.click();
-            document.getElementById('synth-modal').classList.remove('active');
-            UIManager.selectedItems = [];
-        },
-
-        selectTier(tier) {
-            AudioEngine.sfx.click();
-            this.currentTier = tier;
-            UIManager.selectedItems = [];
+// =========================================================================
+        // 🔨 [신규 시스템] 대장간 (장비 강화)
+        // =========================================================================
+        Forge: {
+            selectedId: null,
+            // 💡 [기획 적용] 1강 100% ~ 8강 30%, 9강 10%, 10강 1% 확률 맵핑!
+            probs: [100, 90, 80, 70, 60, 50, 40, 30, 10, 1],
             
-            ['common', 'rare', 'epic'].forEach(t => {
-                const btn = document.getElementById(`synth-tab-${t}`);
-                if (btn) {
-                    if (t === tier) btn.className = "flex-1 py-2 bg-slate-600 text-white border border-slate-400 text-xs font-bold rounded shadow-inner transition-all";
-                    else btn.className = "flex-1 py-2 bg-slate-800 text-slate-500 border border-slate-700 text-xs font-bold rounded transition-all";
-                }
-            });
-            this.updateUI();
-        },
+            init() {
+                if(!GameState.itemUpgrades) GameState.itemUpgrades = {};
+                this.selectedId = null;
+                document.getElementById('forge-details').classList.add('hidden');
+                this.renderList();
+            },
 
-      selectItem(id) {
-            const item = GameData.items[id];
-            if (!item || item.type !== 'gear' || item.rarity !== this.currentTier) {
-                return UIManager.showToast("동일 등급의 장비만 연성 가능합니다.");
-            }
-            
-            // 💡 [핵심 수정] 3분할 장비 중 하나라도 장착하고 있다면 막기!
-            const isEquipped = (GameState.equippedWeapon === id || GameState.equippedArmor === id || GameState.equippedAccessory === id);
-            if (isEquipped) {
-                return UIManager.showToast("장착 중인 장비는 안전을 위해 연성할 수 없습니다.");
-            }
-
-            if (UIManager.selectedItems.length >= 3) return UIManager.showToast("재료는 3개까지만 넣을 수 있습니다.");
-            
-            const hasCount = GameState.inventory.filter(iid => iid === id).length;
-            const usedCount = UIManager.selectedItems.filter(sid => sid === id).length;
-            
-            if (usedCount >= hasCount) return UIManager.showToast("보유한 아이템 수량이 부족합니다.");
-            
-            UIManager.selectedItems.push(id);
-            AudioEngine.sfx.click();
-            
-            this.updateUI();
-        },
-
-        removeItem(index) {
-            if (index > -1 && index < UIManager.selectedItems.length) {
-                UIManager.selectedItems.splice(index, 1);
-                AudioEngine.sfx.click();
-                this.updateUI();
-            }
-        },
-
-        updateUI() {
-            const selected = UIManager.selectedItems;
-            const count = selected.length;
-            const conf = this.config[this.currentTier];
-
-            for (let i = 1; i <= 3; i++) {
-                const slot = document.getElementById(`synth-slot-${i}`);
-                if (!slot) continue;
-                if (i <= count) {
-                    const itemObj = GameData.items[selected[i-1]];
-                    slot.innerHTML = `<span class="filter drop-shadow-lg">${itemObj.emoji}</span>`;
-                    slot.className = `w-16 h-16 rounded-xl border-2 border-solid border-purple-500 flex items-center justify-center text-3xl bg-slate-800 transition-all cursor-pointer shadow-lg`;
-                    slot.onclick = () => this.removeItem(i-1);
-                } else {
-                    slot.innerHTML = '';
-                    slot.className = `w-16 h-16 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center bg-slate-800/50 transition-all`;
-                    slot.onclick = null;
-                }
-            }
-
-            const listArea = document.getElementById('synth-material-list');
-            if (listArea) {
-                listArea.innerHTML = "";
+            renderList() {
+                const list = document.getElementById('forge-item-list');
+                list.innerHTML = '';
                 
-                // 💡 [핵심 수정] 장착 중인 3개의 장비는 목록에서 아예 숨기기!
-                const eligibleItems = GameState.inventory.filter(id => {
-                    const item = GameData.items[id];
-                    const isEquipped = (GameState.equippedWeapon === id || GameState.equippedArmor === id || GameState.equippedAccessory === id);
-                    return item && item.type === 'gear' && item.rarity === this.currentTier && !isEquipped;
-                });
-
-                [...new Set(eligibleItems)].forEach(id => {
-                    const item = GameData.items[id];
-                    const hasCount = eligibleItems.filter(iid => iid === id).length;
-                    const usedCount = selected.filter(sid => sid === id).length;
-                    const remain = hasCount - usedCount;
-
-                    if (hasCount > 0) {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = `p-2 bg-slate-800 rounded-lg flex flex-col items-center justify-center border transition-all cursor-pointer ${usedCount > 0 ? 'border-purple-500 ring-2 ring-purple-500/50 bg-slate-700' : 'border-slate-700'}`;
-                        itemDiv.innerHTML = `
-                            <div class="text-2xl">${item.emoji}</div>
-                            <div class="text-[9px] mt-1 ${remain > 0 ? 'text-slate-300' : 'text-slate-500'} font-bold">${remain}개 남음</div>
-                            ${usedCount > 0 ? `<div class="absolute -top-1 -right-1 bg-purple-600 text-[8px] px-1.5 py-0.5 rounded-full font-bold text-white shadow-sm">+${usedCount}</div>` : ''}
-                        `;
-                        itemDiv.onclick = () => this.selectItem(id);
-                        listArea.appendChild(itemDiv);
+                // 💡 [기획 적용] 장착 중인 아이템은 강화 목록에서 원천 차단 (오류 방지)
+                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                const counts = {};
+                
+                GameState.inventory.forEach(id => {
+                    if(GameData.items[id] && !equipped.includes(id)) {
+                        counts[id] = (counts[id] || 0) + 1;
                     }
                 });
-            }
 
-            const bonusPity = GameState.synthPity[this.currentTier] || 0;
-            const finalRate = Math.min(100, conf.rate + bonusPity);
-            document.getElementById('synth-rate-text').innerHTML = `${finalRate}%` + (bonusPity > 0 ? ` <span class="text-xs text-pink-400">(+${bonusPity}%)</span>` : '');
-            
-            const btn = document.getElementById('btn-synth-execute');
-            const cost = conf.baseGold + (GameState.rpgStage * conf.inflation);
-            document.getElementById('synth-btn-cost').innerText = `🪙 ${cost.toLocaleString()}`;
+                let hasItems = false;
+                for(const id in counts) {
+                    hasItems = true;
+                    const item = GameData.items[id];
+                    const count = counts[id];
+                    const level = GameState.itemUpgrades[id] || 0;
+                    
+                    const div = document.createElement('div');
+                    div.className = `bg-slate-700 border ${this.selectedId === id ? 'border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'border-slate-600'} rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-600 transition-all relative`;
+                    div.onclick = () => { this.selectedId = id; this.renderList(); this.renderDetails(); };
+                    
+                    div.innerHTML = `
+                        <div class="text-2xl mb-1">${item.icon}</div>
+                        <div class="text-[10px] text-white text-center w-full truncate">${level > 0 ? '<span class="text-purple-300 font-bold">+' + level + '</span>' : ''} ${item.name}</div>
+                        <div class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-indigo-400 shadow-md">x${count}</div>
+                    `;
+                    list.appendChild(div);
+                }
 
-            if (count === 3) {
-                btn.disabled = false;
-                btn.className = "w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-black shadow-lg animate-pulse";
-                document.getElementById('synth-btn-title').innerText = "✨ 연성 시작";
-            } else {
-                btn.disabled = true;
-                btn.className = "w-full py-4 bg-slate-800 text-slate-500 rounded-xl font-black opacity-50";
-                document.getElementById('synth-btn-title').innerText = `재료 부족 (${count}/3)`;
-            }
+                if(!hasItems) {
+                    list.innerHTML = '<div class="col-span-4 text-center text-slate-500 text-xs py-6 font-bold">인벤토리에 장착 해제된 장비가 없습니다.</div>';
+                }
+            },
 
-            const pityWrap = document.getElementById('synth-pity-wrap');
-            if (this.currentTier !== 'common' && bonusPity > 0) {
-                pityWrap.classList.remove('hidden');
-                document.getElementById('synth-pity-text').innerText = `${bonusPity}%`;
-                document.getElementById('synth-pity-bar').style.width = `${Math.min(100, bonusPity)}%`;
-            } else {
-                pityWrap.classList.add('hidden');
-            }
-        },
+            renderDetails() {
+                const details = document.getElementById('forge-details');
+                if(!this.selectedId) { details.classList.add('hidden'); return; }
+                
+                const item = GameData.items[this.selectedId];
+                const level = GameState.itemUpgrades[this.selectedId] || 0;
+                
+                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                let count = 0;
+                GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
 
-        execute() {
-            if (UIManager.selectedItems.length < 3) return;
-            const conf = this.config[this.currentTier];
-            const cost = conf.baseGold + (GameState.rpgStage * conf.inflation);
-            const gemCost = conf.gem || 0;
+                details.classList.remove('hidden');
 
-            if (GameState.gold < cost) return UIManager.showToast("골드가 부족합니다! 🪙");
-            if (GameState.gem < gemCost) return UIManager.showToast("젬이 부족합니다! 💎");
+                if(level >= 10) {
+                    details.innerHTML = `
+                        <div class="text-center py-4">
+                            <div class="text-5xl mb-3 animate-bounce">${item.icon}</div>
+                            <h3 class="text-2xl font-black text-yellow-400 mb-2 drop-shadow-md">+MAX ${item.name}</h3>
+                            <p class="text-slate-400 text-sm">더 이상 강화할 수 없는 궁극의 상태입니다.</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            GameState.gold -= cost;
-            GameState.gem -= gemCost;
-         
+                const prob = this.probs[level];
+                const cost = (level + 1) * 100; // 💡 1강 100G, 10강 1000G
+                const canUpgrade = count >= 2 && GameState.gold >= cost; // 제물용 1개 포함 총 2개 이상 필요
 
-            UIManager.selectedItems.forEach(id => {
-                const idx = GameState.inventory.indexOf(id);
-                if (idx > -1) GameState.inventory.splice(idx, 1);
-            });
+                details.innerHTML = `
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-3xl border border-slate-600 shadow-inner">
+                            ${item.icon}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-black text-white mb-1"><span class="text-slate-400">+${level}</span> ${item.name} ➔ <span class="text-purple-400">+${level+1}</span></h3>
+                            <p class="text-xs text-slate-400">아이템 고유 능력치 <span class="text-emerald-400 font-bold">+${(level+1)*10}%</span> 적용</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="bg-slate-800 rounded-xl p-3 text-center border ${count >= 2 ? 'border-slate-600' : 'border-red-500/50'}">
+                            <div class="text-[10px] text-slate-400 mb-1">필요 재료 (제물)</div>
+                            <div class="text-sm font-bold ${count >= 2 ? 'text-white' : 'text-red-400'}">${item.name} <span class="text-[10px]">(${count}/2)</span></div>
+                        </div>
+                        <div class="bg-slate-800 rounded-xl p-3 text-center border ${GameState.gold >= cost ? 'border-slate-600' : 'border-red-500/50'}">
+                            <div class="text-[10px] text-slate-400 mb-1">소모 골드</div>
+                            <div class="text-sm font-bold ${GameState.gold >= cost ? 'text-yellow-400' : 'text-red-400'}">🪙 ${cost} G</div>
+                        </div>
+                    </div>
 
-            UIManager.triggerHeavyHaptic();
-            AudioEngine.sfx.gacha_build();
-            document.getElementById('btn-synth-execute').disabled = true;
+                    <div class="mb-5 text-center bg-slate-900/50 py-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">돌파 성공 확률</div>
+                        <div class="text-3xl font-black ${prob >= 50 ? 'text-emerald-400' : (prob >= 30 ? 'text-yellow-400' : 'text-red-500')} drop-shadow-md">${prob}%</div>
+                    </div>
 
-            setTimeout(() => {
-                const bonusPity = GameState.synthPity[this.currentTier] || 0;
-                const finalRate = conf.rate + bonusPity;
-                const isSuccess = (Math.random() * 100 < finalRate);
+                    <button onclick="GameSystem.Forge.attemptUpgrade()" ${!canUpgrade ? 'disabled' : ''} class="w-full py-4 rounded-xl font-black text-lg shadow-lg transition-all ${canUpgrade ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-500 hover:to-indigo-500 active:scale-95 border border-purple-400' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}">
+                        ${canUpgrade ? '🔨 장비 강화 시도!' : '재료 또는 골드 부족'}
+                    </button>
+                `;
+            },
 
-                if (isSuccess) {
-                    AudioEngine.sfx.gacha_reveal();
-                    const nextRarity = conf.next;
-                    const pool = Object.values(GameData.items).filter(it => it.type === 'gear' && it.rarity === nextRarity);
-                    const result = pool[Math.floor(Math.random() * pool.length)];
-                    GameState.inventory.push(result.id);
-                    GameState.synthPity[this.currentTier] = 0;
-                    UIManager.showToast(`🎉 연성 성공! [${result.name}] 획득!`);
+            attemptUpgrade() {
+                if(!this.selectedId) return;
+                const level = GameState.itemUpgrades[this.selectedId] || 0;
+                if(level >= 10) return;
+
+                const cost = (level + 1) * 100;
+                
+                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                let count = 0;
+                GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
+
+                if(count < 2) return UIManager.showToast("제물로 바칠 동일한 장비가 부족합니다.");
+                if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다.");
+
+                // 💸 비용 지불 및 제물 파괴 (인벤토리에서 1개만 확실하게 삭제)
+                GameState.gold -= cost;
+                const index = GameState.inventory.indexOf(this.selectedId);
+                if(index > -1) GameState.inventory.splice(index, 1);
+
+                const prob = this.probs[level];
+                const roll = Math.random() * 100;
+
+                if(roll < prob) {
+                    // 🎉 깡! 강화 성공
+                    GameState.itemUpgrades[this.selectedId] = level + 1;
+                    AudioEngine.sfx.equip(); // 경쾌한 성공음
+                    UIManager.triggerHeavyHaptic();
+                    UIManager.showToast(`✨ 돌파 성공! [+${level+1} ${GameData.items[this.selectedId].name}]`, 3000);
                 } else {
-                    AudioEngine.sfx.hit();
-                    GameState.synthPity[this.currentTier] = (GameState.synthPity[this.currentTier] || 0) + conf.pityAdd;
-                    UIManager.showToast(`💥 연성 실패... 마일리지가 쌓였습니다.`);
+                    // 💥 쨍그랑! 강화 실패
+                    AudioEngine.sfx.hit_player(); // 둔탁한 실패음
+                    UIManager.triggerHaptic();
+                    UIManager.showToast(`💥 강화 실패... 제물 장비가 파괴되었습니다.`, 3000);
                 }
 
                 GameState.save();
                 UIManager.updateCurrencyUI();
-                UIManager.selectedItems = [];
-                this.updateUI();
-                UIManager.renderInventory();
-            }, 1000);
-        }
-    },
+                this.renderList();
+                this.renderDetails();
+            }
+        },
 
     Lobby: {
         // 👇 여기서부터 복사해서 끼워 넣기!
