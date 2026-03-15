@@ -608,7 +608,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
             const prestigeText = GameState.prestige > 0 ? `[${GameState.prestige}환생] ` : "";
-           recordEl.innerText = \${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;`
+          recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
         }
 
         // 💬 한 줄 소개
