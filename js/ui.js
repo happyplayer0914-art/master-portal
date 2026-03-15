@@ -142,13 +142,18 @@ const UIManager = {
         document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
         document.getElementById('potion-count-display').innerText = GameState.potions;
 
-        const renderSlot = (slotId, itemId, label) => {
+     const renderSlot = (slotId, itemId, label) => {
             const el = document.getElementById(slotId);
             if (!el) return;
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
+                
+                // 🌟 [추가] 장비의 강화 수치를 불러와서 예쁜 보라색 뱃지로 만들기!
+                const level = GameState.itemUpgrades[itemId] || 0;
+                const levelBadge = level > 0 ? `<div class="absolute -top-2 -left-2 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-purple-400 z-10 shadow">+${level}</div>` : '';
+                
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
-                el.innerHTML = `<span class="filter drop-shadow-md">${item.emoji}</span>`;
+                el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
                 el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
                 el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
@@ -251,7 +256,7 @@ const UIManager = {
         });
     },
     
-    // 🌟 [수정됨] 장비 탭 렌더링 (스킨 관련 코드 싹 날림!)
+   // 🌟 [수정됨] 장비 탭 렌더링 (강화 수치 표시 및 뻥튀기 스탯 적용!)
     renderInventory() {
         const pGear = document.getElementById('inv-panel-gear'); 
         const emptyState = document.getElementById('inv-empty-state');
@@ -267,7 +272,6 @@ const UIManager = {
 
         for(const [id, count] of Object.entries(counts)) {
             const item = GameData.items[id]; 
-            // 💡 옛날 '스킨' 타입 데이터가 인벤토리에 남아있으면 무시하고 넘어갑니다!
             if(!item || item.type === 'skin') continue; 
             
             let isEquipped = false;
@@ -275,25 +279,32 @@ const UIManager = {
             if (item.subType === 'armor' && GameState.equippedArmor === id) isEquipped = true;
             if (item.subType === 'accessory' && GameState.equippedAccessory === id) isEquipped = true;
             
-            const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider">장착중</div>` : '';
-            const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold">x${count}</div>` : '';
+            // 💡 [핵심 계산기] 이 장비가 몇 강인지 확인하고 배율 계산!
+            const level = GameState.itemUpgrades[id] || 0;
+            const upgMult = 1.0 + (level * 0.1); // 1강이면 1.1배, 2강이면 1.2배!
+
+            const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider z-10">장착중</div>` : '';
+            const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-[10px] text-slate-400 font-bold z-10">x${count}</div>` : '';
             
-          let effectText = '';
-            // 💡 [수정 1] <br> 태그를 전부 지우고, leading-none(기본 줄간격 제거)을 추가!
-            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold leading-none">공격력 +${Math.round((item.atkMult - 1)*100)}%</span>`;
-            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold leading-none">체력 +${Math.round((item.hpMult - 1)*100)}%</span>`;
-            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold leading-none">크리티컬 +${item.critRate}%</span>`;
-            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold leading-none">크리데미지 +${item.critDmg}%</span>`;
-            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold leading-none">피흡 +${item.vamp}%</span>`;
-            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold leading-none">공속 +${item.spd}%</span>`;
-            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none">회피 +${item.eva}%</span>`;
-            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none">방어력 +${item.def}</span>`;
+            // 💡 이름 앞에 붙여줄 +1, +2 텍스트
+            const levelText = level > 0 ? `<span class="text-purple-300 font-black mr-0.5">+${level}</span>` : '';
+            
+            // 💡 스탯 텍스트 출력 시 강화 배율(upgMult)을 곱하고, toFixed(1)로 소수점 1자리 자르기!
+            let effectText = '';
+            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold leading-none">공격력 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</span>`;
+            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold leading-none">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</span>`;
+            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold leading-none">크리티컬 +${(item.critRate * upgMult).toFixed(1)}%</span>`;
+            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold leading-none">크리데미지 +${(item.critDmg * upgMult).toFixed(1)}%</span>`;
+            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold leading-none">피흡 +${(item.vamp * upgMult).toFixed(1)}%</span>`;
+            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold leading-none">공속 +${(item.spd * upgMult).toFixed(1)}%</span>`;
+            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none">회피 +${(item.eva * upgMult).toFixed(1)}%</span>`;
+            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none">방어력 +${Math.floor(item.def * upgMult)}</span>`;
             
             const card = `
                 <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-2 h-[140px] !important">
                     ${badgeHTML}
                     <div class="text-3xl mb-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[10px] text-center break-keep leading-tight min-h-[24px] flex items-center mb-1">${item.name}</h4>
+                    <h4 class="text-white font-bold text-[10px] text-center break-keep leading-tight min-h-[24px] flex items-center mb-1">${levelText}${item.name}</h4>
                     
                     <div class="flex flex-col items-center gap-[2px]">
                         ${effectText}
@@ -307,6 +318,7 @@ const UIManager = {
             hasGear = true; 
         }
 
+        // 장비 분류 렌더링
         if (groupedCards.weapon.length > 0) {
             pGear.innerHTML += `<div class="col-span-3 text-xs font-bold text-indigo-300 mt-1 mb-1 border-b border-slate-700/50 pb-1 flex items-center gap-1.5"><span class="text-sm">🗡️</span> 무기</div>`;
             pGear.innerHTML += groupedCards.weapon.join('');
@@ -320,7 +332,6 @@ const UIManager = {
             pGear.innerHTML += groupedCards.accessory.join('');
         }
         
-        // 텅 빈 상태 처리 (장비 탭에서 장비가 없을 때만 띄움)
         const isGearTab = !document.getElementById('inv-tab-gear').classList.contains('text-slate-400');
         if (isGearTab && !hasGear) {
             emptyState.classList.remove('hidden');
@@ -333,20 +344,24 @@ const UIManager = {
         document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
         
+        // 🌟 내 정보 탭의 장비 슬롯도 뱃지 표시되게 변경!
         const renderProfileSlot = (slotId, itemId, label) => {
             const el = document.getElementById(slotId);
             if (!el) return;
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
+                const level = GameState.itemUpgrades[itemId] || 0;
+                const levelBadge = level > 0 ? `<div class="absolute -top-2 -left-2 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-purple-400 z-10 shadow">+${level}</div>` : '';
+                
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity}`;
-                el.innerHTML = `<span class="filter drop-shadow-md">${item.emoji}</span>`;
+                el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
                 el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
                 el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
             }
         };
 
-       renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
+        renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
         renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
         renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
     }, // <-- renderInventory 끝나는 괄호
