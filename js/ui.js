@@ -149,7 +149,7 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-               / 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
+               // 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
                 // 부모의 overflow-hidden이 왼쪽 위 둥근 모서리를 알아서 잘라줍니다.
                 const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-br-[8px] z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
                 
