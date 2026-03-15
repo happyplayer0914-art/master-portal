@@ -119,10 +119,12 @@ const UIManager = {
         
         if(s === 'screen-home') this.updateIdleUI(); 
         if(s === 'screen-arena') this.updateRpgLobbyUI();
-        // 💡 [수정됨] 프로필 탭 진입 시 항상 장비 탭이 먼저 보이도록 초기화
+       // 💡 [수정됨] 프로필 탭 진입 시 서버 동기화 및 렌더링
         if(s === 'screen-profile') { 
             this.switchInvTab('gear'); 
-            this.updateProfileUI(); // 🌟 새롭게 짠 프로필 업데이트 엔진 가동!
+            // 🌟 프로필 탭 누를 때마다 서버에서 좋아요/한줄소개 쫙 땡겨옵니다!
+            if(window.GameSystem && GameSystem.Profile) GameSystem.Profile.loadMyProfile();
+            this.updateProfileUI(); 
         }
         if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
     },
