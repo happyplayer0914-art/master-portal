@@ -164,9 +164,20 @@ const UIManager = {
         }
     },
     
+   // 🌟 [수정됨] 재화 표시 시스템 (단위 변환기 탑재!)
     updateCurrencyUI() {
-        document.getElementById('gold-display').innerText = GameState.gold.toLocaleString();
-        document.getElementById('gem-display').innerText = GameState.gem.toLocaleString();
+        // 숫자가 너무 커지면 RPG 스타일로 압축해 주는 마법의 공식!
+        const formatBigNumber = (num) => {
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
+            if (num >= 10000) return (num / 10000).toFixed(1) + '만';
+            return num.toLocaleString();
+        };
+
+        const goldEl = document.getElementById('gold-display');
+        const gemEl = document.getElementById('gem-display');
+        
+        if (goldEl) goldEl.innerText = formatBigNumber(GameState.gold);
+        if (gemEl) gemEl.innerText = formatBigNumber(GameState.gem);
     },
     
     initCheckinButton() { 
