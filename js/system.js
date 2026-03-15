@@ -183,14 +183,15 @@ const GameSystem = {
         },
 
     Lobby: {
-        applyBackground() {
-            // 💡 [핵심] 모바일 스크롤 버그를 막기 위해 '고정된 배경 전용 도화지'를 하나 만듭니다!
+       applyBackground() {
+            // 💡 [초강력 고정] 모바일 브라우저의 악질적인 스크롤 버그를 완전히 박살내는 CSS!
             let fixedBg = document.getElementById('fixed-custom-bg');
             if (!fixedBg) {
                 fixedBg = document.createElement('div');
                 fixedBg.id = 'fixed-custom-bg';
-                // 화면 전체를 덮고 맨 뒤(-2)로 빠지며, 절대 움직이지 않는(fixed) 설정!
-                fixedBg.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-size: cover; background-position: center; background-repeat: no-repeat; pointer-events: none;';
+                // 100% 높이 대신 상하좌우(top, bottom, left, right)를 0으로 당겨서 화면에 못을 박습니다!
+                // transform: translate3d(0,0,0) 을 넣어서 스마트폰의 그래픽 카드(GPU)가 강제로 멈추게 만듭니다.
+                fixedBg.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: -2 !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; pointer-events: none !important; transform: translate3d(0,0,0) !important;';
                 document.body.prepend(fixedBg);
             }
 
@@ -200,16 +201,15 @@ const GameSystem = {
             if (bgId && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
                 const bgItem = GameData.cosmetics.backgrounds.find(b => b.id === bgId);
                 if (bgItem) {
-                    // 이제 body가 아니라 고정된 도화지에 배경을 그립니다!
+                    // 고정된 도화지에 배경 그리기
                     fixedBg.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
                     fixedBg.style.display = 'block';
                     
-                    // 기존에 body에 발려있던 에러투성이 배경은 싹 지웁니다.
                     document.body.style.backgroundImage = "none";
                     
                     document.querySelectorAll('.screen').forEach(s => {
-                        s.style.backgroundColor = 'rgba(15, 23, 42, 0.6)'; 
-                        s.style.backdropFilter = 'blur(2px)'; 
+                        s.style.backgroundColor = 'rgba(15, 23, 42, 0.65)'; // 화면을 살짝 더 어둡게 눌러줌
+                        s.style.backdropFilter = 'blur(3px)'; // 뒷배경 뽀샤시 효과
                     });
 
                     if (dynamicBg) dynamicBg.style.display = 'none'; 
@@ -217,7 +217,7 @@ const GameSystem = {
                 }
             }
             
-            // 장착 해제 시 원상복구 (다시 까만 화면으로!)
+            // 장착 해제 시 원상복구
             if (fixedBg) fixedBg.style.display = 'none';
             document.body.style.backgroundImage = "none";
             document.querySelectorAll('.screen').forEach(s => {
