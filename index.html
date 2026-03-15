@@ -876,10 +876,12 @@
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-indigo-500 flex flex-col max-h-[80vh]">
         <button onclick="GameSystem.Quest.closeModal()" class="absolute top-3 right-4 text-slate-400 hover:text-white text-3xl font-light">&times;</button>
         
-        <div class="text-center mb-5 mt-2">
-            <h3 class="text-2xl font-black text-white mb-1"><span class="text-gradient">마스터의 임무</span></h3>
-            <p class="text-xs text-slate-400">목표를 달성하고 보상을 획득하세요.</p>
-        </div>
+       <div class="text-center mb-5 mt-2">
+                    <div class="w-full max-w-[200px] aspect-[3/4] mx-auto rounded-2xl border-2 border-purple-400/50 shadow-lg overflow-hidden mb-3">
+                        <img src="image_0.png" class="w-full h-full object-cover" alt="차원의 여신">
+                    </div>
+                    <h3 class="text-3xl font-black text-white mb-1">차원의 여신</h3>
+                </div>
 
         <div class="flex gap-2 mb-4">
             <button onclick="GameSystem.Quest.switchTab('daily')" id="quest-tab-daily" class="flex-1 py-2 bg-slate-700 text-white border border-slate-500 text-xs font-bold rounded">일일 퀘스트</button>
