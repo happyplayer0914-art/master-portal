@@ -122,7 +122,7 @@ const UIManager = {
         // 💡 [수정됨] 프로필 탭 진입 시 항상 장비 탭이 먼저 보이도록 초기화
         if(s === 'screen-profile') { 
             this.switchInvTab('gear'); 
-            document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
+            this.updateProfileUI(); // 🌟 새롭게 짠 프로필 업데이트 엔진 가동!
         }
         if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
     },
@@ -484,6 +484,121 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
     }, // <-- updateRpgLobbyUI 끝나는 괄호
+    // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
+    updateProfileUI() {
+        const avatarEl = document.getElementById('profile-big-icon');
+        const nicknameEl = document.getElementById('profile-nickname-display');
+        const titleEl = document.getElementById('profile-job-title');
+        const uidEl = document.getElementById('profile-uid-display');
+        const recordEl = document.getElementById('profile-highest-record');
+        const statusEl = document.getElementById('profile-status-msg');
+        const likesEl = document.getElementById('profile-likes-display');
+
+        if(nicknameEl) nicknameEl.innerText = GameState.nickname;
+
+        // 🆔 UID 발급 (없으면 최초 1회 랜덤 생성 후 영구 저장!)
+        if (!GameState.uid) {
+            GameState.uid = Math.floor(1000 + Math.random() * 9000).toString();
+            GameState.save();
+        }
+        if(uidEl) uidEl.innerText = GameState.uid;
+
+        // 🏅 장착 칭호
+        if(titleEl) {
+            if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && GameData.cosmetics && GameData.cosmetics.titles) {
+                const tItem = GameData.cosmetics.titles.find(x => x.id === GameState.equippedTitle);
+                titleEl.innerHTML = tItem ? `✨ ${tItem.name} ✨` : "✨ 칭호 없음 ✨";
+            } else {
+                titleEl.innerHTML = "✨ 칭호 없음 ✨";
+            }
+        }
+
+        // 🎨 아바타 & 테두리
+        let iconStr = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
+        if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default' && GameData.cosmetics && GameData.cosmetics.profiles) {
+            const pfItem = GameData.cosmetics.profiles.find(x => x.id === GameState.equippedProfile);
+            if (pfItem) iconStr = pfItem.icon;
+        }
+        if(avatarEl) {
+            avatarEl.innerHTML = iconStr;
+            let skinClass = "bg-slate-700 border border-slate-600";
+            if(GameState.equippedSkin && GameState.equippedSkin !== 'none' && GameState.equippedSkin !== 'default' && GameData.cosmetics && GameData.cosmetics.borders) {
+                const bItem = GameData.cosmetics.borders.find(x => x.id === GameState.equippedSkin);
+                if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
+            }
+            avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
+        }
+
+        // 👑 최고 기록 (환생 + 층수 통합!)
+        if(recordEl) {
+            const prestigeText = GameState.prestige > 0 ? `[${GameState.prestige}환생] ` : "";
+            recordEl.innerText = `${prestigeText}${GameState.maxStage || 1}F`;
+        }
+
+        // 💬 한 줄 소개
+        if(statusEl) {
+            statusEl.innerText = GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!";
+        }
+
+        // 💖 좋아요 (일단 로컬 데이터 0으로 표시, 나중에 서버랑 연결!)
+        if(likesEl) {
+            likesEl.innerText = GameState.likes || 0;
+        }
+
+        // ⚔️ 장비 슬롯 그리기 함수 호출
+        this.updateProfileEquipmentSlots();
+    },
+
+    // ⚔️ [신규] 프로필 전용 장비 슬롯 그리기
+    updateProfileEquipmentSlots() {
+        const slots = ['weapon', 'armor', 'accessory'];
+        slots.forEach(type => {
+            const el = document.getElementById(`profile-slot-${type}`);
+            if(!el) return;
+            
+            // 대문자로 시작하는 타입 이름 (Weapon, Armor, Accessory)
+            const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+            const itemId = GameState[`equipped${typeCapitalized}`]; // GameState.equippedWeapon 등
+
+            if(itemId && GameData.items[itemId]) {
+                const item = GameData.items[itemId];
+                let rarityClass = "border-slate-600 bg-slate-800";
+                
+                if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
+                else if(item.rarity === 'epic') rarityClass = "rarity-epic";
+                else if(item.rarity === 'rare') rarityClass = "rarity-rare";
+                else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+
+                const level = GameState.itemUpgrades[itemId] || 0;
+
+                el.className = `w-[30%] aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                el.innerHTML = `
+                    <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
+                    <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
+                    <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
+                `;
+                el.onclick = () => UIManager.openStatsModal(); 
+            } else {
+                const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
+                el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
+                el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
+                el.onclick = null;
+            }
+        });
+    },
+
+    // ✍️ [신규] 3단계용! 한 줄 소개 수정 스위치
+    editStatusMessage() {
+        const currentMsg = GameState.statusMessage || "";
+        const newMsg = prompt("프로필에 표시할 한 줄 소개를 입력하세요 (최대 20자):", currentMsg);
+        
+        if (newMsg !== null) {
+            GameState.statusMessage = newMsg.substring(0, 20); // 20자 컷!
+            GameState.save();
+            this.updateProfileUI(); // 화면 바로 새로고침
+            UIManager.showToast("✍️ 한 줄 소개가 멋지게 변경되었습니다!");
+        }
+    },
     
    applyAvatarSkin() {
         const skinId = GameState.equippedSkin;
