@@ -290,8 +290,8 @@ const UIManager = {
 
         // 2. 보상 계산 로직 (예: 층수 * 50 젬, 층수 * 1000 골드)
         // 💡 주의: GameSystem.Battle.doPrestige() 안에 있는 실제 지급 로직과 수식을 똑같이 맞춰주시면 됩니다!
-        const gemReward = GameState.rpgStage * 50; 
-        const goldReward = GameState.rpgStage * 1000;
+        const gemReward = GameState.rpgStage * 10; 
+        const goldReward = GameState.rpgStage * 30;
 
         // 3. 계산된 보상을 화면에 찍어주기
         const gemEl = document.getElementById('goddess-gem-reward');
