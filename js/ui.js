@@ -34,11 +34,19 @@ const UIManager = {
             }, 1000);
         }
 
+       // (기존에 있던 1분짜리 방치형 UI 타이머)
         setInterval(() => {
             if (document.getElementById('screen-home').classList.contains('active')) {
                 this.updateIdleUI();
             }
         }, 60000);
+
+        // 🌟 [여기에 신규 추가!] 1초마다 체력 회복 스케줄러 가동!
+        setInterval(() => {
+            if (window.GameState && GameState.recoverHpOverTime) {
+                GameState.recoverHpOverTime();
+            }
+        }, 1000);
     },
     
     triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
