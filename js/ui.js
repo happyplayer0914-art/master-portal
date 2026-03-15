@@ -149,8 +149,8 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-           // 🌟 [UI 완벽 픽스] 줄바꿈(엔터)을 없애서 투명한 여백 제거! 슬림하고 핏한 플래그 완성!
-const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-transparent text-yellow-300 text-[10px] font-black px-1.5 py-0.5 rounded-br-md z-10 border-b border-r border-slate-600 shadow-md leading-none tracking-tighter" style="text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">+${level}</div>` : '';
+          // 🌟 [UI 심플 모드] 배경과 테두리를 모두 날리고, 가독성을 위해 글씨 겉에 얇고 진한 검은색 외곽선만 추가!
+const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-400 text-[11px] font-black z-10 leading-none tracking-tighter" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8);">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
@@ -352,8 +352,9 @@ const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-transparent
             if (itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
-             // 🌟 [UI 완벽 픽스] 줄바꿈(엔터)을 없애서 투명한 여백 제거! 슬림하고 핏한 플래그 완성!
-const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-black/40 backdrop-blur-sm text-yellow-300 text-[10px] font-black px-1.5 py-0.5 rounded-br-md z-10 border-b border-r border-slate-500/50 shadow-md leading-none tracking-tighter" style="text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">+${level}</div>` : '';
+           
+// 🌟 [UI 심플 모드] 배경과 테두리를 모두 날리고, 가독성을 위해 글씨 겉에 얇고 진한 검은색 외곽선만 추가!
+const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-400 text-[11px] font-black z-10 leading-none tracking-tighter" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8);">+${level}</div>` : '';
                 
                 // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
