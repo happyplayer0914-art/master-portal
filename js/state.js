@@ -77,6 +77,7 @@ const GameState = {
         this.rpgAtk = this._safeLoad('master_atk', 10);
         this.rpgMaxHp = this._safeLoad('master_max_hp', 100);
         this.currentHp = this._safeLoad('master_current_hp', this.rpgMaxHp);
+        
 
         this.ownedCosmetics = this._safeLoad('master_ownedCosmetics', []);
         
@@ -96,6 +97,13 @@ const GameState = {
         let w = this._safeLoad('master_equipped_weapon', 'none'); this.equippedWeapon = (w === 'none' ? null : w);
         let a = this._safeLoad('master_equipped_armor', 'none'); this.equippedArmor = (a === 'none' ? null : a);
         let ac = this._safeLoad('master_equipped_accessory', 'none'); this.equippedAccessory = (ac === 'none' ? null : ac);
+        // 💡 [여기에 추가!] 강화 데이터 불러오기!
+        const savedUpgrades = localStorage.getItem('master_itemUpgrades');
+        if (savedUpgrades) {
+            this.itemUpgrades = JSON.parse(savedUpgrades);
+        } else {
+            this.itemUpgrades = {};
+        }
 
         // 💡 퀘스트 데이터 보호 로직 (에러 발생 시 강제 초기화)
         const defaultQuestData = {
@@ -127,6 +135,8 @@ const GameState = {
         localStorage.setItem('master_atk', this._encode(this.rpgAtk));
         localStorage.setItem('master_max_hp', this._encode(this.rpgMaxHp));
         localStorage.setItem('master_current_hp', this._encode(this.currentHp));
+        // 💡 [여기에 추가!] 강화 데이터 저장!
+        localStorage.setItem('master_itemUpgrades', JSON.stringify(this.itemUpgrades || {}));
         
         localStorage.setItem('master_ownedCosmetics', this._encode(this.ownedCosmetics));
         localStorage.setItem('master_equippedBg', this._encode(this.equippedBg || 'none'));
