@@ -357,8 +357,17 @@ const UIManager = {
                                 <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                                 <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level || 0}</div>
                             `;
-                            // 남의 장비 터치하면 텍스트로 살짝 옵션 보여주기!
-                            el.onclick = () => { UIManager.showToast(`[${item.name}] Lv.${level || 0} 장착 중!`); }; 
+                           // 남의 장비 터치하면 텍스트로 옵션 훔쳐보기!
+                            el.onclick = () => { 
+                                const upgMult = 1.0 + ((level || 0) * 0.1);
+                                let effectText = "";
+                                if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
+                                if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
+                                if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
+                                if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
+                                
+                                UIManager.showToast(`[${item.name} +${level || 0}] ${effectText}`); 
+                            };
                         } else {
                             const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
                             el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
@@ -599,7 +608,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
             const prestigeText = GameState.prestige > 0 ? `[${GameState.prestige}환생] ` : "";
-            recordEl.innerText = `${prestigeText}${GameState.maxStage || 1}F`;
+           recordEl.innerText = \${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;`
         }
 
         // 💬 한 줄 소개
