@@ -7,7 +7,7 @@ const GameSystem = {
         // =========================================================================
         Forge: {
             selectedId: null,
-            // 💡 1강 100% ~ 8강 30%, 9강 10%, 10강 1% 확률 맵핑
+            currentTab: 'weapon', // 💡 기본 탭 설정
             probs: [100, 90, 80, 70, 60, 50, 40, 30, 10, 1],
             
             init() {
@@ -15,6 +15,25 @@ const GameSystem = {
                 this.selectedId = null;
                 const details = document.getElementById('forge-details');
                 if(details) details.classList.add('hidden');
+                this.switchTab('weapon'); // 💡 대장간 들어올 때 무조건 무기 탭부터 열기
+            },
+
+            // 💡 탭 전환 스위치 함수 추가!
+            switchTab(tab) {
+                this.currentTab = tab;
+                this.selectedId = null;
+                const details = document.getElementById('forge-details');
+                if(details) details.classList.add('hidden');
+                
+                // 버튼 색상 업데이트
+                ['weapon', 'armor', 'accessory'].forEach(t => {
+                    const btn = document.getElementById(`forge-tab-${t}`);
+                    if(btn) {
+                        btn.className = (t === tab) 
+                            ? "flex-1 py-1.5 bg-purple-600 text-white text-[10px] font-bold rounded border border-purple-500 shadow-inner"
+                            : "flex-1 py-1.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded border border-slate-700 hover:text-white transition-colors";
+                    }
+                });
                 this.renderList();
             },
 
@@ -23,12 +42,12 @@ const GameSystem = {
                 if(!list) return;
                 list.innerHTML = '';
                 
-                // 🚨 [오류 픽스!] 장착 변수명을 길드장님 시스템에 맞게 완벽 수정!
                 const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 const counts = {};
                 
                 GameState.inventory.forEach(id => {
-                    if(GameData.items[id] && !equipped.includes(id)) {
+                    // 🚨 [핵심 필터링] 선택된 탭(currentTab)과 같은 부위의 장비만 보여주기!
+                    if(GameData.items[id] && !equipped.includes(id) && GameData.items[id].subType === this.currentTab) {
                         counts[id] = (counts[id] || 0) + 1;
                     }
                 });
@@ -44,7 +63,6 @@ const GameSystem = {
                     div.className = `bg-slate-700 border ${this.selectedId === id ? 'border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'border-slate-600'} rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-600 transition-all relative`;
                     div.onclick = () => { this.selectedId = id; this.renderList(); this.renderDetails(); };
                     
-                    // 💡 [안전장치] icon과 emoji 변수명을 모두 지원하도록 수정!
                     div.innerHTML = `
                         <div class="text-2xl mb-1">${item.icon || item.emoji || '📦'}</div>
                         <div class="text-[10px] text-white text-center w-full truncate">${level > 0 ? '<span class="text-purple-300 font-bold">+' + level + '</span>' : ''} ${item.name}</div>
@@ -54,7 +72,8 @@ const GameSystem = {
                 }
 
                 if(!hasItems) {
-                    list.innerHTML = '<div class="col-span-4 text-center text-slate-500 text-xs py-6 font-bold">인벤토리에 장착 해제된 강화 가능 장비가 없습니다.</div>';
+                    const tabName = this.currentTab === 'weapon' ? '무기' : this.currentTab === 'armor' ? '방어구' : '장신구';
+                    list.innerHTML = `<div class="col-span-4 sm:col-span-5 text-center text-slate-500 text-xs py-6 font-bold">보유 중인 ${tabName}가 없습니다.</div>`;
                 }
             },
 
