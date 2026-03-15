@@ -909,65 +909,68 @@
         
     </div>
 </div>
-    <div id="goddess-modal" class="fixed inset-0 z-[1600] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-4">
-
-    <div class="w-full max-w-sm relative rounded-xl bg-gradient-to-b from-indigo-900 to-slate-900 border-[3px] border-indigo-400/80 shadow-[0_0_40px_rgba(99,102,241,0.5)] overflow-hidden flex flex-col p-1">
+   <div id="goddess-modal" class="fixed inset-0 z-[1600] bg-black/95 px-4 hidden">
+    <div class="w-full h-full flex flex-col items-center justify-center">
         
-        <div class="relative w-full h-full border border-yellow-500/50 rounded-lg overflow-hidden flex flex-col bg-slate-900">
+        <div class="w-full max-w-sm relative rounded-xl bg-gradient-to-b from-indigo-900 to-slate-900 border-[3px] border-indigo-400/80 shadow-[0_0_40px_rgba(99,102,241,0.5)] overflow-hidden flex flex-col p-1">
+            
+            <div class="relative w-full h-full border border-yellow-500/50 rounded-lg overflow-hidden flex flex-col bg-slate-900">
 
-            <button onclick="document.getElementById('goddess-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'active'); document.getElementById('goddess-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="absolute top-2 right-2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-slate-900/80 border border-indigo-400 text-indigo-300 hover:text-white hover:bg-indigo-600 transition-colors shadow-md">
-                <span class="font-bold text-xl leading-none mb-0.5">&times;</span>
-            </button>
+                <button onclick="document.getElementById('goddess-modal').classList.add('hidden');" class="absolute top-2 right-2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-slate-900/80 border border-indigo-400 text-indigo-300 hover:text-white hover:bg-indigo-600 transition-colors shadow-md">
+                    <span class="font-bold text-xl leading-none mb-0.5">&times;</span>
+                </button>
 
-            <div class="relative w-full aspect-[4/5] overflow-hidden bg-black shrink-0">
-                <img src="goddess.png" class="w-full h-full object-cover object-top opacity-95" alt="차원의 여신">
-                <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent"></div>
-            </div>
-
-            <div class="p-4 flex flex-col gap-4 relative z-10 -mt-8">
-
-                <div class="bg-[#F4EBD9] border-2 border-[#D4C3A3] p-4 rounded-lg shadow-inner text-center relative">
-                    <p class="text-[#5C4A3D] text-[11px] sm:text-xs font-bold leading-relaxed break-keep tracking-tight">
-                        "훌륭해요, 마스터! 진정 심연의 군주를 무찌르셨군요...<br>
-                        저에게 환생을 요청하세요... 당신의 현재 진행 상황을<br>
-                        1층으로 리셋하겠지만... 보상은 엄청날 것입니다.<br>
-                        <span class="text-[#8B5E3C] mt-1 block">이것이 탑의 위대한 순환입니다."</span>
-                    </p>
+                <div class="relative w-full aspect-[4/5] overflow-hidden bg-black shrink-0">
+                    <img src="goddess.png" class="w-full h-full object-cover object-top opacity-95" alt="차원의 여신">
+                    <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent"></div>
                 </div>
 
-                <div class="bg-slate-800 border border-yellow-600/60 rounded-lg p-3 relative shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-1">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-b from-yellow-700 to-yellow-900 border border-yellow-500 px-5 py-0.5 rounded shadow-lg text-[10px] text-yellow-200 font-black tracking-widest whitespace-nowrap">
-                        환생 보상
+                <div class="p-4 flex flex-col gap-4 relative z-10 -mt-8">
+
+                    <div class="bg-[#F4EBD9] border-2 border-[#D4C3A3] p-4 rounded-lg shadow-inner text-center relative">
+                        <p class="text-[#5C4A3D] text-[11px] sm:text-xs font-bold leading-relaxed break-keep tracking-tight">
+                            "훌륭해요, 마스터! 진정 심연의 군주를 무찌르셨군요...<br>
+                            저에게 환생을 요청하세요... 당신의 현재 진행 상황을<br>
+                            1층으로 리셋하겠지만... 보상은 엄청날 것입니다.<br>
+                            <span class="text-[#8B5E3C] mt-1 block">이것이 탑의 위대한 순환입니다."</span>
+                        </p>
                     </div>
-                    <div class="flex items-center justify-center gap-8 mt-2">
-                        <div class="flex flex-col items-center">
-                            <span class="text-3xl filter drop-shadow-md mb-1">💎</span>
-                            <span class="text-white text-[11px] font-bold">+<span id="goddess-gem-reward">0</span> 젬</span>
+
+                    <div class="bg-slate-800 border border-yellow-600/60 rounded-lg p-3 relative shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-1">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-b from-yellow-700 to-yellow-900 border border-yellow-500 px-5 py-0.5 rounded shadow-lg text-[10px] text-yellow-200 font-black tracking-widest whitespace-nowrap">
+                            환생 보상
                         </div>
-                        <div class="flex flex-col items-center">
-                            <span class="text-3xl filter drop-shadow-md mb-1">💰</span>
-                            <span class="text-white text-[11px] font-bold">+<span id="goddess-gold-reward">0</span> 골드</span>
+                        <div class="flex items-center justify-center gap-8 mt-2">
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl filter drop-shadow-md mb-1">💎</span>
+                                <span class="text-white text-[11px] font-bold">+<span id="goddess-gem-reward">0</span> 젬</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl filter drop-shadow-md mb-1">💰</span>
+                                <span class="text-white text-[11px] font-bold">+<span id="goddess-gold-reward">0</span> 골드</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="flex flex-col gap-2 mt-1">
-                    <button onclick="GameSystem.Battle.doPrestige(true)" class="w-full py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 border border-pink-400 text-white text-[12px] font-black shadow-[0_0_15px_rgba(236,72,153,0.5)] flex items-center justify-center gap-1.5 active:scale-95 transition-transform tracking-tight">
-                        📺 광고 보고 2배 받기!
-                    </button>
-                    
-                    <button onclick="GameSystem.Battle.doPrestige(false)" class="w-full py-2.5 rounded border border-blue-500 bg-gradient-to-r from-blue-900 to-indigo-900 text-indigo-200 hover:text-white text-[11px] font-bold shadow-md active:scale-95 transition-all flex flex-col items-center justify-center leading-tight">
-                        <span class="text-blue-200 font-black text-xs">[환생] 시작하기!</span>
-                        <span class="text-[9px] text-blue-400 font-normal">(Stage 1으로 리셋)</span>
-                    </button>
-                    
-                    <button onclick="document.getElementById('goddess-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'active'); document.getElementById('goddess-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="text-slate-500 hover:text-slate-300 text-[10px] font-bold mt-1 text-center py-1">
-                        아니요 (그냥 진행할래요)
-                    </button>
-                </div>
+                    <div class="flex flex-col gap-2 mt-1">
+                        <button onclick="GameSystem.Battle.doPrestige(true)" class="w-full py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 border border-pink-400 text-white text-[12px] font-black shadow-[0_0_15px_rgba(236,72,153,0.5)] flex items-center justify-center gap-1.5 active:scale-95 transition-transform tracking-tight">
+                            📺 광고 보고 2배 받기!
+                        </button>
+                        
+                        <button onclick="GameSystem.Battle.doPrestige(false)" class="w-full py-2.5 rounded border border-blue-500 bg-gradient-to-r from-blue-900 to-indigo-900 text-indigo-200 hover:text-white text-[11px] font-bold shadow-md active:scale-95 transition-all flex flex-col items-center justify-center leading-tight">
+                            <span class="text-blue-200 font-black text-xs">[환생] 시작하기!</span>
+                            <span class="text-[9px] text-blue-400 font-normal">(Stage 1으로 리셋)</span>
+                        </button>
+                        
+                        <button onclick="document.getElementById('goddess-modal').classList.add('hidden');" class="text-slate-500 hover:text-slate-300 text-[10px] font-bold mt-1 text-center py-1">
+                            아니요 (그냥 진행할래요)
+                        </button>
+                    </div>
 
+                </div>
             </div>
         </div>
+        
     </div>
 </div>
 
