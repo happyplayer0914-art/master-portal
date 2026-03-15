@@ -590,7 +590,7 @@ upgradeStat(t) {
                     list.innerHTML += `
                         <div class="p-3 sm:p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
                             <div class="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                                <div class="w-10 sm:w-12 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} flex-shrink-0">${rankIcon}</div>
+                                <div class="w-14 sm:w-16 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} shrink-0 whitespace-nowrap">${rankIcon}</div>
                                 <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} flex-shrink-0">${innerIcon}</div>
                                 <div class="flex flex-col min-w-0 flex-1">
                                     ${titleHtml}
