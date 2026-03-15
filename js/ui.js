@@ -288,7 +288,7 @@ const UIManager = {
         modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
         modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
     },
-    // 👤 [신규] 타 유저 프로필 조회 및 신고 모달 컨트롤러
+    // 👤 [전면 개편] 타 유저 궁극의 프로필 조회 모달 컨트롤러
     openUserProfile(nickname, icon, title, stage, skinClass) {
         // 본인 프로필은 누를 필요 없으니 컷!
         if (nickname === GameState.nickname) return;
@@ -296,16 +296,33 @@ const UIManager = {
         // 현재 선택한 타겟 유저 기억해두기 (차단/신고할 때 쓰기 위함)
         window.currentTargetUser = nickname;
 
-        // 모달창 안에 데이터 쏙쏙 집어넣기
+        // 1. 기본 정보 꽂아넣기
         document.getElementById('target-user-nickname').innerText = nickname;
-        document.getElementById('target-user-avatar').innerHTML = icon;
-        // 아바타 테두리(skinClass)까지 그대로 복사해서 적용!
-        document.getElementById('target-user-avatar').className = `master-avatar w-24 h-24 rounded-full flex items-center justify-center font-black text-4xl text-white shadow-xl mb-3 mt-4 ${skinClass}`;
-        
-        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' ? title : "칭호 없음";
+        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' ? `✨ ${title} ✨` : "✨ 칭호 없음 ✨";
         document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
+        
+        // 2. 아바타 & 테두리 꽂아넣기
+        document.getElementById('target-user-avatar').innerHTML = icon;
+        // 내 프로필처럼 동그라미 테두리가 예쁘게 씌워지도록 조정!
+        document.getElementById('target-user-avatar').className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass.replace('bg-slate-700', 'bg-slate-800')}`;
 
-        // 프로필 창 짠! 하고 열기
+        // 💡 3. 서버 연동 전 임시 텍스트 처리 (5단계에서 서버 연동 시 채워질 부분들!)
+        document.getElementById('target-user-uid').innerText = "????";
+        document.getElementById('target-user-status').innerText = "서버에서 정보를 불러오는 중입니다...";
+        document.getElementById('target-user-likes').innerText = "???";
+
+        // 장비 슬롯도 일단 '로딩 중' 빈칸으로 둡니다.
+        const slots = ['weapon', 'armor', 'accessory'];
+        slots.forEach(type => {
+            const el = document.getElementById(`target-slot-${type}`);
+            if(el) {
+                const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
+                el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
+                el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
+            }
+        });
+
+        // 4. 모달창 짠! 하고 열기
         const modal = document.getElementById('user-profile-modal');
         if (modal) {
             modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
