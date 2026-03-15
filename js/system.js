@@ -245,10 +245,30 @@ const GameSystem = {
                 this.toggleEquip(id);
             }
         },
+// 🌟 [신규 추가] 내 현재 스펙에 맞는 방치형 최대 한도 계산기!
+        getMaxIdleReward() {
+            // 1. 현재 돌파한 보스 수 (존) 계산 (1~9층 = 0명, 10~19층 = 1명...)
+            const bossDefeated = Math.floor((GameState.rpgStage - 1) / 10);
+            
+            // 2. 환생 배율 (0환생=1배, 1환생=2배, 2환생=4배, 3환생=8배... 2의 제곱으로 떡상!)
+            const prestigeCount = GameState.prestigeCount || 0;
+            const prestigeMult = Math.pow(2, prestigeCount); 
+            
+            // 3. 최종 한도: (기본 200 + 보스 1명당 20) * 환생배율
+            return (200 + (bossDefeated * 20)) * prestigeMult;
+        },
+
+        // 💰 [대격변] 8시간 기준 폭발적인 스케일링이 적용된 지원금 계산기!
         calculateIdleReward() {
             const now = Date.now();
             const elapsedHours = (now - GameState.lastIdleCheck) / (1000 * 60 * 60);
-            return Math.min(100, Math.floor(elapsedHours * 12.5));
+            
+            const maxGold = this.getMaxIdleReward();
+            const goldPerHour = maxGold / 8; // 8시간을 꽉 채웠을 때 maxGold가 되도록 1시간당 획득량 계산
+            
+            const reward = Math.floor(elapsedHours * goldPerHour);
+            
+            return Math.min(maxGold, reward); // 최대치를 넘지 않도록 커트!
         },
      claimIdleReward(isAd = false) {
             const amount = this.calculateIdleReward();
@@ -1037,25 +1057,25 @@ upgradeStat(t) {
         // 💡 마스터의 새로운 퀘스트 목록! (보상과 목표치는 여기서 수정하세요)
       list: {
             daily: [
-                { id: 'd1', title: '심연의 도전자', desc: '심연의 탑 3층(회) 클리어', target: 3, rewardGold: 10, rewardGems: 10 },
-                { id: 'd2', title: '트렌드 세터', desc: '인기 폭발 테스트 3회 참여', target: 3, rewardGold: 10, rewardGems: 10 },
-                { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 3회 강화', target: 3, rewardGold: 10, rewardGems: 10 }
+                { id: 'd1', title: '심연의 도전자', desc: '심연의 탑 3층(회) 클리어', target: 3, rewardGold: 50, rewardGems: 15 },
+                { id: 'd2', title: '트렌드 세터', desc: '인기 폭발 테스트 3회 참여', target: 3, rewardGold: 50, rewardGems: 20 },
+                { id: 'd3', title: '성장의 기쁨', desc: '골드로 스탯 3회 강화', target: 3, rewardGold: 50, rewardGems: 15 }
             ],
           weekly: [ 
                 // 1. 일반 몬스터 300마리 -> 30마리로 대폭 하향! (보상 유지: 500G / 100💎)
                 { id: 'w1', title: '심연의 정복자', desc: '일반 몬스터 30마리 토벌', target: 30, rewardGold: 500, rewardGems: 100 },
                 
                 // 2. 보스 30마리 -> 5마리로 하향! (보상 변경: 500G / 150💎)
-                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 500, rewardGems: 150 },
+                { id: 'w2', title: '진(眞) 마왕 토벌대', desc: '보스 몬스터 5마리 토벌', target: 5, rewardGold: 1500, rewardGems: 300 },
                 
                 // 3. 방치형 지원금 5회 수령 (유지, 보상 유지: 300G / 50💎)
                 { id: 'w3', title: '시간의 투자자', desc: '방치형 지원금 5회 수령', target: 5, rewardGold: 300, rewardGems: 50 },
                 
                 // 4. 스탯 강화 100회 -> 30회로 하향! (보상 변경: 500G / 100💎)
-                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 30회 강화', target: 30, rewardGold: 500, rewardGems: 100 },
+                { id: 'w4', title: '만수르의 길', desc: '골드로 스탯 30회 강화', target: 30, rewardGold: 1000, rewardGems: 200 },
                 
                 // 5. 환생 1회 달성 (유지, 보상 변경: 1000G / 300💎)
-                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 1000, rewardGems: 300 }
+                { id: 'w5', title: '차원을 넘어서', desc: '환생(Prestige) 1회 달성', target: 1, rewardGold: 5000, rewardGems: 500 }
             ]
         },
 
@@ -1360,10 +1380,10 @@ enterDungeon() {
                 currentZone = ((currentZone - 1) % 10) + 1;
             }
 
-            // 🌟 2. 난이도 폭발 구역 계산 및 배율 적용 (1.1배씩 중첩)
-            // effStage를 기준으로 10층마다 배율이 1.1배씩 곱해집니다.
+            // 🌟 2. 난이도 폭발 구역 계산 및 배율 적용 (1.2배씩 중첩)
+            // effStage를 기준으로 10층마다 배율이 1.2배씩 곱해집니다.
             let effectiveZone = Math.floor((effStage - 1) / 10);
-            let zoneMultiplier = Math.pow(1.05, effectiveZone);
+            let zoneMultiplier = Math.pow(1.2, effectiveZone);
 
             // 🌟 3. [공식 적용] 몬스터 기본 스탯 (1층당 공 4, 체 40 고정 증가)
             let baseHp = (effStage * 40) + (isBoss ? 200 : 0);
@@ -1643,15 +1663,15 @@ playerAttack() {
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
                 
                 // 💰 [마스터의 완벽한 밸런스 공식 적용!]
-                let rewardGold = 15; // 일반 몹은 고정 15골드!
+                let rewardGold = 10 + (GameState.rpgStage * 2);; // 일반 몹은 고정 15골드!
                 let rewardGem = 0;   // 일반 몹은 다이아(젬) 없음!
                 
                 if (isBoss) {
                     // 현재 몇 번째 보스인지 계산 (예: 10층=1, 20층=2, 30층=3)
                     const bossTier = GameState.rpgStage / 10; 
                     
-                    rewardGold = 100 * bossTier; // 10, 200, 300... 이렇게 늘어남!
-                    rewardGem = 50 * bossTier;  // 50, 100, 150... 이렇게 늘어남!
+                    rewardGold = 150 * bossTier; // 10, 200, 300... 이렇게 늘어남!
+                    rewardGem = 100 * bossTier;  // 50, 100, 150... 이렇게 늘어남!
                 }
                 
                // 👇 [이렇게 변경!] 무조건 숫자로 취급하도록 Number()로 감싸기!
