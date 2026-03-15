@@ -718,29 +718,9 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         if (document.getElementById('profile-total-power')) document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
         if (document.getElementById('profile-total-hp')) document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
         
-     // 🌟 내 정보 탭의 장비 슬롯도 뱃지 표시되게 변경!
-        const renderProfileSlot = (slotId, itemId, label) => {
-            const el = document.getElementById(slotId);
-            if (!el) return;
-            if (itemId && GameData.items[itemId]) {
-                const item = GameData.items[itemId];
-                const level = GameState.itemUpgrades[itemId] || 0;
-           
-// 🌟 [UI 심플 모드] 배경과 테두리를 모두 날리고, 가독성을 위해 글씨 겉에 얇고 진한 검은색 외곽선만 추가!
-const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-400 text-[11px] font-black z-10 leading-none tracking-tighter" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8);">+${level}</div>` : '';
-                
-                // overflow-hidden 확인 필수!
-                el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
-                el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
-            } else {
-                el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
-                el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
-            }
-        };
-
-        renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
-        renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
-        renderProfileSlot('profile-slot-accessory', GameState.equippedAccessory, '장신구');
+     // 🌟 내 정보 탭의 장비 슬롯 업데이트 (새로운 프로필 UI 엔진으로 연결!)
+        this.updateProfileEquipmentSlots();
+        
     }, // <-- renderInventory 끝나는 괄호
 
     // ... (기존 renderInventory 끝나는 부분 아래) ...
