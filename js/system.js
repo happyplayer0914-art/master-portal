@@ -1217,40 +1217,47 @@ upgradeStat(t) {
         progress: { daily: {}, weekly: {} },
       
         init() {
-            const saved = localStorage.getItem('master_quest_progress2'); // 기존 에러 방지를 위해 저장소 이름 변경
+            const saved = localStorage.getItem('master_quest_progress2'); 
+            
+            // 📅 1. 오늘의 날짜와 이번 주 월요일 날짜 구하기!
+            const todayStr = new Date().toDateString(); // 예: "Mon Mar 16 2026"
+            
+            const now = new Date();
+            const day = now.getDay() || 7; // 일요일(0)을 7로 변환해서 계산하기 쉽게!
+            const monday = new Date(now);
+            monday.setDate(monday.getDate() - day + 1); // 이번 주 월요일로 시간 돌리기
+            monday.setHours(0,0,0,0);
+            const weekStr = monday.toDateString(); // 예: "Mon Mar 16 2026"
+
+            // 💾 2. 일단 저장된 데이터 불러오기
             if (saved) {
                 this.progress = JSON.parse(saved);
             } else {
-                this.list.daily.forEach(q => this.progress.daily[q.id] = { count: 0, claimed: false });
-                this.list.weekly.forEach(q => this.progress.weekly[q.id] = { count: 0, claimed: false });
-                this.save();
+                // 처음 킨 유저면 뼈대부터 만들어주기
+                this.progress = { daily: {}, weekly: {}, lastDailyDate: '', lastWeeklyDate: '' };
             }
-        },
 
-        save() {
-            localStorage.setItem('master_quest_progress2', JSON.stringify(this.progress));
-        },
+            let needsSave = false;
 
-        // 🌟 [핵심 센서 발동기] 다른 곳에서 퀘스트 수치를 올릴 때 부르는 함수!
-        update(type, questId, amount = 1) {
-            if (!this.progress[type] || !this.progress[type][questId]) return;
-            
-            let qProgress = this.progress[type][questId];
-            let qData = this.list[type].find(q => q.id === questId);
-            
-            if (qProgress.claimed) return; 
-            
-            if (qProgress.count < qData.target) {
-                qProgress.count += amount;
-                if (qProgress.count > qData.target) qProgress.count = qData.target;
+            // ☀️ 3. 일일 퀘스트 초기화 검사 (마지막 접속일이 오늘이 아니면 리셋!)
+            if (this.progress.lastDailyDate !== todayStr) {
+                this.list.daily.forEach(q => this.progress.daily[q.id] = { count: 0, claimed: false });
+                this.progress.lastDailyDate = todayStr; // 오늘 날짜로 도장 쾅!
+                needsSave = true;
+                console.log("☀️ 일일 퀘스트 초기화 완료!");
+            }
+
+            // 📆 4. 주간 퀘스트 초기화 검사 (마지막 접속 주간이 이번 주가 아니면 리셋!)
+            if (this.progress.lastWeeklyDate !== weekStr) {
+                this.list.weekly.forEach(q => this.progress.weekly[q.id] = { count: 0, claimed: false });
+                this.progress.lastWeeklyDate = weekStr; // 이번 주 월요일 도장 쾅!
+                needsSave = true;
+                console.log("📆 주간 퀘스트 초기화 완료!");
+            }
+
+            // 초기화된 게 있거나 처음 켰다면 저장소 업데이트!
+            if (needsSave || !saved) {
                 this.save();
-                
-                const modal = document.getElementById('quest-modal');
-                if (modal && !modal.classList.contains('opacity-0')) this.renderList();
-                
-                if (qProgress.count === qData.target) {
-                    UIManager.showToast(`📜 퀘스트 [${qData.title}] 달성! 젬을 수령하세요!`);
-                }
             }
         },
 
