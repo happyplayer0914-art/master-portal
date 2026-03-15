@@ -55,25 +55,28 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-   init() { 
+  init() { 
         this.initBackground(); 
-        this.updateCurrencyUI(); 
-        this.applyAvatarSkin(); 
-        this.initCheckinButton(); 
-        this.updateIdleUI(); 
-        document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
-        this.updateRpgLobbyUI();
+        
+        // 🚨 [긴급 패치] 금고(저장소)에서 데이터를 완벽히 꺼내올 수 있도록 0.1초 대기 후 화면 그리기!
+        setTimeout(() => {
+            this.updateCurrencyUI(); 
+            this.applyAvatarSkin(); 
+            this.initCheckinButton(); 
+            this.updateIdleUI(); 
+            document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
+            this.updateRpgLobbyUI();
+            this.updateProfileUI();
+        }, 100);
 
-        // 🌟 [여기에 쏙!] 새로고침 시 폰 화면부터 그리고 서버 최신 데이터(한줄소개 등) 강제 로딩!
-        this.updateProfileUI();
+        // 새로고침 시 폰 화면부터 그리고 서버 최신 데이터(한줄소개 등) 강제 로딩!
         if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
             GameSystem.Profile.loadMyProfile();
         }
 
-        // 👇 여기에 한 줄 쓱 추가!
         this.GachaSlider.init();
 
-        // 👇 [핵심 추가] 게임 켤 때 내가 낀 배경화면 불러오기! (시스템 로딩을 위해 0.5초 기다림)
+        // 게임 켤 때 내가 낀 배경화면 불러오기! (시스템 로딩을 위해 0.5초 기다림)
         setTimeout(() => {
             if (window.GameSystem && GameSystem.Lobby && GameSystem.Lobby.applyBackground) {
                 GameSystem.Lobby.applyBackground();
@@ -92,20 +95,19 @@ const UIManager = {
             }, 1000);
         }
 
-       // (기존에 있던 1분짜리 방치형 UI 타이머)
+        // 1분짜리 방치형 UI 타이머
         setInterval(() => {
             if (document.getElementById('screen-home').classList.contains('active')) {
                 this.updateIdleUI();
             }
         }, 60000);
 
-        // 🌟 [여기에 신규 추가!] 1초마다 체력 회복 스케줄러 가동!
+        // 1초마다 체력 회복 스케줄러 가동!
         setInterval(() => {
             if (window.GameState && GameState.recoverHpOverTime) {
                 GameState.recoverHpOverTime();
             }
             
-            // 💡 [추가] 투기장 화면을 보고 있을 때만 1초마다 전광판 갱신!
             const arenaScreen = document.getElementById('screen-arena');
             if (arenaScreen && arenaScreen.classList.contains('active')) {
                 this.updateHpRecoveryText();
