@@ -971,15 +971,21 @@ upgradeStat(t) {
             if (!uid) return UIManager.showToast("로그인이 필요합니다.");
             if (!confirm("현재 기기의 데이터를 지우고 클라우드 데이터로 덮어씌우시겠습니까?")) return;
             
-            try {
-                // 💡 [핵심 방어막] 다운로드 중에 폰이 옛날 데이터를 올리지 못하게 타이머를 부숴버립니다!
+           try {
                 if(this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+
                 const docSnap = await window.getDoc(window.doc(window.db, "users", uid));
                 if (docSnap.exists() && docSnap.data().saveData) {
                     const cloudData = docSnap.data().saveData;
                     for (const key in cloudData) {
-                        localStorage.setItem(key, cloudData[key]);
+                        // 🚨 [수정] 강제 동기화 때도 탈주 기록은 무시!
+                        if (key !== 'master_in_battle') {
+                            localStorage.setItem(key, cloudData[key]);
+                        }
                     }
+                    // 🚨 [핵심] 찌꺼기 완벽 소각!
+                    localStorage.removeItem('master_in_battle'); 
+                    
                     alert("✨ 클라우드 동기화 완료! 게임을 재시작합니다.");
                     location.reload();
                 } else {
@@ -991,13 +997,14 @@ upgradeStat(t) {
             }
         },
         
-        silentSaveToCloud(uid) {
+    silentSaveToCloud(uid) {
             if (!this.isSessionValid) return; 
 
             const allMyData = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && (key.startsWith('master_') || key === 'last_checkin')) {
+                // 🚨 [수정] key가 'master_in_battle'이 아닐 때만 저장하도록 조건 추가!
+                if (key && (key.startsWith('master_') || key === 'last_checkin') && key !== 'master_in_battle') {
                     allMyData[key] = localStorage.getItem(key);
                 }
             }
@@ -1023,11 +1030,16 @@ upgradeStat(t) {
                     const cloudTime = parseInt(cloudData['master_lastSaveTime'] || '0');
                     const localTime = parseInt(localStorage.getItem('master_lastSaveTime') || '0');
 
-                    if (cloudTime > localTime) {
+                  if (cloudTime > localTime) {
                         console.log("☁️ 클라우드에 더 최신 데이터가 있습니다. 덮어씌우는 중...");
                         for (const key in cloudData) {
-                            localStorage.setItem(key, cloudData[key]);
+                            // 🚨 [수정] 다운로드할 때도 탈주 기록은 빼고 받기!
+                            if (key !== 'master_in_battle') {
+                                localStorage.setItem(key, cloudData[key]);
+                            }
                         }
+                        // 🚨 [핵심] 찌꺼기가 남아있을 수 있으니 무조건 지우고 재시작!
+                        localStorage.removeItem('master_in_battle'); 
                         location.reload(); 
                     } else {
                         console.log("📱 현재 기기의 데이터가 가장 최신입니다. 백섭 방어 완료!");
