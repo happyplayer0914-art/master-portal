@@ -119,12 +119,15 @@ const UIManager = {
         
         if(s === 'screen-home') this.updateIdleUI(); 
         if(s === 'screen-arena') this.updateRpgLobbyUI();
-       // 💡 [수정됨] 프로필 탭 진입 시 서버 동기화 및 렌더링
+     // 💡 프로필 탭 진입 로직
         if(s === 'screen-profile') { 
             this.switchInvTab('gear'); 
-            // 🌟 프로필 탭 누를 때마다 서버에서 좋아요/한줄소개 쫙 땡겨옵니다!
-            if(window.GameSystem && GameSystem.Profile) GameSystem.Profile.loadMyProfile();
+            // 1. 먼저 로컬 데이터로 빠르게 화면 그리기
             this.updateProfileUI(); 
+            // 2. 서버에서 최신 정보(좋아요, 잃어버린 한줄소개 등)를 비동기로 땡겨오기 (성공 시 알아서 다시 그림)
+            if(window.GameSystem && GameSystem.Profile) {
+                GameSystem.Profile.loadMyProfile(); 
+            }
         }
         if(s === 'screen-ranking') GameSystem.Ranking.loadRanking();
     },
@@ -570,7 +573,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
     }, // <-- updateRpgLobbyUI 끝나는 괄호
-    // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
+   // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
     updateProfileUI() {
         const avatarEl = document.getElementById('profile-big-icon');
         const nicknameEl = document.getElementById('profile-nickname-display');
@@ -579,10 +582,11 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         const recordEl = document.getElementById('profile-highest-record');
         const statusEl = document.getElementById('profile-status-msg');
         const likesEl = document.getElementById('profile-likes-display');
+        const bgEl = document.getElementById('profile-bg-image'); // 배경 엘리먼트
 
         if(nicknameEl) nicknameEl.innerText = GameState.nickname;
 
-        // 🆔 UID 발급 (없으면 최초 1회 랜덤 생성 후 영구 저장!)
+        // 🆔 UID 발급
         if (!GameState.uid) {
             GameState.uid = Math.floor(1000 + Math.random() * 9000).toString();
             GameState.save();
@@ -591,7 +595,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
         // 🏅 장착 칭호
         if(titleEl) {
-            if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && GameData.cosmetics && GameData.cosmetics.titles) {
+            if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
                 const tItem = GameData.cosmetics.titles.find(x => x.id === GameState.equippedTitle);
                 titleEl.innerHTML = tItem ? `✨ ${tItem.name} ✨` : "✨ 칭호 없음 ✨";
             } else {
@@ -601,23 +605,23 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
         // 🎨 아바타 & 테두리
         let iconStr = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
-        if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default' && GameData.cosmetics && GameData.cosmetics.profiles) {
+        if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
             const pfItem = GameData.cosmetics.profiles.find(x => x.id === GameState.equippedProfile);
             if (pfItem) iconStr = pfItem.icon;
         }
         if(avatarEl) {
             avatarEl.innerHTML = iconStr;
             let skinClass = "bg-slate-700 border border-slate-600";
-            if(GameState.equippedSkin && GameState.equippedSkin !== 'none' && GameState.equippedSkin !== 'default' && GameData.cosmetics && GameData.cosmetics.borders) {
+            if(GameState.equippedSkin && GameState.equippedSkin !== 'none' && GameState.equippedSkin !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                 const bItem = GameData.cosmetics.borders.find(x => x.id === GameState.equippedSkin);
                 if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
             }
+            // 💡 크기 고정! w-16 h-16
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
-      // 👑 최고 기록 (환생 + 층수 통합!)
+        // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
-            // 💡 prestige 대신 prestigeCount 로 수정!
             const pCount = GameState.prestigeCount || 0;
             const prestigeText = pCount > 0 ? `[${pCount}환생] ` : "";
             recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
@@ -633,21 +637,22 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             likesEl.innerText = GameState.likes || 0;
         }
 
-        // 🖼️ 내 프로필 배경 스킨 적용 (버그 4 해결)
-        const bgEl = document.getElementById('profile-bg-image');
+        // 🖼️ 내 프로필 배경 스킨 적용 (즉각 렌더링!)
         if (bgEl) {
             if (GameState.equippedBg && GameState.equippedBg !== 'none' && GameState.equippedBg !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
                 const bgItem = GameData.cosmetics.backgrounds.find(x => x.id === GameState.equippedBg);
-                if (bgItem) bgEl.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+                if (bgItem) {
+                     bgEl.style.backgroundImage = `url('assets/backgrounds/${bgItem.img}')`;
+                }
             } else {
-                bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
+                bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`; // 기본 배경
             }
         }
 
         // ⚔️ 장비 슬롯 그리기 함수 호출
         this.updateProfileEquipmentSlots();
-        
-        // 🌟 [여기 추가!] 화면 갱신이 끝날 때마다 파이어베이스 서버로 내 정보 쏴주기!
+
+        // 🌟 화면 갱신이 끝날 때마다 파이어베이스 서버로 내 정보 쏴주기!
         if (window.GameSystem && GameSystem.Profile) {
             GameSystem.Profile.syncToServer();
         }
@@ -713,25 +718,31 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             if (borderItem) borderClass = `bg-slate-800 ${borderItem.cssClass}`; 
         }
 
-        // 🌟 [추가됨] 내가 장착한 프로필(내부 아이콘) 찾아오기!
         const profileId = GameState.equippedProfile;
-        // 장착한 게 없으면 원래대로 닉네임 첫 글자(M) 출력
         let innerIcon = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0); 
         
         if (profileId && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
             const profileItem = GameData.cosmetics.profiles.find(p => p.id === profileId);
-            if (profileItem) innerIcon = profileItem.icon; // 고양이(🐱) 등으로 교체!
+            if (profileItem) innerIcon = profileItem.icon;
         }
 
         const avatars = document.querySelectorAll('.master-avatar');
         avatars.forEach(a => {
-            a.className = "master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all " 
-                        + (a.id === 'profile-big-icon' ? 'w-20 h-20 text-4xl ' : 'w-10 h-10 text-xl ')
-                        + borderClass;
+            // 💡 [핵심] '내 정보'의 큰 프사는 따로 관리하도록 분기 처리!
+            if (a.id === 'profile-big-icon') {
+                 // 여기서는 아무것도 안 함! 크기 유지는 updateProfileUI에서 담당
+                 return; 
+            }
             
-            // 🌟 아바타 안쪽의 글씨(M)를 싹 지우고 새로운 아이콘으로 덮어씌웁니다!
+            // 나머지 채팅창 등 작은 프사들만 적용
+            a.className = `master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all w-10 h-10 text-xl ${borderClass}`;
             a.innerHTML = innerIcon; 
         });
+        
+        // 💡 [핵심] '내 정보' 탭의 큰 프사 갱신은 이걸로 확실하게 호출!
+        if (document.getElementById('screen-profile').classList.contains('active')) {
+            this.updateProfileUI();
+        }
     },
     
    // 🌟 [수정됨] 장비 탭 렌더링 (강화 수치 표시 및 뻥튀기 스탯 적용!)
