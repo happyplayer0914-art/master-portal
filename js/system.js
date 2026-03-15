@@ -2176,4 +2176,24 @@ GameSystem.Profile = {
             console.error("좋아요 실패:", e);
         }
     }
+     // 🌟 [추가됨] 서버에서 내 최신 정보(좋아요, 한줄소개) 강제로 땡겨오기! (버그 2,3 해결)
+    async loadMyProfile() {
+        if (!window.db || !GameState.nickname) return;
+        try {
+            const userRef = window.doc(window.db, "users", GameState.nickname);
+            const docSnap = await window.getDoc(userRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.likes !== undefined) GameState.likes = data.likes;
+                if (data.statusMessage) GameState.statusMessage = data.statusMessage;
+                if (data.prestige !== undefined) GameState.prestige = data.prestige;
+                GameState.save(); // 내 폰에 다시 꽉 저장!
+                
+                // 화면 즉시 새로고침
+                if (UIManager.updateProfileUI) UIManager.updateProfileUI();
+            }
+        } catch(e) {
+            console.error("내 프로필 로드 실패:", e);
+        }
+    }
 };
