@@ -600,12 +600,33 @@ upgradeStat(t) {
                                 </div>
                             </div>
                             
-                            <div class="text-right shrink-0 whitespace-nowrap pl-1">
+                           <div class="text-right shrink-0 whitespace-nowrap pl-1">
                                 <p class="text-[10px] sm:text-xs text-slate-400">도달 층수</p>
                                 <p class="text-base sm:text-lg font-black text-gradient-gold flex items-center justify-end">${prestigeText}${d.stage}F</p>
                             </div>
                         </div>`;
                 });
+                
+                // 🌟 [추가됨] 화면에 글씨가 다 그려지면, 상자 크기랑 글씨 길이를 비교합니다!
+                setTimeout(() => {
+                    const boxes = list.querySelectorAll('.rank-marquee-box');
+                    boxes.forEach(box => {
+                        const textEl = box.querySelector('.rank-marquee-text');
+                        // 글씨 길이(scrollWidth)가 상자 크기(clientWidth)보다 크다면?
+                        if (textEl && textEl.scrollWidth > box.clientWidth) {
+                            textEl.classList.add('is-long'); // 움직이는 애니메이션 스위치 ON!
+                            
+                            // 삐져나온 길이만큼만 딱 맞게 이동하도록 변수 설정!
+                            const moveDist = box.clientWidth - textEl.scrollWidth; 
+                            textEl.style.setProperty('--slide-distance', `${moveDist}px`);
+                        } else {
+                            // 글자가 짧아서 넉넉하다면, 오른쪽 끝이 흐려지는 효과(마스크)도 꺼버리기!
+                            box.style.maskImage = 'none';
+                            box.style.webkitMaskImage = 'none';
+                        }
+                    });
+                }, 50);
+
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     }, // 🚨 [랭킹 끝]
