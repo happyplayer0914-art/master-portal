@@ -493,10 +493,10 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             emptyState.classList.add('hidden');
         }
         
-        // 내 정보 상단 전투력/생존력 업데이트
+       // 내 정보 상단 전투력/생존력 업데이트 (태그가 삭제되었으므로 안전장치 추가!)
         const stats = GameState.getTotalStats(); 
-        document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
-        document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
+        if (document.getElementById('profile-total-power')) document.getElementById('profile-total-power').innerText = stats.atk.toLocaleString(); 
+        if (document.getElementById('profile-total-hp')) document.getElementById('profile-total-hp').innerText = stats.hp.toLocaleString();
         
      // 🌟 내 정보 탭의 장비 슬롯도 뱃지 표시되게 변경!
         const renderProfileSlot = (slotId, itemId, label) => {
