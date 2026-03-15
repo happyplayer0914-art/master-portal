@@ -2116,7 +2116,6 @@ const AssetPreloader = {
 // 🌟 [신규] 파이어베이스 프로필 & 좋아요 서버 동기화 엔진
 // =========================================================================
 GameSystem.Profile = {
-    // 1. 내 프로필 정보 서버에 쏘기!
     async syncToServer() {
         if (!window.db || !GameState.nickname) return;
         try {
@@ -2127,7 +2126,8 @@ GameSystem.Profile = {
                 uid: GameState.uid || "0000",
                 statusMessage: GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!",
                 highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
-                prestige: GameState.prestige || 0,
+                // 💡 [수정] prestige가 아니라 prestigeCount로 정확히 보냅니다!
+                prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
@@ -2146,25 +2146,20 @@ GameSystem.Profile = {
         }
     },
 
-    // 2. 남의 프로필에 좋아요(💖) 누르기!
     async addLike(targetNickname) {
         if (!window.db || !targetNickname || targetNickname === GameState.nickname) return;
-        
         const likedKey = `liked_${targetNickname}`;
         if (localStorage.getItem(likedKey)) {
             UIManager.showToast("이미 좋아요를 보낸 마스터입니다! 💖");
             return;
         }
-        
         try {
             const userRef = window.doc(window.db, "users", targetNickname);
             const docSnap = await window.getDoc(userRef);
-            
             if (docSnap.exists()) {
                 let currentLikes = docSnap.data().likes || 0;
                 await window.setDoc(userRef, { likes: currentLikes + 1 }, { merge: true });
                 localStorage.setItem(likedKey, "true"); 
-                
                 UIManager.showToast("💖 좋아요를 보냈습니다!");
                 document.getElementById('target-user-likes').innerText = currentLikes + 1; 
             } else {
@@ -2173,9 +2168,9 @@ GameSystem.Profile = {
         } catch(e) {
             console.error("좋아요 실패:", e);
         }
-    }, // 👈 [핵심!!] 여기에 콤마(,)가 없어서 에러가 났습니다. 부활 완료!
+    },
 
-    // 🌟 [추가됨] 서버에서 내 최신 정보(좋아요, 한줄소개) 강제로 땡겨오기!
+    // 🌟 서버에서 내 정보(좋아요, 한줄소개) 땡겨오기 완벽 버전!
     async loadMyProfile() {
         if (!window.db || !GameState.nickname) return;
         try {
@@ -2185,10 +2180,14 @@ GameSystem.Profile = {
                 const data = docSnap.data();
                 if (data.likes !== undefined) GameState.likes = data.likes;
                 if (data.statusMessage) GameState.statusMessage = data.statusMessage;
-                if (data.prestige !== undefined) GameState.prestige = data.prestige;
+                // 💡 [수정] 다운받을 때도 prestigeCount로 받습니다!
+                if (data.prestige !== undefined) GameState.prestigeCount = data.prestige; 
                 GameState.save(); 
                 
-                if (UIManager.updateProfileUI) UIManager.updateProfileUI();
+                // 💡 [핵심] 서버에서 데이터를 다 받아온 뒤에 프로필 UI를 다시 그려줍니다!
+                if (window.UIManager && UIManager.updateProfileUI) {
+                    UIManager.updateProfileUI();
+                }
             }
         } catch(e) {
             console.error("내 프로필 로드 실패:", e);
