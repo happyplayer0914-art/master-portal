@@ -810,23 +810,24 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             // 💡 이름 앞에 붙여줄 +1, +2 텍스트
             const levelText = level > 0 ? `<span class="text-purple-300 font-black mr-0.5">+${level}</span>` : '';
             
-            // 💡 스탯 텍스트 출력 시 강화 배율(upgMult)을 곱하고, toFixed(1)로 소수점 1자리 자르기!
+          // 💡 [핵심] 글씨가 두 줄로 꺾이지 않도록 방어막(whitespace-nowrap) 치고 텍스트 다이어트!
             let effectText = '';
-            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold leading-none">공격력 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</span>`;
-            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold leading-none">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</span>`;
-            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold leading-none">크리티컬 +${(item.critRate * upgMult).toFixed(1)}%</span>`;
-            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold leading-none">크리데미지 +${(item.critDmg * upgMult).toFixed(1)}%</span>`;
-            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold leading-none">피흡 +${(item.vamp * upgMult).toFixed(1)}%</span>`;
-            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold leading-none">공속 +${(item.spd * upgMult).toFixed(1)}%</span>`;
-            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none">회피 +${(item.eva * upgMult).toFixed(1)}%</span>`;
-            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none">방어력 +${Math.floor(item.def * upgMult)}</span>`;
+            if (item.atkMult) effectText += `<span class="text-[9px] text-red-400 font-bold leading-none whitespace-nowrap tracking-tighter">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</span>`;
+            if (item.hpMult) effectText += `<span class="text-[9px] text-emerald-400 font-bold leading-none whitespace-nowrap tracking-tighter">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</span>`;
+            if (item.critRate) effectText += `<span class="text-[9px] text-purple-400 font-bold leading-none whitespace-nowrap tracking-tighter">크리 +${(item.critRate * upgMult).toFixed(1)}%</span>`;
+            if (item.critDmg) effectText += `<span class="text-[9px] text-pink-400 font-bold leading-none whitespace-nowrap tracking-tighter">크리피해 +${(item.critDmg * upgMult).toFixed(1)}%</span>`;
+            if (item.vamp) effectText += `<span class="text-[9px] text-rose-500 font-bold leading-none whitespace-nowrap tracking-tighter">피흡 +${(item.vamp * upgMult).toFixed(1)}%</span>`;
+            if (item.spd) effectText += `<span class="text-[9px] text-yellow-400 font-bold leading-none whitespace-nowrap tracking-tighter">공속 +${(item.spd * upgMult).toFixed(1)}%</span>`;
+            if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none whitespace-nowrap tracking-tighter">회피 +${(item.eva * upgMult).toFixed(1)}%</span>`;
+            if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none whitespace-nowrap tracking-tighter">방어 +${Math.floor(item.def * upgMult)}</span>`;
             
-           const card = `
-                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-3 px-1 h-auto min-h-[130px] w-full">
+            // 💡 [핵심] 카드 정렬을 윗부분(justify-start)으로 맞추고 스탯을 아래로(mt-auto) 밀어내서 깔끔하게!
+            const card = `
+                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[120px] w-full">
                     ${badgeHTML}
-                    <div class="text-3xl mb-1.5 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 px-1 word-break-keep-all">${levelText}${item.name}</h4>
-                    <div class="flex flex-col items-center gap-[2px] w-full">
+                    <div class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
+                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${item.name}</h4>
+                    <div class="flex flex-col items-center gap-[3px] w-full mt-auto">
                         ${effectText}
                     </div>
                     ${countHTML}
