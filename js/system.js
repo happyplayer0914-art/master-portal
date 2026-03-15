@@ -7,22 +7,24 @@ const GameSystem = {
         // =========================================================================
         Forge: {
             selectedId: null,
-            // 💡 [기획 적용] 1강 100% ~ 8강 30%, 9강 10%, 10강 1% 확률 맵핑!
+            // 💡 1강 100% ~ 8강 30%, 9강 10%, 10강 1% 확률 맵핑
             probs: [100, 90, 80, 70, 60, 50, 40, 30, 10, 1],
             
             init() {
                 if(!GameState.itemUpgrades) GameState.itemUpgrades = {};
                 this.selectedId = null;
-                document.getElementById('forge-details').classList.add('hidden');
+                const details = document.getElementById('forge-details');
+                if(details) details.classList.add('hidden');
                 this.renderList();
             },
 
             renderList() {
                 const list = document.getElementById('forge-item-list');
+                if(!list) return;
                 list.innerHTML = '';
                 
-                // 💡 [기획 적용] 장착 중인 아이템은 강화 목록에서 원천 차단 (오류 방지)
-                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                // 🚨 [오류 픽스!] 장착 변수명을 길드장님 시스템에 맞게 완벽 수정!
+                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 const counts = {};
                 
                 GameState.inventory.forEach(id => {
@@ -42,8 +44,9 @@ const GameSystem = {
                     div.className = `bg-slate-700 border ${this.selectedId === id ? 'border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'border-slate-600'} rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-600 transition-all relative`;
                     div.onclick = () => { this.selectedId = id; this.renderList(); this.renderDetails(); };
                     
+                    // 💡 [안전장치] icon과 emoji 변수명을 모두 지원하도록 수정!
                     div.innerHTML = `
-                        <div class="text-2xl mb-1">${item.icon}</div>
+                        <div class="text-2xl mb-1">${item.icon || item.emoji || '📦'}</div>
                         <div class="text-[10px] text-white text-center w-full truncate">${level > 0 ? '<span class="text-purple-300 font-bold">+' + level + '</span>' : ''} ${item.name}</div>
                         <div class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-indigo-400 shadow-md">x${count}</div>
                     `;
@@ -51,18 +54,19 @@ const GameSystem = {
                 }
 
                 if(!hasItems) {
-                    list.innerHTML = '<div class="col-span-4 text-center text-slate-500 text-xs py-6 font-bold">인벤토리에 장착 해제된 장비가 없습니다.</div>';
+                    list.innerHTML = '<div class="col-span-4 text-center text-slate-500 text-xs py-6 font-bold">인벤토리에 장착 해제된 강화 가능 장비가 없습니다.</div>';
                 }
             },
 
             renderDetails() {
                 const details = document.getElementById('forge-details');
-                if(!this.selectedId) { details.classList.add('hidden'); return; }
+                if(!this.selectedId || !details) return;
                 
                 const item = GameData.items[this.selectedId];
                 const level = GameState.itemUpgrades[this.selectedId] || 0;
                 
-                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                // 🚨 [오류 픽스] 여기서도 변수명 수정!
+                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 let count = 0;
                 GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
 
@@ -71,7 +75,7 @@ const GameSystem = {
                 if(level >= 10) {
                     details.innerHTML = `
                         <div class="text-center py-4">
-                            <div class="text-5xl mb-3 animate-bounce">${item.icon}</div>
+                            <div class="text-5xl mb-3 animate-bounce">${item.icon || item.emoji || '📦'}</div>
                             <h3 class="text-2xl font-black text-yellow-400 mb-2 drop-shadow-md">+MAX ${item.name}</h3>
                             <p class="text-slate-400 text-sm">더 이상 강화할 수 없는 궁극의 상태입니다.</p>
                         </div>
@@ -80,13 +84,13 @@ const GameSystem = {
                 }
 
                 const prob = this.probs[level];
-                const cost = (level + 1) * 100; // 💡 1강 100G, 10강 1000G
+                const cost = (level + 1) * 100; // 1강 100G, 10강 1000G
                 const canUpgrade = count >= 2 && GameState.gold >= cost; // 제물용 1개 포함 총 2개 이상 필요
 
                 details.innerHTML = `
                     <div class="flex items-center gap-4 mb-5">
                         <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-3xl border border-slate-600 shadow-inner">
-                            ${item.icon}
+                            ${item.icon || item.emoji || '📦'}
                         </div>
                         <div class="flex-1">
                             <h3 class="text-lg font-black text-white mb-1"><span class="text-slate-400">+${level}</span> ${item.name} ➔ <span class="text-purple-400">+${level+1}</span></h3>
@@ -123,14 +127,15 @@ const GameSystem = {
 
                 const cost = (level + 1) * 100;
                 
-                const equipped = [GameState.equipment.weapon, GameState.equipment.armor, GameState.equipment.accessory];
+                // 🚨 [오류 픽스] 여기도 변수명 수정!
+                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 let count = 0;
                 GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
 
                 if(count < 2) return UIManager.showToast("제물로 바칠 동일한 장비가 부족합니다.");
                 if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다.");
 
-                // 💸 비용 지불 및 제물 파괴 (인벤토리에서 1개만 확실하게 삭제)
+                // 💸 비용 지불 및 제물 파괴
                 GameState.gold -= cost;
                 const index = GameState.inventory.indexOf(this.selectedId);
                 if(index > -1) GameState.inventory.splice(index, 1);
@@ -141,12 +146,12 @@ const GameSystem = {
                 if(roll < prob) {
                     // 🎉 깡! 강화 성공
                     GameState.itemUpgrades[this.selectedId] = level + 1;
-                    AudioEngine.sfx.equip(); // 경쾌한 성공음
+                    AudioEngine.sfx.equip();
                     UIManager.triggerHeavyHaptic();
                     UIManager.showToast(`✨ 돌파 성공! [+${level+1} ${GameData.items[this.selectedId].name}]`, 3000);
                 } else {
                     // 💥 쨍그랑! 강화 실패
-                    AudioEngine.sfx.hit_player(); // 둔탁한 실패음
+                    AudioEngine.sfx.hit_player(); 
                     UIManager.triggerHaptic();
                     UIManager.showToast(`💥 강화 실패... 제물 장비가 파괴되었습니다.`, 3000);
                 }
