@@ -55,7 +55,7 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-    init() { 
+   init() { 
         this.initBackground(); 
         this.updateCurrencyUI(); 
         this.applyAvatarSkin(); 
@@ -63,6 +63,13 @@ const UIManager = {
         this.updateIdleUI(); 
         document.getElementById('profile-nickname-display').innerText = GameState.nickname; 
         this.updateRpgLobbyUI();
+
+        // 🌟 [여기에 쏙!] 새로고침 시 폰 화면부터 그리고 서버 최신 데이터(한줄소개 등) 강제 로딩!
+        this.updateProfileUI();
+        if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
+            GameSystem.Profile.loadMyProfile();
+        }
+
         // 👇 여기에 한 줄 쓱 추가!
         this.GachaSlider.init();
 
@@ -573,7 +580,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
     }, // <-- updateRpgLobbyUI 끝나는 괄호
-   // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
+  // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
     updateProfileUI() {
         const avatarEl = document.getElementById('profile-big-icon');
         const nicknameEl = document.getElementById('profile-nickname-display');
@@ -586,14 +593,12 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
         if(nicknameEl) nicknameEl.innerText = GameState.nickname;
 
-        // 🆔 UID 발급
         if (!GameState.uid) {
             GameState.uid = Math.floor(1000 + Math.random() * 9000).toString();
             GameState.save();
         }
         if(uidEl) uidEl.innerText = GameState.uid;
 
-        // 🏅 장착 칭호
         if(titleEl) {
             if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
                 const tItem = GameData.cosmetics.titles.find(x => x.id === GameState.equippedTitle);
@@ -603,7 +608,6 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
 
-        // 🎨 아바타 & 테두리
         let iconStr = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
         if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
             const pfItem = GameData.cosmetics.profiles.find(x => x.id === GameState.equippedProfile);
@@ -616,26 +620,19 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                 const bItem = GameData.cosmetics.borders.find(x => x.id === GameState.equippedSkin);
                 if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
             }
-            // 💡 크기 고정! w-16 h-16
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
         // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
-            const pCount = GameState.prestigeCount || 0;
+            // 💡 구버전(prestige) 데이터 호환까지 완벽하게 잡아냅니다!
+            const pCount = GameState.prestigeCount || GameState.prestige || 0;
             const prestigeText = pCount > 0 ? `[${pCount}환생] ` : "";
             recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
         }
 
-        // 💬 한 줄 소개
-        if(statusEl) {
-            statusEl.innerText = GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!";
-        }
-
-        // 💖 좋아요
-        if(likesEl) {
-            likesEl.innerText = GameState.likes || 0;
-        }
+        if(statusEl) statusEl.innerText = GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!";
+        if(likesEl) likesEl.innerText = GameState.likes || 0;
 
         // 🖼️ 내 프로필 배경 스킨 적용 (즉각 렌더링!)
         if (bgEl) {
@@ -649,13 +646,9 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
 
-        // ⚔️ 장비 슬롯 그리기 함수 호출
         this.updateProfileEquipmentSlots();
-
-        // 🌟 화면 갱신이 끝날 때마다 파이어베이스 서버로 내 정보 쏴주기!
-        if (window.GameSystem && GameSystem.Profile) {
-            GameSystem.Profile.syncToServer();
-        }
+        
+        // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
     },
 
     // ⚔️ [신규] 프로필 전용 장비 슬롯 그리기
@@ -696,20 +689,22 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         });
     },
 
-    // ✍️ [신규] 3단계용! 한 줄 소개 수정 스위치
+   // ✍️ 3단계용! 한 줄 소개 수정 스위치
     editStatusMessage() {
         const currentMsg = GameState.statusMessage || "";
         const newMsg = prompt("프로필에 표시할 한 줄 소개를 입력하세요 (최대 20자):", currentMsg);
         
         if (newMsg !== null) {
-            GameState.statusMessage = newMsg.substring(0, 20); // 20자 컷!
+            GameState.statusMessage = newMsg.substring(0, 20); 
             GameState.save();
-            this.updateProfileUI(); // 화면 바로 새로고침
+            this.updateProfileUI(); 
+            // 🌟 여기서만 안전하게 서버로 전송!
+            if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer(); 
             UIManager.showToast("✍️ 한 줄 소개가 멋지게 변경되었습니다!");
         }
     },
     
-   applyAvatarSkin() {
+  applyAvatarSkin() {
         const skinId = GameState.equippedSkin;
         let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; 
         
@@ -726,20 +721,13 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             if (profileItem) innerIcon = profileItem.icon;
         }
 
-        const avatars = document.querySelectorAll('.master-avatar');
+        // 🚨 [핵심 방어막] 내 정보창의 메인 프사(#profile-big-icon)는 절대로 건드리지 마!
+        const avatars = document.querySelectorAll('.master-avatar:not(#profile-big-icon):not(#target-user-avatar)');
         avatars.forEach(a => {
-            // 💡 [핵심] '내 정보'의 큰 프사는 따로 관리하도록 분기 처리!
-            if (a.id === 'profile-big-icon') {
-                 // 여기서는 아무것도 안 함! 크기 유지는 updateProfileUI에서 담당
-                 return; 
-            }
-            
-            // 나머지 채팅창 등 작은 프사들만 적용
             a.className = `master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all w-10 h-10 text-xl ${borderClass}`;
             a.innerHTML = innerIcon; 
         });
         
-        // 💡 [핵심] '내 정보' 탭의 큰 프사 갱신은 이걸로 확실하게 호출!
         if (document.getElementById('screen-profile').classList.contains('active')) {
             this.updateProfileUI();
         }
@@ -1026,6 +1014,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         
         this.renderCosmeticsShop();
         this.updateProfileUI(); // 🌟 [여기 추가!] 치장품 끼면 프로필 창 즉시 새로고침!
+        if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer(); // 🌟 치장품 바꿨을 때만 서버 전송!
         this.triggerHaptic();
     },
 
@@ -1049,6 +1038,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         
         this.renderCosmeticsShop();
         this.updateProfileUI(); // 🌟 [여기 추가!] 치장품 빼도 프로필 창 즉시 새로고침!
+        if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer(); // 🌟 치장품 바꿨을 때만 서버 전송!
         this.triggerHaptic();
     },
 // =========================================================================
