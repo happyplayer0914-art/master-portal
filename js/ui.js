@@ -149,9 +149,11 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-                // 💡 [UI 픽스] 밖으로 튀어나가지 않게 모서리에 딱 맞춤! (top-0 left-0)
-                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
+               / 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
+                // 부모의 overflow-hidden이 왼쪽 위 둥근 모서리를 알아서 잘라줍니다.
+                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-br-[8px] z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
                 
+                // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
@@ -352,16 +354,18 @@ const UIManager = {
                 const item = GameData.items[itemId];
                 const level = GameState.itemUpgrades[itemId] || 0;
                 
-                // 💡 [UI 픽스] 여기도 동일하게 모서리 핏으로 교체!
-                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-xl rounded-tl-[10px] z-10 border-b border-r border-purple-400 shadow-sm">+${level}</div>` : '';
+                // 🌟 [디자인 픽스!] Tailwind 기본 클래스만 사용해서 오류 해결! 
+                // 부모의 overflow-hidden이 왼쪽 위 둥근 모서리를 알아서 잘라줍니다.
+                const levelBadge = level > 0 ? `<div class="absolute top-0 left-0 bg-purple-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-br-[8px] z-10 shadow-sm border-b border-r border-purple-400">+${level}</div>` : '';
                 
+                // overflow-hidden 확인 필수!
                 el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative rarity-${item.rarity} overflow-hidden`;
                 el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
             } else {
                 el.className = `w-14 h-14 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800/50 flex flex-col items-center justify-center relative`;
                 el.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">${label}</span>`;
             }
-        };;
+        };
 
         renderProfileSlot('profile-slot-weapon', GameState.equippedWeapon, '무기');
         renderProfileSlot('profile-slot-armor', GameState.equippedArmor, '방어구');
