@@ -130,44 +130,23 @@ const UIManager = {
         }, 1000);
     },
 
-        // 방치형 지원금 1분마다 UI 갱신
-        setInterval(() => {
-            const homeScreen = document.getElementById('screen-home');
-            if (homeScreen && homeScreen.classList.contains('active')) {
-                this.updateIdleUI();
-            }
-        }, 60000);
+    // 🌟 [최종 진화] 재화 표시 시스템 (문자 강제 숫자 변환 + 에러 방어!)
+    updateCurrencyUI() {
+        // 💡 [핵심 방어막] 데이터가 글자로 오든 빈칸으로 오든 무조건 숫자로 강제 멱살잡이!
+        let g = Number(GameState.gold) || 0;
+        let m = Number(GameState.gem) || 0;
 
-        // 체력 회복 1초 스케줄러
-        setInterval(() => {
-            if (window.GameState && GameState.recoverHpOverTime) {
-                GameState.recoverHpOverTime();
-            }
-            const arenaScreen = document.getElementById('screen-arena');
-            if (arenaScreen && arenaScreen.classList.contains('active')) {
-                this.updateHpRecoveryText();
-            }
-        }, 1000);
-    },
+        const formatBigNumber = (num) => {
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
+            if (num >= 10000) return (num / 10000).toFixed(1) + '만';
+            return num.toLocaleString();
+        };
 
-        // 방치형 지원금 1분마다 UI 갱신
-        setInterval(() => {
-            const homeScreen = document.getElementById('screen-home');
-            if (homeScreen && homeScreen.classList.contains('active')) {
-                this.updateIdleUI();
-            }
-        }, 60000);
-
-        // 체력 회복 1초 스케줄러
-        setInterval(() => {
-            if (window.GameState && GameState.recoverHpOverTime) {
-                GameState.recoverHpOverTime();
-            }
-            const arenaScreen = document.getElementById('screen-arena');
-            if (arenaScreen && arenaScreen.classList.contains('active')) {
-                this.updateHpRecoveryText();
-            }
-        }, 1000);
+        const goldEl = document.getElementById('gold-display');
+        const gemEl = document.getElementById('gem-display');
+        
+        if (goldEl) goldEl.innerText = formatBigNumber(g);
+        if (gemEl) gemEl.innerText = formatBigNumber(m);
     },
     
     triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
