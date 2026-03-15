@@ -288,6 +288,54 @@ const UIManager = {
         modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
         modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
     },
+    // 👤 [신규] 타 유저 프로필 조회 및 신고 모달 컨트롤러
+    openUserProfile(nickname, icon, title, stage, skinClass) {
+        // 본인 프로필은 누를 필요 없으니 컷!
+        if (nickname === GameState.nickname) return;
+
+        // 현재 선택한 타겟 유저 기억해두기 (차단/신고할 때 쓰기 위함)
+        window.currentTargetUser = nickname;
+
+        // 모달창 안에 데이터 쏙쏙 집어넣기
+        document.getElementById('target-user-nickname').innerText = nickname;
+        document.getElementById('target-user-avatar').innerHTML = icon;
+        // 아바타 테두리(skinClass)까지 그대로 복사해서 적용!
+        document.getElementById('target-user-avatar').className = `master-avatar w-24 h-24 rounded-full flex items-center justify-center font-black text-4xl text-white shadow-xl mb-3 mt-4 ${skinClass}`;
+        
+        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' ? title : "칭호 없음";
+        document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
+
+        // 프로필 창 짠! 하고 열기
+        const modal = document.getElementById('user-profile-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+    },
+
+    closeUserProfile() {
+        const modal = document.getElementById('user-profile-modal');
+        if (modal) {
+            modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        }
+    },
+
+    openReportModal() {
+        const modal = document.getElementById('report-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+    },
+
+    closeReportModal() {
+        const modal = document.getElementById('report-modal');
+        if (modal) {
+            modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        }
+    },
     // 🌟 [신규] 차원의 여신(환생) 모달 열기 및 보상 계산!
     openGoddessModal() {
         // 1. 100층 미만이면 컷! (길드장님이 설정하신 층수가 있다면 거기에 맞춰주세요)
