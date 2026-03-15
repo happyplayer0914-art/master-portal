@@ -210,14 +210,25 @@ const UIManager = {
             descDisplay.innerText = `접속을 종료해도 8시간 동안 최대 ${maxGold.toLocaleString()}G가 자동으로 누적됩니다.`;
         }
     },
-    // 🌟 [신규] 상세 스탯 모달 열기 및 데이터 렌더링
-    openStatsModal() {
+   // 🌟 [업그레이드] 내 스탯 & 타 유저 스탯 공용 모달창
+    openStatsModal(customStats = null, customName = null) {
         if(AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
         this.triggerHaptic();
         
-        const stats = GameState.getTotalStats();
+        // customStats가 들어오면(남의 프로필) 그걸 쓰고, 안 들어오면 내 스탯을 씁니다!
+        const stats = customStats || GameState.getTotalStats();
+        if (!stats) {
+            this.showToast("이 유저의 상세 스탯 정보가 서버에 없습니다.");
+            return;
+        }
+
+        const modalTitle = customName ? `${customName}의 능력치` : "내 능력치";
         const content = document.getElementById('stats-modal-content');
         if (!content) return;
+
+        // 팝업창 제목 바꿔주기
+        const titleEl = document.querySelector('#stats-modal h3');
+        if (titleEl) titleEl.innerText = modalTitle;
 
         content.innerHTML = `
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -225,7 +236,6 @@ const UIManager = {
                     <span class="text-red-400 font-black text-sm">⚔️ 공격력</span>
                     <span class="text-white font-bold text-base">${stats.atk.toLocaleString()}</span>
                 </div>
-                <p class="text-[10px] text-slate-400">적에게 가하는 기본 피해량입니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -233,7 +243,6 @@ const UIManager = {
                     <span class="text-emerald-400 font-black text-sm">❤️ 최대 체력</span>
                     <span class="text-white font-bold text-base">${stats.hp.toLocaleString()}</span>
                 </div>
-                <p class="text-[10px] text-slate-400">이 수치가 0이 되면 패배하여 휴식이 필요합니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -241,7 +250,6 @@ const UIManager = {
                     <span class="text-purple-400 font-black text-sm">🎯 크리티컬 확률</span>
                     <span class="text-white font-bold text-base">${stats.critRate}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">공격 시 치명타가 발생할 확률입니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -249,7 +257,6 @@ const UIManager = {
                     <span class="text-pink-400 font-black text-sm">💥 크리티컬 데미지</span>
                     <span class="text-white font-bold text-base">${stats.critDmg}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">치명타 발생 시 증폭되는 피해량 비율입니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -257,7 +264,6 @@ const UIManager = {
                     <span class="text-blue-400 font-black text-sm">🛡️ 방어력</span>
                     <span class="text-white font-bold text-base">${stats.def}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">적에게 받는 피해량을 ${stats.def}% 만큼 직접 감소시킵니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -265,7 +271,6 @@ const UIManager = {
                     <span class="text-teal-400 font-black text-sm">💨 회피율</span>
                     <span class="text-white font-bold text-base">${stats.eva}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">적의 공격을 완전히 무효화할 확률입니다.</p>
             </div>
             
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1">
@@ -273,7 +278,6 @@ const UIManager = {
                     <span class="text-yellow-400 font-black text-sm">⚡ 공격 속도</span>
                     <span class="text-white font-bold text-base">${stats.spd}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">공격 쿨타임을 감소시켜 더 빠르게 공격합니다.</p>
             </div>
 
             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex flex-col gap-1 mb-2">
@@ -281,9 +285,13 @@ const UIManager = {
                     <span class="text-rose-500 font-black text-sm">🩸 흡혈(피흡)</span>
                     <span class="text-white font-bold text-base">${stats.vamp}%</span>
                 </div>
-                <p class="text-[10px] text-slate-400">적에게 입힌 피해의 일부를 체력으로 흡수합니다.</p>
             </div>
         `;
+
+        const modal = document.getElementById('stats-modal');
+        modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+        modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
+    },
 
         // 팝업 애니메이션 켜기
         const modal = document.getElementById('stats-modal');
@@ -322,6 +330,9 @@ const UIManager = {
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    // 🌟 상대방의 이름과 스탯을 임시로 기억해 둡니다! (상세 스탯 창 띄울 때 씀)
+                    window.currentTargetStats = data.totalStats || null;
+                    window.currentTargetName = nickname;
                     
                     // 텍스트 정보 덮어씌우기
                     document.getElementById('target-user-uid').innerText = data.uid || "0000";
