@@ -52,34 +52,28 @@ const UIManager = {
         el.classList.remove('hidden');
     },
 
-// 🌟 [최종 진화] 무한 추적 로딩 엔진 탑재!
+// 🌟 [최종 진화] 무조건 즉시 렌더링 엔진!
     init() { 
         this.initBackground(); 
         
-        // 🚨 [좀비 추적 엔진] 화면이 0원이면 진짜 돈이 로딩될 때까지 0.3초마다 강제로 다시 그립니다!
-        const bootEngine = setInterval(() => {
-            if (window.GameState) {
-                if (typeof GameState.load === 'function') GameState.load(); // 금고 강제 개방
-                
-                this.updateCurrencyUI(); 
-                this.applyAvatarSkin(); 
-                this.initCheckinButton(); 
-                this.updateIdleUI(); 
-                if(document.getElementById('profile-nickname-display')) {
-                    document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
-                }
-                this.updateRpgLobbyUI();
-                this.updateProfileUI();
+        // 🚨 0.3초 타이머 삭제! 무조건 게임 켜자마자 화면부터 완벽하게 쫙 그립니다!
+        this.updateCurrencyUI(); 
+        this.applyAvatarSkin(); 
+        this.initCheckinButton(); 
+        this.updateIdleUI(); 
+        if(document.getElementById('profile-nickname-display')) {
+            document.getElementById('profile-nickname-display').innerText = GameState.nickname || "마스터"; 
+        }
+        this.updateRpgLobbyUI();
+        this.updateProfileUI();
 
-                // 💡 골드가 0이 아니거나 정상적으로 로딩되었으면 엔진 정지! (깜빡임 완벽 박멸)
-                if (Number(GameState.gold) > 0) {
-                    clearInterval(bootEngine);
-                }
-            }
-        }, 300);
-
-        // 아무리 늦어도 3초 뒤에는 엔진 강제 종료 (무한 루프 방지)
-        setTimeout(() => clearInterval(bootEngine), 3000);
+        // 만약을 대비해 0.5초 뒤에 한 번 더 확실하게 덧칠 (0원 깜빡임 원천 차단)
+        setTimeout(() => {
+            this.updateCurrencyUI();
+            this.applyAvatarSkin();
+            this.updateRpgLobbyUI();
+            this.updateProfileUI();
+        }, 500);
 
         // 파이어베이스(서버)에서 한줄소개/인기도 땡겨오기
         if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.loadMyProfile) {
