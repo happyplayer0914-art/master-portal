@@ -1381,6 +1381,8 @@ enterDungeon() {
     initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-rpg-battle').classList.add('active');
+            // 🌟 [신규 추가] 전투 화면이 열리자마자 스크롤을 맨 위로 팍! 끌어올립니다.
+            window.scrollTo(0, 0);
             GameState.isBattling = true;
             localStorage.setItem('master_in_battle', 'true');
 
