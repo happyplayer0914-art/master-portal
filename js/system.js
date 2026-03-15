@@ -2112,3 +2112,68 @@ const AssetPreloader = {
         console.log(`✅ [프리로딩 완료] 총 ${uniqueUrls.length}개의 리소스 장전 및 보호 완료!`);
     }
 };
+// =========================================================================
+// 🌟 [신규] 파이어베이스 프로필 & 좋아요 서버 동기화 엔진
+// =========================================================================
+GameSystem.Profile = {
+    // 1. 내 프로필 정보 서버에 쏘기!
+    async syncToServer() {
+        if (!window.db || !GameState.nickname) return;
+        try {
+            // 'users'라는 폴더에 내 닉네임으로 된 문서를 만듭니다.
+            const userRef = window.doc(window.db, "users", GameState.nickname);
+            await window.setDoc(userRef, {
+                nickname: GameState.nickname,
+                uid: GameState.uid || "0000",
+                statusMessage: GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!",
+                highestStage: GameState.maxStage || 1,
+                prestige: GameState.prestige || 0,
+                bgSkin: GameState.equippedBg || 'none', // 남의 팝업창 배경 띄울 때 사용
+                equipment: {
+                    weapon: GameState.equippedWeapon || null,
+                    armor: GameState.equippedArmor || null,
+                    accessory: GameState.equippedAccessory || null
+                },
+                itemUpgrades: {
+                    weapon: GameState.equippedWeapon ? (GameState.itemUpgrades[GameState.equippedWeapon] || 0) : 0,
+                    armor: GameState.equippedArmor ? (GameState.itemUpgrades[GameState.equippedArmor] || 0) : 0,
+                    accessory: GameState.equippedAccessory ? (GameState.itemUpgrades[GameState.equippedAccessory] || 0) : 0
+                },
+                lastUpdated: window.serverTimestamp()
+            }, { merge: true }); // 기존에 받은 '좋아요' 수는 날아가지 않게 보호!
+        } catch(e) {
+            console.error("프로필 서버 백업 실패:", e);
+        }
+    },
+
+    // 2. 남의 프로필에 좋아요(💖) 누르기!
+    async addLike(targetNickname) {
+        if (!window.db || !targetNickname || targetNickname === GameState.nickname) return;
+        
+        // 내 폰에 '이 사람한테 좋아요 눌렀음' 이라는 도장을 찍어서 중복 방지 (어뷰징 차단!)
+        const likedKey = `liked_${targetNickname}`;
+        if (localStorage.getItem(likedKey)) {
+            UIManager.showToast("이미 좋아요를 보낸 마스터입니다! 💖");
+            return;
+        }
+        
+        try {
+            const userRef = window.doc(window.db, "users", targetNickname);
+            const docSnap = await window.getDoc(userRef);
+            
+            if (docSnap.exists()) {
+                let currentLikes = docSnap.data().likes || 0;
+                // 좋아요 수 +1 해서 서버에 다시 저장
+                await window.setDoc(userRef, { likes: currentLikes + 1 }, { merge: true });
+                localStorage.setItem(likedKey, "true"); // 내 폰에 도장 쾅!
+                
+                UIManager.showToast("💖 좋아요를 보냈습니다!");
+                document.getElementById('target-user-likes').innerText = currentLikes + 1; // 화면 즉시 갱신
+            } else {
+                UIManager.showToast("서버에 등록되지 않은 유저입니다.");
+            }
+        } catch(e) {
+            console.error("좋아요 실패:", e);
+        }
+    }
+};
