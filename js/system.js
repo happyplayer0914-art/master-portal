@@ -562,42 +562,45 @@ upgradeStat(t) {
                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
                     if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
-                  // 👇 [수정됨] 랭킹 테두리 불러오기 로직 교체!
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
                     let sId = d.skin;
                     if(sId && sId !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                         const bItem = GameData.cosmetics.borders.find(x => x.id === sId);
-                        // 💡 여기에 bg-slate-800 을 추가했습니다!
                         if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
                     }
-                    // 👆 여기까지!
-                        // 🌟 [추가됨!] 프로필 아이콘 찾아오기 (없으면 기존처럼 이름 첫 글자)
+                    
                     let innerIcon = d.nickname.charAt(0);
                     if (d.profile && d.profile !== 'none' && d.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
                         const pfItem = GameData.cosmetics.profiles.find(x => x.id === d.profile);
                         if (pfItem) innerIcon = pfItem.icon;
                     }
                     
-                  const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    
-                    // 💡 [수정1] 환생 텍스트가 절대 줄바꿈 되지 않도록 whitespace-nowrap 추가!
+                    const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     let prestigeText = d.prestige ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${d.prestige}환생]</span>` : '';
+                    let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
                     
-                    // 💡 [수정2] 칭호가 너무 길면 말줄임표(...)로 잘리도록 truncate와 너비 속성 추가!
-                    let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md truncate w-full">${d.title}</div>` : '';
-                    
-                    // 💡 [수정3] 오른쪽 구역이 찌그러지지 않게 flex-shrink-0, 왼쪽은 유연하게 줄어들게 flex-1 min-w-0 적용!
+                    // 🌟 [대수술 완료] 
+                    // 1. py-3 pl-2 pr-3 로 왼쪽 여백을 줄여서 '1위'를 왼쪽으로 바싹 붙였습니다.
+                    // 2. w-10 텍스트 크기를 살짝 줄여서 공간을 더 확보했습니다.
+                    // 3. 닉네임과 칭호에 마스터의 아이디어인 'rank-marquee-box' (슬라이딩)를 씌웠습니다!
                     list.innerHTML += `
-                        <div class="p-3 sm:p-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
-                            <div class="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                                <div class="w-14 sm:w-16 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} shrink-0 whitespace-nowrap">${rankIcon}</div>
-                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} flex-shrink-0">${innerIcon}</div>
-                                <div class="flex flex-col min-w-0 flex-1">
-                                    ${titleHtml}
-                                    <p class="font-bold text-white text-sm flex items-center gap-1.5 truncate">${d.nickname} ${isMe ? '<span class="text-[9px] bg-indigo-500 px-1 py-0.5 rounded text-white font-normal flex-shrink-0">ME</span>' : ''}</p>
+                        <div class="py-3 pl-2 pr-3 sm:py-4 sm:pl-3 sm:pr-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
+                            <div class="flex items-center gap-2 flex-1 min-w-0">
+                                <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
+                                <div class="master-avatar w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0">${innerIcon}</div>
+                                
+                                <div class="rank-marquee-box flex-1 min-w-0">
+                                    <div class="rank-marquee-text">
+                                        ${titleHtml}
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="font-bold text-white text-[13px] sm:text-sm">${d.nickname}</p>
+                                            ${isMe ? '<span class="text-[9px] bg-indigo-500 px-1 py-0.5 rounded text-white font-normal shrink-0">ME</span>' : ''}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="text-right flex-shrink-0 whitespace-nowrap">
+                            
+                            <div class="text-right shrink-0 whitespace-nowrap pl-1">
                                 <p class="text-[10px] sm:text-xs text-slate-400">도달 층수</p>
                                 <p class="text-base sm:text-lg font-black text-gradient-gold flex items-center justify-end">${prestigeText}${d.stage}F</p>
                             </div>
