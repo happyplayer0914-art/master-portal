@@ -821,16 +821,14 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none">회피 +${(item.eva * upgMult).toFixed(1)}%</span>`;
             if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none">방어력 +${Math.floor(item.def * upgMult)}</span>`;
             
-            const card = `
-                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-2 h-[140px] !important">
+           const card = `
+                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-center items-center py-3 px-1 h-auto min-h-[130px] w-full">
                     ${badgeHTML}
-                    <div class="text-3xl mb-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[10px] text-center break-keep leading-tight min-h-[24px] flex items-center mb-1">${levelText}${item.name}</h4>
-                    
-                    <div class="flex flex-col items-center gap-[2px]">
+                    <div class="text-3xl mb-1.5 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
+                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 px-1 word-break-keep-all">${levelText}${item.name}</h4>
+                    <div class="flex flex-col items-center gap-[2px] w-full">
                         ${effectText}
                     </div>
-                    
                     ${countHTML}
                 </div>
             `;
