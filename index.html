@@ -674,11 +674,76 @@
                 <span class="text-cyan-400 text-xs font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 500</span>
             </button>
         </div>
+<div class="text-center mt-10 mb-6 border-t border-slate-700/50 pt-8">
+            <h1 class="text-3xl font-black text-white mb-2"><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400">스페셜 파트너 소환</span></h1>
+            <p class="text-slate-400 text-sm">차원의 문을 열어 심연을 돌파할 미소녀 파트너를 맞이하세요.</p>
+        </div>
 
-        <div class="flex items-center justify-between mb-2 px-1 mt-4 border-t border-slate-700/50 pt-4">
+        <div class="relative w-full h-[180px] rounded-2xl overflow-hidden mb-4 border-2 border-pink-500/50 shadow-[0_0_20px_rgba(236,72,153,0.3)] touch-pan-y group cursor-pointer" id="gacha-slider-container-partner">
+            <div id="gacha-slide-track-partner" class="flex h-full transition-transform duration-500 ease-out" style="transform: translateX(0%);">
+                
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-600/40 to-purple-600/40 z-10"></div>
+                    <img src="" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="신화 픽업">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">절찬 픽업 중!</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">차원의 마녀 강림</h3>
+                            <p class="text-[11px] text-pink-200 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">✨신화 등급 출현 확률 UP!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(236,72,153,0.8)] animate-pulse">🌌</div>
+                    </div>
+                </div>
+
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 z-10"></div>
+                    <img src="" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="동료 픽업">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">신규 파트너</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">성기사단장 아이리스</h3>
+                            <p class="text-[11px] text-cyan-200 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">절대적인 수호의 힘!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(56,189,248,0.8)]">🛡️</div>
+                    </div>
+                </div>
+
+                <div class="w-full h-full flex-shrink-0 relative bg-slate-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/40 to-teal-600/40 z-10"></div>
+                    <img src="" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80 z-0 mix-blend-screen" alt="여신 축복">
+                    <div class="p-6 relative z-20 flex h-full items-center justify-between">
+                        <div>
+                            <span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded mb-2 inline-block shadow-md">초보자 환영</span>
+                            <h3 class="text-xl font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">숲의 엘프 리아</h3>
+                            <p class="text-[11px] text-teal-200 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">바람이 당신을 인도하길!</p>
+                        </div>
+                        <div class="text-6xl drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]">🏹</div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-3 left-0 w-full flex justify-center gap-2 z-30" id="gacha-slider-dots-partner">
+                <div class="w-4 h-2 rounded-full bg-white transition-all shadow-md"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"></div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center text-[10px] sm:text-xs font-bold px-3 py-3 bg-slate-800/80 rounded-xl mb-4 border border-slate-700 shadow-inner">
+            <span class="text-slate-400">일반 <span class="font-black">64.2%</span></span>
+            <span class="text-blue-300">희귀 <span class="font-black">25%</span></span>
+            <span class="text-purple-400">영웅 <span class="font-black">7.5%</span></span>
+            <span class="text-yellow-400 drop-shadow-md">전설 <span class="font-black">2.5%</span></span>
+            <span class="text-pink-400 font-black tracking-wider drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] animate-pulse">
+                ✨신화 0.8%
+            </span>
+        </div>
+
+        <div class="flex items-center justify-between mb-2 px-1">
             <span class="text-xs font-bold text-pink-300">🌸 미소녀 파트너 영입</span>
             <span class="text-[10px] text-pink-500 font-bold bg-pink-900/30 px-2 py-0.5 rounded-full border border-pink-500/30 animate-pulse">신화 확률 UP!</span>
         </div>
+      
+     
         <div class="grid grid-cols-2 gap-3 mb-6">
             <button onclick="GameSystem.Gacha.performGacha(1, 'partner')" class="py-4 bg-gradient-to-b from-pink-900/40 to-slate-900 border border-pink-500/40 hover:from-pink-800/50 hover:to-slate-800 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(131,24,67,1)] active:shadow-[0_0px_0_rgba(131,24,67,1)] active:translate-y-[4px] transition-all">
                 <span class="text-pink-100 mb-1">1명 영입</span>
