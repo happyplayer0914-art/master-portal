@@ -600,9 +600,9 @@ const UIManager = {
                 const prefix = isPartner ? '★' : 'Lv.';
                 const levelColor = isPartner ? 'text-pink-200' : 'text-white';
                 
-              // 💡 [변경됨] 파트너면 SD 이미지를 부르고, 없으면 이모티콘 띄우기!
+              // 💡 [수정 완료] 브라우저 속도 차이로 인한 충돌을 막기 위해 setTimeout 타이머 장착!
                 const iconHtml = isPartner 
-                    ? `<img src="assets/partners/${item.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-2" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div style="display:none;" class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`
+                    ? `<img src="assets/partners/${item.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-2" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`
                     : `<div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`;
 
                 el.className = `w-[72px] h-[72px] rounded-xl flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass} overflow-hidden`;
@@ -839,11 +839,11 @@ updateProfileEquipmentSlots() {
                 else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
 
                 const level = GameState.partnerLevels[ptId] || 0;
-               ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+              ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
                 
-                // 💡 [변경됨] 이모티콘 대신 SD 이미지 태그(<img src=...>) 삽입!
+                // 💡 [수정 완료] 여기도 동일하게 setTimeout 안전장치 부착!
                 ptEl.innerHTML = `
-                    <img src="assets/partners/${pt.img_sd}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="assets/partners/${pt.img_sd}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
                     <div style="display:none;" class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
                     <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level}</div>
