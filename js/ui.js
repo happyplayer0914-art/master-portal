@@ -1277,20 +1277,19 @@ updateProfileEquipmentSlots() {
         },
 
         updateUI() {
-            if (!this.track) return;
-            // 기차를 옆으로 스으윽 밀기
-            this.track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+            // 💡 [개조 완료] 화면에 있는 모든 배너(장비, 파트너)를 동시에 움직입니다!
+            document.querySelectorAll('[id^="gacha-slide-track"]').forEach(track => {
+                track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+            });
             
-            // 하단 점(인디케이터) 모양 바꾸기
-            if (this.dots) {
-                Array.from(this.dots).forEach((dot, idx) => {
-                    if (idx === this.currentIndex) {
-                        dot.className = "w-4 h-2 rounded-full bg-white transition-all shadow-md"; 
-                    } else {
-                        dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; 
-                    }
+            // 하단 점(인디케이터)도 동시에 불 켜주기
+            document.querySelectorAll('[id^="gacha-slider-dots"]').forEach(dotContainer => {
+                Array.from(dotContainer.children).forEach((dot, idx) => {
+                    dot.className = (idx === this.currentIndex) 
+                        ? "w-4 h-2 rounded-full bg-white transition-all shadow-md" 
+                        : "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; 
                 });
-            }
+            });
         },
 
         next() {
