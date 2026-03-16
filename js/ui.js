@@ -412,11 +412,37 @@ const UIManager = {
                         bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
                     }
                     
-                    // 상대방 장비 렌더링 엔진
+              // 상대방 장비 & 파트너 렌더링 엔진
                     const renderTargetSlot = (type, itemId, level) => {
                         const el = document.getElementById(`target-slot-${type}`);
                         if (!el) return;
                         
+                        // 🌸 파트너 처리 로직
+                        if (type === 'partner') {
+                            if (itemId && window.GameData && GameData.partners && GameData.partners[itemId]) {
+                                const pt = GameData.partners[itemId];
+                                let rarityClass = "border-pink-500/50 bg-pink-900/30";
+                                if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+                                else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
+                                else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
+                                else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
+
+                                el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                                el.innerHTML = `
+                                    <div class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
+                                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
+                                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level || 0}</div>
+                                `;
+                                el.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level || 0}] ${pt.skillDesc}`); };
+                            } else {
+                                el.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
+                                el.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
+                                el.onclick = null;
+                            }
+                            return;
+                        }
+
+                        // 🗡️ 기존 장비 처리 로직
                         if (itemId && window.GameData && GameData.items[itemId]) {
                             const item = GameData.items[itemId];
                             let rarityClass = "border-slate-600 bg-slate-800";
@@ -425,13 +451,13 @@ const UIManager = {
                             else if(item.rarity === 'rare') rarityClass = "rarity-rare";
                             else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
                             
-                            el.className = `w-[30%] aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                            // 🚨 w-[30%] 제거!
+                            el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
                             el.innerHTML = `
                                 <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
                                 <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                                 <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level || 0}</div>
                             `;
-                          // 💡 [여기가 수정됨!] 타유저 장비 훔쳐볼 때 누락됐던 4가지 스탯(크뎀, 방어, 회피, 공속, 피흡) 추가!
                             el.onclick = () => { 
                                 const upgMult = 1.0 + ((level || 0) * 0.1);
                                 let effectText = "";
@@ -448,16 +474,18 @@ const UIManager = {
                             };
                         } else {
                             const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
-                            el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
+                            el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
                             el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
                             el.onclick = null;
                         }
                     };
                     
-                    // 무기, 방어구, 장신구 뿌려주기
+                    // 무기, 방어구, 장신구, 그리고 파트너까지 렌더링!
                     renderTargetSlot('weapon', data.equipment?.weapon, data.itemUpgrades?.weapon);
                     renderTargetSlot('armor', data.equipment?.armor, data.itemUpgrades?.armor);
                     renderTargetSlot('accessory', data.equipment?.accessory, data.itemUpgrades?.accessory);
+                    // 🌸 [추가!] 타유저 파트너 슬롯 렌더링 호출
+                    renderTargetSlot('partner', data.equipment?.partner, data.partnerLevels ? data.partnerLevels[data.equipment.partner] : 0);
                 } else {
                     document.getElementById('target-user-status').innerText = "최근 접속 기록이 없는 유저입니다.";
                 }
@@ -726,16 +754,14 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
     },
 
-    // ⚔️ [신규] 프로필 전용 장비 슬롯 그리기
     updateProfileEquipmentSlots() {
         const slots = ['weapon', 'armor', 'accessory'];
         slots.forEach(type => {
             const el = document.getElementById(`profile-slot-${type}`);
             if(!el) return;
             
-            // 대문자로 시작하는 타입 이름 (Weapon, Armor, Accessory)
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-            const itemId = GameState[`equipped${typeCapitalized}`]; // GameState.equippedWeapon 등
+            const itemId = GameState[`equipped${typeCapitalized}`]; 
 
             if(itemId && GameData.items[itemId]) {
                 const item = GameData.items[itemId];
@@ -748,13 +774,13 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
                 const level = GameState.itemUpgrades[itemId] || 0;
 
-                el.className = `w-[30%] aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                // 🚨 w-[30%] 삭제! 4칸 그리드에 딱 맞게 들어갑니다.
+                el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
                 el.innerHTML = `
                     <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
                     <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
                 `;
-              // 💡 [여기가 수정됨!] 모달창 띄우던 걸 지우고, 상세 스탯 토스트 메시지로 교체!
                 el.onclick = () => { 
                     const upgMult = 1.0 + (level * 0.1);
                     let effectText = "";
@@ -771,11 +797,39 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                 }; 
             } else {
                 const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
-                el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
+                el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
                 el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
                 el.onclick = null;
             }
         });
+
+        // 🌸 [신규] 파트너 전용 슬롯 렌더링 로직 추가!
+        const ptEl = document.getElementById('profile-slot-partner');
+        if (ptEl) {
+            const ptId = GameState.equippedPartner;
+            if (ptId && GameData.partners && GameData.partners[ptId]) {
+                const pt = GameData.partners[ptId];
+                let rarityClass = "border-pink-500/50 bg-pink-900/30";
+                if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+                else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
+                else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
+                else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
+
+                const level = GameState.partnerLevels[ptId] || 0;
+
+                ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                ptEl.innerHTML = `
+                    <div class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
+                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
+                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level}</div>
+                `;
+                ptEl.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level}] ${pt.skillDesc}`); }; 
+            } else {
+                ptEl.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
+                ptEl.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
+                ptEl.onclick = null;
+            }
+        }
     },
 
    // ✍️ 3단계용! 한 줄 소개 수정 스위치
