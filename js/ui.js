@@ -188,17 +188,17 @@ const UIManager = {
         document.getElementById('tab-shop').className = t === 'shop' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
     },
     
-    // 🌟 [핵심 수정] 치장품(cosmetics) 탭 전환 로직 완벽 적용!
-    switchInvTab(t) {
+   switchInvTab(t) {
         AudioEngine.sfx.click(); this.triggerHaptic();
         
         const btnGear = document.getElementById('inv-tab-gear');
         const btnCosmetics = document.getElementById('inv-tab-cosmetics');
         const panelGear = document.getElementById('inv-panel-gear');
         const panelCosmetics = document.getElementById('inv-panel-cosmetics');
+        const panelPartner = document.getElementById('inv-panel-partner'); // 🌸 파트너 패널!
+        const emptyState = document.getElementById('inv-empty-state');
         
         if(btnGear && btnCosmetics) {
-            // 🚨 [진범 박멸] w-full을 모조리 flex-1로 교체 완료!!
             btnGear.className = t === 'gear' 
                 ? "flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors whitespace-nowrap" 
                 : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
@@ -208,13 +208,22 @@ const UIManager = {
                 : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
         }
 
-        if(panelGear) panelGear.classList.toggle('hidden', t !== 'gear');
-        if(panelCosmetics) panelCosmetics.classList.toggle('hidden', t !== 'cosmetics');
+        // 1. 모든 패널 싹 다 숨기기
+        if(panelGear) panelGear.classList.add('hidden');
+        if(panelCosmetics) panelCosmetics.classList.add('hidden');
+        if(panelPartner) panelPartner.classList.add('hidden');
+        if(emptyState) emptyState.classList.add('hidden');
 
+        // 2. 누른 탭에 맞는 패널만 열고 내용물 그리기!
         if (t === 'gear') {
+            if(panelGear) panelGear.classList.remove('hidden');
             this.renderInventory();
         } else if (t === 'cosmetics') {
+            if(panelCosmetics) panelCosmetics.classList.remove('hidden');
             if(this.renderCosmeticsShop) this.renderCosmeticsShop();
+        } else if (t === 'partner') {
+            if(panelPartner) panelPartner.classList.remove('hidden');
+            if(this.renderPartnerInventory) this.renderPartnerInventory();
         }
     },
     
@@ -683,7 +692,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         if(statusEl) statusEl.innerText = GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!";
         if(likesEl) likesEl.innerText = GameState.likes || 0;
 
-        // 🖼️ 내 프로필 배경 스킨 적용 (즉각 렌더링!)
+       // 🖼️ 내 프로필 배경 스킨 적용 (기존 코드)
         if (bgEl) {
             if (GameState.equippedBg && GameState.equippedBg !== 'none' && GameState.equippedBg !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
                 const bgItem = GameData.cosmetics.backgrounds.find(x => x.id === GameState.equippedBg);
@@ -695,6 +704,23 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             }
         }
 
+        // 🌸 [여기에 신규 추가!] 장착한 파트너의 아름다운 자태 렌더링!
+        const ptImgEl = document.getElementById('profile-partner-image');
+        if (ptImgEl) {
+            if (GameState.equippedPartner && window.GameData && GameData.partners && GameData.partners[GameState.equippedPartner]) {
+                const pt = GameData.partners[GameState.equippedPartner];
+                // 장착 중이면 투명도 풀고 전신 일러스트(img_full) 출력!
+                ptImgEl.style.backgroundImage = `url('assets/partners/${pt.img_full}')`;
+                ptImgEl.style.filter = "none"; 
+                ptImgEl.style.opacity = "1";
+            } else {
+                // 장착 안 했으면 칙칙한 실루엣 기본값으로!
+                ptImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
+                ptImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)";
+                ptImgEl.style.opacity = "0.5";
+            }
+        }
+        
         this.updateProfileEquipmentSlots();
         
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
@@ -887,6 +913,52 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         this.updateProfileEquipmentSlots();
         
     }, // <-- renderInventory 끝나는 괄호
+    // 🌸 [신규 엔진] 미소녀 파트너 명단 그리기!
+    renderPartnerInventory() {
+        const pPartner = document.getElementById('inv-panel-partner');
+        const emptyState = document.getElementById('inv-empty-state');
+        if(!pPartner) return;
+        
+        pPartner.innerHTML = '';
+        
+        if(!GameState.ownedPartners || GameState.ownedPartners.length === 0) {
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = '<div class="text-4xl mb-3 opacity-50">🌸</div><p class="text-slate-400 text-xs">아직 영입한 파트너가 없습니다.<br>상점에서 프리미엄 소환을 진행해 보세요!</p>';
+            return;
+        }
+
+        let html = '';
+        GameState.ownedPartners.forEach(id => {
+            const pt = GameData.partners[id];
+            if(!pt) return;
+            
+            const isEquipped = (GameState.equippedPartner === id);
+            const level = GameState.partnerLevels[id] || 0;
+            
+            const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider z-10 bg-pink-500 border-pink-400">동행중</div>` : '';
+            const levelText = level > 0 ? `<span class="text-pink-300 font-black mr-0.5">★${level}</span>` : '';
+            
+            let rarityClass = "border-slate-600 bg-slate-800";
+            if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+            else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
+            else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
+            else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
+
+            html += `
+                <div onclick="GameSystem.Partner.toggleEquip('${id}')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
+                    ${badgeHTML}
+                    <div class="text-4xl mb-1 mt-2 filter drop-shadow-md flex-shrink-0">${pt.emoji}</div>
+                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
+                    <div class="flex flex-col items-center w-full mt-auto bg-black/40 rounded py-1 px-1">
+                        <span class="text-[8px] text-pink-300 font-black mb-0.5">[${pt.skillName}]</span>
+                        <span class="text-[8px] text-slate-300 font-bold break-keep text-center leading-tight">${pt.skillDesc}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        pPartner.innerHTML = html;
+    },
 
     // ... (기존 renderInventory 끝나는 부분 아래) ...
 
