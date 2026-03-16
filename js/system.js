@@ -417,32 +417,30 @@ upgradeStat(t) {
             const pt = GameData.partners[id]; 
             if(!pt) return;
             
-            // 1. 장비(Gear)와 100% 똑같은 원리의 스위치(장착/해제) 로직!
+            // 1. 상태 변경 및 저장
             GameState.equippedPartner = GameState.equippedPartner === id ? null : id;
-            
-            // 2. 상태 저장
             GameState.save(); 
             
-            // 3. 🌟 [가장 중요] 장비를 낄 때 쓰는 렌더링 파이프라인을 그대로 복사해왔습니다!
-            if(window.UIManager) {
-                // 💡 핵심: 장비 렌더링 엔진을 돌려야 프로필의 [전투력 스탯 + 슬롯]이 강제로 새로고침 됨!
-                UIManager.renderInventory();        
-                UIManager.renderPartnerInventory(); // 파트너 목록 뱃지 갱신
-                UIManager.updateProfileUI();        // 프로필 일러스트 및 배경 갱신
-                UIManager.updateRpgLobbyUI();       // 전투화면 스탯 갱신
-                
-                AudioEngine.sfx.equip(); 
-                UIManager.triggerHaptic();
-                
-                UIManager.showToast(`[${pt.name}] 동행 상태가 변경되었습니다.`);
-            }
+            // 🔥 2. 쓸데없는 window 조건문 싹 다 삭제!! 다이렉트로 무조건 그리기!!
+            UIManager.renderInventory();        // 프로필 스탯 및 장비 슬롯 갱신
+            UIManager.renderPartnerInventory(); // 파트너 명단 뱃지 갱신
+            UIManager.applyAvatarSkin();        // 내 정보창 배경 및 일러스트 갱신
+            UIManager.updateRpgLobbyUI();       // 로비(전투화면) 갱신
             
-            // 4. 서버 동기화
-            if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.syncToServer) {
+            // 3. 사운드 및 진동
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
+            UIManager.triggerHaptic();
+            
+            // 4. 안내 토스트
+            const actionText = GameState.equippedPartner ? pt.flavorText : `🌸 [${pt.name}] 동행을 해제했습니다.`;
+            UIManager.showToast(actionText);
+            
+            // 5. 서버 데이터 백업
+            if (GameSystem.Profile && GameSystem.Profile.syncToServer) {
                 GameSystem.Profile.syncToServer();
             }
         }
-    }, // <-- 콤마 필수! (이 바로 밑에 Gacha: { 가 이어집니다)
+    }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
  Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
