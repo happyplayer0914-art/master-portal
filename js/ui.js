@@ -756,14 +756,13 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
 
    updateProfileEquipmentSlots() {
         const slots = ['weapon', 'armor', 'accessory'];
-        slots.forEach(type => {
+        slots.forEach((type) => {
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
             const itemId = GameState[`equipped${typeCapitalized}`]; 
 
-            // 💡 querySelectorAll을 써서 내 프로필, 남의 프로필 가리지 않고 싹 다 칠해버림!
             const els = document.querySelectorAll(`[id$="-slot-${type}"]`);
-            els.forEach(el => {
-                if(itemId && GameData.items[itemId]) {
+            els.forEach((el) => {
+                if(itemId && window.GameData && GameData.items[itemId]) {
                     const item = GameData.items[itemId];
                     let rarityClass = "border-slate-600 bg-slate-800";
                     if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
@@ -786,9 +785,9 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
             });
         });
 
-        // 🌸 [강제 연동 엔진] 파트너 전용 슬롯 무조건 색칠!
+        // 🌸 파트너 전용 슬롯 무조건 칠하는 강제 연동 엔진!
         const ptEls = document.querySelectorAll('[id$="-slot-partner"]');
-        ptEls.forEach(ptEl => {
+        ptEls.forEach((ptEl) => {
             const ptId = GameState.equippedPartner;
             if (ptId && window.GameData && GameData.partners && GameData.partners[ptId]) {
                 const pt = GameData.partners[ptId];
@@ -810,7 +809,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                 ptEl.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
             }
         });
-    },
+    }, // <-- 여기까지 완벽하게 덮어씌워져야 합니다!
 
         // 🌸 [신규] 파트너 전용 슬롯 렌더링 로직 추가!
         const ptEl = document.getElementById('profile-slot-partner');
