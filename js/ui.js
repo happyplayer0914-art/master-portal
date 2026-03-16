@@ -582,7 +582,7 @@ const UIManager = {
         document.getElementById('cost-hp-display').innerText = GameSystem.Lobby.getUpgradeCost('hp').toLocaleString();
         document.getElementById('potion-count-display').innerText = GameState.potions;
 
-   const renderSlot = (slotId, itemId, label, isPartner = false) => {
+  const renderSlot = (slotId, itemId, label, isPartner = false) => {
     const el = document.getElementById(slotId);
     if (!el) return;
     
@@ -611,7 +611,18 @@ const UIManager = {
             <div class="absolute bottom-0 w-full bg-black/60 ${levelColor} text-[10px] text-center font-bold py-0.5 truncate px-1 tracking-wider z-10">${prefix}${level}</div>
         `;
         
-       
+        // 터치(클릭) 시 효과
+        el.onclick = () => { 
+            if (isPartner) {
+                UIManager.showToast(`🌸 [${item.name} ★${level}] ${item.skillDesc}`);
+            } else {
+                const upgMult = 1.0 + (level * 0.1);
+                let effectText = "";
+                if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
+                if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
+                UIManager.showToast(`[${item.name} +${level}] ${effectText}`); 
+            }
+        };
     } else {
         // 장착 해제 시 빈 슬롯 모양
         const emptyBorder = isPartner ? 'border-pink-500/30' : 'border-slate-600';
