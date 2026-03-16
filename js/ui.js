@@ -754,7 +754,7 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
     },
 
-   updateProfileEquipmentSlots() {
+  updateProfileEquipmentSlots() {
         const slots = ['weapon', 'armor', 'accessory'];
         slots.forEach((type) => {
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
@@ -777,15 +777,30 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                         <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                         <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
                     `;
+                    // 🔥 [복구 완료] 장비 돋보기(클릭) 상세 스탯 기능!
+                    el.onclick = () => { 
+                        const upgMult = 1.0 + (level * 0.1);
+                        let effectText = "";
+                        if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
+                        if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
+                        if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
+                        if (item.critDmg) effectText += `크리피해 +${(item.critDmg * upgMult).toFixed(1)}%  `;
+                        if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
+                        if (item.eva) effectText += `회피 +${(item.eva * upgMult).toFixed(1)}%  `;
+                        if (item.spd) effectText += `공속 +${(item.spd * upgMult).toFixed(1)}%  `;
+                        if (item.vamp) effectText += `피흡 +${(item.vamp * upgMult).toFixed(1)}%  `;
+                        UIManager.showToast(`[${item.name} +${level}] ${effectText}`); 
+                    };
                 } else {
                     const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
                     el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
                     el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
+                    el.onclick = null; // 장비 해제 시 클릭 기능 끄기
                 }
             });
         });
 
-        // 🌸 파트너 전용 슬롯 무조건 칠하는 강제 연동 엔진!
+        // 🌸 파트너 전용 슬롯 연동
         const ptEls = document.querySelectorAll('[id$="-slot-partner"]');
         ptEls.forEach((ptEl) => {
             const ptId = GameState.equippedPartner;
@@ -804,12 +819,15 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                     <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level}</div>
                 `;
+                // 🔥 [복구 완료] 파트너 돋보기(클릭) 스킬 설명 기능!
+                ptEl.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level}] ${pt.skillDesc}`); };
             } else {
                 ptEl.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
                 ptEl.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
+                ptEl.onclick = null; // 장착 해제 시 클릭 기능 끄기
             }
         });
-    }, // <-- 여기까지 완벽하게 덮어씌워져야 합니다!
+    },
 
 
    // ✍️ 3단계용! 한 줄 소개 수정 스위치
