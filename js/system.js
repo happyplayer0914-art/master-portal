@@ -409,81 +409,170 @@ upgradeStat(t) {
             UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
-    
-   Gacha: {
-        performGacha(times) {
-            const cost = times * 50; 
+    // =========================================================================
+    // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
+    // =========================================================================
+    Partner: {
+        toggleEquip(id) {
+            const pt = GameData.partners[id];
+            if (!pt) return;
+
+            // 1. 이미 장착 중인 애를 또 누르면 -> 장착 해제!
+            if (GameState.equippedPartner === id) {
+                GameState.equippedPartner = null; 
+                UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
+            } 
+            // 2. 다른 애를 누르거나 빈칸일 때 누르면 -> 즉시 장착!
+            else {
+                GameState.equippedPartner = id; 
+                UIManager.showToast(`🌸 ${pt.flavorText}`);
+                AudioEngine.sfx.equip(); 
+                UIManager.triggerHeavyHaptic();
+            }
+
+            GameState.save();
+            
+            // 💡 [핵심] 파트너를 바꾸면 스탯이 변하므로 화면 3단 콤보 새로고침!
+            if(window.UIManager) {
+                UIManager.renderPartnerInventory(); // 인벤토리 뱃지 갱신
+                UIManager.updateProfileUI();        // 프로필 배경 갱신
+                UIManager.updateRpgLobbyUI();       // 전투력(공/체) 갱신
+            }
+            
+            // ☁️ 장착 정보 서버로 동기화!
+            if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer();
+        }
+    }, // <-- 콤마 필수! (이 바로 밑에 Gacha: { 가 이어집니다)
+ Gacha: {
+        // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
+        performGacha(times, type = 'gear') {
+            const cost = type === 'partner' ? times * 100 : times * 50; 
             if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
-            // 광고 보지 말고 무조건 젬 소모하고 뽑기 진행!
-            this._executeGachaLogic(times);
+            
+            this._executeGachaLogic(times, type);
         },
 
-        // 💡 [대격변 완료!] 극악의 0.1% 확률 엔진과 신화(Mythic) 연출 탑재!
-        _executeGachaLogic(times) {
-            GameState.gem -= (times * 50); GameState.save(); UIManager.updateCurrencyUI();
+        _executeGachaLogic(times, type = 'gear') {
+            const cost = type === 'partner' ? times * 100 : times * 50;
+            GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
+            
             document.getElementById('bottom-nav').style.display = 'none'; 
-            const over = document.getElementById('gacha-overlay'); const resBox = document.getElementById('gacha-results-container'); const anim = document.getElementById('gacha-animation');
-            over.classList.add('active'); resBox.classList.add('hidden'); resBox.innerHTML = ''; anim.classList.remove('hidden'); document.getElementById('gacha-title').innerText = "소환의식 진행 중...";
+            const over = document.getElementById('gacha-overlay'); 
+            const resBox = document.getElementById('gacha-results-container'); 
+            const anim = document.getElementById('gacha-animation');
+            
+            over.classList.add('active'); resBox.classList.add('hidden'); resBox.innerHTML = ''; 
+            anim.classList.remove('hidden'); 
             document.getElementById('gacha-close-btn').classList.add('hidden');
+            
+            // 🌟 [연출 분기] 파트너 영입과 장비 소환 이펙트 완벽 분리!
+            if (type === 'partner') {
+                document.getElementById('gacha-title').innerText = "🌸 차원의 문 개방 중...";
+                anim.innerHTML = '🌌';
+                anim.className = 'text-9xl mb-8 filter drop-shadow-[0_0_30px_rgba(236,72,153,0.8)] animate-spin'; 
+            } else {
+                document.getElementById('gacha-title').innerText = "소환의식 진행 중...";
+                anim.innerHTML = '🎁';
+                anim.className = 'text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]';
+            }
+            
             AudioEngine.sfx.gacha_build(); UIManager.triggerHeavyHaptic();
             
             let results = [];
             for(let i=0; i<times; i++) {
-                // 🌟 [확률 엔진 교체] 마스터가 지시한 황금 밸런스 확률!
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                if (roll < 0.8) rarity = 'mythic';               // 🌟 0.1% (신화)
+                if (roll < 0.8) rarity = 'mythic';               // ✨ 0.8% (신화)
                 else if (roll < 0.8 + 2.5) rarity = 'legendary'; // 2.5% (전설)
                 else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; // 7.5% (영웅)
                 else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; // 25.0% (희귀)
-                else rarity = 'common';                          // 나머지 64.9% (일반)
+                else rarity = 'common';                          // 나머지 (일반)
                 
-                const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
-                // (방어막) 만약 해당 등급 템이 없으면 튕기지 않고 일반 템으로 대체!
-                const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
-                
-                const item = safePool[Math.floor(Math.random() * safePool.length)];
-                
-                // 마스터의 기존 인벤토리 저장 로직 유지 (item.id가 없으면 객체 키값을 찾아서 저장)
-                const itemId = item.id || Object.keys(GameData.items).find(key => GameData.items[key] === item);
-                results.push({ id: itemId, ...item }); 
-                GameState.inventory.push(itemId);
+                if (type === 'partner') {
+                    // 🌸 파트너 뽑기 풀 (일반이 없으므로 rare로 땡겨줌!)
+                    const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
+                    const safePool = pool.length > 0 ? pool : Object.values(GameData.partners).filter(it => it.rarity === 'rare');
+                    const pt = safePool[Math.floor(Math.random() * safePool.length)];
+                    
+                    const isDup = GameState.ownedPartners.includes(pt.id);
+                    if (isDup) {
+                        // 중복이면 별(레벨) 증가! (최대 10성)
+                        GameState.partnerLevels[pt.id] = Math.min((GameState.partnerLevels[pt.id] || 0) + 1, 10);
+                        results.push({ ...pt, isDup: true });
+                    } else {
+                        // 첫 획득!
+                        GameState.ownedPartners.push(pt.id);
+                        GameState.partnerLevels[pt.id] = 0;
+                        results.push({ ...pt, isDup: false });
+                    }
+                } else {
+                    // 🗡️ 장비 뽑기 풀
+                    const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
+                    const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
+                    const item = safePool[Math.floor(Math.random() * safePool.length)];
+                    
+                    const itemId = item.id || Object.keys(GameData.items).find(key => GameData.items[key] === item);
+                    results.push({ id: itemId, ...item }); 
+                    GameState.inventory.push(itemId);
+                }
             }
             GameState.save();
             
             setTimeout(() => {
                 AudioEngine.sfx.gacha_reveal(); UIManager.triggerHaptic();
-                anim.classList.add('hidden'); resBox.classList.remove('hidden'); document.getElementById('gacha-title').innerText = "소환 결과!";
-                resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10";
+                anim.classList.add('hidden'); resBox.classList.remove('hidden'); 
+                
+                document.getElementById('gacha-title').innerText = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
+                resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
                 
                 results.forEach((item, index) => {
                     setTimeout(() => {
-                        // 🌟 [UI 업데이트] 신화(Mythic) 라벨 및 색상 처리!
                         let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                        
-                        // 신화가 뜨면 텍스트가 빨간색으로 반짝거림!
                         let colorClass = item.rarity === 'mythic' ? "text-red-400 font-extrabold animate-pulse" : (item.color || "text-gray-300");
                         
-                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity}"><span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span><div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div><h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4></div>`;
+                        // 💡 파트너 중복 텍스트 추가
+                        let dupText = item.isDup ? `<div class="absolute -top-2 -right-2 bg-pink-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-md z-20">조각 변환</div>` : '';
+                        
+                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative">
+                            ${dupText}
+                            <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
+                            <div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>
+                            <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
+                        </div>`;
                         
                         resBox.insertAdjacentHTML('beforeend', cardHtml);
                         
-                        // 🌟 신화나 전설이 떴을 때 진동 빡! 오고 화면 덜덜 떨리기!
                         if(item.rarity === 'mythic' || item.rarity === 'legendary') {
                             if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
                         }
                         if(item.rarity === 'mythic') {
                             const overlay = document.getElementById('gacha-overlay');
                             overlay.classList.add('shake');
-                            setTimeout(() => overlay.classList.remove('shake'), 400); // 0.4초 뒤 진동 멈춤
+                            setTimeout(() => overlay.classList.remove('shake'), 400); 
                         }
                     }, index * 100); 
                 });
-                setTimeout(() => { document.getElementById('gacha-close-btn').classList.remove('hidden'); }, results.length * 100 + 300);
+                
+                // 닫기 버튼 텍스트 변경
+                const closeBtn = document.getElementById('gacha-close-btn');
+                closeBtn.innerText = type === 'partner' ? "명단 확인하기" : "인벤토리에 넣기";
+                setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 100 + 300);
             }, 1500);
         },
-        closeGacha() { AudioEngine.sfx.click(); document.getElementById('gacha-overlay').classList.remove('active'); document.getElementById('bottom-nav').style.display = 'flex'; }
+        
+        closeGacha() { 
+            AudioEngine.sfx.click(); 
+            document.getElementById('gacha-overlay').classList.remove('active'); 
+            document.getElementById('bottom-nav').style.display = 'flex'; 
+            
+            // 💡 [가챠 끝난 뒤] 변경된 아이템 창 최신화!
+            if(window.UIManager) {
+                if(UIManager.renderInventory) UIManager.renderInventory();
+                if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
+                UIManager.updateRpgLobbyUI(); 
+            }
+        }
     },
     
  Ranking: {
@@ -2155,6 +2244,8 @@ GameSystem.Profile = {
                     weapon: GameState.equippedWeapon || null,
                     armor: GameState.equippedArmor || null,
                     accessory: GameState.equippedAccessory || null
+                        // 🌸 [추가] 내 옆에 서 있는 파트너도 서버로 전송!
+                    partner: GameState.equippedPartner || null
                 },
                 itemUpgrades: {
                     weapon: GameState.equippedWeapon ? (GameState.itemUpgrades[GameState.equippedWeapon] || 0) : 0,
