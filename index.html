@@ -817,11 +817,18 @@
                                 <span>장착 장비</span>
                                 <button onclick="UIManager.openStatsModal()" class="text-indigo-300 hover:text-white flex items-center gap-1"><i class="fa-solid fa-magnifying-glass-chart"></i> 상세 스탯</button>
                             </p>
-                            <div class="flex gap-2">
-                                <div id="profile-slot-weapon" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">무기</span></div>
-                                <div id="profile-slot-armor" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">방어구</span></div>
-                                <div id="profile-slot-accessory" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">장신구</span></div>
+                            <div class="bg-slate-900/70 border border-slate-600/50 rounded-lg p-2.5 backdrop-blur-sm shadow-inner">
+                            <p class="text-[9px] text-slate-400 mb-2 flex justify-between items-center font-bold">
+                                <span>장착 장비 & 파트너</span>
+                                <button onclick="UIManager.openStatsModal()" class="text-indigo-300 hover:text-white flex items-center gap-1"><i class="fa-solid fa-magnifying-glass-chart"></i> 상세 스탯</button>
+                            </p>
+                            <div class="grid grid-cols-4 gap-1.5">
+                                <div id="profile-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">무기</span></div>
+                                <div id="profile-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">방어구</span></div>
+                                <div id="profile-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">장신구</span></div>
+                                <div id="profile-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[9px] text-pink-400 font-bold">파트너</span></div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -1043,10 +1050,17 @@
         🔍 상세 스탯
     </button>
                         </div>
-                        <div class="flex gap-2">
-                            <div id="target-slot-weapon" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">무기</span></div>
-                            <div id="target-slot-armor" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">방어구</span></div>
-                            <div id="target-slot-accessory" class="w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">장신구</span></div>
+                      <div class="bg-slate-900/70 border border-slate-600/50 rounded-lg p-2.5 backdrop-blur-sm shadow-inner">
+                            <p class="text-[9px] text-slate-400 mb-2 flex justify-between items-center font-bold">
+                                <span>장착 장비 & 파트너</span>
+                                <button onclick="UIManager.openStatsModal()" class="text-indigo-300 hover:text-white flex items-center gap-1"><i class="fa-solid fa-magnifying-glass-chart"></i> 상세 스탯</button>
+                            </p>
+                            <div class="grid grid-cols-4 gap-1.5">
+                                <div id="profile-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">무기</span></div>
+                                <div id="profile-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">방어구</span></div>
+                                <div id="profile-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[9px] text-slate-500 font-bold">장신구</span></div>
+                                <div id="profile-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[9px] text-pink-400 font-bold">파트너</span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
