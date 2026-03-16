@@ -790,14 +790,15 @@ renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true);
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
     },
 
-  updateProfileEquipmentSlots() {
+updateProfileEquipmentSlots() {
         const slots = ['weapon', 'armor', 'accessory'];
         slots.forEach((type) => {
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
             const itemId = GameState[`equipped${typeCapitalized}`]; 
 
-            const els = document.querySelectorAll(`[id$="-slot-${type}"]`);
-            els.forEach((el) => {
+            // 🚨 [범인 검거!] 애먼 로비 슬롯까지 건드리지 않도록 명확하게 profile-slot만 콕 집어줍니다!
+            const el = document.getElementById(`profile-slot-${type}`);
+            if (el) {
                 if(itemId && window.GameData && GameData.items[itemId]) {
                     const item = GameData.items[itemId];
                     let rarityClass = "border-slate-600 bg-slate-800";
@@ -813,7 +814,7 @@ renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true);
                         <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                         <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
                     `;
-                    // 🔥 [복구 완료] 장비 돋보기(클릭) 상세 스탯 기능!
+                    // 장비 돋보기 상세 스탯
                     el.onclick = () => { 
                         const upgMult = 1.0 + (level * 0.1);
                         let effectText = "";
@@ -831,14 +832,14 @@ renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true);
                     const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
                     el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
                     el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
-                    el.onclick = null; // 장비 해제 시 클릭 기능 끄기
+                    el.onclick = null;
                 }
-            });
+            }
         });
 
         // 🌸 파트너 전용 슬롯 연동
-        const ptEls = document.querySelectorAll('[id$="-slot-partner"]');
-        ptEls.forEach((ptEl) => {
+        const ptEl = document.getElementById('profile-slot-partner');
+        if (ptEl) {
             const ptId = GameState.equippedPartner;
             if (ptId && window.GameData && GameData.partners && GameData.partners[ptId]) {
                 const pt = GameData.partners[ptId];
@@ -855,14 +856,13 @@ renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true);
                     <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level}</div>
                 `;
-                // 🔥 [복구 완료] 파트너 돋보기(클릭) 스킬 설명 기능!
                 ptEl.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level}] ${pt.skillDesc}`); };
             } else {
                 ptEl.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
                 ptEl.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
-                ptEl.onclick = null; // 장착 해제 시 클릭 기능 끄기
+                ptEl.onclick = null;
             }
-        });
+        }
     },
 
 
