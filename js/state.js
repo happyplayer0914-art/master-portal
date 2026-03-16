@@ -9,8 +9,12 @@ const GameState = {
     lastCheckIn: "",
     lastPlayRewards: {}, 
     lastIdleCheck: Date.now(),
-    lastHpUpdate: Date.now(), // 💡 [추가] 마지막으로 체력을 회복한 시간!
+ // ✅ 이렇게 바꿔주세요! (파트너 주머니 3개 추가!)
+    lastHpUpdate: Date.now(),
     ownedCosmetics: [],
+    ownedPartners: [],       // 🌸 [추가] 내가 뽑은 미소녀 명단
+    partnerLevels: {},       // 🌸 [추가] 미소녀들의 돌파(중복) 레벨
+    equippedPartner: null,   // 🌸 [추가] 현재 내 옆에 서 있는 파트너
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     
     // 🌟 신규 스탯 3인방
@@ -82,6 +86,10 @@ const GameState = {
         
 
         this.ownedCosmetics = this._safeLoad('master_ownedCosmetics', []);
+        // ✅ 이렇게 3줄을 추가해 주세요!
+        this.ownedPartners = this._safeLoad('master_ownedPartners', []);
+        this.partnerLevels = this._safeLoad('master_partnerLevels', {});
+        let ep = this._safeLoad('master_equippedPartner', 'none');
         
         let title = this._safeLoad('master_equippedTitle', 'none'); this.equippedTitle = (title === 'none' ? null : title);
         let bg = this._safeLoad('master_equippedBg', 'none'); this.equippedBg = (bg === 'none' ? null : bg);
@@ -148,6 +156,11 @@ const GameState = {
         localStorage.setItem('master_itemUpgrades', JSON.stringify(this.itemUpgrades || {}));
         
         localStorage.setItem('master_ownedCosmetics', this._encode(this.ownedCosmetics));
+        // ✅ 이렇게 3줄을 추가해 주세요!
+        localStorage.setItem('master_ownedPartners', this._encode(this.ownedPartners));
+        localStorage.setItem('master_partnerLevels', this._encode(this.partnerLevels));
+        localStorage.setItem('master_equippedPartner', this._encode(this.equippedPartner || 'none'));
+        
         localStorage.setItem('master_equippedBg', this._encode(this.equippedBg || 'none'));
         localStorage.setItem('master_equippedBubble', this._encode(this.equippedBubble || 'none'));
         localStorage.setItem('master_equippedSkin', this._encode(this.equippedSkin || 'none')); 
@@ -246,6 +259,23 @@ const GameState = {
                 if (item.spd) finalSpd += (item.spd * upgMult);
             }
         });
+     // ✅ 여기에 파트너 스탯 엔진을 쏙 끼워 넣습니다!
+        // 🌸 [신규] 파트너 스탯 뻥튀기 적용!
+        if (this.equippedPartner && GameData.partners && GameData.partners[this.equippedPartner]) {
+            const pt = GameData.partners[this.equippedPartner];
+            // 파트너도 레벨(중복 뽑기)에 따라 0.1배씩 스탯이 더 강해집니다!
+            const ptLevel = this.partnerLevels[this.equippedPartner] || 0;
+            const ptMult = 1.0 + (ptLevel * 0.1);
+
+            if (pt.atkMult) finalAtkMult += ((pt.atkMult - 1.0) * ptMult);
+            if (pt.hpMult) finalHpMult += ((pt.hpMult - 1.0) * ptMult);
+            if (pt.critRate) finalCritRate += (pt.critRate * ptMult);
+            if (pt.critDmg) finalCritDmg += (pt.critDmg * ptMult);
+            if (pt.vamp) finalVamp += (pt.vamp * ptMult);
+            if (pt.def) finalDef += (pt.def * ptMult);
+            if (pt.eva) finalEva += (pt.eva * ptMult);
+            if (pt.spd) finalSpd += (pt.spd * ptMult);
+        }
         
         let prestigeMultiplier = 1.0 + (this.prestigeCount || 0);
 
