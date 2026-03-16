@@ -409,44 +409,40 @@ upgradeStat(t) {
             UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
-  // =========================================================================
+ // =========================================================================
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
     Partner: {
         toggleEquip(id) {
-            const pt = window.GameData.partners[id];
-            if (!pt) return;
-
-            // 1. 장착 및 해제 상태 변경
-            if (GameState.equippedPartner === id) {
-                GameState.equippedPartner = null; 
-                if(window.UIManager) UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
-            } else {
-                GameState.equippedPartner = id; 
-                if(window.UIManager) {
-                    UIManager.showToast(`🌸 ${pt.flavorText}`);
-                    UIManager.triggerHeavyHaptic();
-                }
-                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
-            }
-
-            // 2. 변경된 상태를 즉시 메모리와 로컬에 저장!
-            GameState.save();
+            const pt = GameData.partners[id]; 
+            if(!pt) return;
             
-            // 🔥 3. [핵심] 딜레이나 안전장치 없이 즉시 4단 화면 강제 렌더링 폭격!!
+            // 1. 장비(Gear)와 100% 똑같은 원리의 스위치(장착/해제) 로직!
+            GameState.equippedPartner = GameState.equippedPartner === id ? null : id;
+            
+            // 2. 상태 저장
+            GameState.save(); 
+            
+            // 3. 🌟 [가장 중요] 장비를 낄 때 쓰는 렌더링 파이프라인을 그대로 복사해왔습니다!
             if(window.UIManager) {
-                if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory(); 
-                if(UIManager.updateProfileUI) UIManager.updateProfileUI();        
-                if(UIManager.updateProfileEquipmentSlots) UIManager.updateProfileEquipmentSlots(); 
-                if(UIManager.updateRpgLobbyUI) UIManager.updateRpgLobbyUI();       
+                // 💡 핵심: 장비 렌더링 엔진을 돌려야 프로필의 [전투력 스탯 + 슬롯]이 강제로 새로고침 됨!
+                UIManager.renderInventory();        
+                UIManager.renderPartnerInventory(); // 파트너 목록 뱃지 갱신
+                UIManager.updateProfileUI();        // 프로필 일러스트 및 배경 갱신
+                UIManager.updateRpgLobbyUI();       // 전투화면 스탯 갱신
+                
+                AudioEngine.sfx.equip(); 
+                UIManager.triggerHaptic();
+                
+                UIManager.showToast(`[${pt.name}] 동행 상태가 변경되었습니다.`);
             }
             
-            // 4. 서버로 데이터 백업
+            // 4. 서버 동기화
             if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.syncToServer) {
                 GameSystem.Profile.syncToServer();
             }
         }
-    }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
+    }, // <-- 콤마 필수! (이 바로 밑에 Gacha: { 가 이어집니다)
         
  Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
