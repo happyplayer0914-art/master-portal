@@ -586,28 +586,33 @@ const UIManager = {
     const el = document.getElementById(slotId);
     if (!el) return;
     
-    // 💡 데이터 소스 분기 (파트너 vs 일반 장비)
-    const dataSource = isPartner ? (GameData.partners ? GameData.partners[itemId] : null) : (GameData.items ? GameData.items[itemId] : null);
-    const levelData = isPartner ? (GameState.partnerLevels[itemId] || 0) : (GameState.itemUpgrades[itemId] || 0);
+    // 데이터 소스 분기 (파트너 vs 일반 장비)
+    const dataSource = isPartner ? (window.GameData && GameData.partners ? GameData.partners[itemId] : null) : (window.GameData && GameData.items ? GameData.items[itemId] : null);
+    const level = isPartner ? (GameState.partnerLevels[itemId] || 0) : (GameState.itemUpgrades[itemId] || 0);
 
     if (itemId && dataSource) {
         const item = dataSource;
-        const level = levelData;
         
-        // 💡 뱃지 텍스트 분기 (장비는 +, 파트너는 ★)
-        const prefix = isPartner ? '★' : '+';
-        const badgeColor = isPartner ? 'text-pink-300' : 'text-yellow-400';
-        const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 ${badgeColor} text-[11px] font-black z-10 leading-none tracking-tighter" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8);">${prefix}${level}</div>` : '';
+        let rarityClass = "border-slate-600 bg-slate-800";
+        if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+        else if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
+        else if(item.rarity === 'epic') rarityClass = "rarity-epic";
+        else if(item.rarity === 'rare') rarityClass = "rarity-rare";
+
+        // 레벨 텍스트와 색상 처리
+        const prefix = isPartner ? '★' : 'Lv.';
+        const levelColor = isPartner ? 'text-pink-200' : 'text-white';
         
-        // 신화 등급 테두리 이펙트
-        let rarityClass = `rarity-${item.rarity}`;
-        if (item.rarity === 'mythic') rarityClass += " animate-pulse";
+        // 💡 크기를 w-[72px] h-[72px]로 키우고 이모티콘을 text-4xl로 큼직하게!
+        el.className = `w-[72px] h-[72px] rounded-xl flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass} overflow-hidden`;
+        el.innerHTML = `
+            <div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>
+            <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow-md z-10">🔍</div>
+            <div class="absolute bottom-0 w-full bg-black/60 ${levelColor} text-[10px] text-center font-bold py-0.5 truncate px-1 tracking-wider z-10">${prefix}${level}</div>
+        `;
         
-        el.className = `w-14 h-14 rounded-xl border-2 flex items-center justify-center text-3xl bg-slate-800 shadow-lg relative ${rarityClass} overflow-hidden cursor-pointer hover:scale-105 transition-transform`;
-        el.innerHTML = `${levelBadge}<span class="filter drop-shadow-md">${item.emoji}</span>`;
-        
-        // 💡 터치 시 상세 정보 토스트 띄우기
-        el.onclick = () => {
+        // 터치(클릭) 시 효과
+        el.onclick = () => { 
             if (isPartner) {
                 UIManager.showToast(`🌸 [${item.name} ★${level}] ${item.skillDesc}`);
             } else {
@@ -619,22 +624,22 @@ const UIManager = {
             }
         };
     } else {
-        // 장착 해제 시 빈 슬롯 모양 (파트너는 분홍색 테마 적용)
+        // 장착 해제 시 빈 슬롯 모양 (크기 w-[72px] h-[72px] 일치)
         const emptyBorder = isPartner ? 'border-pink-500/30' : 'border-slate-600';
         const emptyBg = isPartner ? 'bg-pink-900/20' : 'bg-slate-800/50';
         const emptyText = isPartner ? 'text-pink-400' : 'text-slate-500';
         
-        el.className = `w-14 h-14 rounded-xl border-2 border-dashed ${emptyBorder} ${emptyBg} flex flex-col items-center justify-center relative`;
-        el.innerHTML = `<span class="text-[10px] ${emptyText} font-bold">${label}</span>`;
+        el.className = `w-[72px] h-[72px] rounded-xl border-2 border-dashed ${emptyBorder} ${emptyBg} flex flex-col items-center justify-center relative opacity-70`;
+        el.innerHTML = `<span class="text-[11px] ${emptyText} font-bold">${label}</span>`;
         el.onclick = null;
     }
 };
 
-// 장비 3종 + 파트너 슬롯 렌더링!
+// 장비 3종 + 파트너 슬롯 렌더링 호출!
 renderSlot('lobby-slot-weapon', GameState.equippedWeapon, '무기');
 renderSlot('lobby-slot-armor', GameState.equippedArmor, '방어구');
 renderSlot('lobby-slot-accessory', GameState.equippedAccessory, '장신구');
-renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true); // 🌸 파트너 슬롯 호출 추가!
+renderSlot('lobby-slot-partner', GameState.equippedPartner, '파트너', true);
 
         if(document.getElementById('profile-def')) document.getElementById('profile-def').innerText = stats.def;
         if(document.getElementById('profile-eva')) document.getElementById('profile-eva').innerText = stats.eva;
