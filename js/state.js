@@ -61,8 +61,7 @@ const GameState = {
         return val;
     },
     
-    load() {
-        // (닉네임, deviceId 불러오는 앞부분 코드는 그대로 유지)
+  load() {
         this.nickname = localStorage.getItem('master_nickname') || "위대한 길드장";
         let storedId = localStorage.getItem('master_device_id');
         if(!storedId) {
@@ -77,19 +76,20 @@ const GameState = {
         this.lastCheckIn = this._safeLoad('last_checkin', "");
         this.lastPlayRewards = this._safeLoad('master_play_rewards_map', {});
         this.lastIdleCheck = this._safeLoad('master_last_idle', Date.now());
-        this.lastHpUpdate = this._safeLoad('master_last_hp_update', Date.now()); // 💡 [추가]
+        this.lastHpUpdate = this._safeLoad('master_last_hp_update', Date.now()); 
         
         this.rpgStage = this._safeLoad('master_stage', 1);
         this.rpgAtk = this._safeLoad('master_atk', 10);
         this.rpgMaxHp = this._safeLoad('master_max_hp', 100);
         this.currentHp = this._safeLoad('master_current_hp', this.rpgMaxHp);
         
-
         this.ownedCosmetics = this._safeLoad('master_ownedCosmetics', []);
-        // ✅ 이렇게 3줄을 추가해 주세요!
+        
+        // 🌸 파트너 로드 완벽 보장!
         this.ownedPartners = this._safeLoad('master_ownedPartners', []);
         this.partnerLevels = this._safeLoad('master_partnerLevels', {});
-        let ep = this._safeLoad('master_equippedPartner', 'none');
+        let ep = this._safeLoad('master_equippedPartner', 'none'); 
+        this.equippedPartner = (ep === 'none' ? null : ep);
         
         let title = this._safeLoad('master_equippedTitle', 'none'); this.equippedTitle = (title === 'none' ? null : title);
         let bg = this._safeLoad('master_equippedBg', 'none'); this.equippedBg = (bg === 'none' ? null : bg);
@@ -107,60 +107,44 @@ const GameState = {
         let w = this._safeLoad('master_equipped_weapon', 'none'); this.equippedWeapon = (w === 'none' ? null : w);
         let a = this._safeLoad('master_equipped_armor', 'none'); this.equippedArmor = (a === 'none' ? null : a);
         let ac = this._safeLoad('master_equipped_accessory', 'none'); this.equippedAccessory = (ac === 'none' ? null : ac);
-   // 💡 [여기에 추가!] 강화 데이터 불러오기! (에러 방어막 탑재)
+        
         const savedUpgrades = localStorage.getItem('master_itemUpgrades');
         if (savedUpgrades) {
-            try {
-                this.itemUpgrades = JSON.parse(savedUpgrades);
-            } catch(e) {
-                console.warn("강화 데이터 손상, 초기화합니다.");
-                this.itemUpgrades = {};
-            }
-        } else {
-            this.itemUpgrades = {};
-        }
+            try { this.itemUpgrades = JSON.parse(savedUpgrades); } catch(e) { this.itemUpgrades = {}; }
+        } else { this.itemUpgrades = {}; }
 
-        // 💡 퀘스트 데이터 보호 로직 (에러 발생 시 강제 초기화)
-        const defaultQuestData = {
-            daily: { date: "", progress: {} }, 
-            achievements: { progress: {}, completed: [] } 
-        };
+        const defaultQuestData = { daily: { date: "", progress: {} }, achievements: { progress: {}, completed: [] } };
         const questRaw = this._safeLoad('master_quest_data', defaultQuestData);
-        if (questRaw && questRaw.daily && questRaw.daily.date !== undefined) {
-            this.questData = questRaw;
-        } else {
-            this.questData = defaultQuestData;
-        }
+        if (questRaw && questRaw.daily && questRaw.daily.date !== undefined) { this.questData = questRaw; } else { this.questData = defaultQuestData; }
         
-       this.checkDailyReset();
-        // this.checkAndRevive(); ❌ [삭제] 기존 하루 1번 부활 로직 지우기!
-        this.recoverHpOverTime(); // 💡 [추가] 새로운 실시간 회복 로직 실행!
+        this.checkDailyReset();
+        this.recoverHpOverTime();
     },
 
-    save() {
+  save() {
         localStorage.setItem('master_nickname', this.nickname);
         
-        // 🔒 저장할 땐 모두 _encode로 외계어 변환!
         localStorage.setItem('master_gold', this._encode(this.gold));
         localStorage.setItem('master_gem', this._encode(this.gem));
         localStorage.setItem('last_checkin', this._encode(this.lastCheckIn));
         localStorage.setItem('master_synth_pity', this._encode(this.synthPity)); 
         localStorage.setItem('master_play_rewards_map', this._encode(this.lastPlayRewards));
         localStorage.setItem('master_last_idle', this._encode(this.lastIdleCheck));
-        localStorage.setItem('master_last_hp_update', this._encode(this.lastHpUpdate)); // 💡 [추가]
+        localStorage.setItem('master_last_hp_update', this._encode(this.lastHpUpdate));
         localStorage.setItem('master_stage', this._encode(this.rpgStage));
         localStorage.setItem('master_atk', this._encode(this.rpgAtk));
         localStorage.setItem('master_max_hp', this._encode(this.rpgMaxHp));
         localStorage.setItem('master_current_hp', this._encode(this.currentHp));
-        // 💡 [여기에 추가!] 강화 데이터 저장!
+        
         localStorage.setItem('master_itemUpgrades', JSON.stringify(this.itemUpgrades || {}));
         
         localStorage.setItem('master_ownedCosmetics', this._encode(this.ownedCosmetics));
-        // ✅ 이렇게 3줄을 추가해 주세요!
+        
+        // 🌸 파트너 세이브 완벽 보장!
         localStorage.setItem('master_ownedPartners', this._encode(this.ownedPartners));
         localStorage.setItem('master_partnerLevels', this._encode(this.partnerLevels));
         localStorage.setItem('master_equippedPartner', this._encode(this.equippedPartner || 'none'));
-        
+
         localStorage.setItem('master_equippedBg', this._encode(this.equippedBg || 'none'));
         localStorage.setItem('master_equippedBubble', this._encode(this.equippedBubble || 'none'));
         localStorage.setItem('master_equippedSkin', this._encode(this.equippedSkin || 'none')); 
