@@ -422,14 +422,18 @@ const UIManager = {
                                 <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                                 <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level || 0}</div>
                             `;
-                           // 남의 장비 터치하면 텍스트로 옵션 훔쳐보기!
+                          // 💡 [여기가 수정됨!] 타유저 장비 훔쳐볼 때 누락됐던 4가지 스탯(크뎀, 방어, 회피, 공속, 피흡) 추가!
                             el.onclick = () => { 
                                 const upgMult = 1.0 + ((level || 0) * 0.1);
                                 let effectText = "";
                                 if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
                                 if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
                                 if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
+                                if (item.critDmg) effectText += `크리피해 +${(item.critDmg * upgMult).toFixed(1)}%  `;
                                 if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
+                                if (item.eva) effectText += `회피 +${(item.eva * upgMult).toFixed(1)}%  `;
+                                if (item.spd) effectText += `공속 +${(item.spd * upgMult).toFixed(1)}%  `;
+                                if (item.vamp) effectText += `피흡 +${(item.vamp * upgMult).toFixed(1)}%  `;
                                 
                                 UIManager.showToast(`[${item.name} +${level || 0}] ${effectText}`); 
                             };
@@ -724,7 +728,21 @@ const levelBadge = level > 0 ? `<div class="absolute top-1 left-1 text-yellow-40
                     <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
                 `;
-                el.onclick = () => UIManager.openStatsModal(); 
+              // 💡 [여기가 수정됨!] 모달창 띄우던 걸 지우고, 상세 스탯 토스트 메시지로 교체!
+                el.onclick = () => { 
+                    const upgMult = 1.0 + (level * 0.1);
+                    let effectText = "";
+                    if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
+                    if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
+                    if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
+                    if (item.critDmg) effectText += `크리피해 +${(item.critDmg * upgMult).toFixed(1)}%  `;
+                    if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
+                    if (item.eva) effectText += `회피 +${(item.eva * upgMult).toFixed(1)}%  `;
+                    if (item.spd) effectText += `공속 +${(item.spd * upgMult).toFixed(1)}%  `;
+                    if (item.vamp) effectText += `피흡 +${(item.vamp * upgMult).toFixed(1)}%  `;
+                    
+                    UIManager.showToast(`[${item.name} +${level}] ${effectText}`); 
+                }; 
             } else {
                 const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
                 el.className = "w-[30%] aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
