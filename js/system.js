@@ -2229,27 +2229,37 @@ GameSystem.Profile = {
         if (!window.db || !GameState.nickname) return;
         try {
             const userRef = window.doc(window.db, "users", GameState.nickname);
+            
+            // 🚨 [대수술 완료] 구조를 완벽하게 분리하고 찌꺼기를 날려버렸습니다!
             await window.setDoc(userRef, {
                 nickname: GameState.nickname,
                 totalStats: GameState.getTotalStats(), 
                 uid: GameState.uid || "0000",
                 statusMessage: GameState.statusMessage || "여기를 터치하여 자신을 소개해보세요!",
                 highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
-                // 💡 [수정] prestige가 아니라 prestigeCount로 정확히 보냅니다!
                 prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
+                
+                // 장착 중인 아이템과 파트너 ID 모음
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
                     armor: GameState.equippedArmor || null,
                     accessory: GameState.equippedAccessory || null,
-                        // 🌸 [추가] 내 옆에 서 있는 파트너도 서버로 전송!
                     partner: GameState.equippedPartner || null
                 },
+                
+                // 장착 중인 아이템의 강화 수치 모음
                 itemUpgrades: {
                     weapon: GameState.equippedWeapon ? (GameState.itemUpgrades[GameState.equippedWeapon] || 0) : 0,
                     armor: GameState.equippedArmor ? (GameState.itemUpgrades[GameState.equippedArmor] || 0) : 0,
                     accessory: GameState.equippedAccessory ? (GameState.itemUpgrades[GameState.equippedAccessory] || 0) : 0
                 },
+                
+                // 🌸 [추가 완료] 장착 중인 파트너의 레벨 모음!
+                partnerLevels: {
+                    [GameState.equippedPartner || 'none']: GameState.equippedPartner ? (GameState.partnerLevels[GameState.equippedPartner] || 0) : 0
+                },
+                
                 lastUpdated: window.serverTimestamp()
             }, { merge: true }); 
         } catch(e) {
@@ -2281,7 +2291,6 @@ GameSystem.Profile = {
         }
     },
 
-    // 🌟 서버에서 내 정보(좋아요, 한줄소개) 땡겨오기 완벽 버전!
     async loadMyProfile() {
         if (!window.db || !GameState.nickname) return;
         try {
@@ -2291,11 +2300,9 @@ GameSystem.Profile = {
                 const data = docSnap.data();
                 if (data.likes !== undefined) GameState.likes = data.likes;
                 if (data.statusMessage) GameState.statusMessage = data.statusMessage;
-                // 💡 [수정] 다운받을 때도 prestigeCount로 받습니다!
                 if (data.prestige !== undefined) GameState.prestigeCount = data.prestige; 
                 GameState.save(); 
                 
-                // 💡 [핵심] 서버에서 데이터를 다 받아온 뒤에 프로필 UI를 다시 그려줍니다!
                 if (window.UIManager && UIManager.updateProfileUI) {
                     UIManager.updateProfileUI();
                 }
@@ -2305,3 +2312,4 @@ GameSystem.Profile = {
         }
     }
 };
+// 🚨 (이 밑으로는 아무 코드도 없어야 합니다! 파일 끝!)
