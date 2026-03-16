@@ -155,7 +155,50 @@ const GameData = {
             100:{e:'👑',n:'심연의 군주', img:'boss_abysslord.png'}
         }
   }, // <-- quests 닫는 괄호
+// (이 위에 monsters: { ... } 덩어리가 끝나는 쉼표(,)가 있어야 합니다!)
 
+    // ==========================================
+    // 🌸 [신규] 미소녀 파트너(동료) 데이터베이스
+    // ==========================================
+    partners: {
+        // 🔵 [희귀/Rare] 25.0% 확률 - 든든한 초반 지원군
+        'pt_r1': { 
+            id: 'pt_r1', name: '견습 마법사 엘라', rarity: 'rare', emoji: '🪄',
+            img_sd: 'partner_ella_sd.png', img_full: 'partner_ella_full.png',
+            atkMult: 1.10, hpMult: 1.05, 
+            skillName: '마력 퐁퐁', skillDesc: '공격력 10%, 체력 5% 증가',
+            flavorText: '"길드장님! 제가 등 뒤를 지킬게요!"'
+        },
+        
+        // 🟣 [영웅/Epic] 7.5% 확률 - 강력한 유틸리티
+        'pt_e1': { 
+            id: 'pt_e1', name: '숲의 엘프 리아', rarity: 'epic', emoji: '🏹',
+            img_sd: 'partner_lia_sd.png', img_full: 'partner_lia_full.png',
+            atkMult: 1.20, spd: 10, eva: 5,
+            skillName: '바람의 시위', skillDesc: '공격력 20%, 공속 10%, 회피 5% 증가',
+            flavorText: '"바람이 당신을 인도하길."'
+        },
+        
+        // 🟡 [전설/Legendary] 2.5% 확률 - 전황을 뒤집는 절대적 힘
+        'pt_l1': { 
+            id: 'pt_l1', name: '성기사단장 아이리스', rarity: 'legendary', emoji: '🛡️',
+            img_sd: 'partner_iris_sd.png', img_full: 'partner_iris_full.png',
+            atkMult: 1.30, hpMult: 1.40, def: 15,
+            skillName: '성스러운 가호', skillDesc: '공격력 30%, 체력 40%, 방어력 15 증가',
+            flavorText: '"제 검과 방패는 오직 마스터를 위해 존재합니다."'
+        },
+        
+        // 🚨 [신화/Mythic] 0.8% 확률 - 심연을 부수는 밸런스 파괴자!!
+        'pt_m1': { 
+            id: 'pt_m1', name: '차원의 마녀 노아', rarity: 'mythic', emoji: '🌌',
+            img_sd: 'partner_noah_sd.png', img_full: 'partner_noah_full.png',
+            atkMult: 2.00, hpMult: 1.50, critRate: 15, critDmg: 50, vamp: 10,
+            skillName: '심연의 포옹', skillDesc: '공격력 100%, 체력 50%, 크리 및 피흡 증가',
+            flavorText: '"후후... 이 우주에서 나를 다룰 수 있는 건 당신뿐이야."'
+        }
+    }, // <-- 요 쉼표(,) 필수! 바로 밑에 cosmetics: { 가 이어집니다.
+
+    // (이 밑으로 cosmetics: { ... } 가 이어집니다)
     // 🌟 [신규 추가] 치장품(Cosmetics) 상점 데이터
     cosmetics: {
         // 👇 profiles, borders 아래에 titles 배열을 추가합니다!
