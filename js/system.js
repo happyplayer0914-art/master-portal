@@ -2243,7 +2243,7 @@ GameSystem.Profile = {
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
                     armor: GameState.equippedArmor || null,
-                    accessory: GameState.equippedAccessory || null
+                    accessory: GameState.equippedAccessory || null,
                         // 🌸 [추가] 내 옆에 서 있는 파트너도 서버로 전송!
                     partner: GameState.equippedPartner || null
                 },
