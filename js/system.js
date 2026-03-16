@@ -414,9 +414,10 @@ upgradeStat(t) {
     // =========================================================================
     Partner: {
         toggleEquip(id) {
-            const pt = GameData.partners[id];
+            const pt = window.GameData.partners[id];
             if (!pt) return;
 
+            // 1. 장착 및 해제 상태 변경
             if (GameState.equippedPartner === id) {
                 GameState.equippedPartner = null; 
                 if(window.UIManager) UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
@@ -429,21 +430,23 @@ upgradeStat(t) {
                 if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
             }
 
+            // 2. 변경된 상태를 즉시 메모리와 로컬에 저장!
             GameState.save();
             
-            // 🔥 [핵심] 어떤 에러가 나도 절대 멈추지 않고 모든 화면을 무조건 갱신합니다!
+            // 🔥 3. [핵심] 딜레이나 안전장치 없이 즉시 4단 화면 강제 렌더링 폭격!!
             if(window.UIManager) {
-                try { UIManager.renderPartnerInventory(); } catch(e) { console.error("인벤 렌더링 에러:", e); }
-                try { UIManager.updateProfileUI(); } catch(e) { console.error("프로필 렌더링 에러:", e); }
-                try { UIManager.updateProfileEquipmentSlots(); } catch(e) { console.error("슬롯 렌더링 에러:", e); }
-                try { UIManager.updateRpgLobbyUI(); } catch(e) { console.error("로비 렌더링 에러:", e); }
+                if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory(); 
+                if(UIManager.updateProfileUI) UIManager.updateProfileUI();        
+                if(UIManager.updateProfileEquipmentSlots) UIManager.updateProfileEquipmentSlots(); 
+                if(UIManager.updateRpgLobbyUI) UIManager.updateRpgLobbyUI();       
             }
             
-            if (window.GameSystem && GameSystem.Profile) {
-                GameSystem.Profile.syncToServer().catch(e => console.error(e));
+            // 4. 서버로 데이터 백업
+            if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.syncToServer) {
+                GameSystem.Profile.syncToServer();
             }
         }
-    }, // <-- 여기까지 덮어씌워 주세요! (다음은 Gacha:
+    }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
  Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
