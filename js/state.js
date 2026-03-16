@@ -87,8 +87,15 @@ const GameState = {
        // 🌸 파트너 로드 완벽 보장 (null 버그 원천 차단!)
         this.ownedPartners = this._safeLoad('master_ownedPartners', []);
         this.partnerLevels = this._safeLoad('master_partnerLevels', {});
-        let ep = this._safeLoad('master_equippedPartner', null); 
-        this.equippedPartner = (ep === 'none' || ep === 'null' || ep === '') ? null : ep;
+        
+        // 👇 이 부분을 아래 코드로 교체! (직통 저장소에서 먼저 꺼내오기!)
+        let safeEp = localStorage.getItem('master_safe_partner');
+        if (safeEp) {
+            this.equippedPartner = (safeEp === 'none') ? null : safeEp;
+        } else {
+            let ep = this._safeLoad('master_equippedPartner', null); 
+            this.equippedPartner = (ep === 'none' || ep === 'null' || ep === '') ? null : ep;
+        }
         
         let title = this._safeLoad('master_equippedTitle', 'none'); this.equippedTitle = (title === 'none' ? null : title);
         let bg = this._safeLoad('master_equippedBg', 'none'); this.equippedBg = (bg === 'none' ? null : bg);
@@ -142,7 +149,9 @@ const GameState = {
         // 🌸 파트너 세이브 완벽 보장!
         localStorage.setItem('master_ownedPartners', this._encode(this.ownedPartners));
         localStorage.setItem('master_partnerLevels', this._encode(this.partnerLevels));
+       // 👇 이 부분을 아래 두 줄로 교체! (직통 저장소 추가)
         localStorage.setItem('master_equippedPartner', this._encode(this.equippedPartner || 'none'));
+        localStorage.setItem('master_safe_partner', this.equippedPartner || 'none');
 
         localStorage.setItem('master_equippedBg', this._encode(this.equippedBg || 'none'));
         localStorage.setItem('master_equippedBubble', this._encode(this.equippedBubble || 'none'));
