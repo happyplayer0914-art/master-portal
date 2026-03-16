@@ -409,7 +409,7 @@ upgradeStat(t) {
             UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
-    // =========================================================================
+   // =========================================================================
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
     Partner: {
@@ -417,13 +417,10 @@ upgradeStat(t) {
             const pt = GameData.partners[id];
             if (!pt) return;
 
-            // 1. 이미 장착 중인 애를 또 누르면 -> 장착 해제!
             if (GameState.equippedPartner === id) {
                 GameState.equippedPartner = null; 
                 UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
-            } 
-            // 2. 다른 애를 누르거나 빈칸일 때 누르면 -> 즉시 장착!
-            else {
+            } else {
                 GameState.equippedPartner = id; 
                 UIManager.showToast(`🌸 ${pt.flavorText}`);
                 AudioEngine.sfx.equip(); 
@@ -432,14 +429,15 @@ upgradeStat(t) {
 
             GameState.save();
             
-            // 💡 [핵심] 파트너를 바꾸면 스탯이 변하므로 화면 3단 콤보 새로고침!
+            // 🔥 [핵심] 컴퓨터가 딴짓 못하게 0.01초 뒤에 강제로 3단 화면 갱신 명령!
             if(window.UIManager) {
-                UIManager.renderPartnerInventory(); // 인벤토리 뱃지 갱신
-                UIManager.updateProfileUI();        // 프로필 배경 갱신
-                UIManager.updateRpgLobbyUI();       // 전투력(공/체) 갱신
+                setTimeout(() => {
+                    UIManager.renderPartnerInventory(); 
+                    UIManager.updateProfileUI();        
+                    UIManager.updateRpgLobbyUI();       
+                }, 10);
             }
             
-            // ☁️ 장착 정보 서버로 동기화!
             if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer();
         }
     }, // <-- 콤마 필수! (이 바로 밑에 Gacha: { 가 이어집니다)
