@@ -117,9 +117,9 @@ const GameData = {
             ],
             // 🗿 7구역 (61~69층) : 얼어붙은 왕국
             7: [
-                { id: 'n13', e: '🧞', n: '타락한 정령', img: 'spirit.png' },
-                { id: 'n18', e: '🤖', n: '고대 수호병', img: 'golem_ancient.png' },
-                { id: 'n28', e: '🧙‍♂️', n: '흑마법사', img: 'dark_mage.png' }
+                { id: 'n13', e: '🧞', n: '얼어붙은 하녀', img: 'icemaid.png' },
+                { id: 'n18', e: '🤖', n: '서리마녀', img: 'icemgaic.png' },
+                { id: 'n28', e: '🧙‍♂️', n: '서리 정령', img: 'icespirit.png' }
             ],
             // 🌑 8구역 (71~79층) : 타락한 기사단의 무덤
             8: [
@@ -148,7 +148,7 @@ const GameData = {
             30:{e:'🌋',n:'화산의 지배자', img:'boss_dragon.png'},
             40:{e:'👁️',n:'주시하는 눈', img:'boss_eye.png'},  
             50:{e:'🐙',n:'심해의 크라켄', img:'boss_kraken.png'},
-            60:{e:'👹',n:'아수라', img:'boss_asura.png'}, 
+            60:{e:'👹',n:'서큐버스', img:'boss_vp.png'}, 
             70:{e:'❄️',n:'서리 여왕', img:'boss_icequeen.png'}, 
             80:{e:'💀',n:'죽음의 기사', img:'boss_deathknight.png'},
             90:{e:'🕷️',n:'지옥의 수문장', img:'boss_hell.png'},
