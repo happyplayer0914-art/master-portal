@@ -1247,34 +1247,90 @@ updateProfileEquipmentSlots() {
         this.triggerHaptic();
     },
 // =========================================================================
-    // 🌟 [신규 추가] 가챠샵 슬라이딩 배너 모터
+    // 🌟 [전면 개편] 가챠샵 슬라이딩 배너 다중 모터 엔진!
     // =========================================================================
     GachaSlider: {
-        currentIndex: 0,
-        totalSlides: 3, 
-        intervalId: null,
-        startX: 0,
-        endX: 0,
+        sliders: [], // 여러 개의 배너를 관리할 창고
 
         init() {
-            this.track = document.getElementById('gacha-slide-track');
-            this.container = document.getElementById('gacha-slider-container');
-            this.dots = document.getElementById('gacha-slider-dots')?.children;
-            if (!this.track || !this.container) return;
-
-            // 모바일 터치(스와이프) 이벤트
-            this.container.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: true});
-            this.container.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: true});
-            this.container.addEventListener('touchend', () => this.handleTouchEnd());
-            
-            // PC 마우스 드래그 이벤트
-            this.container.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-            this.container.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-            this.container.addEventListener('mouseup', () => this.handleMouseUp());
-            this.container.addEventListener('mouseleave', () => { this.isDragging = false; this.startAuto(); });
-
-            this.startAuto();
+            this.sliders = []; 
+            // 1. 장비 뽑기 배너 세팅
+            this.setupSlider('gacha-slider-container', 'gacha-slide-track', 'gacha-slider-dots');
+            // 2. 파트너 뽑기 배너 세팅
+            this.setupSlider('gacha-slider-container-partner', 'gacha-slide-track-partner', 'gacha-slider-dots-partner');
         },
+
+        setupSlider(containerId, trackId, dotsId) {
+            const container = document.getElementById(containerId);
+            const track = document.getElementById(trackId);
+            const dotsContainer = document.getElementById(dotsId);
+
+            if (!container || !track) return;
+
+            // 💡 각 배너마다 자기만의 번호표, 타이머, 터치 센서를 가진 '독립된 개체(state)'로 만듭니다!
+            const state = {
+                container, track, dots: dotsContainer ? dotsContainer.children : null,
+                currentIndex: 0, totalSlides: 3, intervalId: null,
+                startX: 0, endX: 0, isDragging: false,
+
+                updateUI() {
+                    this.track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+                    if (this.dots) {
+                        Array.from(this.dots).forEach((dot, idx) => {
+                            dot.className = (idx === this.currentIndex) 
+                                ? "w-4 h-2 rounded-full bg-white transition-all shadow-md" 
+                                : "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; 
+                        });
+                    }
+                },
+                next() {
+                    this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+                    this.updateUI();
+                },
+                prev() {
+                    this.currentIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+                    this.updateUI();
+                },
+                startAuto() {
+                    this.stopAuto();
+                    // 배너마다 5초 주기로 알아서 돌아가게 타이머 장착!
+                    this.intervalId = setInterval(() => this.next(), 5000);
+                },
+                stopAuto() {
+                    if (this.intervalId) clearInterval(this.intervalId);
+                }
+            };
+
+            // 📱 모바일 터치(스와이프) 이벤트
+            container.addEventListener('touchstart', (e) => { state.startX = e.touches[0].clientX; state.stopAuto(); }, {passive: true});
+            container.addEventListener('touchmove', (e) => { state.endX = e.touches[0].clientX; }, {passive: true});
+            container.addEventListener('touchend', () => {
+                if (!state.startX || !state.endX) return;
+                const diff = state.startX - state.endX;
+                if (diff > 50) state.next(); 
+                else if (diff < -50) state.prev(); 
+                state.startX = 0; state.endX = 0;
+                state.startAuto();
+            });
+            
+            // 🖱️ PC 마우스 드래그 이벤트
+            container.addEventListener('mousedown', (e) => { state.startX = e.clientX; state.isDragging = true; state.stopAuto(); });
+            container.addEventListener('mousemove', (e) => { if(state.isDragging) state.endX = e.clientX; });
+            container.addEventListener('mouseup', () => {
+                if(!state.isDragging || !state.startX || !state.endX) { state.isDragging = false; return; }
+                const diff = state.startX - state.endX;
+                if (diff > 50) state.next(); 
+                else if (diff < -50) state.prev(); 
+                state.isDragging = false; state.startX = 0; state.endX = 0;
+                state.startAuto();
+            });
+            container.addEventListener('mouseleave', () => { state.isDragging = false; state.startAuto(); });
+
+            // 세팅이 끝났으니 자동 슬라이드 켜기!
+            state.startAuto();
+            this.sliders.push(state);
+        }
+    },
 
         updateUI() {
             // 💡 [개조 완료] 화면에 있는 모든 배너(장비, 파트너)를 동시에 움직입니다!
