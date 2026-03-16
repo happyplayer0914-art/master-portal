@@ -603,28 +603,17 @@ const UIManager = {
         const prefix = isPartner ? '★' : 'Lv.';
         const levelColor = isPartner ? 'text-pink-200' : 'text-white';
         
-        // 💡 크기를 w-[72px] h-[72px]로 키우고 이모티콘을 text-4xl로 큼직하게!
         el.className = `w-[72px] h-[72px] rounded-xl flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass} overflow-hidden`;
+        
+        // 💡 돋보기(🔍) HTML 한 줄 삭제 완료!
         el.innerHTML = `
             <div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>
-            <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow-md z-10">🔍</div>
             <div class="absolute bottom-0 w-full bg-black/60 ${levelColor} text-[10px] text-center font-bold py-0.5 truncate px-1 tracking-wider z-10">${prefix}${level}</div>
         `;
         
-        // 터치(클릭) 시 효과
-        el.onclick = () => { 
-            if (isPartner) {
-                UIManager.showToast(`🌸 [${item.name} ★${level}] ${item.skillDesc}`);
-            } else {
-                const upgMult = 1.0 + (level * 0.1);
-                let effectText = "";
-                if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
-                if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
-                UIManager.showToast(`[${item.name} +${level}] ${effectText}`); 
-            }
-        };
+       
     } else {
-        // 장착 해제 시 빈 슬롯 모양 (크기 w-[72px] h-[72px] 일치)
+        // 장착 해제 시 빈 슬롯 모양
         const emptyBorder = isPartner ? 'border-pink-500/30' : 'border-slate-600';
         const emptyBg = isPartner ? 'bg-pink-900/20' : 'bg-slate-800/50';
         const emptyText = isPartner ? 'text-pink-400' : 'text-slate-500';
