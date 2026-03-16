@@ -84,12 +84,11 @@ const GameState = {
         this.currentHp = this._safeLoad('master_current_hp', this.rpgMaxHp);
         
         this.ownedCosmetics = this._safeLoad('master_ownedCosmetics', []);
-        
-        // 🌸 파트너 로드 완벽 보장!
+       // 🌸 파트너 로드 완벽 보장 (null 버그 원천 차단!)
         this.ownedPartners = this._safeLoad('master_ownedPartners', []);
         this.partnerLevels = this._safeLoad('master_partnerLevels', {});
-        let ep = this._safeLoad('master_equippedPartner', 'none'); 
-        this.equippedPartner = (ep === 'none' ? null : ep);
+        let ep = this._safeLoad('master_equippedPartner', null); 
+        this.equippedPartner = (ep === 'none' || ep === 'null' || ep === '') ? null : ep;
         
         let title = this._safeLoad('master_equippedTitle', 'none'); this.equippedTitle = (title === 'none' ? null : title);
         let bg = this._safeLoad('master_equippedBg', 'none'); this.equippedBg = (bg === 'none' ? null : bg);
