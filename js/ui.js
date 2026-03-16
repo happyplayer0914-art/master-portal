@@ -1331,63 +1331,6 @@ updateProfileEquipmentSlots() {
             this.sliders.push(state);
         }
     },
-
-        updateUI() {
-            // 💡 [개조 완료] 화면에 있는 모든 배너(장비, 파트너)를 동시에 움직입니다!
-            document.querySelectorAll('[id^="gacha-slide-track"]').forEach(track => {
-                track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
-            });
-            
-            // 하단 점(인디케이터)도 동시에 불 켜주기
-            document.querySelectorAll('[id^="gacha-slider-dots"]').forEach(dotContainer => {
-                Array.from(dotContainer.children).forEach((dot, idx) => {
-                    dot.className = (idx === this.currentIndex) 
-                        ? "w-4 h-2 rounded-full bg-white transition-all shadow-md" 
-                        : "w-2 h-2 rounded-full bg-white/40 transition-all shadow-md"; 
-                });
-            });
-        },
-
-        next() {
-            this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
-            this.updateUI();
-        },
-
-        prev() {
-            this.currentIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
-            this.updateUI();
-        },
-
-        startAuto() {
-            this.stopAuto();
-            this.intervalId = setInterval(() => this.next(), 5000); // 5초마다 휙!
-        },
-
-        stopAuto() {
-            if (this.intervalId) clearInterval(this.intervalId);
-        },
-
-        handleTouchStart(e) { this.startX = e.touches[0].clientX; this.stopAuto(); },
-        handleTouchMove(e) { this.endX = e.touches[0].clientX; },
-        handleTouchEnd() {
-            if (!this.startX || !this.endX) return;
-            const diff = this.startX - this.endX;
-            if (diff > 50) this.next(); 
-            else if (diff < -50) this.prev(); 
-            this.startX = 0; this.endX = 0;
-            this.startAuto();
-        },
-        handleMouseDown(e) { this.startX = e.clientX; this.isDragging = true; this.stopAuto(); },
-        handleMouseMove(e) { if(this.isDragging) this.endX = e.clientX; },
-        handleMouseUp() {
-            if(!this.isDragging || !this.startX || !this.endX) { this.isDragging = false; return; }
-            const diff = this.startX - this.endX;
-            if (diff > 50) this.next(); 
-            else if (diff < -50) this.prev(); 
-            this.isDragging = false; this.startX = 0; this.endX = 0;
-            this.startAuto();
-        }
-    },
     // 🌌 원래 있던 백그라운드 함수 부활!
     initBackground() { 
         const canvas = document.getElementById('dynamic-bg'); const ctx = canvas.getContext('2d');
