@@ -703,10 +703,11 @@ const UIManager = {
         }
         if(uidEl) uidEl.innerText = GameState.uid;
 
-        if(titleEl) {
+      if(titleEl) {
             if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
                 const tItem = GameData.cosmetics.titles.find(x => x.id === GameState.equippedTitle);
-                titleEl.innerHTML = tItem ? `✨ ${tItem.name} ✨` : "✨ 칭호 없음 ✨";
+                // 💡 [수정 완료] 칭호 이름 뒤에 [MBTI]를 항상 붙여서 출력하도록 변경!
+                titleEl.innerHTML = tItem ? `✨ ${tItem.name} [${tItem.reqMbti}] ✨` : "✨ 칭호 없음 ✨";
             } else {
                 titleEl.innerHTML = "✨ 칭호 없음 ✨";
             }
