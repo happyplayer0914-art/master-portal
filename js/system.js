@@ -1438,7 +1438,7 @@ enterDungeon() {
                 }
             }
         }, // 🚨 끝에 콤마(,) 잊지 마!
-    triggerRandomEvent(roll) {
+ triggerRandomEvent(roll) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             
@@ -1458,10 +1458,9 @@ enterDungeon() {
                 titleEl.innerText = "함정 발동!"; iconEl.innerText = "🪤"; titleEl.className = "text-2xl font-black text-rose-500 mb-4"; 
                 let dmg = Math.floor(hpStat * 0.15); 
                 descEl.innerText = `독화살이 날아왔습니다!\n(-${dmg} HP)`; 
-                
-                // 💡 [핵심] Math.max(1, ...) 로 아무리 맞아도 최소 피 1은 보장!!
                 GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
-                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
+                // 🚨 [수정 완료] 마스터가 맞는 소리로 변경!
+                AudioEngine.sfx.hit_player(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 2) {
                 titleEl.innerText = "요정의 축복"; iconEl.innerText = "🧚"; titleEl.className = "text-2xl font-black text-cyan-400 mb-4"; 
@@ -1477,13 +1476,14 @@ enterDungeon() {
                 // 💡 [핵심] 미믹한테 물려도 피 1은 남음!
                 GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
                 GameState.gold += 50;
-                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
+                // 🚨 [수정 완료] 마스터가 맞는 소리로 변경!
+                AudioEngine.sfx.hit_player(); UIManager.triggerHeavyHaptic(); 
                 
             } else if (eventType === 4) {
                 titleEl.innerText = "떠돌이 상인"; iconEl.innerText = "🧙‍♂️"; titleEl.className = "text-2xl font-black text-purple-400 mb-4"; 
-                if (GameState.gold >= 50) {
-                    GameState.gold -= 50; GameState.potions += 1;
-                    descEl.innerText = `상인이 당신의 주머니에서 50G를 가져가고\n회복 물약(❤️)을 하나 두고 갔습니다!`; AudioEngine.sfx.coin(); 
+                if (GameState.gold >= 10) {
+                    GameState.gold -= 10; GameState.potions += 1;
+                    descEl.innerText = `상인이 당신의 주머니에서 10G를 가져가고\n회복 물약(❤️)을 하나 두고 갔습니다!`; AudioEngine.sfx.coin(); 
                 } else {
                     descEl.innerText = `가진 돈이 없어 상인이 무시하고 지나갑니다...`;
                 }
@@ -1496,13 +1496,15 @@ enterDungeon() {
                 // 💡 [핵심] 제단에 피를 바쳐도 1은 남김!
                 GameState.currentHp = Math.max(1, GameState.currentHp - dmg); 
                 GameState.gem += 15;
-                AudioEngine.sfx.hit(); UIManager.triggerHeavyHaptic(); 
+                // 🚨 [수정 완료] 마스터가 맞는 소리로 변경!
+                AudioEngine.sfx.hit_player(); UIManager.triggerHeavyHaptic(); 
             }
             
-            // 이제 절대 죽지 않으니까 '쓰러짐' 버튼 UI 로직은 싹 지우고 무조건 '돌아가기'!
             const btn = document.querySelector('#screen-rpg-event button');
-            btn.innerText = "돌아가기";
-            btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all";
+            if(btn) {
+                btn.innerText = "돌아가기";
+                btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 active:scale-95 transition-all";
+            }
             
             UIManager.updateCurrencyUI(); 
         },
