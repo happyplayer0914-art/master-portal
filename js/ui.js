@@ -600,10 +600,14 @@ const UIManager = {
                 const prefix = isPartner ? '★' : 'Lv.';
                 const levelColor = isPartner ? 'text-pink-200' : 'text-white';
                 
-                // 💡 돋보기 HTML을 아예 삭제하고, 크기를 w-[72px] h-[72px]로 시원하게 고정!
+              // 💡 [변경됨] 파트너면 SD 이미지를 부르고, 없으면 이모티콘 띄우기!
+                const iconHtml = isPartner 
+                    ? `<img src="assets/partners/${item.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-2" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div style="display:none;" class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`
+                    : `<div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`;
+
                 el.className = `w-[72px] h-[72px] rounded-xl flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass} overflow-hidden`;
                 el.innerHTML = `
-                    <div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>
+                    ${iconHtml}
                     <div class="absolute bottom-0 w-full bg-black/60 ${levelColor} text-[10px] text-center font-bold py-0.5 truncate px-1 tracking-wider z-10">${prefix}${level}</div>
                 `;
               
@@ -751,20 +755,22 @@ const UIManager = {
             }
         }
 
-        // 🌸 [여기에 신규 추가!] 장착한 파트너의 아름다운 자태 렌더링!
+       // 🌸 장착한 파트너의 아름다운 자태 렌더링!
         const ptImgEl = document.getElementById('profile-partner-image');
         if (ptImgEl) {
             if (GameState.equippedPartner && window.GameData && GameData.partners && GameData.partners[GameState.equippedPartner]) {
                 const pt = GameData.partners[GameState.equippedPartner];
-                // 장착 중이면 투명도 풀고 전신 일러스트(img_full) 출력!
                 ptImgEl.style.backgroundImage = `url('assets/partners/${pt.img_full}')`;
                 ptImgEl.style.filter = "none"; 
                 ptImgEl.style.opacity = "1";
+                // 🌟 [핵심] 예시 사진처럼 전신이 웅장하게 보이도록 크기와 위치(오른쪽) 완벽 조정!
+                ptImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
             } else {
-                // 장착 안 했으면 칙칙한 실루엣 기본값으로!
+                // 장착 안 했을 때 (실루엣)
                 ptImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
                 ptImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)";
                 ptImgEl.style.opacity = "0.5";
+                ptImgEl.className = "absolute -right-8 bottom-0 h-[90%] w-[65%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
             }
         }
         
@@ -833,11 +839,14 @@ updateProfileEquipmentSlots() {
                 else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
 
                 const level = GameState.partnerLevels[ptId] || 0;
-                ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+               ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                
+                // 💡 [변경됨] 이모티콘 대신 SD 이미지 태그(<img src=...>) 삽입!
                 ptEl.innerHTML = `
-                    <div class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
-                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
-                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level}</div>
+                    <img src="assets/partners/${pt.img_sd}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display:none;" class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
+                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
+                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level}</div>
                 `;
                 ptEl.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level}] ${pt.skillDesc}`); };
             } else {
