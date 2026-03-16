@@ -409,7 +409,7 @@ upgradeStat(t) {
             UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
-   // =========================================================================
+  // =========================================================================
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
     Partner: {
@@ -419,28 +419,32 @@ upgradeStat(t) {
 
             if (GameState.equippedPartner === id) {
                 GameState.equippedPartner = null; 
-                UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
+                if(window.UIManager) UIManager.showToast(`🌸 [${pt.name}] 동행을 해제했습니다.`);
             } else {
                 GameState.equippedPartner = id; 
-                UIManager.showToast(`🌸 ${pt.flavorText}`);
-                AudioEngine.sfx.equip(); 
-                UIManager.triggerHeavyHaptic();
+                if(window.UIManager) {
+                    UIManager.showToast(`🌸 ${pt.flavorText}`);
+                    UIManager.triggerHeavyHaptic();
+                }
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
             }
 
             GameState.save();
             
-            // 🔥 [핵심] 컴퓨터가 딴짓 못하게 0.01초 뒤에 강제로 3단 화면 갱신 명령!
+            // 🔥 [핵심] 어떤 에러가 나도 절대 멈추지 않고 모든 화면을 무조건 갱신합니다!
             if(window.UIManager) {
-                setTimeout(() => {
-                    UIManager.renderPartnerInventory(); 
-                    UIManager.updateProfileUI();        
-                    UIManager.updateRpgLobbyUI();       
-                }, 10);
+                try { UIManager.renderPartnerInventory(); } catch(e) { console.error("인벤 렌더링 에러:", e); }
+                try { UIManager.updateProfileUI(); } catch(e) { console.error("프로필 렌더링 에러:", e); }
+                try { UIManager.updateProfileEquipmentSlots(); } catch(e) { console.error("슬롯 렌더링 에러:", e); }
+                try { UIManager.updateRpgLobbyUI(); } catch(e) { console.error("로비 렌더링 에러:", e); }
             }
             
-            if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer();
+            if (window.GameSystem && GameSystem.Profile) {
+                GameSystem.Profile.syncToServer().catch(e => console.error(e));
+            }
         }
-    }, // <-- 콤마 필수! (이 바로 밑에 Gacha: { 가 이어집니다)
+    }, // <-- 여기까지 덮어씌워 주세요! (다음은 Gacha:
+        
  Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
         performGacha(times, type = 'gear') {
