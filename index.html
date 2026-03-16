@@ -659,14 +659,32 @@
             </span>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-6">
-            <button onclick="GameSystem.Gacha.performGacha(1)" class="py-6 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] transition-all">
+    <div class="flex items-center justify-between mb-2 px-1">
+            <span class="text-xs font-bold text-slate-300">🗡️ 전설 장비 소환</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="GameSystem.Gacha.performGacha(1, 'gear')" class="py-4 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[4px] transition-all">
                 <span class="text-white mb-1">1회 소환</span>
-                <span class="text-cyan-400 text-sm font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 50</span>
+                <span class="text-cyan-400 text-xs font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 50</span>
             </button>
-            <button onclick="GameSystem.Gacha.performGacha(10)" class="py-6 bg-gradient-to-br from-indigo-900 to-purple-900 hover:from-indigo-800 hover:to-purple-800 border border-purple-500 rounded-2xl font-black text-lg flex flex-col items-center justify-center shadow-[0_6px_0_rgba(49,46,129,1)] active:shadow-[0_0px_0_rgba(49,46,129,1)] active:translate-y-[6px] transition-all">
-                <span class="text-white mb-1">10회 연속 소환</span>
-                <span class="text-cyan-400 text-sm font-bold bg-black/30 px-3 py-1 rounded-full border border-purple-400/50">💎 500</span>
+            <button onclick="GameSystem.Gacha.performGacha(10, 'gear')" class="py-4 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[4px] transition-all">
+                <span class="text-white mb-1">10회 연속</span>
+                <span class="text-cyan-400 text-xs font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-900">💎 500</span>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-between mb-2 px-1 mt-4 border-t border-slate-700/50 pt-4">
+            <span class="text-xs font-bold text-pink-300">🌸 미소녀 파트너 영입</span>
+            <span class="text-[10px] text-pink-500 font-bold bg-pink-900/30 px-2 py-0.5 rounded-full border border-pink-500/30 animate-pulse">신화 확률 UP!</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <button onclick="GameSystem.Gacha.performGacha(1, 'partner')" class="py-4 bg-gradient-to-b from-pink-900/40 to-slate-900 border border-pink-500/40 hover:from-pink-800/50 hover:to-slate-800 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(131,24,67,1)] active:shadow-[0_0px_0_rgba(131,24,67,1)] active:translate-y-[4px] transition-all">
+                <span class="text-pink-100 mb-1">1명 영입</span>
+                <span class="text-cyan-400 text-xs font-bold bg-black/50 px-3 py-1 rounded-full border border-pink-500/30">💎 100</span>
+            </button>
+            <button onclick="GameSystem.Gacha.performGacha(10, 'partner')" class="py-4 bg-gradient-to-br from-pink-600 to-purple-700 hover:from-pink-500 hover:to-purple-600 border border-pink-400 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(131,24,67,1)] active:shadow-[0_0px_0_rgba(131,24,67,1)] active:translate-y-[4px] transition-all relative overflow-hidden">
+                <span class="text-white mb-1 relative z-10">10명 연속 영입</span>
+                <span class="text-cyan-200 text-xs font-bold bg-black/30 px-3 py-1 rounded-full border border-pink-300/50 relative z-10 shadow-inner">💎 1000</span>
             </button>
         </div>
         
@@ -813,8 +831,8 @@
                 <button onclick="UIManager.switchInvTab('cosmetics')" class="flex-1 py-2.5 bg-slate-800 border border-slate-600 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 hover:text-white transition-colors flex items-center justify-center gap-1.5 shadow-md">
                     🖼️ 치장품 변경
                 </button>
-                <button onclick="UIManager.showToast('파트너 영입 시스템은 추후 업데이트 예정입니다! 🌸')" class="flex-1 py-2.5 bg-indigo-900/40 border border-indigo-500/40 text-indigo-300 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-md opacity-60">
-                    🌸 파트너 변경 (준비 중)
+               <button onclick="UIManager.switchInvTab('partner')" id="btn-profile-partner" class="flex-1 py-2.5 bg-gradient-to-r from-pink-900/60 to-rose-900/60 hover:from-pink-800/80 hover:to-rose-800/80 border border-pink-500/50 text-pink-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(236,72,153,0.3)] active:scale-95">
+                    🌸 파트너 편성
                 </button>
             </div>
         </div>
@@ -830,6 +848,8 @@
 
     <div class="glass-card p-4 min-h-[380px]">
         <div id="inv-panel-gear" class="grid grid-cols-3 gap-3 w-full"></div>
+        
+        <div id="inv-panel-partner" class="hidden grid grid-cols-3 gap-3 w-full pb-10"></div>
         
         <div id="inv-panel-cosmetics" class="hidden flex-col gap-2 w-full">
             <div class="flex flex-wrap gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-700/50 mb-2">
