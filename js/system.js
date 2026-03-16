@@ -409,7 +409,7 @@ upgradeStat(t) {
             UIManager.showToast(`[${item.name}] 장착 상태가 변경되었습니다.`);
         }
     },
- // =========================================================================
+// =========================================================================
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
     Partner: {
@@ -428,13 +428,13 @@ upgradeStat(t) {
                 // 💡 핵심: 장비 렌더링 엔진을 돌려야 프로필의 [전투력 스탯 + 슬롯]이 강제로 새로고침 됨!
                 UIManager.renderInventory();        
                 UIManager.renderPartnerInventory(); // 파트너 목록 뱃지 갱신
-                UIManager.updateProfileUI();        // 프로필 일러스트 및 배경 갱신
+                UIManager.applyAvatarSkin();        // 프로필 일러스트 및 배경 갱신 (내부적으로 updateProfileUI 호출)
                 UIManager.updateRpgLobbyUI();       // 전투화면 스탯 갱신
                 
-                AudioEngine.sfx.equip(); 
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
                 UIManager.triggerHaptic();
                 
-                UIManager.showToast(`[${pt.name}] 동행 상태가 변경되었습니다.`);
+                UIManager.showToast(`🌸 [${pt.name}] 동행 상태가 변경되었습니다.`);
             }
             
             // 4. 서버 동기화
