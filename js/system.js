@@ -2834,18 +2834,35 @@ Ranking: {
             this.executePrestige(1);
         },
 
-        executePrestige(multiplier = 1) { 
-            const rewardDiamond = (GameState.rpgStage * 10) * multiplier;
-            const rewardGold = (GameState.rpgStage * 30) * multiplier;
-            GameState.gem += rewardDiamond; GameState.gold += rewardGold;
-            GameState.prestigeCount = (GameState.prestigeCount || 0) + 1;
+       executePrestige(multiplier = 1) { 
+            // 🌟 [핵심] 실제 지급할 때도 똑같이 환생 횟수만큼 배수를 곱해줍니다!
+            const nextPrestige = (GameState.prestigeCount || 0) + 1;
+            
+            // 층수 보상 * 환생 배율 * (광고 2배 배율)
+            const rewardDiamond = (GameState.rpgStage * 10) * nextPrestige * multiplier;
+            const rewardGold = (GameState.rpgStage * 30) * nextPrestige * multiplier;
+            
+            GameState.gem += rewardDiamond; 
+            GameState.gold += rewardGold;
+            
+            // 🌟 [버그 방지] 환생 횟수를 여기서 확실하게 올려줍니다!
+            GameState.prestigeCount = nextPrestige; 
+            
             GameState.rpgStage = 1; 
-            GameState.rpgAtk = 10; GameState.rpgMaxHp = 100;
-            GameState.save(); GameState.currentHp = GameState.getTotalStats().hp; GameState.save(); 
+            GameState.rpgAtk = 10; 
+            GameState.rpgMaxHp = 100;
+            GameState.save(); 
+            
+            GameState.currentHp = GameState.getTotalStats().hp; 
+            GameState.save(); 
+            
             if (window.GameSystem && GameSystem.Quest) GameSystem.Quest.update('weekly', 'w5', 1);
-            UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI();
+            UIManager.updateCurrencyUI(); 
+            UIManager.updateRpgLobbyUI();
+            
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
             if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently(); 
+            
             const adText = multiplier > 1 ? "(광고 2배 보너스!) " : "";
             UIManager.showToast(`🎉 ${GameState.prestigeCount}번째 환생 완료! ${adText}다이아 ${rewardDiamond.toLocaleString()}개, 골드 ${rewardGold.toLocaleString()}G 획득! 💎`);
         }
