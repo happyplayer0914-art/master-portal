@@ -1023,18 +1023,20 @@ updateProfileEquipmentSlots() {
             else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
             else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
             else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
-
-            html += `
-                <div onclick="GameSystem.Partner.toggleEquip('${id}')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
-                    ${badgeHTML}
-                    <div class="text-4xl mb-1 mt-2 filter drop-shadow-md flex-shrink-0">${pt.emoji}</div>
-                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
-                    <div class="flex flex-col items-center w-full mt-auto bg-black/40 rounded py-1 px-1">
-                        <span class="text-[8px] text-pink-300 font-black mb-0.5">[${pt.skillName}]</span>
-                        <span class="text-[8px] text-slate-300 font-bold break-keep text-center leading-tight">${pt.skillDesc}</span>
-                    </div>
+html += `
+            <div onclick="GameSystem.Partner.toggleEquip('${id}')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
+                ${badgeHTML}
+                
+                <img src="assets/partners/${pt.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
+                <div style="display:none;" class="text-4xl mb-1 mt-2 filter drop-shadow-md flex-shrink-0">${pt.emoji}</div>
+                
+                <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
+                <div class="flex flex-col items-center w-full mt-auto bg-black/40 rounded py-1 px-1">
+                    <span class="text-[8px] text-pink-300 font-black mb-0.5">[${pt.skillName}]</span>
+                    <span class="text-[8px] text-slate-300 font-bold break-keep text-center leading-tight">${pt.skillDesc}</span>
                 </div>
-            `;
+            </div>
+        `;
         });
         
         pPartner.innerHTML = html;
