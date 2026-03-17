@@ -1102,7 +1102,21 @@ updateProfileEquipmentSlots() {
             else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
             else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
             else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
-html += `
+
+            // 👇 [여기 추가!!] html 카드를 그리기 직전에, pt(파트너)의 스탯을 읽어와서 요약본(statStr)을 만듭니다!
+            const upgMult = 1.0 + (level * 0.1);
+            let statStr = '';
+            if (pt.atkMult) statStr += `공격+${Math.round((pt.atkMult - 1)*100 * upgMult)}% `;
+            if (pt.hpMult) statStr += `체력+${Math.round((pt.hpMult - 1)*100 * upgMult)}% `;
+            if (pt.critRate) statStr += `크리+${(pt.critRate * upgMult).toFixed(1)}% `;
+            if (pt.critDmg) statStr += `크피+${(pt.critDmg * upgMult).toFixed(1)}% `;
+            if (pt.def) statStr += `방어+${Math.floor(pt.def * upgMult)} `;
+            if (pt.eva) statStr += `회피+${(pt.eva * upgMult).toFixed(1)}% `;
+            if (pt.spd) statStr += `공속+${(pt.spd * upgMult).toFixed(1)}% `;
+            if (pt.vamp) statStr += `피흡+${(pt.vamp * upgMult).toFixed(1)}% `;
+
+            // 👇 위에서 만든 statStr.trim()을 아랫줄 html 내부에서 불러옵니다!
+            html += `
             <div onclick="UIManager.openDetailCard('${id}', 'partner')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
                 ${badgeHTML}
                 
@@ -1111,8 +1125,8 @@ html += `
                 
                 <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
                 <div class="flex flex-col items-center w-full mt-auto bg-black/40 rounded py-1 px-1">
-                    <span class="text-[8px] text-pink-300 font-black mb-0.5">[${pt.skillName}]</span>
-                    <span class="text-[8px] text-slate-300 font-bold break-keep text-center leading-tight">${pt.skillDesc}</span>
+                    <span class="text-[9px] text-pink-300 font-black mb-0.5">[${pt.skillName}]</span>
+                    <span class="text-[8px] text-emerald-300 font-bold truncate w-full text-center">${statStr.trim() || '스탯 없음'}</span>
                 </div>
             </div>
         `;
@@ -1375,7 +1389,7 @@ html += `
         const gearSec = document.getElementById('dc-gear-section');
         const btnArea = document.getElementById('dc-btn-area');
 
-        // 🌸 [파트너 상세 카드일 때]
+      // 🌸 [파트너 상세 카드일 때]
         if (isPartner) {
             document.getElementById('dc-level-label').innerText = "돌파 레벨";
             document.getElementById('dc-level').innerText = `★${level}`;
@@ -1396,6 +1410,20 @@ html += `
             document.getElementById('dc-skill-name').innerText = item.skillName;
             document.getElementById('dc-skill-desc').innerText = item.skillDesc;
 
+            // 👇 [신규] 파트너 스탯 렌더링 (1개든 3개든 꽉 차게 flex-1 자동 분배!)
+            const upgMult = 1.0 + (level * 0.1);
+            let pStatsHtml = '';
+            if (item.atkMult) pStatsHtml += `<div class="flex-1 text-[10px] text-red-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
+            if (item.hpMult) pStatsHtml += `<div class="flex-1 text-[10px] text-emerald-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
+            if (item.critRate) pStatsHtml += `<div class="flex-1 text-[10px] text-purple-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
+            if (item.critDmg) pStatsHtml += `<div class="flex-1 text-[10px] text-pink-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
+            if (item.def) pStatsHtml += `<div class="flex-1 text-[10px] text-blue-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">방어 +${Math.floor(item.def * upgMult)}</div>`;
+            if (item.eva) pStatsHtml += `<div class="flex-1 text-[10px] text-teal-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
+            if (item.spd) pStatsHtml += `<div class="flex-1 text-[10px] text-yellow-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
+            if (item.vamp) pStatsHtml += `<div class="flex-1 text-[10px] text-rose-500 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
+            
+            document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
+
             btnArea.innerHTML = `
                 <button onclick="GameSystem.Partner.giveGift('${id}')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-pink-300 font-bold rounded-xl border border-pink-500/30 active:scale-95 flex flex-col items-center justify-center shadow-md transition-all">
                     <span class="text-xs flex items-center gap-1"><i class="fa-solid fa-gift"></i> 선물하기</span>
@@ -1405,7 +1433,7 @@ html += `
                     ${isEquipped ? '동행 해제하기' : '동행하기'}
                 </button>
             `;
-        } 
+        }
         // 🗡️ [장비 상세 카드일 때]
         else {
             document.getElementById('dc-level-label').innerText = "강화 수치";
