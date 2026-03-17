@@ -413,7 +413,7 @@ const UIManager = {
 
         // 1. 기본 껍데기 세팅 (빠르게 먼저 띄움)
         document.getElementById('target-user-nickname').innerText = nickname;
-        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' ? `✨ ${title} ✨` : "✨ 칭호 없음 ✨";
+        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' && title !== '' ? title : "✨ 칭호 없음 ✨";
         document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
         document.getElementById('target-user-avatar').innerHTML = icon;
         document.getElementById('target-user-avatar').className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass.replace('bg-slate-700', 'bg-slate-800')}`;
