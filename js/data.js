@@ -326,6 +326,135 @@ const GameData = {
             skillName: '뇌명의 축복', skillDesc: '10초마다 4초 동안 마스터의 크리티컬 확률 40% 대폭 상승',
             flavorText: '"벼락이여, 마스터의 검에 치명적인 힘을 깃드소서!"'
         },
+        // =========================================================================
+    // 🐾 파트너(동료) 데이터베이스 (희귀, 영웅, 전설)
+    // =========================================================================
+  
+        // 🟦 [RARE] 희귀 등급 (총 4종: 불 1, 대지 1, 무속성 2)
+        'pt_r_fire': { 
+            id: 'pt_r_fire', name: '횃불 코볼트', rarity: 'rare', emoji: '🐾',
+            img_sd: 'partner_kobold_sd.png', img_full: 'partner_kobold_full.png',
+            atkMult: 1.15, hpMult: 1.10, 
+            element: 'fire', skillCooldown: 1000, skillValue: 20,
+            skillName: '불티 던지기', skillDesc: '1초마다 횃불을 던져 공격력의 20% 화염 피해를 줍니다.',
+            flavorText: '"앗 뜨거! 조심해, 털 탄다구!"'
+        },
+        'pt_r_earth': { 
+            id: 'pt_r_earth', name: '꼬마 바위 골렘', rarity: 'rare', emoji: '🪨',
+            img_sd: 'partner_rockgolem_sd.png', img_full: 'partner_rockgolem_full.png',
+            atkMult: 1.05, hpMult: 1.20, def: 5,
+            element: 'earth', skillCooldown: 5000, skillValue: 10,
+            skillName: '단단한 돌멩이', skillDesc: '5초마다 마스터 체력의 10%만큼 작은 보호막을 생성합니다.',
+            flavorText: '"돌... 단단하다... 마스터... 지킨다..."'
+        },
+        'pt_r_none1': { // 🌟 무속성 깡스탯 1호
+            id: 'pt_r_none1', name: '도둑 너구리', rarity: 'rare', emoji: '🦝',
+            img_sd: 'partner_raccoon_sd.png', img_full: 'partner_raccoon_full.png',
+            atkMult: 1.30, hpMult: 1.05, spd: 15, eva: 10,
+            element: 'none', skillCooldown: 99999, skillValue: 0,
+            skillName: '재빠른 손놀림', skillDesc: '[무속성 패시브] 스킬이 없는 대신 마스터의 공격력과 회피/공속을 크게 높여줍니다.',
+            flavorText: '"헤헤, 방금 몬스터 주머니에서 뭐 좀 슬쩍했지!"'
+        },
+        'pt_r_none2': { // 🌟 무속성 깡스탯 2호
+            id: 'pt_r_none2', name: '떠돌이 용병', rarity: 'rare', emoji: '🗡️',
+            img_sd: 'partner_merc_sd.png', img_full: 'partner_merc_full.png',
+            atkMult: 1.10, hpMult: 1.35, def: 15,
+            element: 'none', skillCooldown: 99999, skillValue: 0,
+            skillName: '실전 압축 근육', skillDesc: '[무속성 패시브] 스킬이 없는 대신 마스터의 최대 체력과 방어력을 크게 높여줍니다.',
+            flavorText: '"돈만 주면 앞장서지. 맷집 하나는 자신 있거든."'
+        },
+
+        // 🟪 [EPIC] 영웅 등급 (총 5종: 불 1, 대지 1, 번개 1, 빙결 1, 무속성 1)
+        'pt_e_fire': { 
+            id: 'pt_e_fire', name: '화염 도롱뇽', rarity: 'epic', emoji: '🦎',
+            img_sd: 'partner_salamander_sd.png', img_full: 'partner_salamander_full.png',
+            atkMult: 1.25, hpMult: 1.15, critRate: 5,
+            element: 'fire', skillCooldown: 2000, skillValue: 35,
+            skillName: '화염 구토', skillDesc: '2초마다 뜨거운 불을 토해 공격력의 35% 화염 피해를 줍니다.',
+            flavorText: '"크르륵... (매운 걸 너무 많이 먹은 것 같다)"'
+        },
+        'pt_e_earth': { 
+            id: 'pt_e_earth', name: '숲의 파수꾼', rarity: 'epic', emoji: '🌳',
+            img_sd: 'partner_treant_sd.png', img_full: 'partner_treant_full.png',
+            atkMult: 1.15, hpMult: 1.35, def: 15,
+            element: 'earth', skillCooldown: 6000, skillValue: 15,
+            skillName: '뿌리 얽기', skillDesc: '6초마다 튼튼한 뿌리로 최대 체력의 15% 쉴드를 부여합니다.',
+            flavorText: '"바스락... 숲을 해치는 자... 용서 못 해..."'
+        },
+        'pt_e_lightn': { 
+            id: 'pt_e_lightn', name: '찌릿찌릿 뇌조', rarity: 'epic', emoji: '🦅',
+            img_sd: 'partner_thunderbird_sd.png', img_full: 'partner_thunderbird_full.png',
+            atkMult: 1.30, hpMult: 1.10, spd: 20,
+            element: 'lightning', skillCooldown: 8000, skillValue: 20, skillDuration: 3000,
+            skillName: '정전기 방출', skillDesc: '8초마다 3초 동안 마스터의 크리티컬 확률을 20% 올려줍니다.',
+            flavorText: '"삐융! 삐융! (털을 만지면 감전된다)"'
+        },
+        'pt_e_ice': { 
+            id: 'pt_e_ice', name: '서리 늑대', rarity: 'epic', emoji: '🐺',
+            img_sd: 'partner_frostwolf_sd.png', img_full: 'partner_frostwolf_full.png',
+            atkMult: 1.20, hpMult: 1.25, eva: 10,
+            element: 'ice', skillCooldown: 5000, skillValue: 30, skillDuration: 1000,
+            skillName: '얼음 송곳니', skillDesc: '5초마다 공격력 30% 피해를 주고 적을 1초간 빙결(기절)시킵니다.',
+            flavorText: '"아우우우~! (입김마저 꽁꽁 얼어붙는다)"'
+        },
+        'pt_e_none': { // 🌟 무속성 깡스탯 끝판왕 (영웅)
+            id: 'pt_e_none', name: '베테랑 대장장이', rarity: 'epic', emoji: '🔨',
+            img_sd: 'partner_smith_sd.png', img_full: 'partner_smith_full.png',
+            atkMult: 1.45, hpMult: 1.45, critDmg: 50, def: 20,
+            element: 'none', skillCooldown: 99999, skillValue: 0,
+            skillName: '명장의 손길', skillDesc: '[무속성 패시브] 장비를 한계까지 벼려내 마스터의 전반적인 스탯을 폭발적으로 증가시킵니다.',
+            flavorText: '"스킬 쓸 시간에 망치질이나 한 번 더 해라! 깡스탯이 최고여!"'
+        },
+
+        // 🟨 [LEGENDARY] 전설 등급 (총 6종: 불, 대지, 번개, 얼음, 바람, 빛)
+        'pt_l_fire': { 
+            id: 'pt_l_fire', name: '염룡의 새끼', rarity: 'legendary', emoji: '🐉',
+            img_sd: 'partner_babydragon_sd.png', img_full: 'partner_babydragon_full.png', img_cutin: 'partner_babydragon_cutin.png',
+            atkMult: 1.45, hpMult: 1.30, critRate: 15, vamp: 5,
+            element: 'fire', skillCooldown: 3000, skillValue: 50,
+            skillName: '용의 브레스', skillDesc: '3초마다 입에서 불을 뿜어 마스터 공격력의 50% 강력한 화염 피해를 입힙니다.',
+            flavorText: '"캬아악! (아직 작지만 제법 용의 태가 난다)"'
+        },
+        'pt_l_earth': { 
+            id: 'pt_l_earth', name: '고대 유적의 수호자', rarity: 'legendary', emoji: '🗿',
+            img_sd: 'partner_ancientgolem_sd.png', img_full: 'partner_ancientgolem_full.png', img_cutin: 'partner_ancientgolem_cutin.png',
+            atkMult: 1.25, hpMult: 1.60, def: 30, eva: -5, // 방어력이 엄청난 대신 회피 깎임
+            element: 'earth', skillCooldown: 7000, skillValue: 25,
+            skillName: '고대의 성벽', skillDesc: '7초마다 마스터 최대 체력의 25%만큼 파괴되지 않는 거대한 보호막을 생성합니다.',
+            flavorText: '"위협... 배제한다. 침입자... 파괴한다..."'
+        },
+        'pt_l_lightn': { 
+            id: 'pt_l_lightn', name: '폭풍을 부르는 뇌신', rarity: 'legendary', emoji: '🌩️',
+            img_sd: 'partner_raijin_sd.png', img_full: 'partner_raijin_full.png', img_cutin: 'partner_raijin_cutin.png',
+            atkMult: 1.50, hpMult: 1.20, spd: 30, critDmg: 50,
+            element: 'lightning', skillCooldown: 9000, skillValue: 40, skillDuration: 4000,
+            skillName: '뇌신의 분노', skillDesc: '9초마다 4초 동안 마스터의 무기에 번개를 감아 크리티컬 확률을 40% 올립니다.',
+            flavorText: '"하늘이 분노하고 번개가 내리친다! 벌벌 떨어라!"'
+        },
+        'pt_l_ice': { 
+            id: 'pt_l_ice', name: '빙하의 성기사', rarity: 'legendary', emoji: '🛡️',
+            img_sd: 'partner_icepaladin_sd.png', img_full: 'partner_icepaladin_full.png', img_cutin: 'partner_icepaladin_cutin.png',
+            atkMult: 1.35, hpMult: 1.45, def: 15, vamp: 10,
+            element: 'ice', skillCooldown: 7000, skillValue: 70, skillDuration: 2000,
+            skillName: '혹한의 심판', skillDesc: '7초마다 공격력 70% 피해를 입히고 적의 약점을 얼려 2초간 행동 불능(빙결)으로 만듭니다.',
+            flavorText: '"나의 검은 흔들리지 않고, 나의 신념은 얼음처럼 단단하다."'
+        },
+        'pt_l_air': { 
+            id: 'pt_l_air', name: '창공의 그리폰', rarity: 'legendary', emoji: '🦅',
+            img_sd: 'partner_griffon_sd.png', img_full: 'partner_griffon_full.png', img_cutin: 'partner_griffon_cutin.png',
+            atkMult: 1.40, hpMult: 1.35, eva: 25, spd: 25,
+            element: 'air', skillCooldown: 4000, skillValue: 120,
+            skillName: '회오리 강하', skillDesc: '4초마다 하늘에서 매섭게 강하하여 공격력의 120% 물리 타격을 입힙니다.',
+            flavorText: '"끼에에엑! (바람을 가르며 전장을 지배한다)"'
+        },
+        'pt_l_light': { 
+            id: 'pt_l_light', name: '성스러운 유니콘', rarity: 'legendary', emoji: '🦄',
+            img_sd: 'partner_unicorn_sd.png', img_full: 'partner_unicorn_full.png', img_cutin: 'partner_unicorn_cutin.png',
+            atkMult: 1.30, hpMult: 1.50, vamp: 20, def: 20,
+            element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 4000,
+            skillName: '정화의 빛', skillDesc: '10초마다 4초 동안 적의 힘을 정화하여 받는 데미지와 명중률을 30% 감소(약화)시킵니다.',
+            flavorText: '"당신의 영혼이 티 없이 맑기에 제가 곁에 머무는 것입니다."'
+        },
 
         // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 파트너 (16종)
