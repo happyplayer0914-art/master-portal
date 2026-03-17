@@ -1496,12 +1496,16 @@ Ranking: {
             }
         },
 
-        renderMailList() {
+       renderMailList() {
             const container = document.getElementById('mailbox-list-container');
             if (!container) return;
             container.innerHTML = '';
 
-            const fullList = this.mailList;
+            // 🚨 방어 코드: 삭제 목록 배열이 없으면 만들어줍니다!
+            if (!GameState.deletedMails) GameState.deletedMails = []; 
+
+            // 🌟 삭제 처리된 우편은 리스트에서 아예 빼버리고 렌더링합니다!
+            const fullList = this.mailList.filter(mail => !GameState.deletedMails.includes(mail.id));
 
             if (fullList.length === 0) {
                 container.innerHTML = '<div class="text-center py-10 text-slate-500 text-xs font-bold">도착한 우편이 없습니다. 텅~ 📭</div>';
@@ -1512,7 +1516,7 @@ Ranking: {
                 if (!GameState.claimedMails) GameState.claimedMails = [];
                 const isClaimed = GameState.claimedMails.includes(mail.id);
                 
-                // 🎁 보상 뱃지 렌더링 (재화 + 아이템 + 파트너 + 치장품 모두 지원!)
+                // 🎁 보상 뱃지 렌더링 (기존과 동일)
                 let rewardHtml = '';
                 if (mail.gold) rewardHtml += `<span class="text-yellow-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">🪙 ${mail.gold.toLocaleString()}</span>`;
                 if (mail.gem) rewardHtml += `<span class="text-cyan-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">💎 ${mail.gem.toLocaleString()}</span>`;
@@ -1542,8 +1546,9 @@ Ranking: {
                     ? `<span class="text-[9px] bg-pink-600/80 text-white px-1.5 py-0.5 rounded border border-pink-400 shadow-sm ml-1 mb-0.5 animate-pulse">개인 우편</span>` 
                     : '';
 
+                // 🌟 [핵심 수정] 보상을 받았으면 회색 버튼 대신 '🗑️ 우편 삭제' 버튼으로 바뀝니다!
                 const btnHtml = isClaimed 
-                    ? `<button disabled class="px-4 py-2.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded-xl border border-slate-700 w-full mt-2 cursor-not-allowed transition-all">수령 완료</button>`
+                    ? `<button onclick="GameSystem.Mail.deleteMail('${mail.id}')" class="px-4 py-2.5 bg-rose-900/30 hover:bg-rose-800/80 text-rose-400 text-[10px] font-bold rounded-xl border border-rose-800/50 w-full mt-2 active:scale-95 transition-all">🗑️ 우편 지우기</button>`
                     : `<button onclick="GameSystem.Mail.claimReward('${mail.id}')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[11px] font-black rounded-xl border border-emerald-400 w-full mt-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] animate-pulse active:scale-95 transition-all">보상 받기</button>`;
 
                 container.innerHTML += `
