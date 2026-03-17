@@ -31,3 +31,5 @@ const AudioEngine = {
 
 document.body.addEventListener('touchstart', () => AudioEngine.init(), { once: true });
 document.body.addEventListener('click', () => AudioEngine.init(), { once: true });
+// 👉 수정 3: 이 한 줄을 추가해야 다른 파일(system.js 등)에서 window.AudioEngine으로 소리를 불러올 수 있습니다!
+window.AudioEngine = AudioEngine;
