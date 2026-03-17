@@ -14,7 +14,11 @@ const GameState = {
     ownedCosmetics: [],
     ownedPartners: [],       // 🌸 [추가] 내가 뽑은 미소녀 명단
     partnerLevels: {},       // 🌸 [추가] 미소녀들의 돌파(중복) 레벨
+    // 👇 [신규 추가] 파트너 호감도 시스템 변수
+    partnerAffectionExp: {},    
+    partnerAffectionLevel: {},
     equippedPartner: null,   // 🌸 [추가] 현재 내 옆에 서 있는 파트너
+    
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     
     // 🌟 신규 스탯 3인방
@@ -89,6 +93,9 @@ const GameState = {
        // 🌸 파트너 로드 완벽 보장 (null 버그 원천 차단!)
         this.ownedPartners = this._safeLoad('master_ownedPartners', []);
         this.partnerLevels = this._safeLoad('master_partnerLevels', {});
+      // 👇 [신규 추가]
+        this.partnerAffectionExp = this._safeLoad('master_pt_aff_exp', {});
+        this.partnerAffectionLevel = this._safeLoad('master_pt_aff_lv', {});
         
         // 👇 이 부분을 아래 코드로 교체! (직통 저장소에서 먼저 꺼내오기!)
         let safeEp = localStorage.getItem('master_safe_partner');
@@ -153,6 +160,9 @@ const GameState = {
         // 🌸 파트너 세이브 완벽 보장!
         localStorage.setItem('master_ownedPartners', this._encode(this.ownedPartners));
         localStorage.setItem('master_partnerLevels', this._encode(this.partnerLevels));
+      // 👇 [신규 추가]
+        localStorage.setItem('master_pt_aff_exp', this._encode(this.partnerAffectionExp));
+        localStorage.setItem('master_pt_aff_lv', this._encode(this.partnerAffectionLevel));
        // 👇 이 부분을 아래 두 줄로 교체! (직통 저장소 추가)
         localStorage.setItem('master_equippedPartner', this._encode(this.equippedPartner || 'none'));
         localStorage.setItem('master_safe_partner', this.equippedPartner || 'none');
@@ -257,13 +267,12 @@ const GameState = {
                 if (item.spd) finalSpd += (item.spd * upgMult);
             }
         });
-     // ✅ 여기에 파트너 스탯 엔진을 쏙 끼워 넣습니다!
-        // 🌸 [신규] 파트너 스탯 뻥튀기 적용!
+    // 🌸 [개편] 파트너 스탯 뻥튀기 (호감도 보너스 삭제, 오직 강화 레벨만 +10%씩 적용!)
         if (this.equippedPartner && GameData.partners && GameData.partners[this.equippedPartner]) {
             const pt = GameData.partners[this.equippedPartner];
-            // 파트너도 레벨(중복 뽑기)에 따라 0.1배씩 스탯이 더 강해집니다!
             const ptLevel = this.partnerLevels[this.equippedPartner] || 0;
-            const ptMult = 1.0 + (ptLevel * 0.1);
+            
+            const ptMult = 1.0 + (ptLevel * 0.1); // 💡 강화당 딱 +10% 씩만! (속성은 안 건드림)
 
             if (pt.atkMult) finalAtkMult += ((pt.atkMult - 1.0) * ptMult);
             if (pt.hpMult) finalHpMult += ((pt.hpMult - 1.0) * ptMult);
