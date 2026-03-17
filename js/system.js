@@ -866,13 +866,88 @@ Gacha: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-            // 0.5초 뒤에 결과창 띄우기 (천장은 이미 알고 뽑는 거라 스피디하게 넘깁니다!)
+            // 👇 [여기서부터 교체!] 스킵 타이머를 지우고, 천장 전용 확정 컷인 연출을 재생합니다!
             setTimeout(() => {
-                this._revealResults(type, 1, [picked], anim, resBox, closeBtn);
-            }, 1000);
-        }
-    }, // 👈 3. Gacha 객체가 끝나는 괄호! (이 밑으로 Ranking: { 이 이어집니다)
+                anim.classList.add('hidden'); 
+                resBox.classList.remove('hidden'); 
+                resBox.className = "w-full max-w-md flex flex-col justify-center items-center min-h-[400px] relative"; 
 
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
+                if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+                
+                const imgFolder = type === 'partner' ? 'partners' : 'items';
+                const commentText = picked.flavorText || picked.desc || "전설 속의 힘이 깨어납니다!";
+                const imgFile = picked.img_cutin || picked.img_full || picked.img || '';
+
+                // 화려한 핑크빛 카드 액자 HTML 세팅
+                const cutinHTML = `
+                    <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
+                        <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${commentText.replace(/\\n/g, '\n')}"</h2>
+                        <p class="text-[11px] sm:text-xs text-white/80 font-bold tracking-widest">- ${picked.name} -</p>
+                    </div>
+                    
+                    <img id="mythic-cutin-illus" src="assets/${imgFolder}/${imgFile}" 
+                         class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[320px] h-auto bg-slate-900/90 rounded-2xl border-[3px] border-pink-500 shadow-[0_0_50px_rgba(236,72,153,0.8)] p-2 opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" 
+                         onerror="this.style.display='none';">
+                    
+                    <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
+                `;
+                resBox.innerHTML = cutinHTML;
+
+                // ➡️ 1단계: 멘트 등장
+                setTimeout(() => {
+                    const textBox = document.getElementById('mythic-cutin-text');
+                    if(textBox) {
+                        textBox.style.opacity = '1';
+                        textBox.style.transform = 'scale(1)';
+                    }
+                }, 100);
+
+                // ➡️ 2단계: 2초 후 일러스트 등장!
+                setTimeout(() => {
+                    const textBox = document.getElementById('mythic-cutin-text');
+                    if(textBox) {
+                        textBox.style.opacity = '0'; 
+                        textBox.style.transform = 'scale(0.9)';
+                    }
+
+                    setTimeout(() => {
+                        const illus = document.getElementById('mythic-cutin-illus');
+                        const guide = document.getElementById('mythic-cutin-guide');
+                        
+                        if(illus) {
+                            illus.style.opacity = '1'; 
+                            illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; 
+                            illus.style.filter = 'blur(0px)'; 
+                        }
+                        
+                        setTimeout(() => {
+                            if(guide) guide.classList.remove('hidden'); 
+                        }, 1500);
+
+                        // ➡️ 3단계: 화면 클릭 시 최종 결과창으로 이동
+                        const overlay = document.getElementById('gacha-overlay');
+                        const handleCutinClick = (e) => {
+                            e.stopPropagation(); 
+                            overlay.removeEventListener('click', handleCutinClick); 
+
+                            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+                            
+                            if(illus) illus.style.opacity = '0';
+                            if(guide) guide.classList.add('hidden'); 
+
+                            // 0.4초 후 최종 결과창 띄우기
+                            setTimeout(() => {
+                                this._revealResults(type, 1, [picked], anim, resBox, closeBtn);
+                            }, 400); 
+                        };
+                        
+                        overlay.addEventListener('click', handleCutinClick); 
+                    }, 400); 
+                }, 2000); 
+            }, 1500); // 1.5초 동안 마법진이 돌고 컷인 시작!
+        }
+    }, // <-- Gacha 객체 끝나는 부분
     
 Ranking: {
         openRegisterModal() { 
