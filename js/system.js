@@ -1494,19 +1494,7 @@ Partner: {
         battleState: { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 },
 
         showDamageText(targetId, text, typeClass) {
-                // 🌟 [신규] 전투 로그 배열 (최대 4줄 보관)
-        battleLogs: [],
-
-        // 🌟 [신규] 멀티라인 전투 로그 추가 함수
-        addLog(text, colorClass = "text-slate-300") {
-            const container = document.getElementById('battle-log-container');
-            if (!container) return;
-            
-            this.battleLogs.push(`<div class="${colorClass} animate-[fadeIn_0.2s_ease-out]">${text}</div>`);
-            if (this.battleLogs.length > 4) this.battleLogs.shift(); // 4줄이 넘어가면 가장 오래된 로그 삭제
-            
-            container.innerHTML = this.battleLogs.join('');
-        },
+             
             const target = document.getElementById(targetId);
             if(!target) return;
             const textEl = document.createElement('div');
@@ -1518,6 +1506,19 @@ Partner: {
             textEl.style.top = `calc(50% + ${randomY}px)`;
             target.appendChild(textEl);
             setTimeout(() => { textEl.remove(); }, 700);
+        },
+            // 🌟 [신규] 전투 로그 배열 (최대 4줄 보관)
+        battleLogs: [],
+
+        // 🌟 [신규] 멀티라인 전투 로그 추가 함수
+        addLog(text, colorClass = "text-slate-300") {
+            const container = document.getElementById('battle-log-container');
+            if (!container) return;
+            
+            this.battleLogs.push(`<div class="${colorClass} animate-[fadeIn_0.2s_ease-out]">${text}</div>`);
+            if (this.battleLogs.length > 4) this.battleLogs.shift(); // 4줄이 넘어가면 가장 오래된 로그 삭제
+            
+            container.innerHTML = this.battleLogs.join('');
         },
 
         enterDungeon() {
