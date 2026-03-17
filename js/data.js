@@ -63,6 +63,7 @@ const GameData = {
             id: 'mythic_entj_w', name: '태양의 심판검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '☀️', 
             atkMult: 4.5, critDmg: 200, spd: 15, mbti: 'ENTJ', job: '전장을 지배하는 군주', passive: '절대 권력', 
             desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.',
+            img: 'weapon_entj.png', // 👈 [추가]
             // 👇 여기에 이미지와 대사를 추가해 주세요!
             img_cutin: 'weapon_entj_cutin.png', 
             flavorText: '"모든 전장은 나의 지휘 아래 통제된다. 꿇어라!"' 
