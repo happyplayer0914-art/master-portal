@@ -1382,11 +1382,44 @@ updateProfileEquipmentSlots() {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-        // 2. 이미지 세팅 (파트너면 호감도에 따라 진화된 이미지 호출!)
+       // 2. 이미지 세팅 (파트너면 마스터가 선택한 진화 이미지를, 장비면 원래 이미지를 가져옴)
         const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img || '');
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
-        document.getElementById('dc-bg').style.backgroundImage = `url('assets/${folder}/${imgFile}')`;
+        
+        // 🌟 [배경 업그레이드] 아이템 사진을 흐리게 쓰는 대신, 예쁜 '공용 배경'을 씁니다!
+        const bgImg = isPartner ? 'card_bg_partner.png' : 'card_bg_gear.png';
+        const fallbackBg = isPartner ? 'bg_library.png' : 'bg_zone1.png';
+        
+        const bgEl = document.getElementById('dc-bg');
+        bgEl.style.backgroundImage = `url('assets/backgrounds/${bgImg}')`;
+        bgEl.style.filter = "none"; // 흐림 효과 삭제!
+        // 땜빵: 만약 폴더에 전용 배경이 없다면 기존 배경을 대신 띄워줍니다.
+        bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/${fallbackBg}')`; };
+
+        // 🌟 [외형 변경 버튼 로직] 노란 동그라미 위치의 버튼을 켜고 끄는 마법!
+        const skinBtn = document.getElementById('dc-btn-skin');
+        
+        // 내 파트너를 열었을 때만 변경 버튼이 보이게 합니다! (장비나, 남의 파트너면 숨김)
+        if (isPartner && !isReadOnly) { 
+            skinBtn.classList.remove('hidden');
+            
+            // 버튼을 누르면 스킨이 휙휙 바뀌는 함수 연결!
+            skinBtn.onclick = () => { GameSystem.Partner.cycleSkin(id); };
+            
+            // 현재 호감도로 해금된 스킨이 몇 개인지 확인 (1개 이하면 회색으로 비활성화)
+            const unlocked = GameSystem.Partner.getUnlockedSkins(id);
+            if (unlocked.length <= 1) {
+                // 해금된 게 없어서 못 바꿀 때 (회색)
+                skinBtn.className = "absolute top-3 left-3 z-30 bg-slate-800/50 text-slate-500 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-md cursor-not-allowed";
+            } else {
+                // 바꿀 스킨이 있을 때 (예쁜 남색으로 활성화!)
+                skinBtn.className = "absolute top-3 left-3 z-30 bg-indigo-600/90 hover:bg-indigo-500 text-white border border-indigo-400 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all active:scale-95 cursor-pointer";
+            }
+        } else {
+            // 장비를 클릭했거나, 랭킹에서 타 유저의 파트너를 구경할 때는 버튼 숨기기!
+            skinBtn.classList.add('hidden'); 
+        }
 
         // 3. 화면 분기용 변수
         const partnerSec = document.getElementById('dc-partner-section');
