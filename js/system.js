@@ -3,11 +3,11 @@
 // =========================================================================
 const GameSystem = {
 // =========================================================================
-        // 🔨 [신규 시스템] 대장간 (장비 강화)
+        // 🔨 [개편] 대장간 (장비 및 파트너 중복 강화)
         // =========================================================================
         Forge: {
             selectedId: null,
-            currentTab: 'weapon', // 💡 기본 탭 설정
+            currentTab: 'weapon', 
             probs: [100, 90, 80, 70, 60, 50, 40, 30, 10, 1],
             
             init() {
@@ -15,18 +15,16 @@ const GameSystem = {
                 this.selectedId = null;
                 const details = document.getElementById('forge-details');
                 if(details) details.classList.add('hidden');
-                this.switchTab('weapon'); // 💡 대장간 들어올 때 무조건 무기 탭부터 열기
+                this.switchTab('weapon'); 
             },
 
-            // 💡 탭 전환 스위치 함수 추가!
             switchTab(tab) {
                 this.currentTab = tab;
                 this.selectedId = null;
                 const details = document.getElementById('forge-details');
                 if(details) details.classList.add('hidden');
                 
-                // 버튼 색상 업데이트
-                ['weapon', 'armor', 'accessory'].forEach(t => {
+                ['weapon', 'armor', 'accessory', 'partner'].forEach(t => {
                     const btn = document.getElementById(`forge-tab-${t}`);
                     if(btn) {
                         btn.className = (t === tab) 
@@ -42,26 +40,36 @@ const GameSystem = {
                 if(!list) return;
                 list.innerHTML = '';
                 
-                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 const counts = {};
                 
-                GameState.inventory.forEach(id => {
-                    // 🚨 [핵심 필터링] 선택된 탭(currentTab)과 같은 부위의 장비만 보여주기!
-                    if(GameData.items[id] && !equipped.includes(id) && GameData.items[id].subType === this.currentTab) {
-                        counts[id] = (counts[id] || 0) + 1;
-                    }
-                });
+                // 💡 [핵심] 탭에 따라 인벤토리를 다르게 뒤집니다!
+                if (this.currentTab === 'partner') {
+                    GameState.ownedPartners.forEach(id => {
+                        if (id !== GameState.equippedPartner) counts[id] = (counts[id] || 0) + 1;
+                    });
+                } else {
+                    const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+                    GameState.inventory.forEach(id => {
+                        if(GameData.items[id] && !equipped.includes(id) && GameData.items[id].subType === this.currentTab) {
+                            counts[id] = (counts[id] || 0) + 1;
+                        }
+                    });
+                }
 
                 let hasItems = false;
                 for(const id in counts) {
                     hasItems = true;
-                    const item = GameData.items[id];
+                    const item = this.currentTab === 'partner' ? GameData.partners[id] : GameData.items[id];
                     const count = counts[id];
-                    const level = GameState.itemUpgrades[id] || 0;
+                    const level = this.currentTab === 'partner' ? (GameState.partnerLevels[id] || 0) : (GameState.itemUpgrades[id] || 0);
                     
-                  const imgHtml = item.img 
-                        ? `<img src="assets/items/${item.img}" class="w-10 h-10 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl mb-1">${item.emoji || '📦'}</div>`
+                    const imgHtml = item.img || item.img_sd
+                        ? `<img src="assets/${this.currentTab === 'partner' ? 'partners' : 'items'}/${item.img || item.img_sd}" class="w-10 h-10 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl mb-1">${item.emoji || '📦'}</div>`
                         : `<div class="text-2xl mb-1">${item.icon || item.emoji || '📦'}</div>`;
+
+                    const div = document.createElement('div');
+                    div.className = `item-card rarity-${item.rarity} relative flex flex-col justify-center items-center p-2 h-24 cursor-pointer hover:scale-105 transition-transform ${this.selectedId === id ? 'border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]' : ''}`;
+                    div.onclick = () => { this.selectedId = id; this.renderList(); this.renderDetails(); AudioEngine.sfx.click(); };
 
                     div.innerHTML = `
                         ${imgHtml}
@@ -72,8 +80,8 @@ const GameSystem = {
                 }
 
                 if(!hasItems) {
-                    const tabName = this.currentTab === 'weapon' ? '무기' : this.currentTab === 'armor' ? '방어구' : '장신구';
-                    list.innerHTML = `<div class="col-span-4 sm:col-span-5 text-center text-slate-500 text-xs py-6 font-bold">보유 중인 ${tabName}가 없습니다.</div>`;
+                    const tabName = this.currentTab === 'weapon' ? '무기' : this.currentTab === 'armor' ? '방어구' : this.currentTab === 'accessory' ? '장신구' : '파트너';
+                    list.innerHTML = `<div class="col-span-4 sm:col-span-5 text-center text-slate-500 text-xs py-6 font-bold">강화할 수 있는 ${tabName}가 없습니다.</div>`;
                 }
             },
 
@@ -81,20 +89,23 @@ const GameSystem = {
                 const details = document.getElementById('forge-details');
                 if(!this.selectedId || !details) return;
                 
-                const item = GameData.items[this.selectedId];
-                const level = GameState.itemUpgrades[this.selectedId] || 0;
+                const item = this.currentTab === 'partner' ? GameData.partners[this.selectedId] : GameData.items[this.selectedId];
+                const level = this.currentTab === 'partner' ? (GameState.partnerLevels[this.selectedId] || 0) : (GameState.itemUpgrades[this.selectedId] || 0);
                 
-                // 🚨 [오류 픽스] 여기서도 변수명 수정!
-                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 let count = 0;
-                GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
+                if (this.currentTab === 'partner') {
+                    GameState.ownedPartners.forEach(id => { if(id === this.selectedId && id !== GameState.equippedPartner) count++; });
+                } else {
+                    const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+                    GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
+                }
 
                 details.classList.remove('hidden');
 
                 if(level >= 10) {
                     details.innerHTML = `
                         <div class="text-center py-4">
-                            <div class="text-5xl mb-3 animate-bounce">${item.icon || item.emoji || '📦'}</div>
+                            <div class="text-5xl mb-3 animate-bounce">${item.emoji || '📦'}</div>
                             <h3 class="text-2xl font-black text-yellow-400 mb-2 drop-shadow-md">+MAX ${item.name}</h3>
                             <p class="text-slate-400 text-sm">더 이상 강화할 수 없는 궁극의 상태입니다.</p>
                         </div>
@@ -103,17 +114,18 @@ const GameSystem = {
                 }
 
                 const prob = this.probs[level];
-                const cost = (level + 1) * 100; // 1강 100G, 10강 1000G
-                const canUpgrade = count >= 2 && GameState.gold >= cost; // 제물용 1개 포함 총 2개 이상 필요
+                // 💡 [비용 공식] 파트너는 장비의 2배 가격!
+                const cost = (level + 1) * (this.currentTab === 'partner' ? 200 : 100); 
+                const canUpgrade = count >= 2 && GameState.gold >= cost; 
 
                 details.innerHTML = `
                     <div class="flex items-center gap-4 mb-5">
                         <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-3xl border border-slate-600 shadow-inner">
-                            ${item.icon || item.emoji || '📦'}
+                            ${item.emoji || '📦'}
                         </div>
                         <div class="flex-1">
                             <h3 class="text-lg font-black text-white mb-1"><span class="text-slate-400">+${level}</span> ${item.name} ➔ <span class="text-purple-400">+${level+1}</span></h3>
-                            <p class="text-xs text-slate-400">아이템 고유 능력치 <span class="text-emerald-400 font-bold">+${(level+1)*10}%</span> 적용</p>
+                            <p class="text-xs text-slate-400">고유 능력치 <span class="text-emerald-400 font-bold">+${(level+1)*10}%</span> 적용</p>
                         </div>
                     </div>
                     
@@ -134,45 +146,54 @@ const GameSystem = {
                     </div>
 
                     <button onclick="GameSystem.Forge.attemptUpgrade()" ${!canUpgrade ? 'disabled' : ''} class="w-full py-4 rounded-xl font-black text-lg shadow-lg transition-all ${canUpgrade ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-500 hover:to-indigo-500 active:scale-95 border border-purple-400' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}">
-                        ${canUpgrade ? '🔨 장비 강화 시도!' : '재료 또는 골드 부족'}
+                        ${canUpgrade ? '🔨 강화 시도!' : '재료 또는 골드 부족'}
                     </button>
                 `;
             },
 
             attemptUpgrade() {
                 if(!this.selectedId) return;
-                const level = GameState.itemUpgrades[this.selectedId] || 0;
+                const level = this.currentTab === 'partner' ? (GameState.partnerLevels[this.selectedId] || 0) : (GameState.itemUpgrades[this.selectedId] || 0);
                 if(level >= 10) return;
 
-                const cost = (level + 1) * 100;
+                const cost = (level + 1) * (this.currentTab === 'partner' ? 200 : 100);
                 
-                // 🚨 [오류 픽스] 여기도 변수명 수정!
-                const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
                 let count = 0;
-                GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
+                if (this.currentTab === 'partner') {
+                    GameState.ownedPartners.forEach(id => { if(id === this.selectedId && id !== GameState.equippedPartner) count++; });
+                } else {
+                    const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+                    GameState.inventory.forEach(id => { if(id === this.selectedId && !equipped.includes(id)) count++; });
+                }
 
-                if(count < 2) return UIManager.showToast("제물로 바칠 동일한 장비가 부족합니다.");
+                if(count < 2) return UIManager.showToast("제물로 바칠 장비/파트너가 부족합니다.");
                 if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다.");
 
                 // 💸 비용 지불 및 제물 파괴
                 GameState.gold -= cost;
-                const index = GameState.inventory.indexOf(this.selectedId);
-                if(index > -1) GameState.inventory.splice(index, 1);
+                if (this.currentTab === 'partner') {
+                    const index = GameState.ownedPartners.indexOf(this.selectedId);
+                    if(index > -1) GameState.ownedPartners.splice(index, 1);
+                } else {
+                    const index = GameState.inventory.indexOf(this.selectedId);
+                    if(index > -1) GameState.inventory.splice(index, 1);
+                }
 
                 const prob = this.probs[level];
                 const roll = Math.random() * 100;
 
                 if(roll < prob) {
-                    // 🎉 깡! 강화 성공
-                    GameState.itemUpgrades[this.selectedId] = level + 1;
+                    if (this.currentTab === 'partner') GameState.partnerLevels[this.selectedId] = level + 1;
+                    else GameState.itemUpgrades[this.selectedId] = level + 1;
+                    
+                    const itemName = this.currentTab === 'partner' ? GameData.partners[this.selectedId].name : GameData.items[this.selectedId].name;
                     AudioEngine.sfx.equip();
                     UIManager.triggerHeavyHaptic();
-                    UIManager.showToast(`✨ 돌파 성공! [+${level+1} ${GameData.items[this.selectedId].name}]`, 3000);
+                    UIManager.showToast(`✨ 돌파 성공! [+${level+1} ${itemName}]`, 3000);
                 } else {
-                    // 💥 쨍그랑! 강화 실패
                     AudioEngine.sfx.hit_player(); 
                     UIManager.triggerHaptic();
-                    UIManager.showToast(`💥 강화 실패... 제물 장비가 파괴되었습니다.`, 3000);
+                    UIManager.showToast(`💥 강화 실패... 제물이 파괴되었습니다.`, 3000);
                 }
 
                 GameState.save();
@@ -415,96 +436,93 @@ upgradeStat(t) {
         }
     },
 // =========================================================================
-    // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
-    // =========================================================================
-Partner: {
-        toggleEquip(id) { /* 기존 유지 */ },
+        // 🌸 [개편] 미소녀 파트너 호감도 및 진화 엔진
+        // =========================================================================
+        Partner: {
+            toggleEquip(id) {
+                const pt = GameData.partners[id]; 
+                if(!pt) return;
+                
+                GameState.equippedPartner = GameState.equippedPartner === id ? null : id;
+                
+                const newStats = GameState.getTotalStats();
+                if (GameState.currentHp > newStats.hp) {
+                    GameState.currentHp = newStats.hp;
+                }
 
-        // 🌟 [신규] 동적 일러스트 변환기 (호감도에 따라 진화!)
-        getDisplayImage(id) {
-            const pt = GameData.partners[id];
-            const lv = GameState.partnerAffectionLevel[id] || 1;
-            
-            if (pt.rarity === 'mythic') {
-                if (lv === 10) return pt.img_gif || pt.img_full; // 10렙: GIF
-                if (lv >= 6) return pt.img_full;                 // 6~9렙: 전신
-                return pt.img_sd;                                // 1~5렙: SD
-            } else if (pt.rarity === 'legendary') {
-                if (lv >= 6) return pt.img_full;                 // 6~10렙: 전신
-                return pt.img_sd;                                // 1~5렙: SD
+                GameState.save(); 
+                UIManager.renderInventory();        
+                UIManager.renderPartnerInventory(); 
+                UIManager.applyAvatarSkin();        
+                UIManager.updateRpgLobbyUI();       
+                
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
+                UIManager.triggerHaptic();
+                
+                const actionText = GameState.equippedPartner ? pt.flavorText : `🌸 [${pt.name}] 동행을 해제했습니다.`;
+                UIManager.showToast(actionText);
+                
+                if (GameSystem.Profile && GameSystem.Profile.syncToServer) {
+                    GameSystem.Profile.syncToServer();
+                }
+            },
+
+            // 🌟 동적 일러스트 변환기 (호감도에 따라 진화!)
+            getDisplayImage(id) {
+                const pt = GameData.partners[id];
+                const lv = GameState.partnerAffectionLevel[id] || 1;
+                
+                if (pt.rarity === 'mythic') {
+                    if (lv >= 10) return pt.img_gif || pt.img_full; // 10렙: GIF
+                    if (lv >= 6) return pt.img_full;                 // 6~9렙: 전신
+                    return pt.img_sd;                                // 1~5렙: SD
+                } else if (pt.rarity === 'legendary') {
+                    if (lv >= 6) return pt.img_full;                 // 6~10렙: 전신
+                    return pt.img_sd;                                // 1~5렙: SD
+                }
+                return pt.img_full; // 영웅, 희귀는 기본 제공 이미지
+            },
+
+            // 🌟 호감도 경험치 추가 엔진
+            addAffection(id, amount) {
+                if (GameState.partnerAffectionExp[id] === undefined) GameState.partnerAffectionExp[id] = 0;
+                if (GameState.partnerAffectionLevel[id] === undefined) GameState.partnerAffectionLevel[id] = 1;
+
+                let currentLv = GameState.partnerAffectionLevel[id];
+                if (currentLv >= 10) return; // 만렙 방어
+
+                GameState.partnerAffectionExp[id] += amount;
+
+                // 💡 점진적 요구량 (1렙->2렙: 100, 2렙->3렙: 200 ...)
+                let reqExp = currentLv * 100;
+                
+                while (GameState.partnerAffectionExp[id] >= reqExp && currentLv < 10) {
+                    GameState.partnerAffectionExp[id] -= reqExp;
+                    currentLv++;
+                    GameState.partnerAffectionLevel[id] = currentLv;
+                    UIManager.showToast(`💖 [${GameData.partners[id].name}] 호감도 레벨 UP! (Lv.${currentLv})`);
+                    reqExp = currentLv * 100;
+                }
+                GameState.save();
+            },
+
+            // 🌟 50젬 내고 호감도 올리기
+            giveGift(id) {
+                if (GameState.gem < 50) return UIManager.showToast("💎 젬이 부족합니다!");
+                if (GameState.partnerAffectionLevel[id] >= 10) return UIManager.showToast("이미 호감도가 최대치입니다!");
+                
+                GameState.gem -= 50;
+                this.addAffection(id, 100); // 50젬 = 경험치 100 획득
+                
+                if(window.AudioEngine) AudioEngine.sfx.equip();
+                UIManager.updateCurrencyUI();
+                
+                // 상세 카드가 열려있다면 즉시 새로고침
+                if (window.UIManager && UIManager.openDetailCard) {
+                    UIManager.openDetailCard(id, 'partner'); 
+                }
             }
-            return pt.img_full; // 영웅, 희귀는 기본 제공 이미지
-        },
-
-        // 🌟 [신규] 호감도 경험치 추가 엔진
-        addAffection(id, amount) {
-            if (!GameState.partnerAffectionExp[id]) GameState.partnerAffectionExp[id] = 0;
-            if (!GameState.partnerAffectionLevel[id]) GameState.partnerAffectionLevel[id] = 1;
-
-            let currentLv = GameState.partnerAffectionLevel[id];
-            if (currentLv >= 10) return; // 만렙
-
-            GameState.partnerAffectionExp[id] += amount;
-
-            // 💡 점진적 요구량 (1렙->2렙: 100, 2렙->3렙: 200, 3렙->4렙: 300 ...)
-            let reqExp = currentLv * 100;
-            
-            while (GameState.partnerAffectionExp[id] >= reqExp && currentLv < 10) {
-                GameState.partnerAffectionExp[id] -= reqExp;
-                currentLv++;
-                GameState.partnerAffectionLevel[id] = currentLv;
-                UIManager.showToast(`💖 [${GameData.partners[id].name}] 호감도 레벨 UP! (Lv.${currentLv})`);
-                reqExp = currentLv * 100;
-            }
-            GameState.save();
-        },
-
-        giveGift(id) {
-            if (GameState.gem < 50) return UIManager.showToast("💎 젬이 부족합니다!");
-            if (GameState.partnerAffectionLevel[id] >= 10) return UIManager.showToast("이미 호감도가 최대치입니다!");
-            
-            GameState.gem -= 50;
-            this.addAffection(id, 100); // 50젬 = 경험치 100 획득
-            
-            if(window.AudioEngine) AudioEngine.sfx.equip();
-            UIManager.updateCurrencyUI();
-            UIManager.openDetailCard(id, 'partner'); // 화면 갱신
-        }
-    },
-            const pt = GameData.partners[id]; 
-            if(!pt) return;
-            
-            // 1. 상태 변경
-            GameState.equippedPartner = GameState.equippedPartner === id ? null : id;
-            
-            // 🚨 [버그 수정] 파트너 해제 시 최대 체력이 깎이면 현재 체력도 맞춰서 깎아내기!
-            const newStats = GameState.getTotalStats();
-            if (GameState.currentHp > newStats.hp) {
-                GameState.currentHp = newStats.hp;
-            }
-
-            GameState.save(); 
-            
-            // 2. 화면 그리기
-            UIManager.renderInventory();        
-            UIManager.renderPartnerInventory(); 
-            UIManager.applyAvatarSkin();        
-            UIManager.updateRpgLobbyUI();       
-            
-            // 3. 사운드 및 진동
-            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
-            UIManager.triggerHaptic();
-            
-            // 4. 안내 토스트
-            const actionText = GameState.equippedPartner ? pt.flavorText : `🌸 [${pt.name}] 동행을 해제했습니다.`;
-            UIManager.showToast(actionText);
-            
-            // 5. 서버 데이터 백업
-            if (GameSystem.Profile && GameSystem.Profile.syncToServer) {
-                GameSystem.Profile.syncToServer();
-            }
-        }
-    }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
+        },// <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
 Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
@@ -560,20 +578,18 @@ Gacha: {
                     else GameState.gachaPity[type].mythic += 1; // 안 뜨면 1 증가!
                 }
                 
-                if (type === 'partner') {
+             if (type === 'partner') {
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.partners).filter(it => it.rarity === 'rare');
                     const pt = safePool[Math.floor(Math.random() * safePool.length)];
                     
-                    const isDup = GameState.ownedPartners.includes(pt.id);
-                    if (isDup) {
-                        GameState.partnerLevels[pt.id] = Math.min((GameState.partnerLevels[pt.id] || 0) + 1, 10);
-                        results.push({ ...pt, isDup: true });
-                    } else {
-                        GameState.ownedPartners.push(pt.id);
-                        GameState.partnerLevels[pt.id] = 0;
-                        results.push({ ...pt, isDup: false });
-                    }
+                    // 무조건 인벤토리로 직행! (자동 레벨업 삭제)
+                    GameState.ownedPartners.push(pt.id);
+                    if (GameState.partnerLevels[pt.id] === undefined) GameState.partnerLevels[pt.id] = 0;
+                    if (GameState.partnerAffectionExp[pt.id] === undefined) GameState.partnerAffectionExp[pt.id] = 0;
+                    if (GameState.partnerAffectionLevel[pt.id] === undefined) GameState.partnerAffectionLevel[pt.id] = 1;
+                    
+                    results.push({ ...pt, isDup: false }); 
                 } else {
                     const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
@@ -882,17 +898,15 @@ Gacha: {
             }
         },
 
-        // 🌟 [천장] 확정 보상 처리 및 연출 연결
+       // 🌟 [천장] 확정 보상 처리 및 연출 연결
         _processPityReward(type, picked) {
-            // 인벤토리에 넣기
+            // 인벤토리에 넣기 (자동 레벨업 삭제! 무조건 배열에 밀어넣기)
             if (type === 'partner') {
-                const isDup = GameState.ownedPartners.includes(picked.id);
-                if (isDup) { 
-                    GameState.partnerLevels[picked.id] = Math.min((GameState.partnerLevels[picked.id] || 0) + 1, 10); 
-                } else { 
-                    GameState.ownedPartners.push(picked.id); 
-                    GameState.partnerLevels[picked.id] = 0; 
-                }
+                GameState.ownedPartners.push(picked.id);
+                // 처음 얻은 거라면 레벨과 호감도를 0/1로 세팅!
+                if (GameState.partnerLevels[picked.id] === undefined) GameState.partnerLevels[picked.id] = 0;
+                if (GameState.partnerAffectionExp[picked.id] === undefined) GameState.partnerAffectionExp[picked.id] = 0;
+                if (GameState.partnerAffectionLevel[picked.id] === undefined) GameState.partnerAffectionLevel[picked.id] = 1;
             } else {
                 GameState.inventory.push(picked.id);
             }
@@ -2352,13 +2366,16 @@ Ranking: {
             if (isWin) {
                 document.getElementById('bottom-nav').style.display = 'flex'; 
                 AudioEngine.sfx.coin(); UIManager.triggerHaptic();
-                
-                let rewardGold = 10 + (GameState.rpgStage * 2);
-                let rewardGem = 0;   
-                    // 👇 [신규 추가] 같이 싸운 파트너 호감도 경험치 +10 상승!
+                    
+                    // 👇 [여기 3줄 추가!!] 같이 싸운 파트너 호감도 경험치 +10 상승!
                 if (GameState.equippedPartner) {
                     GameSystem.Partner.addAffection(GameState.equippedPartner, 10);
                 }
+
+                    
+                let rewardGold = 10 + (GameState.rpgStage * 2);
+                let rewardGem = 0;   
+               
                 
                 if (isBoss) {
                     const bossTier = GameState.rpgStage / 10; 
