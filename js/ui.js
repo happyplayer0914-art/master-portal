@@ -865,12 +865,19 @@ updateProfileEquipmentSlots() {
                     else if(item.rarity === 'rare') rarityClass = "rarity-rare";
                     else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
 
-                    const level = GameState.itemUpgrades[itemId] || 0;
+                   const level = GameState.itemUpgrades[itemId] || 0;
                     el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                    
+                    // 👇 [추가된 부분] 이미지가 있으면 이미지를 부르고, 없으면 이모지를 부릅니다!
+                    const iconHtml = item.img 
+                        ? `<img src="assets/items/${item.img}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl filter drop-shadow-md">${item.emoji}</div>`
+                        : `<div class="text-2xl filter drop-shadow-md">${item.emoji}</div>`;
+
+                    // 덮어쓰기!
                     el.innerHTML = `
-                        <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
-                        <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
-                        <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level}</div>
+                        ${iconHtml}
+                        <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
+                        <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">Lv.${level}</div>
                     `;
                     el.onclick = () => { 
                         const upgMult = 1.0 + (level * 0.1);
