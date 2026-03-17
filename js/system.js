@@ -679,14 +679,19 @@ Gacha: {
             }, 1500);
         },
 
-        // 🎁 5. 실제 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
+       // 🎁 5. 실제 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
         _revealResults(type, times, results, anim, resBox, closeBtn) {
             GameState.save();
+            
+            // 👇 [무적의 안전장치 1] 결과 화면이 나오는 순간 무조건 천장 게이지부터 쫙 채웁니다!
+            if (window.UIManager && typeof UIManager.updateGachaPityUI === 'function') {
+                UIManager.updateGachaPityUI();
+            }
             
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_reveal(); 
             if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
             
-            anim.classList.add('hidden'); 
+            anim.classList.add('hidden');
             resBox.classList.remove('hidden'); 
 
             document.getElementById('gacha-title').innerHTML = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
@@ -742,21 +747,23 @@ Gacha: {
         },
         
       closeGacha() { 
-            AudioEngine.sfx.click(); 
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click(); 
             document.getElementById('gacha-overlay').classList.remove('active'); 
             document.getElementById('bottom-nav').style.display = 'flex'; 
             
             if(window.UIManager) {
                 if(UIManager.renderInventory) UIManager.renderInventory();
                 if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
-                UIManager.updateRpgLobbyUI(); 
+                if(UIManager.updateRpgLobbyUI) UIManager.updateRpgLobbyUI(); 
                 
-                // 👇 [바로 여기 추가!] 가챠 창을 닫고 상점으로 돌아올 때, 천장 게이지를 즉시 최신화합니다!
-                if(UIManager.updateGachaPityUI) UIManager.updateGachaPityUI();
+                // 👇 [무적의 안전장치 2] 창이 닫힐 때 상점 뒤에 있는 게이지도 강제 새로고침!
+                if(typeof UIManager.updateGachaPityUI === 'function') {
+                    UIManager.updateGachaPityUI();
+                }
             }
         }, // 👈 1. 기존 closeGacha 끝나는 괄호 뒤에 콤마(,)를 꼭 찍어주세요!
 
-        // 👇 2. 여기서부터 아래로 천장 관련 함수 4개를 통째로 붙여넣습니다!
+      
         
         // 🌟 [천장] 200뽑 랜덤 신화 수령
         claimPity200(type) {
