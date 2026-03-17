@@ -619,10 +619,12 @@ const UIManager = {
                 const prefix = isPartner ? '★' : 'Lv.';
                 const levelColor = isPartner ? 'text-pink-200' : 'text-white';
                 
-              // 💡 [수정 완료] 브라우저 속도 차이로 인한 충돌을 막기 위해 setTimeout 타이머 장착!
+             // 💡 [수정] 장비(isPartner가 아닐 때)도 img 속성을 바라보도록 추가!
                 const iconHtml = isPartner 
                     ? `<img src="assets/partners/${item.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-2" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`
-                    : `<div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`;
+                    : (item.img 
+                        ? `<img src="assets/items/${item.img}" class="w-10 h-10 object-contain filter drop-shadow-md mb-2" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>` 
+                        : `<div class="text-4xl filter drop-shadow-md mb-2">${item.emoji}</div>`);
 
                 el.className = `w-[72px] h-[72px] rounded-xl flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass} overflow-hidden`;
                 el.innerHTML = `
@@ -965,12 +967,15 @@ updateProfileEquipmentSlots() {
             if (item.eva) effectText += `<span class="text-[9px] text-teal-400 font-bold leading-none whitespace-nowrap tracking-tighter">회피 +${(item.eva * upgMult).toFixed(1)}%</span>`;
             if (item.def) effectText += `<span class="text-[9px] text-blue-400 font-bold leading-none whitespace-nowrap tracking-tighter">방어 +${Math.floor(item.def * upgMult)}</span>`;
             
-            // 💡 [핵심] 카드 정렬을 윗부분(justify-start)으로 맞추고 스탯을 아래로(mt-auto) 밀어내서 깔끔하게!
+          // 💡 [수정] 이모지 대신 이미지를 먼저 부르고, 실패하면 이모지 띄우기!
+            const iconHtml = item.img 
+                ? `<img src="assets/items/${item.img}" class="w-10 h-10 object-contain filter drop-shadow-md mb-1 mt-1 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>`
+                : `<div class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>`;
+
             const card = `
-                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[120px] w-full">
+                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[120px] w-full hover:scale-105 transition-all">
                     ${badgeHTML}
-                    <div class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>
-                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${item.name}</h4>
+                    ${iconHtml} <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${item.name}</h4>
                     <div class="flex flex-col items-center gap-[3px] w-full mt-auto">
                         ${effectText}
                     </div>
