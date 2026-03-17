@@ -1273,12 +1273,11 @@ Ranking: {
 // system.js 안의 GameSystem 객체 내부 (Chat이나 Ranking 아래쪽에 추가!)
 
  Mail: {
-        globalMails: [],   // 전체 공지 우편함
-        personalMails: [], // 내 전용 1:1 우편함
+        globalMails: [],   
+        personalMails: [], 
         unsubGlobal: null,
         unsubPersonal: null,
 
-        // 💡 [핵심] 두 우편함을 하나로 합치고 시간순으로 예쁘게 정렬해주는 마법의 가방!
         get mailList() {
             const combined = [...this.globalMails, ...this.personalMails];
             return combined.sort((a, b) => {
@@ -1289,10 +1288,8 @@ Ranking: {
         },
 
         init() {
-            // 닉네임 설정이 안 되어있으면 개인 우편을 받을 수 없으니 방어막 설치!
             if (!window.db || !GameState.nickname || GameState.nickname === "위대한 길드장") return;
 
-            // 📢 1. 전체 공지 우편함 수신기 (기존)
             const qGlobal = window.query(window.collection(window.db, "mails"), window.orderBy("timestamp", "desc"), window.limit(20));
             this.unsubGlobal = window.onSnapshot(qGlobal, (snapshot) => {
                 this.globalMails = [];
@@ -1304,16 +1301,13 @@ Ranking: {
                 this.checkAndRender();
             });
 
-            // 💌 2. 개인 1:1 우편함 수신기 (신규 탑재!)
-            // 경로: users -> 내 닉네임 -> mailbox 폴더를 감시합니다.
             const qPersonal = window.query(window.collection(window.db, "users", GameState.nickname, "mailbox"), window.orderBy("timestamp", "desc"), window.limit(10));
             this.unsubPersonal = window.onSnapshot(qPersonal, (snapshot) => {
                 this.personalMails = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // 전체 우편과 ID가 겹치지 않게 'p_' 꼬리표를 달아줍니다.
                     data.id = "p_" + doc.id; 
-                    data.isPersonal = true; // 개인 우편임을 알리는 뱃지용
+                    data.isPersonal = true; 
                     this.personalMails.push(data);
                 });
                 this.checkAndRender();
@@ -1324,19 +1318,16 @@ Ranking: {
             let hasUnread = false;
             if (!GameState.claimedMails) GameState.claimedMails = [];
 
-            // 안 읽은 편지가 하나라도 있는지 검사!
             this.mailList.forEach(mail => {
                 if (!GameState.claimedMails.includes(mail.id)) hasUnread = true;
             });
 
-            // 빨간 점 컨트롤
             const notiDot = document.getElementById('mail-noti-dot');
             if (notiDot) {
                 if (hasUnread) notiDot.classList.remove('hidden');
                 else notiDot.classList.add('hidden');
             }
 
-            // 우편함을 보고 있는 중이라면 실시간 새로고침
             const modal = document.getElementById('mailbox-modal');
             if (modal && modal.classList.contains('active')) {
                 this.renderMailList();
@@ -1359,14 +1350,32 @@ Ranking: {
                 if (!GameState.claimedMails) GameState.claimedMails = [];
                 const isClaimed = GameState.claimedMails.includes(mail.id);
                 
-                // 보상 딱지
+                // 🎁 보상 뱃지 렌더링 (재화 + 아이템 + 파트너 + 치장품 모두 지원!)
                 let rewardHtml = '';
-                if (mail.gold) rewardHtml += `<span class="text-yellow-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">🪙 ${mail.gold.toLocaleString()}</span>`;
-                if (mail.gem) rewardHtml += `<span class="text-cyan-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">💎 ${mail.gem.toLocaleString()}</span>`;
+                if (mail.gold) rewardHtml += `<span class="text-yellow-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">🪙 ${mail.gold.toLocaleString()}</span>`;
+                if (mail.gem) rewardHtml += `<span class="text-cyan-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">💎 ${mail.gem.toLocaleString()}</span>`;
+                
+                if (mail.item && window.GameData && GameData.items[mail.item]) {
+                    const it = GameData.items[mail.item];
+                    rewardHtml += `<span class="text-purple-300 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">${it.emoji} ${it.name}</span>`;
+                }
+                if (mail.partner && window.GameData && GameData.partners[mail.partner]) {
+                    const pt = GameData.partners[mail.partner];
+                    rewardHtml += `<span class="text-pink-300 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">🌸 ${pt.name}</span>`;
+                }
+                if (mail.cosmetic && window.GameData && GameData.cosmetics) {
+                    let cosName = '치장품'; let cosEmoji = '🎁';
+                    ['profiles', 'borders', 'backgrounds', 'bubbles', 'titles'].forEach(cat => {
+                        if(GameData.cosmetics[cat]) {
+                            const found = GameData.cosmetics[cat].find(c => c.id === mail.cosmetic);
+                            if(found) { cosName = found.name; if(found.icon) cosEmoji = found.icon; else if(cat==='titles') cosEmoji='✨'; }
+                        }
+                    });
+                    rewardHtml += `<span class="text-indigo-300 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm mt-1 whitespace-nowrap">${cosEmoji} ${cosName}</span>`;
+                }
                 
                 const dateStr = mail.timestamp ? new Date(mail.timestamp.toMillis()).toLocaleDateString() : '방금 전';
 
-                // 개인 우편 전용 특별 뱃지! 🌸
                 const personalBadge = mail.isPersonal 
                     ? `<span class="text-[9px] bg-pink-600/80 text-white px-1.5 py-0.5 rounded border border-pink-400 shadow-sm ml-1 mb-0.5 animate-pulse">개인 우편</span>` 
                     : '';
@@ -1375,7 +1384,6 @@ Ranking: {
                     ? `<button disabled class="px-4 py-2.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded-xl border border-slate-700 w-full mt-2 cursor-not-allowed transition-all">수령 완료</button>`
                     : `<button onclick="GameSystem.Mail.claimReward('${mail.id}')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[11px] font-black rounded-xl border border-emerald-400 w-full mt-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] animate-pulse active:scale-95 transition-all">보상 받기</button>`;
 
-                // 개인 우편이면 테두리를 핑크색으로 예쁘게 바꿔줍니다!
                 container.innerHTML += `
                     <div class="glass-card p-4 border ${isClaimed ? 'border-slate-700/50 bg-slate-900/40 opacity-70' : (mail.isPersonal ? 'border-pink-500/50 bg-slate-800/80' : 'border-emerald-500/50 bg-slate-800/80')} flex flex-col gap-1 transition-all">
                         <div class="flex justify-between items-start mb-1.5">
@@ -1383,13 +1391,35 @@ Ranking: {
                             <span class="text-[9px] text-slate-400 font-bold">${dateStr}</span>
                         </div>
                         <p class="text-[11px] text-slate-300 leading-snug break-keep mb-3 whitespace-pre-wrap">${mail.content || '보상이 도착했습니다.'}</p>
-                        <div class="flex items-center gap-1.5 mb-1">
+                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
                             ${rewardHtml}
                         </div>
                         ${btnHtml}
                     </div>
                 `;
             });
+        },
+
+        // 🌟 수령 시 인벤토리에 꽂아주는 핵심 로직!
+        _processMailReward(mail) {
+            if (mail.gold) GameState.gold += Number(mail.gold);
+            if (mail.gem) GameState.gem += Number(mail.gem);
+            
+            if (mail.item) GameState.inventory.push(mail.item);
+            
+            if (mail.partner) {
+                GameState.ownedPartners.push(mail.partner);
+                if (GameState.partnerLevels[mail.partner] === undefined) GameState.partnerLevels[mail.partner] = 0;
+                if (GameState.partnerAffectionExp[mail.partner] === undefined) GameState.partnerAffectionExp[mail.partner] = 0;
+                if (GameState.partnerAffectionLevel[mail.partner] === undefined) GameState.partnerAffectionLevel[mail.partner] = 1;
+            }
+            
+            if (mail.cosmetic) {
+                if (!GameState.ownedCosmetics) GameState.ownedCosmetics = [];
+                if (!GameState.ownedCosmetics.includes(mail.cosmetic)) {
+                    GameState.ownedCosmetics.push(mail.cosmetic);
+                }
+            }
         },
 
         claimReward(mailId) {
@@ -1399,8 +1429,7 @@ Ranking: {
             const mail = this.mailList.find(m => m.id === mailId);
             if (!mail) return;
 
-            if (mail.gold) GameState.gold += Number(mail.gold);
-            if (mail.gem) GameState.gem += Number(mail.gem);
+            this._processMailReward(mail); // 👈 분리해 둔 보상 처리 함수 호출
 
             GameState.claimedMails.push(mailId);
             GameState.save();
@@ -1408,9 +1437,9 @@ Ranking: {
             if (window.UIManager) {
                 UIManager.updateCurrencyUI();
                 if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
-                UIManager.showToast(`🎁 우편 보상을 수령했습니다!`);
+                UIManager.showToast(`🎁 우편 보상을 수령했습니다! 인벤토리를 확인하세요.`);
             }
-            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
 
             this.checkAndRender();
         },
@@ -1418,13 +1447,10 @@ Ranking: {
         claimAll() {
             if (!GameState.claimedMails) GameState.claimedMails = [];
             let claimedCount = 0;
-            let totalGold = 0;
-            let totalGem = 0;
 
             this.mailList.forEach(mail => {
                 if (!GameState.claimedMails.includes(mail.id)) {
-                    if (mail.gold) totalGold += Number(mail.gold);
-                    if (mail.gem) totalGem += Number(mail.gem);
+                    this._processMailReward(mail);
                     GameState.claimedMails.push(mail.id);
                     claimedCount++;
                 }
@@ -1434,16 +1460,14 @@ Ranking: {
                 return UIManager.showToast("새로 받을 보상이 없습니다. 📭");
             }
 
-            GameState.gold += totalGold;
-            GameState.gem += totalGem;
             GameState.save();
 
             if (window.UIManager) {
                 UIManager.updateCurrencyUI();
                 if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
-                UIManager.showToast(`🎁 한 번에 수령 완료! (🪙 +${totalGold} / 💎 +${totalGem})`);
+                UIManager.showToast(`🎁 ${claimedCount}개의 우편을 한 번에 수령했습니다!`);
             }
-            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
 
             this.checkAndRender();
         }
