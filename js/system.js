@@ -580,7 +580,7 @@ Gacha: {
                         const guide = document.getElementById('mythic-cutin-guide');
                         if(illus) illus.style.opacity = '1'; // Prominent illustration (fancy fade via transition-opacity)
                         if(guide) guide.style.opacity = '1';
-                    }, 500);
+                    }, 2000);
 
                     // 💡 [수정 사항 2번] 아무대나 클릭하면 진짜 카드 공개 로직 실행 (Addresses Change 2)
                     // gacha-overlay는 이미 활성화되어 있으므로 여기에 리스너를 답니다.
