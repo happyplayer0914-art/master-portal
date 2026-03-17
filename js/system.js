@@ -554,88 +554,101 @@ Gacha: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-            // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
+        // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
             setTimeout(() => {
-                const mythicPartner = type === 'partner' ? results.find(r => r.rarity === 'mythic') : null;
+                // 💡 [수정 1] find(1개만 찾기) 대신 filter(전부 다 찾기)를 사용합니다!
+                const mythics = type === 'partner' ? results.filter(r => r.rarity === 'mythic') : [];
                 
-                if (mythicPartner) {
-                    if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
-                    if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
-                    
+                // 신화가 1개 이상 있다면 연출 시작!
+                if (mythics.length > 0) {
                     anim.classList.add('hidden'); 
                     resBox.classList.remove('hidden'); 
-                    
-                    // 💡 [수정] 박스를 크게 만들고 잘림(overflow-hidden) 방지!
                     resBox.className = "w-full max-w-md flex flex-col justify-center items-center min-h-[400px] relative"; 
-                    resBox.innerHTML = ''; 
-
-          // 💡 [수정] HTML 구조 재설계 (코멘트와 일러스트 분리)
-                    const cutinHTML = `
-                        <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
-                            <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${mythicPartner.flavorText.replace(/\\n/g, '\n')}"</h2>
-                            <p class="text-[11px] sm:text-xs text-white/80 font-bold tracking-widest">- ${mythicPartner.name} -</p>
-                        </div>
+                    
+                    // 💡 [수정 2] 여러 명의 신화를 차례대로 보여주기 위한 릴레이 함수(재귀 함수) 생성!
+                    const playMythicAnimation = (index) => {
+                        const currentMythic = mythics[index]; // 이번 순서의 신화 파트너
                         
-                        <img id="mythic-cutin-illus" src="assets/partners/${mythicPartner.img_full}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
+                        if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
                         
-                        <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
-                    `;
-                    resBox.innerHTML = cutinHTML;
+                        // HTML 구조 리셋 및 세팅
+                        const cutinHTML = `
+                            <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
+                                <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${currentMythic.flavorText.replace(/\\n/g, '\n')}"</h2>
+                                <p class="text-[11px] sm:text-xs text-white/80 font-bold tracking-widest">- ${currentMythic.name} -</p>
+                            </div>
+                            
+                            <img id="mythic-cutin-illus" src="assets/partners/${currentMythic.img_full}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
+                            
+                            <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
+                        `;
+                        resBox.innerHTML = cutinHTML;
 
-                    // ➡️ 1단계: 코멘트 먼저 등장!
-                    setTimeout(() => {
-                        const textBox = document.getElementById('mythic-cutin-text');
-                        if(textBox) {
-                            textBox.style.opacity = '1';
-                            textBox.style.transform = 'scale(1)';
-                        }
-                    }, 100);
-
-                    // ➡️ 2단계: 2초 후 코멘트 퇴장 & 일러스트 웅장하게 등장!
-                    setTimeout(() => {
-                        const textBox = document.getElementById('mythic-cutin-text');
-                        if(textBox) {
-                            textBox.style.opacity = '0'; // 코멘트 스르륵 사라짐
-                            textBox.style.transform = 'scale(0.9)';
-                        }
-
+                        // ➡️ 1단계: 코멘트 먼저 등장!
                         setTimeout(() => {
-                            const illus = document.getElementById('mythic-cutin-illus');
-                            const guide = document.getElementById('mythic-cutin-guide');
-                            
-                            if(illus) {
-                                illus.style.opacity = '1'; // 일러스트 짠!
-                                illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; // 포커싱
-                                illus.style.filter = 'blur(0px)'; // 선명하게
+                            const textBox = document.getElementById('mythic-cutin-text');
+                            if(textBox) {
+                                textBox.style.opacity = '1';
+                                textBox.style.transform = 'scale(1)';
                             }
-                            
-                            // 👉 수정 2: 일러스트가 등장하고 1.5초 뒤에 가이드 텍스트 나타나게 딜레이 추가!
+                        }, 100);
+
+                        // ➡️ 2단계: 2초 후 코멘트 퇴장 & 일러스트 웅장하게 등장!
+                        setTimeout(() => {
+                            const textBox = document.getElementById('mythic-cutin-text');
+                            if(textBox) {
+                                textBox.style.opacity = '0'; 
+                                textBox.style.transform = 'scale(0.9)';
+                            }
+
                             setTimeout(() => {
-                                if(guide) guide.classList.remove('hidden'); 
-                            }, 1500);
-
-                            // ➡️ 3단계: 클릭 시 결과 공개!
-                            const overlay = document.getElementById('gacha-overlay');
-                            const handleCutinClick = (e) => {
-                                e.stopPropagation(); 
-                                overlay.removeEventListener('click', handleCutinClick); 
-
-                                if(typeof AudioEngine !== 'undefined' && AudioEngine.sfx) AudioEngine.sfx.click();
+                                const illus = document.getElementById('mythic-cutin-illus');
+                                const guide = document.getElementById('mythic-cutin-guide');
                                 
-                                if(illus) illus.style.opacity = '0';
-                                if(guide) guide.classList.add('hidden'); // 클릭하면 다시 숨김
-
-                                // 0.4초 후 최종 카드 공개
+                                if(illus) {
+                                    illus.style.opacity = '1'; 
+                                    illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; 
+                                    illus.style.filter = 'blur(0px)'; 
+                                }
+                                
                                 setTimeout(() => {
-                                    this._revealResults(type, times, results, anim, resBox, closeBtn);
-                                }, 400);
-                            };
-                            
-                            overlay.addEventListener('click', handleCutinClick); 
-                        }, 400); // 코멘트 사라질 시간 잠시 대기
-                    }, 2000); // 코멘트 읽을 시간 2초 보장
+                                    if(guide) guide.classList.remove('hidden'); 
+                                }, 1500);
+
+                                // ➡️ 3단계: 클릭 시 다음 신화가 있는지 확인!
+                                const overlay = document.getElementById('gacha-overlay');
+                                const handleCutinClick = (e) => {
+                                    e.stopPropagation(); 
+                                    overlay.removeEventListener('click', handleCutinClick); 
+
+                                    if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+                                    
+                                    if(illus) illus.style.opacity = '0';
+                                    if(guide) guide.classList.add('hidden'); 
+
+                                    // 💡 [수정 3] 0.4초 후 다음 신화 연출을 틀어줄지, 최종 결과창을 띄울지 결정!
+                                    setTimeout(() => {
+                                        if (index + 1 < mythics.length) {
+                                            // 아직 보여줄 신화가 남았다면 다음 타자 등판!
+                                            playMythicAnimation(index + 1);
+                                        } else {
+                                            // 모든 신화 연출이 끝났다면 최종 결과창 공개!
+                                            this._revealResults(type, times, results, anim, resBox, closeBtn);
+                                        }
+                                    }, 400); 
+                                };
+                                
+                                overlay.addEventListener('click', handleCutinClick); 
+                            }, 400); 
+                        }, 2000); 
+                    };
+
+                    // 🚀 릴레이 함수 시작! (0번째 신화부터 재생)
+                    playMythicAnimation(0);
 
                 } else {
+                    // 신화가 하나도 없으면 그냥 기존처럼 결과창 띄우기
                     this._revealResults(type, times, results, anim, resBox, closeBtn);
                 }
             }, 1500);
