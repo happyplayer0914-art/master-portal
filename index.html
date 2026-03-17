@@ -1383,13 +1383,18 @@
         </div>
     </div>
 </div>
+   <button onclick="if(GameState.nickname === '위대한 길드장' || GameState.nickname === 'GM 마스터') document.getElementById('gm-mail-modal').classList.replace('hidden', 'flex'); else alert('일반 유저는 접근 불가!');" 
+            class="fixed bottom-2 left-2 z-[9000] opacity-20 hover:opacity-100 text-xl transition-opacity">
+        👑
+    </button>
+
     <div id="gm-mail-modal" class="fixed inset-0 bg-black/80 z-[9999] hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-900 border-2 border-pink-500 rounded-2xl p-5 w-full max-w-sm flex flex-col gap-3 shadow-[0_0_40px_rgba(236,72,153,0.4)]">
             <h2 class="text-pink-400 font-black text-xl text-center mb-1 drop-shadow-md">👑 GM 전체 우편 발송기 👑</h2>
             <p class="text-slate-400 text-xs text-center mb-3">모든 유저의 우편함으로 즉시 발송됩니다.</p>
             
             <input id="gm-title" type="text" placeholder="제목 (예: 런칭 기념 깜짝 선물!)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-pink-500 font-bold">
-            <textarea id="gm-content" placeholder="우편 내용 (줄바꿈 가능)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-pink-500 h-24 resize-none custom-scrollbar"></textarea>
+            <textarea id="gm-content" placeholder="우편 내용 (줄바꿈 가능)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-pink-500 h-24 resize-none"></textarea>
             
             <div class="flex gap-2">
                 <input id="gm-gold" type="number" placeholder="골드 🪙" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white w-1/2 text-center font-bold">
