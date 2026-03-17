@@ -632,8 +632,7 @@ const UIManager = {
         }
     },
     // 🌟 [신규] 차원의 여신(환생) 모달 열기 및 보상 계산!
-    openGoddessModal() {
-        // 1. 100층 미만이면 컷! (길드장님이 설정하신 층수가 있다면 거기에 맞춰주세요)
+   openGoddessModal() {
         if (GameState.rpgStage < 100) {
             this.showToast("100층의 심연의 군주를 토벌해야 차원의 여신을 만날 수 있습니다! 👑");
             return;
@@ -642,18 +641,17 @@ const UIManager = {
         if(AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
         this.triggerHaptic();
 
-        // 2. 보상 계산 로직 (예: 층수 * 50 젬, 층수 * 1000 골드)
-        // 💡 주의: GameSystem.Battle.doPrestige() 안에 있는 실제 지급 로직과 수식을 똑같이 맞춰주시면 됩니다!
-        const gemReward = GameState.rpgStage * 10; 
-        const goldReward = GameState.rpgStage * 30;
+        // 🌟 [핵심] 이번에 달성할 환생 횟수를 계산해서 보상에 곱해줍니다!
+        // (예: 현재 0환생이면 이번엔 1환생 몫(1배), 1환생이면 이번엔 2환생 몫(2배))
+        const nextPrestige = (GameState.prestigeCount || 0) + 1;
+        const gemReward = GameState.rpgStage * 10 * nextPrestige; 
+        const goldReward = GameState.rpgStage * 30 * nextPrestige;
 
-        // 3. 계산된 보상을 화면에 찍어주기
         const gemEl = document.getElementById('goddess-gem-reward');
         const goldEl = document.getElementById('goddess-gold-reward');
         if (gemEl) gemEl.innerText = gemReward.toLocaleString();
         if (goldEl) goldEl.innerText = goldReward.toLocaleString();
 
-        // 4. 모달 짠! 하고 열기
         const modal = document.getElementById('goddess-modal');
         if (modal) modal.classList.remove('hidden');
     },
