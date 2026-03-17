@@ -576,15 +576,21 @@
                 <div class="progress-track h-3"><div id="battle-monster-hp-bar" class="monster-hp-fill" style="width: 100%"></div></div>
             </div>
         </div>
-        <div class="h-10 flex items-center justify-center mb-4">
-            <p id="battle-log" class="text-sm font-bold text-yellow-400 animate-pulse">전투를 준비하세요.</p>
-        </div>
-        <div class="glass-card p-4 mb-4 border border-emerald-500/30 bg-slate-900/80">
-            <div class="flex justify-between text-xs font-bold text-emerald-400 mb-2 px-1">
-                <span>마스터 HP <span id="battle-player-buff-text" class="text-[10px] text-yellow-400 ml-1"></span></span>
-                <span id="battle-player-hp-text">100 / 100</span>
+      <div id="battle-log-container" class="h-[68px] flex flex-col justify-end overflow-hidden mb-3 px-2 text-center text-[11px] sm:text-xs font-bold" style="mask-image: linear-gradient(to bottom, transparent 0%, black 40%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%);">
             </div>
-            <div class="progress-track h-4"><div id="battle-player-hp-bar" class="hp-fill" style="width: 100%"></div></div>
+
+        <div class="flex gap-3 mb-4 items-center w-full">
+            <div id="battle-partner-slot" class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-slate-600 bg-slate-800/80 flex items-center justify-center relative flex-shrink-0 transition-transform duration-200 shadow-md">
+                <span class="text-[10px] text-slate-500 font-bold">대기중</span>
+            </div>
+            
+            <div class="glass-card p-3 border border-emerald-500/30 bg-slate-900/80 flex-1 shadow-md">
+                <div class="flex justify-between text-[11px] sm:text-xs font-bold text-emerald-400 mb-1.5 px-1">
+                    <span>마스터 HP</span>
+                    <span id="battle-player-hp-text">100 / 100</span>
+                </div>
+                <div class="progress-track h-3"><div id="battle-player-hp-bar" class="hp-fill" style="width: 100%"></div></div>
+            </div>
         </div>
         <div class="grid grid-cols-3 gap-3">
             <button id="btn-attack" onclick="GameSystem.Battle.playerAttack()" class="col-span-2 py-6 bg-slate-800 border border-slate-500 rounded-2xl font-black text-xl shadow-[0_6px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[6px] disabled:opacity-50">⚔️ 공격 (TAP!)</button>
