@@ -876,16 +876,18 @@ const UIManager = {
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
     },
 
-updateProfileEquipmentSlots() {
+// ui.js - UIManager 내부
+    updateProfileEquipmentSlots() {
         // 🚨 장비 3개와 파트너 1개까지 총 4개의 슬롯을 배열로 묶어서 한방에 처리합니다!
+        // 💡 [수정] 빈칸일 때 올바른 글씨를 출력하기 위해 subType 이라는 꼬리표를 추가했어요!
         const types = [
-            { id: GameState.equippedWeapon, el: document.getElementById('profile-slot-weapon'), type: 'gear' },
-            { id: GameState.equippedArmor, el: document.getElementById('profile-slot-armor'), type: 'gear' },
-            { id: GameState.equippedAccessory, el: document.getElementById('profile-slot-accessory'), type: 'gear' },
-            { id: GameState.equippedPartner, el: document.getElementById('profile-slot-partner'), type: 'partner' }
+            { id: GameState.equippedWeapon, el: document.getElementById('profile-slot-weapon'), type: 'gear', subType: 'weapon' },
+            { id: GameState.equippedArmor, el: document.getElementById('profile-slot-armor'), type: 'gear', subType: 'armor' },
+            { id: GameState.equippedAccessory, el: document.getElementById('profile-slot-accessory'), type: 'gear', subType: 'accessory' },
+            { id: GameState.equippedPartner, el: document.getElementById('profile-slot-partner'), type: 'partner', subType: 'partner' }
         ];
 
-        types.forEach(({id: itemId, el, type}) => {
+        types.forEach(({id: itemId, el, type, subType}) => {
             if (!el) return;
             
             // 장착된 아이템(장비 or 파트너)이 데이터에 존재하는지 확인
@@ -923,7 +925,8 @@ updateProfileEquipmentSlots() {
                 
             } else {
                 // 장착 해제되어 비어있는 슬롯 그리기
-                const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : type === 'accessory' ? '장신구' : '파트너';
+                // 👇 [핵심 수정] type 대신 subType으로 이름을 찾아줍니다! 이제 무기/방어구/장신구가 정상적으로 떠요!
+                const typeName = subType === 'weapon' ? '무기' : subType === 'armor' ? '방어구' : subType === 'accessory' ? '장신구' : '파트너';
                 el.className = `aspect-square rounded-lg border ${type === 'partner' ? 'border-pink-500/30 bg-pink-900/20 text-pink-400' : 'border-slate-600 bg-slate-800 text-slate-500'} flex flex-col items-center justify-center relative opacity-50`;
                 el.innerHTML = `<span class="text-[8px] font-bold">${typeName}</span>`;
                 el.onclick = null;
