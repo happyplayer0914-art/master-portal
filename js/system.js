@@ -611,7 +611,85 @@ upgradeStat(t) {
                 }
             }
         },// <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
-        
+        // system.js 안의 GameSystem 객체 내부 (아무 곳이나 콤마로 연결해서 넣으면 돼!)
+
+    Maintenance: {
+        run() {
+            // 🚨 [운영자 세팅] 삭제할 아이템 ID와 보상(젬)을 여기에 적어둡니다!
+            // 예시: 'mythic_entj_w' 무기를 지우고 개당 5000젬으로 환산해줌.
+            const deprecatedItems = {
+                // '아이템_또는_파트너_ID': 지급할_젬_수량
+                'pt_m1': 5000
+            };
+
+            let totalCompensationGem = 0;
+            let isChanged = false;
+
+            // 1. 장착 중인 템 검사 후 강제 해제 (안 빼면 에러 남!)
+            const equipSlots = ['equippedWeapon', 'equippedArmor', 'equippedAccessory', 'equippedPartner'];
+            equipSlots.forEach(slot => {
+                const id = GameState[slot];
+                if (id && deprecatedItems[id]) {
+                    GameState[slot] = null; // 장착 해제!
+                    isChanged = true;
+                }
+            });
+
+            // 2. 인벤토리 (장비) 검사 및 압수
+            if (GameState.inventory) {
+                const newInventory = [];
+                GameState.inventory.forEach(id => {
+                    if (deprecatedItems[id]) {
+                        totalCompensationGem += deprecatedItems[id]; // 보상 누적
+                        isChanged = true;
+                    } else {
+                        newInventory.push(id); // 정상 아이템만 새 가방에 넣기
+                    }
+                });
+                GameState.inventory = newInventory;
+            }
+
+            // 3. 파트너 인벤토리 검사 및 압수
+            if (GameState.ownedPartners) {
+                const newPartners = [];
+                GameState.ownedPartners.forEach(id => {
+                    if (deprecatedItems[id]) {
+                        totalCompensationGem += deprecatedItems[id];
+                        isChanged = true;
+                        
+                        // 찌꺼기 데이터(레벨, 호감도)도 깔끔하게 청소!
+                        delete GameState.partnerLevels[id];
+                        delete GameState.partnerAffectionExp[id];
+                        delete GameState.partnerAffectionLevel[id];
+                    } else {
+                        newPartners.push(id);
+                    }
+                });
+                GameState.ownedPartners = newPartners;
+            }
+
+            // 4. 회수한 템이 있다면 보상 지급 및 알림 띄우기!
+            if (isChanged && totalCompensationGem > 0) {
+                GameState.gem += totalCompensationGem;
+                GameState.save();
+                
+                // 화면이 다 그려진 후(2초 뒤)에 극적으로 알림창 띄우기
+                setTimeout(() => {
+                    if (window.UIManager) {
+                        UIManager.updateCurrencyUI();
+                        UIManager.updateRpgLobbyUI();
+                        UIManager.renderInventory();
+                        UIManager.renderPartnerInventory();
+                        UIManager.showToast(`🚨 [시스템] 단종된 아이템이 회수되고 보상 ${totalCompensationGem}💎가 지급되었습니다.`);
+                    }
+                    if (window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+                    
+                    // 유저가 확실히 알 수 있게 경고창 팝업!
+                    alert(`[시스템 안내]\n보유 중이던 일부 아이템이 밸런스 문제로 단종되어 인벤토리에서 회수되었습니다.\n\n🎁 보상: ${totalCompensationGem} 젬이 지급되었습니다!`);
+                }, 2000);
+            }
+        }
+    },
 Gacha: {
         // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
         performGacha(times, type = 'gear') {
@@ -3011,11 +3089,13 @@ window.onRewardEarned = function() {
     window.currentAdAction = ''; 
 };
 
-// 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
+// 게임 시작 후 2초 뒤에 각종 수신기 & 점검 엔진 자동 가동!
 setTimeout(() => { 
     if (window.db && GameSystem.Chat) GameSystem.Chat.init(); 
-    // 👇 이 줄을 추가해줘!
     if (window.db && GameSystem.Mail) GameSystem.Mail.init(); 
+    
+    // 👇 이 줄을 추가해줘! 접속 시 단종 아이템 싹 스캔!
+    if (window.GameSystem && GameSystem.Maintenance) GameSystem.Maintenance.run();
 }, 2000);
 
 // 🌟 [초거대 글로벌 프리로더 엔진] - 몬스터, 배경 싹쓸이 캐싱 (가비지 컬렉터 방어 탑재!)
