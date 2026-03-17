@@ -525,19 +525,22 @@ upgradeStat(t) {
                 document.getElementById('gacha-title').innerText = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
                 resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
                 
-                results.forEach((item, index) => {
+      results.forEach((item, index) => {
                     setTimeout(() => {
                         let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
                         let colorClass = item.rarity === 'mythic' ? "text-red-400 font-extrabold animate-pulse" : (item.color || "text-gray-300");
                         
-                        // 💡 파트너 중복 텍스트 추가
                         let dupText = item.isDup ? `<div class="absolute -top-2 -right-2 bg-pink-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-md z-20">조각 변환</div>` : '';
                         
+                        // 💡 [수정됨] 파트너 뽑기일 때만 SD 이미지를 부르도록 분기 처리!
+                        let iconHtml = type === 'partner' 
+                            ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
+                            : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`;
+
                         const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative">
                             ${dupText}
                             <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
-                            <div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>
-                            <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
+                            ${iconHtml} <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
                         </div>`;
                         
                         resBox.insertAdjacentHTML('beforeend', cardHtml);
