@@ -593,16 +593,20 @@ Gacha: {
                             textBox.style.transform = 'scale(0.9)';
                         }
 
-                        setTimeout(() => {
+                      setTimeout(() => {
                             const illus = document.getElementById('mythic-cutin-illus');
-                            const guide = document.getElementById('mythic-cutin-guide');
                             
                             if(illus) {
-                                illus.style.opacity = '1'; // 일러스트 짠!
-                                illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; // 포커싱
-                                illus.style.filter = 'blur(0px)'; // 선명하게
+                                illus.style.opacity = '1'; // 일러스트 짠! (서서히 페이드인 시작)
+                                illus.style.transform = 'translate(-50%, -50%) scale(1.0)';
+                                illus.style.filter = 'blur(0px)';
                             }
-                            if(guide) guide.style.opacity = '1'; // 클릭 유도 등장
+
+                            // 💡 [수정] 클릭 가이드는 일러스트가 다 나오고(1초 뒤) 나타나도록 딜레이 추가!
+                            setTimeout(() => {
+                                const guide = document.getElementById('mythic-cutin-guide');
+                                if(guide) guide.style.opacity = '1'; 
+                            }, 1000);
 
                             // ➡️ 3단계: 클릭 시 결과 공개!
                             const overlay = document.getElementById('gacha-overlay');
@@ -645,9 +649,12 @@ Gacha: {
             document.getElementById('gacha-title').innerHTML = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
             document.getElementById('gacha-title').className = "text-center text-xl sm:text-2xl font-black text-white drop-shadow-md"; 
             
+           // Standard layout restore (times=1 or times=10)
+            // mt-4를 mt-10으로 변경하여 제목과의 간격을 대폭 띄웁니다!
             resBox.className = times === 1 
-                ? "w-full max-w-xs grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pb-6" 
-                : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
+                ? "w-full max-w-xs grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pb-6 mt-10" 
+                : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar mt-10";
+                
             resBox.innerHTML = ''; 
 
             results.forEach((item, index) => {
