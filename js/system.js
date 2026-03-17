@@ -523,10 +523,6 @@ Partner: {
             let portalFilter = type === 'partner' ? "hue-rotate-[-45deg]" : "hue-rotate-0";
             let portalMsg = type === 'partner' ? "차원의 문 개방 중..." : "소환의식 진행 중...";
             let titleColor = "text-white";
-                
-           let portalGlow = "shadow-[0_0_40px_rgba(59,130,246,0.8)]"; // 기본: 푸른빛
-            let portalFilter = "hue-rotate-0";
-            let portalMsg = "차원의 문 개방 중...";
             
             if (hasMythic) {
                 portalGlow = "shadow-[0_0_80px_rgba(236,72,153,1)]"; // 신화: 강렬한 핑크/레드
