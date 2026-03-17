@@ -455,7 +455,6 @@ Partner: {
     }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
  Gacha: {
-        // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
         performGacha(times, type = 'gear') {
             const cost = type === 'partner' ? times * 100 : times * 50; 
             if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
@@ -471,24 +470,14 @@ Partner: {
             const over = document.getElementById('gacha-overlay'); 
             const resBox = document.getElementById('gacha-results-container'); 
             const anim = document.getElementById('gacha-animation');
+            const closeBtn = document.getElementById('gacha-close-btn');
             
-            over.classList.add('active'); resBox.classList.add('hidden'); resBox.innerHTML = ''; 
+            over.classList.add('active'); 
+            resBox.classList.add('hidden'); resBox.innerHTML = ''; 
             anim.classList.remove('hidden'); 
-            document.getElementById('gacha-close-btn').classList.add('hidden');
+            closeBtn.classList.add('hidden');
             
-            // 🌟 [연출 분기] 파트너 영입과 장비 소환 이펙트 완벽 분리!
-            if (type === 'partner') {
-                document.getElementById('gacha-title').innerText = "🌸 차원의 문 개방 중...";
-                anim.innerHTML = '🌌';
-                anim.className = 'text-9xl mb-8 filter drop-shadow-[0_0_30px_rgba(236,72,153,0.8)] animate-spin'; 
-            } else {
-                document.getElementById('gacha-title').innerText = "소환의식 진행 중...";
-                anim.innerHTML = '🎁';
-                anim.className = 'text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]';
-            }
-            
-            AudioEngine.sfx.gacha_build(); UIManager.triggerHeavyHaptic();
-            
+            // 🎁 1. [핵심] 연출을 위해 어떤 결과가 나올지 미리 계산합니다!
             let results = [];
             for(let i=0; i<times; i++) {
                 const roll = Math.random() * 100; 
@@ -501,24 +490,20 @@ Partner: {
                 else rarity = 'common';                          // 나머지 (일반)
                 
                 if (type === 'partner') {
-                    // 🌸 파트너 뽑기 풀 (일반이 없으므로 rare로 땡겨줌!)
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.partners).filter(it => it.rarity === 'rare');
                     const pt = safePool[Math.floor(Math.random() * safePool.length)];
                     
                     const isDup = GameState.ownedPartners.includes(pt.id);
                     if (isDup) {
-                        // 중복이면 별(레벨) 증가! (최대 10성)
                         GameState.partnerLevels[pt.id] = Math.min((GameState.partnerLevels[pt.id] || 0) + 1, 10);
                         results.push({ ...pt, isDup: true });
                     } else {
-                        // 첫 획득!
                         GameState.ownedPartners.push(pt.id);
                         GameState.partnerLevels[pt.id] = 0;
                         results.push({ ...pt, isDup: false });
                     }
                 } else {
-                    // 🗡️ 장비 뽑기 풀
                     const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
                     const item = safePool[Math.floor(Math.random() * safePool.length)];
@@ -529,50 +514,127 @@ Partner: {
                 }
             }
             GameState.save();
-            
-            setTimeout(() => {
-                AudioEngine.sfx.gacha_reveal(); UIManager.triggerHaptic();
-                anim.classList.add('hidden'); resBox.classList.remove('hidden'); 
-                
-                document.getElementById('gacha-title').innerText = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
-                resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
-                
-      results.forEach((item, index) => {
-                    setTimeout(() => {
-                        let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
-                        let colorClass = item.rarity === 'mythic' ? "text-red-400 font-extrabold animate-pulse" : (item.color || "text-gray-300");
-                        
-                        let dupText = item.isDup ? `<div class="absolute -top-2 -right-2 bg-pink-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-md z-20">조각 변환</div>` : '';
-                        
-                        // 💡 [수정됨] 파트너 뽑기일 때만 SD 이미지를 부르도록 분기 처리!
-                        let iconHtml = type === 'partner' 
-                            ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
-                            : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`;
 
-                        const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative">
-                            ${dupText}
-                            <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
-                            ${iconHtml} <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
-                        </div>`;
-                        
-                        resBox.insertAdjacentHTML('beforeend', cardHtml);
-                        
-                        if(item.rarity === 'mythic' || item.rarity === 'legendary') {
-                            if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
-                        }
-                        if(item.rarity === 'mythic') {
-                            const overlay = document.getElementById('gacha-overlay');
+            // 🎁 2. 최고 등급 판별하여 포탈 색상(스포일러) 결정!
+            let hasMythic = results.some(r => r.rarity === 'mythic');
+            let hasLegendary = results.some(r => r.rarity === 'legendary');
+            
+            let portalGlow = type === 'partner' ? "shadow-[0_0_40px_rgba(236,72,153,0.5)]" : "shadow-[0_0_40px_rgba(251,191,36,0.5)]";
+            let portalFilter = type === 'partner' ? "hue-rotate-[-45deg]" : "hue-rotate-0";
+            let portalMsg = type === 'partner' ? "차원의 문 개방 중..." : "소환의식 진행 중...";
+            let titleColor = "text-white";
+            
+            if (hasMythic) {
+                portalGlow = "shadow-[0_0_80px_rgba(236,72,153,1)]"; // 신화: 강렬한 핑크/레드
+                portalFilter = "hue-rotate-[-45deg] saturate-200";
+                portalMsg = "심연의 틈새가 열립니다...!!";
+                titleColor = "text-pink-400 font-black animate-pulse";
+            } else if (hasLegendary) {
+                portalGlow = "shadow-[0_0_60px_rgba(250,204,21,0.8)]"; // 전설: 황금빛
+                portalFilter = "hue-rotate-[180deg] saturate-150"; 
+                portalMsg = "눈부신 황금빛이 뿜어져 나옵니다!";
+                titleColor = "text-yellow-400 font-black";
+            }
+
+            document.getElementById('gacha-title').innerHTML = `<span class="${titleColor} drop-shadow-md">${portalMsg}</span>`;
+            
+            // 🎁 3. 이모지 대신 고퀄리티 소환 포탈 이미지 렌더링
+            anim.className = 'mb-8 transition-all duration-500 flex justify-center w-full';
+            anim.innerHTML = `
+                <div class="relative w-32 h-32 rounded-full ${portalGlow} animate-[spin_4s_linear_infinite] flex items-center justify-center">
+                    <img src="assets/ui/summon_portal.png" class="w-full h-full object-cover rounded-full filter ${portalFilter}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display:none;" class="w-full h-full rounded-full border-4 border-dashed border-white/50 bg-gradient-to-tr from-transparent to-white/20"></div>
+                </div>
+            `;
+            
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
+            if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+
+            // 🎁 4. 컷인 애니메이션 분기
+            setTimeout(() => {
+                const bestPartner = results.find(r => r.rarity === 'mythic') || results.find(r => r.rarity === 'legendary');
+                
+                // 파트너 뽑기이면서 전설/신화가 떴을 때 '명대사 컷인' 등장!
+                if (type === 'partner' && bestPartner) {
+                    if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
+                    if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+                    
+                    anim.classList.add('hidden'); 
+                    resBox.classList.remove('hidden'); 
+                    resBox.className = "w-full max-w-sm flex justify-center"; // 컷인용으로 잠시 클래스 변경
+                    
+                    resBox.innerHTML = `
+                        <div class="w-full h-48 bg-black/90 flex flex-col items-center justify-center rounded-xl border border-${hasMythic ? 'pink' : 'yellow'}-500 shadow-[inset_0_0_50px_rgba(0,0,0,1)] relative overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+                            <img src="assets/partners/${bestPartner.img_full}" class="absolute w-full h-[200%] object-cover opacity-30 object-top" style="-webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);" onerror="this.style.display='none';">
+                            <div class="z-10 text-center px-4">
+                                <h2 class="text-lg sm:text-xl font-black text-${hasMythic ? 'pink' : 'yellow'}-400 mb-2 drop-shadow-md">"${bestPartner.flavorText}"</h2>
+                                <p class="text-[10px] sm:text-xs text-white/70 font-bold">- ${bestPartner.name} -</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 컷인 2초 대기 후 진짜 카드 공개 함수 호출
+                    setTimeout(() => this._revealResults(type, times, results, anim, resBox, closeBtn), 2000);
+                } else {
+                    // 일반 장비 뽑기거나 고등급이 없으면 1.5초 대기 후 바로 공개
+                    this._revealResults(type, times, results, anim, resBox, closeBtn);
+                }
+            }, 1500);
+        },
+
+        // 🎁 5. 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
+        _revealResults(type, times, results, anim, resBox, closeBtn) {
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_reveal(); 
+            if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+            
+            anim.classList.add('hidden'); 
+            resBox.classList.remove('hidden'); 
+            
+            document.getElementById('gacha-title').innerText = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
+            resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
+            resBox.innerHTML = ''; // 컷인 지우기
+            
+            results.forEach((item, index) => {
+                setTimeout(() => {
+                    let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
+                    let colorClass = item.rarity === 'mythic' ? "text-pink-400 font-extrabold animate-pulse" : item.rarity === 'legendary' ? "text-yellow-400 font-extrabold" : (item.color || "text-gray-300");
+                    
+                    let dupText = item.isDup ? `<div class="absolute -top-2 -right-2 bg-pink-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-md z-20">조각 변환</div>` : '';
+                    
+                    let iconHtml = type === 'partner' 
+                        ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
+                        : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`;
+
+                    // 💡 카드가 popIn 애니메이션과 함께 등장
+                    const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                        ${dupText}
+                        <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
+                        ${iconHtml} <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
+                    </div>`;
+                    
+                    resBox.insertAdjacentHTML('beforeend', cardHtml);
+                    
+                    // 등급에 따라 타격음 및 진동
+                    if(item.rarity === 'mythic' || item.rarity === 'legendary') {
+                        if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+                    } else {
+                        if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.hit_normal();
+                    }
+
+                    if(item.rarity === 'mythic') {
+                        const overlay = document.getElementById('gacha-overlay');
+                        if (overlay) {
                             overlay.classList.add('shake');
                             setTimeout(() => overlay.classList.remove('shake'), 400); 
                         }
-                    }, index * 100); 
-                });
-                
-                // 닫기 버튼 텍스트 변경
-                const closeBtn = document.getElementById('gacha-close-btn');
-                closeBtn.innerText = type === 'partner' ? "명단 확인하기" : "인벤토리에 넣기";
-                setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 100 + 300);
-            }, 1500);
+                    }
+                }, index * 200); // 0.2초마다 순차 공개
+            });
+            
+            closeBtn.innerText = type === 'partner' ? "명단 확인하기" : "인벤토리에 넣기";
+            setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 200 + 300);
         },
         
         closeGacha() { 
@@ -580,7 +642,6 @@ Partner: {
             document.getElementById('gacha-overlay').classList.remove('active'); 
             document.getElementById('bottom-nav').style.display = 'flex'; 
             
-            // 💡 [가챠 끝난 뒤] 변경된 아이템 창 최신화!
             if(window.UIManager) {
                 if(UIManager.renderInventory) UIManager.renderInventory();
                 if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
