@@ -741,7 +741,7 @@ Gacha: {
             setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 200 + 300);
         },
         
-       closeGacha() { 
+      closeGacha() { 
             AudioEngine.sfx.click(); 
             document.getElementById('gacha-overlay').classList.remove('active'); 
             document.getElementById('bottom-nav').style.display = 'flex'; 
@@ -750,6 +750,9 @@ Gacha: {
                 if(UIManager.renderInventory) UIManager.renderInventory();
                 if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
                 UIManager.updateRpgLobbyUI(); 
+                
+                // 👇 [바로 여기 추가!] 가챠 창을 닫고 상점으로 돌아올 때, 천장 게이지를 즉시 최신화합니다!
+                if(UIManager.updateGachaPityUI) UIManager.updateGachaPityUI();
             }
         }, // 👈 1. 기존 closeGacha 끝나는 괄호 뒤에 콤마(,)를 꼭 찍어주세요!
 
