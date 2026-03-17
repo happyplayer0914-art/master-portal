@@ -476,7 +476,7 @@ const UIManager = {
                         }
                     }
                     
-              // 상대방 장비 & 파트너 렌더링 엔진
+         // 상대방 장비 & 파트너 렌더링 엔진
                     const renderTargetSlot = (type, itemId, level) => {
                         const el = document.getElementById(`target-slot-${type}`);
                         if (!el) return;
@@ -499,7 +499,11 @@ const UIManager = {
                                     <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
                                     <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level || 0}</div>
                                 `;
-                                el.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level || 0}] ${pt.skillDesc}`); };
+                                
+                                // 👇 [여기 수정!!] 타 유저 파트너 호감도도 서버에서 땡겨와서 관전 모드로 열어줍니다!
+                                const ptAffLv = (data.partnerAffectionLevel && data.partnerAffectionLevel[itemId]) ? data.partnerAffectionLevel[itemId] : 1;
+                                el.onclick = () => { UIManager.openDetailCard(itemId, 'partner', true, level || 0, ptAffLv); };
+                                
                             } else {
                                 el.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
                                 el.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
@@ -519,25 +523,21 @@ const UIManager = {
                             
                             // 🚨 w-[30%] 제거!
                             el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                            
+                            // 👇 [여기 수정!!] 타 유저 장비 슬롯도 아이콘 렌더링에 일러스트(img) 지원 추가!
+                            const iconHtml = item.img 
+                                ? `<img src="assets/items/${item.img}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl filter drop-shadow-md">${item.emoji}</div>`
+                                : `<div class="text-2xl filter drop-shadow-md">${item.emoji}</div>`;
+
                             el.innerHTML = `
-                                <div class="text-2xl filter drop-shadow-md">${item.emoji}</div>
+                                ${iconHtml}
                                 <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
                                 <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">Lv.${level || 0}</div>
                             `;
-                            el.onclick = () => { 
-                                const upgMult = 1.0 + ((level || 0) * 0.1);
-                                let effectText = "";
-                                if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
-                                if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
-                                if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
-                                if (item.critDmg) effectText += `크리피해 +${(item.critDmg * upgMult).toFixed(1)}%  `;
-                                if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
-                                if (item.eva) effectText += `회피 +${(item.eva * upgMult).toFixed(1)}%  `;
-                                if (item.spd) effectText += `공속 +${(item.spd * upgMult).toFixed(1)}%  `;
-                                if (item.vamp) effectText += `피흡 +${(item.vamp * upgMult).toFixed(1)}%  `;
-                                
-                                UIManager.showToast(`[${item.name} +${level || 0}] ${effectText}`); 
-                            };
+                            
+                            // 👇 [여기 수정!!] 토스트 알림 대신 상세 카드를 관전 모드(true)로 띄웁니다!
+                            el.onclick = () => { UIManager.openDetailCard(itemId, 'gear', true, level || 0); };
+                            
                         } else {
                             const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
                             el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
@@ -823,12 +823,16 @@ const UIManager = {
             }
         }
 
-       // 🌸 장착한 파트너의 아름다운 자태 렌더링!
+    // 🌸 장착한 파트너의 아름다운 자태 렌더링!
         const ptImgEl = document.getElementById('profile-partner-image');
         if (ptImgEl) {
             if (GameState.equippedPartner && window.GameData && GameData.partners && GameData.partners[GameState.equippedPartner]) {
                 const pt = GameData.partners[GameState.equippedPartner];
-                ptImgEl.style.backgroundImage = `url('assets/partners/${pt.img_full}')`;
+                
+                // 👇 [여기 수정!!] 무조건 img_full을 쓰는 게 아니라, 진화 단계에 맞는 이미지를 가져옵니다!
+                const imgFile = GameSystem.Partner.getDisplayImage(GameState.equippedPartner);
+                ptImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
+                
                 ptImgEl.style.filter = "none"; 
                 ptImgEl.style.opacity = "1";
                 // 🌟 [핵심] 예시 사진처럼 전신이 웅장하게 보이도록 크기와 위치(오른쪽) 완벽 조정!
