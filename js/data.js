@@ -211,12 +211,14 @@ const GameData = {
             flavorText: '"벼락이여, 마스터의 검에 치명적인 힘을 깃드소서!"'
         },
         
-        // 🌟 6. 빛 (Light) - n초마다 n초 동안 몬스터 공격/공속 약화
+      // 🌟 6. 빛 (Light) - 신화 파트너 예시
         'pt_m1': { 
             id: 'pt_m1', name: '차원의 마녀 노아', rarity: 'mythic', emoji: '🌌',
-            img_sd: 'partner_noah_sd.png', img_full: 'partner_noah_full.png',
+            img_sd: 'partner_noah_sd.png', // 인벤토리용 쪼꼬미 이미지
+            img_full: 'partner_noah_full.png', // 👈 내 정보(프로필) 창에 세워둘 얌전한 스탠딩 이미지
+            img_cutin: 'partner_noah_cutin.png', // 👈 [신규 추가!] 가챠 연출 때 뽝! 하고 나올 역동적인 컷인 이미지
             atkMult: 2.00, hpMult: 1.50, critRate: 15, critDmg: 50, vamp: 10,
-            element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 5000, // 10초마다 5초간 30% 디버프
+            element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 5000,
             skillName: '심연의 빛', skillDesc: '10초마다 5초간 적의 데미지와 공격 속도를 30% 감소 (약화)',
             flavorText: '"후후... 이 우주에서 나를 다룰 수 있는 건 당신뿐이야."'
         }
