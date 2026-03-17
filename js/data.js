@@ -157,43 +157,67 @@ const GameData = {
   }, // <-- quests 닫는 괄호
 // (이 위에 monsters: { ... } 덩어리가 끝나는 쉼표(,)가 있어야 합니다!)
 
-    // ==========================================
-    // 🌸 [신규] 미소녀 파트너(동료) 데이터베이스
-    // ==========================================
+   // =========================================================================
+    // 🌸 [개편] 미소녀 파트너(동료) 데이터베이스 (속성 시스템 적용)
+    // =========================================================================
     partners: {
-        // 🔵 [희귀/Rare] 25.0% 확률 - 든든한 초반 지원군
+        // 🔥 1. 화염 (Fire) - 0.5초마다 지속 딜링
         'pt_r1': { 
             id: 'pt_r1', name: '견습 마법사 엘라', rarity: 'rare', emoji: '🪄',
             img_sd: 'partner_ella_sd.png', img_full: 'partner_ella_full.png',
             atkMult: 1.10, hpMult: 1.05, 
-            skillName: '마력 퐁퐁', skillDesc: '공격력 10%, 체력 5% 증가',
-            flavorText: '"길드장님! 제가 등 뒤를 지킬게요!"'
+            element: 'fire', skillCooldown: 500, skillValue: 15, // 0.5초마다 공격력의 15%
+            skillName: '화염 퐁퐁', skillDesc: '0.5초마다 적에게 마스터 공격력의 15% 화염 지속 피해',
+            flavorText: '"길드장님! 제 뜨거운 불꽃을 보여드릴게요!"'
         },
         
-        // 🟣 [영웅/Epic] 7.5% 확률 - 강력한 유틸리티
+        // 🌬️ 2. 바람 (Air) - n초마다 추가 타격 (분신)
         'pt_e1': { 
             id: 'pt_e1', name: '숲의 엘프 리아', rarity: 'epic', emoji: '🏹',
             img_sd: 'partner_lia_sd.png', img_full: 'partner_lia_full.png',
             atkMult: 1.20, spd: 10, eva: 5,
-            skillName: '바람의 시위', skillDesc: '공격력 20%, 공속 10%, 회피 5% 증가',
-            flavorText: '"바람이 당신을 인도하길."'
+            element: 'air', skillCooldown: 3000, skillValue: 100, // 3초마다 공격 100% 1회 추가
+            skillName: '바람의 환영', skillDesc: '3초마다 마스터의 공격을 그대로 1회 더 입힘 (분신 타격)',
+            flavorText: '"바람처럼 빠르고 날카롭게 베어낼게요."'
+        },
+
+        // ❄️ 3. 빙결 (Ice) - [신규] n초마다 데미지 + 적 공격 정지
+        'pt_e2': { 
+            id: 'pt_e2', name: '서리마녀 실비아', rarity: 'epic', emoji: '❄️',
+            img_sd: 'partner_silvia_sd.png', img_full: 'partner_silvia_full.png',
+            atkMult: 1.15, hpMult: 1.15, eva: 10,
+            element: 'ice', skillCooldown: 6000, skillValue: 50, skillDuration: 1500, // 6초마다 50% 딜 + 1.5초 기절
+            skillName: '혹한의 감옥', skillDesc: '6초마다 적에게 50% 피해를 주고 1.5초간 공격 정지(빙결)',
+            flavorText: '"얼어붙은 시간 속에서 조용히 잠드렴..."'
         },
         
-        // 🟡 [전설/Legendary] 2.5% 확률 - 전황을 뒤집는 절대적 힘
+        // 🪨 4. 대지 (Earth) - n초마다 최대 체력 비례 보호막
         'pt_l1': { 
             id: 'pt_l1', name: '성기사단장 아이리스', rarity: 'legendary', emoji: '🛡️',
             img_sd: 'partner_iris_sd.png', img_full: 'partner_iris_full.png',
             atkMult: 1.30, hpMult: 1.40, def: 15,
-            skillName: '성스러운 가호', skillDesc: '공격력 30%, 체력 40%, 방어력 15 증가',
-            flavorText: '"제 검과 방패는 오직 마스터를 위해 존재합니다."'
+            element: 'earth', skillCooldown: 8000, skillValue: 20, // 8초마다 최대 체력의 20% 보호막
+            skillName: '대지의 방벽', skillDesc: '8초마다 마스터 최대 체력의 20%만큼 든든한 보호막 생성',
+            flavorText: '"제 방패가 깨지기 전까진 마스터에게 흠집도 낼 수 없습니다."'
+        },
+
+        // ⚡ 5. 번개 (Lightning) - [신규] n초마다 x초 동안 마스터 크리티컬 대폭 상승
+        'pt_l2': { 
+            id: 'pt_l2', name: '천둥의 성녀 클레어', rarity: 'legendary', emoji: '⚡',
+            img_sd: 'partner_claire_sd.png', img_full: 'partner_claire_full.png',
+            atkMult: 1.25, hpMult: 1.25, critRate: 15, spd: 15,
+            element: 'lightning', skillCooldown: 10000, skillValue: 40, skillDuration: 4000, // 10초마다 4초간 크리 40% 증가
+            skillName: '뇌명의 축복', skillDesc: '10초마다 4초 동안 마스터의 크리티컬 확률 40% 대폭 상승',
+            flavorText: '"벼락이여, 마스터의 검에 치명적인 힘을 깃드소서!"'
         },
         
-        // 🚨 [신화/Mythic] 0.8% 확률 - 심연을 부수는 밸런스 파괴자!!
+        // 🌟 6. 빛 (Light) - n초마다 n초 동안 몬스터 공격/공속 약화
         'pt_m1': { 
             id: 'pt_m1', name: '차원의 마녀 노아', rarity: 'mythic', emoji: '🌌',
             img_sd: 'partner_noah_sd.png', img_full: 'partner_noah_full.png',
             atkMult: 2.00, hpMult: 1.50, critRate: 15, critDmg: 50, vamp: 10,
-            skillName: '심연의 포옹', skillDesc: '공격력 100%, 체력 50%, 크리 및 피흡 증가',
+            element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 5000, // 10초마다 5초간 30% 디버프
+            skillName: '심연의 빛', skillDesc: '10초마다 5초간 적의 데미지와 공격 속도를 30% 감소 (약화)',
             flavorText: '"후후... 이 우주에서 나를 다룰 수 있는 건 당신뿐이야."'
         }
     }, // <-- 요 쉼표(,) 필수! 바로 밑에 cosmetics: { 가 이어집니다.
