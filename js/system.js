@@ -602,7 +602,7 @@ Gacha: {
                                 illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; // 포커싱
                                 illus.style.filter = 'blur(0px)'; // 선명하게
                             }
-                            if(guide) guide.style.opacity = '1'; // 클릭 유도 등장
+                            if(guide) guide.style.opacity = '3'; // 클릭 유도 등장
 
                             // ➡️ 3단계: 클릭 시 결과 공개!
                             const overlay = document.getElementById('gacha-overlay');
@@ -646,8 +646,8 @@ Gacha: {
             document.getElementById('gacha-title').className = "text-center text-xl sm:text-2xl font-black text-white drop-shadow-md"; 
             
             resBox.className = times === 1 
-                ? "w-full max-w-xs grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pb-6" 
-                : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
+                ? "w-full max-w-xs grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pb-6 mt-4" 
+                : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar mt-4";
             resBox.innerHTML = ''; 
 
             results.forEach((item, index) => {
