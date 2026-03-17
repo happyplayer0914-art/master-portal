@@ -4,7 +4,7 @@
 const GameData = {
     items: {
         // 🟢 일반 (Common) - 초반용 깡스탯 위주
-        'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', atkMult: 1.10 },
+        'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', atkMult: 1.15 },
         'w_c2': { id: 'w_c2', type: 'gear', subType: 'weapon', name: '녹슨 단검', emoji: '🔪', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, critRate: 5 },
         'w_c3': { id: 'w_c3', type: 'gear', subType: 'weapon', name: '거친 몽둥이', emoji: '🏏', rarity: 'common', color: 'text-slate-400', atkMult: 1.15 }, // 신규 추가 (높은 깡공격력)
         
