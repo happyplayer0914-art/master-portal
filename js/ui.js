@@ -852,58 +852,59 @@ const UIManager = {
     },
 
 updateProfileEquipmentSlots() {
-        // 🚨 오직 내 정보(프로필) 창에 있는 슬롯들만 업데이트하도록 족쇄 채우기!
-        const slots = ['weapon', 'armor', 'accessory'];
-        slots.forEach((type) => {
-            const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-            const itemId = GameState[`equipped${typeCapitalized}`]; 
+        // 🚨 장비 3개와 파트너 1개까지 총 4개의 슬롯을 배열로 묶어서 한방에 처리합니다!
+        const types = [
+            { id: GameState.equippedWeapon, el: document.getElementById('profile-slot-weapon'), type: 'gear' },
+            { id: GameState.equippedArmor, el: document.getElementById('profile-slot-armor'), type: 'gear' },
+            { id: GameState.equippedAccessory, el: document.getElementById('profile-slot-accessory'), type: 'gear' },
+            { id: GameState.equippedPartner, el: document.getElementById('profile-slot-partner'), type: 'partner' }
+        ];
 
-            // querySelectorAll 대신 getElementById로 하나만 콕 집어옵니다.
-            const el = document.getElementById(`profile-slot-${type}`);
-            if (el) {
-                if(itemId && window.GameData && GameData.items[itemId]) {
-                    const item = GameData.items[itemId];
-                    let rarityClass = "border-slate-600 bg-slate-800";
-                    if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
-                    else if(item.rarity === 'epic') rarityClass = "rarity-epic";
-                    else if(item.rarity === 'rare') rarityClass = "rarity-rare";
-                    else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
+        types.forEach(({id: itemId, el, type}) => {
+            if (!el) return;
+            
+            // 장착된 아이템(장비 or 파트너)이 데이터에 존재하는지 확인
+            if (itemId && ((type === 'gear' && window.GameData && GameData.items[itemId]) || (type === 'partner' && window.GameData && GameData.partners[itemId]))) {
+                const item = type === 'gear' ? GameData.items[itemId] : GameData.partners[itemId];
+                const level = type === 'gear' ? (GameState.itemUpgrades[itemId] || 0) : (GameState.partnerLevels[itemId] || 0);
+                
+                let rarityClass = "border-slate-600 bg-slate-800";
+                if(item.rarity === 'legendary') rarityClass = "rarity-legendary";
+                else if(item.rarity === 'epic') rarityClass = "rarity-epic";
+                else if(item.rarity === 'rare') rarityClass = "rarity-rare";
+                else if(item.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
 
-                   const level = GameState.itemUpgrades[itemId] || 0;
-                    el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
-                    
-                    // 👇 [추가된 부분] 이미지가 있으면 이미지를 부르고, 없으면 이모지를 부릅니다!
-                    const iconHtml = item.img 
-                        ? `<img src="assets/items/${item.img}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl filter drop-shadow-md">${item.emoji}</div>`
-                        : `<div class="text-2xl filter drop-shadow-md">${item.emoji}</div>`;
+                el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                
+                // 💡 [핵심] 파트너면 img_icon을 우선으로 찾고, 장비면 img를 찾습니다!
+                const iconFile = type === 'partner' ? (item.img_icon || item.img_sd) : item.img;
+                const folder = type === 'partner' ? 'partners' : 'items';
+                
+                const iconHtml = iconFile 
+                    ? `<img src="assets/${folder}/${iconFile}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl filter drop-shadow-md">${item.emoji}</div>`
+                    : `<div class="text-2xl filter drop-shadow-md">${item.emoji}</div>`;
 
-                    // 덮어쓰기!
-                    el.innerHTML = `
-                        ${iconHtml}
-                        <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
-                        <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">Lv.${level}</div>
-                    `;
-                    el.onclick = () => { 
-                        const upgMult = 1.0 + (level * 0.1);
-                        let effectText = "";
-                        if (item.atkMult) effectText += `공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%  `;
-                        if (item.hpMult) effectText += `체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%  `;
-                        if (item.critRate) effectText += `크리 +${(item.critRate * upgMult).toFixed(1)}%  `;
-                        if (item.critDmg) effectText += `크리피해 +${(item.critDmg * upgMult).toFixed(1)}%  `;
-                        if (item.def) effectText += `방어 +${Math.floor(item.def * upgMult)}  `;
-                        if (item.eva) effectText += `회피 +${(item.eva * upgMult).toFixed(1)}%  `;
-                        if (item.spd) effectText += `공속 +${(item.spd * upgMult).toFixed(1)}%  `;
-                        if (item.vamp) effectText += `피흡 +${(item.vamp * upgMult).toFixed(1)}%  `;
-                        UIManager.showToast(`[${item.name} +${level}] ${effectText}`); 
-                    };
-                } else {
-                    const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : '장신구';
-                    el.className = "aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative opacity-50";
-                    el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold">${typeName}</span>`;
-                    el.onclick = null;
-                }
+                // 파트너면 ★, 장비면 Lv. 로 표기 변경
+                const levelText = type === 'partner' ? `★${level}` : `Lv.${level}`;
+
+                el.innerHTML = `
+                    ${iconHtml}
+                    <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
+                    <div class="absolute bottom-0 w-full bg-black/60 text-white text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">${levelText}</div>
+                `;
+                
+                // 💡 돋보기를 누르면 토스트 알림 대신 아름다운 상세 카드를 띄웁니다!
+                el.onclick = () => { UIManager.openDetailCard(itemId, type); };
+                
+            } else {
+                // 장착 해제되어 비어있는 슬롯 그리기
+                const typeName = type === 'weapon' ? '무기' : type === 'armor' ? '방어구' : type === 'accessory' ? '장신구' : '파트너';
+                el.className = `aspect-square rounded-lg border ${type === 'partner' ? 'border-pink-500/30 bg-pink-900/20 text-pink-400' : 'border-slate-600 bg-slate-800 text-slate-500'} flex flex-col items-center justify-center relative opacity-50`;
+                el.innerHTML = `<span class="text-[8px] font-bold">${typeName}</span>`;
+                el.onclick = null;
             }
         });
+    }
 
         // 🌸 파트너 전용 슬롯 연동 (얘도 getElementById로 콕 집음!)
         const ptEl = document.getElementById('profile-slot-partner');
@@ -1076,38 +1077,44 @@ updateProfileEquipmentSlots() {
         this.updateProfileEquipmentSlots();
         
     }, // <-- renderInventory 끝나는 괄호
-    // 🌸 [신규 엔진] 미소녀 파트너 명단 그리기!
-    renderPartnerInventory() {
-        const pPartner = document.getElementById('inv-panel-partner');
-        const emptyState = document.getElementById('inv-empty-state');
-        if(!pPartner) return;
-        
-        pPartner.innerHTML = '';
-        
-        if(!GameState.ownedPartners || GameState.ownedPartners.length === 0) {
-            emptyState.classList.remove('hidden');
-            emptyState.innerHTML = '<div class="text-4xl mb-3 opacity-50">🌸</div><p class="text-slate-400 text-xs">아직 영입한 파트너가 없습니다.<br>상점에서 프리미엄 소환을 진행해 보세요!</p>';
+   renderPartnerInventory() {
+        const panel = document.getElementById('inv-panel-partner');
+        if(!panel) return;
+
+        if (!GameState.ownedPartners || GameState.ownedPartners.length === 0) {
+            panel.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500 text-xs">영입한 파트너가 없습니다.</div>';
             return;
         }
 
-        let html = '';
+        // 👇 1. 중복 파트너 개수 세기!
+        const counts = {};
         GameState.ownedPartners.forEach(id => {
+            counts[id] = (counts[id] || 0) + 1;
+        });
+
+        let html = '';
+        
+        // 👇 2. 중복을 합친 고유 ID 목록으로 반복문 돌리기!
+        Object.keys(counts).forEach(id => {
             const pt = GameData.partners[id];
             if(!pt) return;
             
+            const count = counts[id]; // 보유 개수
             const isEquipped = (GameState.equippedPartner === id);
             const level = GameState.partnerLevels[id] || 0;
             
             const badgeHTML = isEquipped ? `<div class="item-equipped-badge text-[8px] tracking-wider z-10 bg-pink-500 border-pink-400">동행중</div>` : '';
             const levelText = level > 0 ? `<span class="text-pink-300 font-black mr-0.5">★${level}</span>` : '';
             
+            // 🌟 우측 상단에 갯수 뱃지 추가!
+            const countHTML = count > 1 ? `<div class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-indigo-400 shadow-md z-20">x${count}</div>` : '';
+
             let rarityClass = "border-slate-600 bg-slate-800";
             if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
             else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
             else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
             else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
 
-            // 👇 [여기 추가!!] html 카드를 그리기 직전에, pt(파트너)의 스탯을 읽어와서 요약본(statStr)을 만듭니다!
             const upgMult = 1.0 + (level * 0.1);
             let statStr = '';
             if (pt.atkMult) statStr += `공격+${Math.round((pt.atkMult - 1)*100 * upgMult)}% `;
@@ -1119,12 +1126,12 @@ updateProfileEquipmentSlots() {
             if (pt.spd) statStr += `공속+${(pt.spd * upgMult).toFixed(1)}% `;
             if (pt.vamp) statStr += `피흡+${(pt.vamp * upgMult).toFixed(1)}% `;
 
-            // 👇 위에서 만든 statStr.trim()을 아랫줄 html 내부에서 불러옵니다!
             html += `
             <div onclick="UIManager.openDetailCard('${id}', 'partner')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
                 ${badgeHTML}
+                ${countHTML}
                 
-                <img src="assets/partners/${pt.img_icon}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
+                <img src="assets/partners/${pt.img_icon || pt.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
                 <div style="display:none;" class="text-4xl mb-1 mt-2 filter drop-shadow-md flex-shrink-0">${pt.emoji}</div>
                 
                 <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
@@ -1133,10 +1140,10 @@ updateProfileEquipmentSlots() {
                     <span class="text-[8px] text-emerald-300 font-bold truncate w-full text-center">${statStr.trim() || '스탯 없음'}</span>
                 </div>
             </div>
-        `;
+            `;
         });
-        
-        pPartner.innerHTML = html;
+
+        panel.innerHTML = html;
     },
 
     // ... (기존 renderInventory 끝나는 부분 아래) ...
