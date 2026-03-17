@@ -455,13 +455,18 @@ Partner: {
     }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
 Gacha: {
+        // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
         performGacha(times, type = 'gear') {
+            // 🚨 [사운드 버그 수정] 가챠 버튼을 누르는 즉시 브라우저 오디오 엔진 강제 기상!
+            if (window.AudioEngine && typeof AudioEngine.init === 'function') {
+                AudioEngine.init();
+            }
+
             const cost = type === 'partner' ? times * 100 : times * 50; 
             if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
             
             this._executeGachaLogic(times, type);
         },
-
         _executeGachaLogic(times, type = 'gear') {
             const cost = type === 'partner' ? times * 100 : times * 50;
             GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
