@@ -454,7 +454,8 @@ Partner: {
         }
     }, // <-- 콤마 필수! (이 밑에 Gacha: { 가 이어집니다)
         
- Gacha: {
+Gacha: {
+        // 💡 [수정] 어떤 버튼을 눌렀느냐(type)에 따라 젬 소모량이 다름!
         performGacha(times, type = 'gear') {
             const cost = type === 'partner' ? times * 100 : times * 50; 
             if(GameState.gem < cost) return UIManager.showToast("젬(💎)이 부족합니다! 보스를 토벌하세요.");
@@ -477,7 +478,7 @@ Partner: {
             anim.classList.remove('hidden'); 
             closeBtn.classList.add('hidden');
             
-            // 🎁 1. [핵심] 연출을 위해 어떤 결과가 나올지 미리 계산합니다!
+            // 🎁 1. [핵심 수정] 연출 분기를 위해 어떤 결과가 나올지 미리 계산합니다!
             let results = [];
             for(let i=0; i<times; i++) {
                 const roll = Math.random() * 100; 
@@ -490,6 +491,7 @@ Partner: {
                 else rarity = 'common';                          // 나머지 (일반)
                 
                 if (type === 'partner') {
+                    // 🌸 파트너 뽑기 풀
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.partners).filter(it => it.rarity === 'rare');
                     const pt = safePool[Math.floor(Math.random() * safePool.length)];
@@ -504,6 +506,7 @@ Partner: {
                         results.push({ ...pt, isDup: false });
                     }
                 } else {
+                    // 🗡️ 장비 뽑기 풀
                     const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
                     const item = safePool[Math.floor(Math.random() * safePool.length)];
@@ -513,87 +516,127 @@ Partner: {
                     GameState.inventory.push(itemId);
                 }
             }
-            GameState.save();
+            // (주의: 기존 코드에 있던 GameState.save()는 여기서 안 하고 결과 공개 직전에 한 번만 합니다!)
 
-            // 🎁 2. 최고 등급 판별하여 포탈 색상(스포일러) 결정!
+            // 🎁 2. [수정 사항 3번] 최고 등급 판별하여 포탈 색상(스포일러) 결정!
             let hasMythic = results.some(r => r.rarity === 'mythic');
             let hasLegendary = results.some(r => r.rarity === 'legendary');
             
-            let portalGlow = type === 'partner' ? "shadow-[0_0_40px_rgba(236,72,153,0.5)]" : "shadow-[0_0_40px_rgba(251,191,36,0.5)]";
-            let portalFilter = type === 'partner' ? "hue-rotate-[-45deg]" : "hue-rotate-0";
+            // 기본값 (파란색) (무기가차도 이제 일반/희귀/영웅이면 파란색!)
             let portalMsg = type === 'partner' ? "차원의 문 개방 중..." : "소환의식 진행 중...";
             let titleColor = "text-white";
-            
-            if (hasMythic) {
-                portalGlow = "shadow-[0_0_80px_rgba(236,72,153,1)]"; // 신화: 강렬한 핑크/레드
-                portalFilter = "hue-rotate-[-45deg] saturate-200";
-                portalMsg = "심연의 틈새가 열립니다...!!";
-                titleColor = "text-pink-400 font-black animate-pulse";
-            } else if (hasLegendary) {
-                portalGlow = "shadow-[0_0_60px_rgba(250,204,21,0.8)]"; // 전설: 황금빛
-                portalFilter = "hue-rotate-[180deg] saturate-150"; 
-                portalMsg = "눈부신 황금빛이 뿜어져 나옵니다!";
-                titleColor = "text-yellow-400 font-black";
-            }
+            let defaultDropShadow = "drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"; // BLUE
 
-            document.getElementById('gacha-title').innerHTML = `<span class="${titleColor} drop-shadow-md">${portalMsg}</span>`;
-            
-            // 🎁 3. 이모지 대신 고퀄리티 소환 포탈 이미지 렌더링
-            anim.className = 'mb-8 transition-all duration-500 flex justify-center w-full';
-            anim.innerHTML = `
-                <div class="relative w-32 h-32 rounded-full ${portalGlow} animate-[spin_4s_linear_infinite] flex items-center justify-center">
-                    <img src="assets/ui/summon_portal.png" class="w-full h-full object-cover rounded-full filter ${portalFilter}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="display:none;" class="w-full h-full rounded-full border-4 border-dashed border-white/50 bg-gradient-to-tr from-transparent to-white/20"></div>
-                </div>
-            `;
+            if (hasMythic) {
+                document.getElementById('gacha-title').innerHTML = `<span class="text-pink-400 font-black animate-pulse drop-shadow-md">심연의 틈새가 열립니다...!!</span>`;
+                anim.className = 'text-9xl mb-8 filter drop-shadow-[0_0_30px_rgba(236,72,153,0.8)] animate-spin'; // PINK
+            } else if (hasLegendary) {
+                document.getElementById('gacha-title').innerHTML = `<span class="text-yellow-400 font-black drop-shadow-md">눈부신 황금빛이 뿜어져 나옵니다!</span>`;
+                anim.className = 'text-9xl chest-shake mb-8 filter drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]'; // AMBER/YELLOW
+            } else {
+                // BLUE DEFAULTS (Addresses Change 3 - gear/partner both default to blue)
+                document.getElementById('gacha-title').innerText = portalMsg;
+                anim.className = `text-9xl ${type==='partner'?'animate-spin':''} mb-8 filter ${defaultDropShadow}`; // BLUE
+            }
+            anim.innerHTML = (type==='partner'?'🌌':'🎁');
             
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-            // 🎁 4. 컷인 애니메이션 분기
+            // 🎁 3. [수정 사항 1, 2번] 컷인 애니메이션 및 결과 공개 체인
             setTimeout(() => {
-                const bestPartner = results.find(r => r.rarity === 'mythic') || results.find(r => r.rarity === 'legendary');
+                // 💡 [수정 사항 1번] 파트너 뽑기이면서 신화 파트너가 떴을 때만 '명대사 컷인' 등장!
+                const mythicPartner = type === 'partner' ? results.find(r => r.rarity === 'mythic') : null;
                 
-                // 파트너 뽑기이면서 전설/신화가 떴을 때 '명대사 컷인' 등장!
-                if (type === 'partner' && bestPartner) {
-                    if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
+                if (mythicPartner) {
+                    if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss(); // 웅장한 효과음
                     if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
                     
-                    anim.classList.add('hidden'); 
-                    resBox.classList.remove('hidden'); 
-                    resBox.className = "w-full max-w-sm flex justify-center"; // 컷인용으로 잠시 클래스 변경
-                    
-                    resBox.innerHTML = `
-                        <div class="w-full h-48 bg-black/90 flex flex-col items-center justify-center rounded-xl border border-${hasMythic ? 'pink' : 'yellow'}-500 shadow-[inset_0_0_50px_rgba(0,0,0,1)] relative overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-                            <img src="assets/partners/${bestPartner.img_full}" class="absolute w-full h-[200%] object-cover opacity-30 object-top" style="-webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);" onerror="this.style.display='none';">
-                            <div class="z-10 text-center px-4">
-                                <h2 class="text-lg sm:text-xl font-black text-${hasMythic ? 'pink' : 'yellow'}-400 mb-2 drop-shadow-md">"${bestPartner.flavorText}"</h2>
-                                <p class="text-[10px] sm:text-xs text-white/70 font-bold">- ${bestPartner.name} -</p>
+                    anim.classList.add('hidden'); // 포탈 숨기기
+                    resBox.classList.remove('hidden'); // 결과창 영역 보이기
+
+                    // 💡 [수정 사항 2번] 텍스트 박스 먼저 노출 (텍스트 박스 자체에는 이미지 없음)
+                    // (user's resBox uses grid, need temporarily flex for center cut-in)
+                    resBox.className = "w-full max-w-sm flex flex-col justify-center items-center h-48 relative overflow-hidden custom-scrollbar"; 
+                    resBox.innerHTML = ''; // 기존 내용 지우기
+
+                    const cutinHTML = `
+                        <div id="mythic-cutin-wrapper" class="w-full flex flex-col items-center justify-center opacity-0 animate-[fadeIn_0.3s_ease-out] relative z-10">
+                            <div class="z-20 text-center p-4 bg-slate-900/90 rounded-lg border border-pink-500 shadow-lg px-6">
+                                <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-2 drop-shadow-md whitespace-pre-wrap">"${mythicPartner.flavorText.replace(/\\n/g, '\n')}"</h2>
+                                <p class="text-[10px] sm:text-xs text-white/70 font-bold">- ${mythicPartner.name} -</p>
                             </div>
+                            
+                            <img id="mythic-cutin-illus" src="assets/partners/${mythicPartner.img_full}" class="absolute w-[200%] h-auto opacity-0 object-contain object-top -top-28 -z-10 transition-opacity duration-1000" onerror="this.style.display='none';">
                         </div>
+                        
+                        <div id="mythic-cutin-guide" class="absolute bottom-2 text-white/60 font-bold text-[10px] animate-pulse z-30 opacity-0 transition-opacity duration-1000">화면을 클릭하여 결과 확인</div>
                     `;
+                    resBox.insertAdjacentHTML('beforeend', cutinHTML);
+
+                    // 0.5초 대기 후 전신 일러스트 화려하게 페이드인! (Addressing Change 2)
+                    setTimeout(() => {
+                        const illus = document.getElementById('mythic-cutin-illus');
+                        const guide = document.getElementById('mythic-cutin-guide');
+                        if(illus) illus.style.opacity = '1'; // Prominent illustration (fancy fade via transition-opacity)
+                        if(guide) guide.style.opacity = '1';
+                    }, 500);
+
+                    // 💡 [수정 사항 2번] 아무대나 클릭하면 진짜 카드 공개 로직 실행 (Addresses Change 2)
+                    // gacha-overlay는 이미 활성화되어 있으므로 여기에 리스너를 답니다.
+                    const overlay = document.getElementById('gacha-overlay');
                     
-                    // 컷인 2초 대기 후 진짜 카드 공개 함수 호출
-                    setTimeout(() => this._revealResults(type, times, results, anim, resBox, closeBtn), 2000);
+                    const handleCutinClick = (e) => {
+                        // event propagation STOP (cards/buttons below won't be clicked accidentally)
+                        e.stopPropagation(); 
+                        overlay.removeEventListener('click', handleCutinClick); // 리스너 바로 삭제 (중복 클릭 방지)
+
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+                        
+                        // 컷인 정보 지우기 (멋지게 페이드아웃)
+                        const wrapper = document.getElementById('mythic-cutin-wrapper');
+                        const guide = document.getElementById('mythic-cutin-guide');
+                        if(wrapper) wrapper.classList.add('opacity-0'); guide.classList.add('opacity-0');
+
+                        // 페이드아웃 될 시간(0.3초) 대기 후 최종 카드 공개 함수 호출
+                        setTimeout(() => {
+                            this._revealResults(type, times, results, anim, resBox, closeBtn);
+                        }, 300);
+                    };
+
+                    // 클릭 유도 대기 시간 (컷인 등장 후 클릭 가능)
+                    setTimeout(() => {
+                        overlay.addEventListener('click', handleCutinClick); 
+                    }, 1000); 
+
                 } else {
-                    // 일반 장비 뽑기거나 고등급이 없으면 1.5초 대기 후 바로 공개
+                    // 일반 장비 뽑기거나 신화가 없으면 1.5초 대기 후 바로 공개 (마스터님 원래 흐름)
                     this._revealResults(type, times, results, anim, resBox, closeBtn);
                 }
             }, 1500);
         },
 
-        // 🎁 5. 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
+        // 🎁 4. [신규 추출] 실제 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수 (Addresses Change 1, 2 reveal step)
         _revealResults(type, times, results, anim, resBox, closeBtn) {
+            // 진짜 카드 공개 직전에 GameState 저장 및 HTML 리렌더링 (마스터님 performGacha 맨 아래에 있던 것 이전)
+            GameState.save();
+            
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_reveal(); 
             if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
             
-            anim.classList.add('hidden'); 
-            resBox.classList.remove('hidden'); 
+            anim.classList.add('hidden'); // 포탈 정보 숨기기
+            resBox.classList.remove('hidden'); // 결과창 영역 보이기
+
+            // 💡 [가챠 결과에 맞춰 UI 클래스 및 제목 복원]
+            document.getElementById('gacha-title').innerHTML = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
+            document.getElementById('gacha-title').className = "text-center text-xl sm:text-2xl font-black text-white drop-shadow-md"; // Reset title style
             
-            document.getElementById('gacha-title').innerText = type === 'partner' ? "🌸 영입 완료!" : "소환 결과!";
-            resBox.className = times === 1 ? "w-full max-w-xs grid grid-cols-1 gap-4" : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
-            resBox.innerHTML = ''; // 컷인 지우기
-            
+            // Standard layout restore (times=1 or times=10)
+            resBox.className = times === 1 
+                ? "w-full max-w-xs grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pb-6" 
+                : "w-full max-w-sm grid grid-cols-2 gap-3 overflow-y-auto max-h-[60vh] pb-10 custom-scrollbar";
+            resBox.innerHTML = ''; // 컷인 정보 싹 비우기
+
             results.forEach((item, index) => {
                 setTimeout(() => {
                     let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
@@ -605,7 +648,7 @@ Partner: {
                         ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
                         : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`;
 
-                    // 💡 카드가 popIn 애니메이션과 함께 등장
+                    // 💡 [가품 연출 강화] 카드가 popIn 애니메이션과 함께 등장
                     const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
                         ${dupText}
                         <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
@@ -614,10 +657,10 @@ Partner: {
                     
                     resBox.insertAdjacentHTML('beforeend', cardHtml);
                     
-                    // 등급에 따라 타격음 및 진동
+                    // 등급에 따라 타격음 및 진동 차별화
                     if(item.rarity === 'mythic' || item.rarity === 'legendary') {
                         if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
-                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); // 웅장한 장착 소리 활용
                     } else {
                         if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
                         if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.hit_normal();
@@ -630,9 +673,10 @@ Partner: {
                             setTimeout(() => overlay.classList.remove('shake'), 400); 
                         }
                     }
-                }, index * 200); // 0.2초마다 순차 공개
+                }, index * 200); // 0.2초 간격으로 타다닥!
             });
             
+            // 닫기 버튼 텍스트 변경
             closeBtn.innerText = type === 'partner' ? "명단 확인하기" : "인벤토리에 넣기";
             setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 200 + 300);
         },
@@ -642,6 +686,7 @@ Partner: {
             document.getElementById('gacha-overlay').classList.remove('active'); 
             document.getElementById('bottom-nav').style.display = 'flex'; 
             
+            // 💡 [가챠 끝난 뒤] 변경된 아이템 창 최신화! (이것도 이제 카드 공개된 후에 해야 안전)
             if(window.UIManager) {
                 if(UIManager.renderInventory) UIManager.renderInventory();
                 if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
@@ -650,7 +695,7 @@ Partner: {
         }
     },
     
- Ranking: {
+Ranking: {
         openRegisterModal() { 
             UIManager.showToast("마스터의 최고 기록은 10초마다 명예의 전당에 자동 등록됩니다! 🚀");
         },
