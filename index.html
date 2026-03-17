@@ -1283,6 +1283,56 @@
             </div>
     </div>
 </div>
+    <button onclick="GameSystem.Forge.switchTab('partner')" id="forge-tab-partner" class="flex-1 py-1.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded border border-slate-700 hover:text-white transition-colors">파트너</button>
+
+<div id="detail-card-modal" class="fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
+    <div class="w-full max-w-sm relative rounded-2xl bg-slate-900 border border-slate-500 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[85vh]">
+        <button onclick="document.getElementById('detail-card-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100'); document.getElementById('detail-card-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="absolute top-3 right-3 z-30 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-slate-300 hover:text-white transition-colors"><span class="font-light text-2xl leading-none mb-0.5">&times;</span></button>
+
+        <div class="relative w-full h-64 bg-slate-800 shrink-0 overflow-hidden flex items-center justify-center">
+            <div id="dc-bg" class="absolute inset-0 w-full h-full bg-cover bg-center opacity-30 blur-sm"></div>
+            <img id="dc-image" src="" class="absolute z-10 max-h-[110%] object-contain drop-shadow-2xl">
+            <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent z-10"></div>
+            
+            <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end z-20">
+                <div>
+                    <div id="dc-rarity" class="text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block">등급</div>
+                    <h2 id="dc-name" class="text-xl font-black text-white drop-shadow-md">이름</h2>
+                </div>
+                <div class="text-right">
+                    <span id="dc-level-label" class="text-[10px] text-purple-300 font-bold block mb-0.5">강화 레벨</span>
+                    <span id="dc-level" class="text-lg font-black text-purple-400 drop-shadow-md">+0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex flex-col gap-3 overflow-y-auto custom-scrollbar relative z-10">
+            <div id="dc-partner-section" class="hidden flex-col gap-3">
+                <p id="dc-flavor" class="text-[11px] text-slate-300 italic text-center break-keep">"대사"</p>
+                <div class="bg-pink-900/20 border border-pink-500/30 rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] text-pink-400 font-bold">💖 호감도: <span id="dc-aff-lv">Lv.1</span></span>
+                        <span id="dc-aff-text" class="text-[10px] text-slate-400">0 / 100</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                        <div id="dc-aff-bar" class="bg-gradient-to-r from-pink-500 to-rose-500 h-full transition-all"></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-3">
+                    <h4 class="text-xs font-black text-white mb-1"><span id="dc-skill-icon">🔥</span> <span id="dc-skill-name">스킬</span></h4>
+                    <p id="dc-skill-desc" class="text-[10px] text-slate-300">설명</p>
+                </div>
+            </div>
+
+            <div id="dc-gear-section" class="hidden bg-slate-800 border border-slate-700 rounded-lg p-3">
+                <p class="text-[10px] text-slate-400 mb-2 font-bold">장착 효과 (강화 적용됨)</p>
+                <div id="dc-gear-stats" class="grid grid-cols-2 gap-2"></div>
+            </div>
+
+            <div class="flex gap-2 mt-1 shrink-0" id="dc-btn-area"></div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 
