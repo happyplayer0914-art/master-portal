@@ -1019,10 +1019,11 @@ updateProfileEquipmentSlots() {
                 ? `<img src="assets/items/${item.img}" class="w-10 h-10 object-contain filter drop-shadow-md mb-1 mt-1 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>`
                 : `<div class="text-3xl mb-1 mt-1 filter drop-shadow-md flex-shrink-0">${item.emoji}</div>`;
 
-            const card = `
-                <div onclick="GameSystem.Lobby.handleItemClick('${id}')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[120px] w-full hover:scale-105 transition-all">
+           const card = `
+                <div onclick="UIManager.openDetailCard('${id}', 'gear')" class="item-card rarity-${item.rarity} ${isEquipped ? 'equipped' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[120px] w-full hover:scale-105 transition-all cursor-pointer">
                     ${badgeHTML}
-                    ${iconHtml} <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${item.name}</h4>
+                    ${iconHtml}
+                    <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${item.name}</h4>
                     <div class="flex flex-col items-center gap-[3px] w-full mt-auto">
                         ${effectText}
                     </div>
@@ -1095,7 +1096,7 @@ updateProfileEquipmentSlots() {
             else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
             else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
 html += `
-            <div onclick="GameSystem.Partner.toggleEquip('${id}')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
+            <div onclick="UIManager.openDetailCard('${id}', 'partner')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
                 ${badgeHTML}
                 
                 <img src="assets/partners/${pt.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
@@ -1327,6 +1328,111 @@ html += `
         this.updateProfileUI(); // 🌟 [여기 추가!] 치장품 빼도 프로필 창 즉시 새로고침!
         if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer(); // 🌟 치장품 바꿨을 때만 서버 전송!
         this.triggerHaptic();
+    },
+    // =========================================================================
+    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너)
+    // =========================================================================
+    openDetailCard(id, type) {
+        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+        
+        const isPartner = (type === 'partner');
+        const item = isPartner ? GameData.partners[id] : GameData.items[id];
+        if (!item) return;
+
+        // 장착 여부 및 레벨 파악
+        const isEquipped = isPartner 
+            ? (GameState.equippedPartner === id) 
+            : [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory].includes(id);
+        const level = isPartner ? (GameState.partnerLevels[id] || 0) : (GameState.itemUpgrades[id] || 0);
+
+        // 1. 공통 정보 세팅 (이름, 등급)
+        document.getElementById('dc-name').innerText = item.name;
+        
+        const rarityEl = document.getElementById('dc-rarity');
+        let rName = "일반"; let rColor = "bg-slate-700 text-white";
+        if (item.rarity === 'mythic') { rName = "✨신화✨"; rColor = "bg-red-600 text-white animate-pulse border border-red-400"; }
+        else if (item.rarity === 'legendary') { rName = "전설"; rColor = "bg-yellow-500 text-slate-900"; }
+        else if (item.rarity === 'epic') { rName = "영웅"; rColor = "bg-purple-600 text-white"; }
+        else if (item.rarity === 'rare') { rName = "희귀"; rColor = "bg-blue-500 text-white"; }
+        rarityEl.innerText = rName; 
+        rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
+
+        // 2. 이미지 세팅 (파트너면 호감도에 따라 진화된 이미지 호출!)
+        const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img || '');
+        const folder = isPartner ? 'partners' : 'items';
+        document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
+        document.getElementById('dc-bg').style.backgroundImage = `url('assets/${folder}/${imgFile}')`;
+
+        // 3. 화면 분기용 변수
+        const partnerSec = document.getElementById('dc-partner-section');
+        const gearSec = document.getElementById('dc-gear-section');
+        const btnArea = document.getElementById('dc-btn-area');
+
+        // 🌸 [파트너 상세 카드일 때]
+        if (isPartner) {
+            document.getElementById('dc-level-label').innerText = "돌파 레벨";
+            document.getElementById('dc-level').innerText = `★${level}`;
+            
+            partnerSec.classList.remove('hidden'); partnerSec.classList.add('flex');
+            gearSec.classList.add('hidden');
+            
+            const affLv = GameState.partnerAffectionLevel[id] || 1;
+            const affExp = GameState.partnerAffectionExp[id] || 0;
+            const reqExp = affLv * 100;
+
+            document.getElementById('dc-flavor').innerText = `"${item.flavorText}"`;
+            document.getElementById('dc-aff-lv').innerText = `Lv.${affLv}`;
+            document.getElementById('dc-aff-text').innerText = affLv >= 10 ? "MAX" : `${affExp} / ${reqExp}`;
+            document.getElementById('dc-aff-bar').style.width = affLv >= 10 ? "100%" : `${(affExp / reqExp) * 100}%`;
+            
+            document.getElementById('dc-skill-icon').innerText = item.emoji;
+            document.getElementById('dc-skill-name').innerText = item.skillName;
+            document.getElementById('dc-skill-desc').innerText = item.skillDesc;
+
+            btnArea.innerHTML = `
+                <button onclick="GameSystem.Partner.giveGift('${id}')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-pink-300 font-bold rounded-xl border border-pink-500/30 active:scale-95 flex flex-col items-center justify-center shadow-md transition-all">
+                    <span class="text-xs flex items-center gap-1"><i class="fa-solid fa-gift"></i> 선물하기</span>
+                    <span class="text-[9px] text-cyan-400 bg-slate-900 px-2 mt-0.5 rounded-full border border-cyan-900">💎 50</span>
+                </button>
+                <button onclick="GameSystem.Partner.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'partner');" class="flex-[1.5] py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
+                    ${isEquipped ? '동행 해제하기' : '동행하기'}
+                </button>
+            `;
+        } 
+        // 🗡️ [장비 상세 카드일 때]
+        else {
+            document.getElementById('dc-level-label').innerText = "강화 수치";
+            document.getElementById('dc-level').innerText = `+${level}`;
+            
+            partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
+            gearSec.classList.remove('hidden');
+
+            const upgMult = 1.0 + (level * 0.1);
+            let statsHtml = '';
+            if (item.atkMult) statsHtml += `<div class="text-[11px] text-red-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
+            if (item.hpMult) statsHtml += `<div class="text-[11px] text-emerald-400 font-bold bg-slate-900/50 px-2 py-1 rounded">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
+            if (item.critRate) statsHtml += `<div class="text-[11px] text-purple-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
+            if (item.critDmg) statsHtml += `<div class="text-[11px] text-pink-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리피해 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
+            if (item.def) statsHtml += `<div class="text-[11px] text-blue-400 font-bold bg-slate-900/50 px-2 py-1 rounded">방어 +${Math.floor(item.def * upgMult)}</div>`;
+            if (item.eva) statsHtml += `<div class="text-[11px] text-teal-400 font-bold bg-slate-900/50 px-2 py-1 rounded">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
+            if (item.spd) statsHtml += `<div class="text-[11px] text-yellow-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
+            if (item.vamp) statsHtml += `<div class="text-[11px] text-rose-500 font-bold bg-slate-900/50 px-2 py-1 rounded">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
+            
+            document.getElementById('dc-gear-stats').innerHTML = statsHtml;
+
+            btnArea.innerHTML = `
+                <button onclick="GameSystem.Lobby.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'gear');" class="w-full py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white border border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
+                    ${isEquipped ? '장착 해제하기' : '장착하기'}
+                </button>
+            `;
+        }
+
+        // 모달창 오픈 애니메이션
+        const modal = document.getElementById('detail-card-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
     },
 // =========================================================================
     // 🌟 [전면 개편] 가챠샵 슬라이딩 배너 다중 모터 엔진!
