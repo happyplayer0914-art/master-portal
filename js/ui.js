@@ -1354,21 +1354,19 @@ updateProfileEquipmentSlots() {
         if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer(); // 🌟 치장품 바꿨을 때만 서버 전송!
         this.triggerHaptic();
     },
+   // =========================================================================
+    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너) - 완성판
     // =========================================================================
-    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너)
-    // =========================================================================
-    openDetailCard(id, type) {
+    openDetailCard(id, type, isReadOnly = false, customLevel = 0, customAffLv = 1) {
         if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
         
         const isPartner = (type === 'partner');
         const item = isPartner ? GameData.partners[id] : GameData.items[id];
         if (!item) return;
 
-        // 장착 여부 및 레벨 파악
-        const isEquipped = isPartner 
-            ? (GameState.equippedPartner === id) 
-            : [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory].includes(id);
-        const level = isPartner ? (GameState.partnerLevels[id] || 0) : (GameState.itemUpgrades[id] || 0);
+        // 내 인벤토리인지 남의 프로필 관전 모드인지 체크
+        const isEquipped = isReadOnly ? true : (isPartner ? (GameState.equippedPartner === id) : [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory].includes(id));
+        const level = isReadOnly ? customLevel : (isPartner ? (GameState.partnerLevels[id] || 0) : (GameState.itemUpgrades[id] || 0));
 
         // 1. 공통 정보 세팅 (이름, 등급)
         document.getElementById('dc-name').innerText = item.name;
@@ -1382,42 +1380,31 @@ updateProfileEquipmentSlots() {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-       // 2. 이미지 세팅 (파트너면 마스터가 선택한 진화 이미지를, 장비면 원래 이미지를 가져옴)
+        // 2. 이미지 세팅 (외형 변경 적용)
         const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img || '');
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
-        // 🌟 [배경 업그레이드] 아이템 사진을 흐리게 쓰는 대신, 예쁜 '공용 배경'을 씁니다!
+        // 🌟 공용 배경 처리
         const bgImg = isPartner ? 'card_bg_partner.png' : 'card_bg_gear.png';
         const fallbackBg = isPartner ? 'bg_library.png' : 'bg_zone1.png';
-        
         const bgEl = document.getElementById('dc-bg');
         bgEl.style.backgroundImage = `url('assets/backgrounds/${bgImg}')`;
-        bgEl.style.filter = "none"; // 흐림 효과 삭제!
-        // 땜빵: 만약 폴더에 전용 배경이 없다면 기존 배경을 대신 띄워줍니다.
+        bgEl.style.filter = "none";
         bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/${fallbackBg}')`; };
 
-        // 🌟 [외형 변경 버튼 로직] 노란 동그라미 위치의 버튼을 켜고 끄는 마법!
+        // 🌟 외형 변경 버튼 처리
         const skinBtn = document.getElementById('dc-btn-skin');
-        
-        // 내 파트너를 열었을 때만 변경 버튼이 보이게 합니다! (장비나, 남의 파트너면 숨김)
         if (isPartner && !isReadOnly) { 
             skinBtn.classList.remove('hidden');
-            
-            // 버튼을 누르면 스킨이 휙휙 바뀌는 함수 연결!
             skinBtn.onclick = () => { GameSystem.Partner.cycleSkin(id); };
-            
-            // 현재 호감도로 해금된 스킨이 몇 개인지 확인 (1개 이하면 회색으로 비활성화)
             const unlocked = GameSystem.Partner.getUnlockedSkins(id);
             if (unlocked.length <= 1) {
-                // 해금된 게 없어서 못 바꿀 때 (회색)
                 skinBtn.className = "absolute top-3 left-3 z-30 bg-slate-800/50 text-slate-500 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-md cursor-not-allowed";
             } else {
-                // 바꿀 스킨이 있을 때 (예쁜 남색으로 활성화!)
                 skinBtn.className = "absolute top-3 left-3 z-30 bg-indigo-600/90 hover:bg-indigo-500 text-white border border-indigo-400 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all active:scale-95 cursor-pointer";
             }
         } else {
-            // 장비를 클릭했거나, 랭킹에서 타 유저의 파트너를 구경할 때는 버튼 숨기기!
             skinBtn.classList.add('hidden'); 
         }
 
@@ -1426,7 +1413,7 @@ updateProfileEquipmentSlots() {
         const gearSec = document.getElementById('dc-gear-section');
         const btnArea = document.getElementById('dc-btn-area');
 
-      // 🌸 [파트너 상세 카드일 때]
+        // 🌸 파트너 상세 카드 렌더링
         if (isPartner) {
             document.getElementById('dc-level-label').innerText = "돌파 레벨";
             document.getElementById('dc-level').innerText = `★${level}`;
@@ -1434,8 +1421,8 @@ updateProfileEquipmentSlots() {
             partnerSec.classList.remove('hidden'); partnerSec.classList.add('flex');
             gearSec.classList.add('hidden');
             
-            const affLv = GameState.partnerAffectionLevel[id] || 1;
-            const affExp = GameState.partnerAffectionExp[id] || 0;
+            const affLv = isReadOnly ? customAffLv : (GameState.partnerAffectionLevel[id] || 1);
+            const affExp = isReadOnly ? 0 : (GameState.partnerAffectionExp[id] || 0); 
             const reqExp = affLv * 100;
 
             document.getElementById('dc-flavor').innerText = `"${item.flavorText}"`;
@@ -1447,7 +1434,6 @@ updateProfileEquipmentSlots() {
             document.getElementById('dc-skill-name').innerText = item.skillName;
             document.getElementById('dc-skill-desc').innerText = item.skillDesc;
 
-            // 👇 [신규] 파트너 스탯 렌더링 (1개든 3개든 꽉 차게 flex-1 자동 분배!)
             const upgMult = 1.0 + (level * 0.1);
             let pStatsHtml = '';
             if (item.atkMult) pStatsHtml += `<div class="flex-1 text-[10px] text-red-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
@@ -1460,18 +1446,8 @@ updateProfileEquipmentSlots() {
             if (item.vamp) pStatsHtml += `<div class="flex-1 text-[10px] text-rose-500 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
-
-            btnArea.innerHTML = `
-                <button onclick="GameSystem.Partner.giveGift('${id}')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-pink-300 font-bold rounded-xl border border-pink-500/30 active:scale-95 flex flex-col items-center justify-center shadow-md transition-all">
-                    <span class="text-xs flex items-center gap-1"><i class="fa-solid fa-gift"></i> 선물하기</span>
-                    <span class="text-[9px] text-cyan-400 bg-slate-900 px-2 mt-0.5 rounded-full border border-cyan-900">💎 50</span>
-                </button>
-                <button onclick="GameSystem.Partner.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'partner');" class="flex-[1.5] py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
-                    ${isEquipped ? '동행 해제하기' : '동행하기'}
-                </button>
-            `;
-        }
-        // 🗡️ [장비 상세 카드일 때]
+        } 
+        // 🗡️ 장비 상세 카드 렌더링
         else {
             document.getElementById('dc-level-label').innerText = "강화 수치";
             document.getElementById('dc-level').innerText = `+${level}`;
@@ -1491,17 +1467,16 @@ updateProfileEquipmentSlots() {
             if (item.vamp) statsHtml += `<div class="text-[11px] text-rose-500 font-bold bg-slate-900/50 px-2 py-1 rounded">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
             document.getElementById('dc-gear-stats').innerHTML = statsHtml;
+        }
 
-           // 👇 [버그 픽스] 이 부분을 통째로 덮어씌워 주세요!
+        // 🌟 [핵심] 남의 프로필 볼 때와 내 프로필 볼 때 버튼 분기!
         if (isReadOnly) {
-            // 남의 프로필 관전 모드일 때는 무조건 '닫기' 버튼 하나만 띄웁니다!
             btnArea.innerHTML = `
                 <button onclick="document.getElementById('detail-card-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100'); document.getElementById('detail-card-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-black rounded-xl active:scale-95 text-sm transition-all shadow-md border border-slate-500">
                     닫기
                 </button>
             `;
         } else {
-            // 내 인벤토리일 때만 장착/선물 버튼을 띄웁니다!
             if (isPartner) {
                 btnArea.innerHTML = `
                     <button onclick="GameSystem.Partner.giveGift('${id}')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-pink-300 font-bold rounded-xl border border-pink-500/30 active:scale-95 flex flex-col items-center justify-center shadow-md transition-all">
@@ -1521,13 +1496,13 @@ updateProfileEquipmentSlots() {
             }
         }
 
-        // 모달창 오픈 애니메이션
         const modal = document.getElementById('detail-card-modal');
         if (modal) {
             modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
             modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
         }
     },
+    // 👈 ui.js 끝나는 마지막 괄호입니다!
 // =========================================================================
     // 🌟 [전면 개편] 가챠샵 슬라이딩 배너 다중 모터 엔진!
     // =========================================================================
