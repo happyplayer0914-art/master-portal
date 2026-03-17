@@ -1636,10 +1636,11 @@ Partner: {
             avatarWrap.className = "w-full flex items-center justify-center relative z-0";
             spriteBox.style.cssText = "width: 100%; height: 160px; margin: 10px 0;";
             
+          // 💡 [수정] 아래쪽 여백(mb-6)을 대폭 줄여서(mb-2) 로그창과의 빈 공간 압축!
             battleCard.className = isBoss 
-                ? "glass-card battle-card p-4 sm:p-6 mb-6 text-center relative border-2 border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] bg-transparent overflow-hidden flex flex-col justify-between min-h-[380px]" 
-                : "glass-card battle-card p-4 sm:p-6 mb-6 text-center relative border border-purple-500/30 bg-transparent overflow-hidden flex flex-col justify-between min-h-[300px]";
-
+                ? "glass-card battle-card p-4 sm:p-6 mb-2 text-center relative border-2 border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] bg-transparent overflow-hidden flex flex-col justify-between min-h-[380px]" 
+                : "glass-card battle-card p-4 sm:p-6 mb-2 text-center relative border border-purple-500/30 bg-transparent overflow-hidden flex flex-col justify-between min-h-[300px]";
+                
             const monsterNameEl = document.getElementById('battle-monster-name');
             const hpBarContainer = document.getElementById('battle-monster-hp-bar').parentElement.parentElement;
             
@@ -2084,7 +2085,7 @@ window.onRewardEarned = function() {
             GameSystem.Battle.executePrestige(2); 
         }
     }
-    // 💀 4. 꼬리표가 'revive' 일 때
+   // 💀 4. 꼬리표가 'revive' 일 때
     else if (window.currentAdAction === 'revive') {
         const reviveModal = document.getElementById('revive-modal');
         if (reviveModal) {
@@ -2092,14 +2093,11 @@ window.onRewardEarned = function() {
             reviveModal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
         }
         
-        const deathModal = document.getElementById('death-modal');
-        if (deathModal) deathModal.classList.remove('active');
-        
         GameState.currentHp = GameState.getTotalStats().hp; 
         GameState.save();
         
         UIManager.triggerHaptic();
-        AudioEngine.sfx.coin(); 
+        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin(); 
 
         const battleScreen = document.getElementById('screen-rpg-battle');
         const isBattleScreen = battleScreen ? battleScreen.classList.contains('active') || battleScreen.style.display !== 'none' : false;
@@ -2107,13 +2105,18 @@ window.onRewardEarned = function() {
         if (isBattleScreen) {
             GameState.isBattling = true; 
             localStorage.setItem('master_in_battle', 'true'); 
-            const battleLog = document.getElementById('battle-log');
-            if (battleLog) battleLog.innerText = `✨ 기적적인 부활! 반격을 시작하세요!`; 
+            
+            // 💡 [추가] 부활 메시지를 새로운 스크롤 로그창에 예쁘게 띄워주기
+            GameSystem.Battle.addLog(`✨ 기적적인 부활! 반격을 시작하세요!`, "text-yellow-400 animate-pulse");
 
             GameSystem.Battle.updateBattleUI(); 
             
+            // 몬스터 공격 타이머 재가동
             clearInterval(GameSystem.Battle.battleInterval); 
             GameSystem.Battle.battleInterval = setInterval(() => GameSystem.Battle.monsterAttack(), 1500);
+            
+            // 🚨 [버그 수정 완료] 잠자고 있던 파트너 스킬 엔진 강제 기상!!
+            GameSystem.Battle.startPartnerSkillEngine();
             
             const btnAtk = document.getElementById('btn-attack');
             if (btnAtk) {
@@ -2130,9 +2133,8 @@ window.onRewardEarned = function() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
             const lobbyScreen = document.getElementById('screen-rpg'); 
-            if (lobbyScreen) {
-                lobbyScreen.classList.add('active');
-            } else {
+            if (lobbyScreen) lobbyScreen.classList.add('active');
+            else {
                 const homeScreen = document.getElementById('screen-home');
                 if(homeScreen) homeScreen.classList.add('active'); 
             }
