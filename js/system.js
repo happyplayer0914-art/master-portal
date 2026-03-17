@@ -576,14 +576,16 @@ Gacha: {
                         const commentText = currentMythic.flavorText || currentMythic.desc || "전설 속의 힘이 깨어납니다!";
                         const imgFile = currentMythic.img_cutin || currentMythic.img_full || currentMythic.img || '';
 
-                        // HTML 구조 세팅
+                      // HTML 구조 세팅
                         const cutinHTML = `
                             <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
                                 <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${commentText.replace(/\\n/g, '\n')}"</h2>
                                 <p class="text-[11px] sm:text-xs text-white/80 font-bold tracking-widest">- ${currentMythic.name} -</p>
                             </div>
                             
-                            <img id="mythic-cutin-illus" src="assets/${imgFolder}/${imgFile}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
+                            <img id="mythic-cutin-illus" src="assets/${imgFolder}/${imgFile}" 
+                                 class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[320px] h-auto bg-slate-900/90 rounded-2xl border-[3px] border-pink-500 shadow-[0_0_50px_rgba(236,72,153,0.8)] p-2 opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" 
+                                 onerror="this.style.display='none';">
                             
                             <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
                         `;
