@@ -1459,11 +1459,33 @@ updateProfileEquipmentSlots() {
             
             document.getElementById('dc-gear-stats').innerHTML = statsHtml;
 
+           // 👇 [버그 픽스] 이 부분을 통째로 덮어씌워 주세요!
+        if (isReadOnly) {
+            // 남의 프로필 관전 모드일 때는 무조건 '닫기' 버튼 하나만 띄웁니다!
             btnArea.innerHTML = `
-                <button onclick="GameSystem.Lobby.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'gear');" class="w-full py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white border border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
-                    ${isEquipped ? '장착 해제하기' : '장착하기'}
+                <button onclick="document.getElementById('detail-card-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100'); document.getElementById('detail-card-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-black rounded-xl active:scale-95 text-sm transition-all shadow-md border border-slate-500">
+                    닫기
                 </button>
             `;
+        } else {
+            // 내 인벤토리일 때만 장착/선물 버튼을 띄웁니다!
+            if (isPartner) {
+                btnArea.innerHTML = `
+                    <button onclick="GameSystem.Partner.giveGift('${id}')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-pink-300 font-bold rounded-xl border border-pink-500/30 active:scale-95 flex flex-col items-center justify-center shadow-md transition-all">
+                        <span class="text-xs flex items-center gap-1"><i class="fa-solid fa-gift"></i> 선물하기</span>
+                        <span class="text-[9px] text-cyan-400 bg-slate-900 px-2 mt-0.5 rounded-full border border-cyan-900">💎 50</span>
+                    </button>
+                    <button onclick="GameSystem.Partner.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'partner');" class="flex-[1.5] py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
+                        ${isEquipped ? '동행 해제하기' : '동행하기'}
+                    </button>
+                `;
+            } else {
+                btnArea.innerHTML = `
+                    <button onclick="GameSystem.Lobby.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'gear');" class="w-full py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white border border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
+                        ${isEquipped ? '장착 해제하기' : '장착하기'}
+                    </button>
+                `;
+            }
         }
 
         // 모달창 오픈 애니메이션
