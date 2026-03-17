@@ -675,6 +675,30 @@
     <div class="flex items-center justify-between mb-2 px-1">
             <span class="text-xs font-bold text-slate-300">🗡️ 전설 장비 소환</span>
         </div>
+        
+        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 mb-3 shadow-inner">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-pink-300 font-bold">✨ 불운 구제 (랜덤 신화)</span>
+                <span class="text-[10px] text-slate-300"><span id="pity-gear-mythic-text">0</span> / 200</span>
+            </div>
+            <div class="flex gap-2 items-center mb-3">
+                <div class="flex-1 bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                    <div id="pity-gear-mythic-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full transition-all" style="width: 0%"></div>
+                </div>
+                <button id="btn-pity-gear-mythic" onclick="GameSystem.Gacha.claimPity200('gear')" class="text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold" disabled>수령</button>
+            </div>
+            
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-yellow-300 font-bold">👑 마스터의 선택 (신화 선택)</span>
+                <span class="text-[10px] text-slate-300"><span id="pity-gear-select-text">0</span> / 500</span>
+            </div>
+            <div class="flex gap-2 items-center">
+                <div class="flex-1 bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                    <div id="pity-gear-select-bar" class="bg-gradient-to-r from-yellow-500 to-orange-500 h-full transition-all" style="width: 0%"></div>
+                </div>
+                <button id="btn-pity-gear-select" onclick="GameSystem.Gacha.openSelectModal('gear')" class="text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold" disabled>선택</button>
+            </div>
+        </div>
         <div class="grid grid-cols-2 gap-3 mb-4">
             <button onclick="GameSystem.Gacha.performGacha(1, 'gear')" class="py-4 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(15,23,42,1)] active:shadow-[0_0px_0_rgba(15,23,42,1)] active:translate-y-[4px] transition-all">
                 <span class="text-white mb-1">1회 소환</span>
@@ -753,7 +777,29 @@
             <span class="text-xs font-bold text-pink-300">🌸 미소녀 파트너 영입</span>
             <span class="text-[10px] text-pink-500 font-bold bg-pink-900/30 px-2 py-0.5 rounded-full border border-pink-500/30 animate-pulse">신화 확률 UP!</span>
         </div>
-      
+      <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 mb-3 shadow-inner">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-pink-300 font-bold">✨ 불운 구제 (랜덤 신화)</span>
+                <span class="text-[10px] text-slate-300"><span id="pity-partner-mythic-text">0</span> / 200</span>
+            </div>
+            <div class="flex gap-2 items-center mb-3">
+                <div class="flex-1 bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                    <div id="pity-partner-mythic-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full transition-all" style="width: 0%"></div>
+                </div>
+                <button id="btn-pity-partner-mythic" onclick="GameSystem.Gacha.claimPity200('partner')" class="text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold" disabled>수령</button>
+            </div>
+            
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-yellow-300 font-bold">👑 마스터의 선택 (신화 선택)</span>
+                <span class="text-[10px] text-slate-300"><span id="pity-partner-select-text">0</span> / 500</span>
+            </div>
+            <div class="flex gap-2 items-center">
+                <div class="flex-1 bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                    <div id="pity-partner-select-bar" class="bg-gradient-to-r from-yellow-500 to-orange-500 h-full transition-all" style="width: 0%"></div>
+                </div>
+                <button id="btn-pity-partner-select" onclick="GameSystem.Gacha.openSelectModal('partner')" class="text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold" disabled>선택</button>
+            </div>
+        </div>
      
         <div class="grid grid-cols-2 gap-3 mb-6">
             <button onclick="GameSystem.Gacha.performGacha(1, 'partner')" class="py-4 bg-gradient-to-b from-pink-900/40 to-slate-900 border border-pink-500/40 hover:from-pink-800/50 hover:to-slate-800 rounded-2xl font-black text-base flex flex-col items-center justify-center shadow-[0_4px_0_rgba(131,24,67,1)] active:shadow-[0_0px_0_rgba(131,24,67,1)] active:translate-y-[4px] transition-all">
@@ -1225,6 +1271,18 @@
 <script src="js/ui.js"></script>
 
 <script src="js/main.js"></script>
+
+    <div id="mythic-select-modal" class="fixed inset-0 z-[1900] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-4">
+    <button onclick="document.getElementById('mythic-select-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100'); document.getElementById('mythic-select-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="absolute top-6 right-6 text-slate-400 hover:text-white text-4xl font-light z-50">&times;</button>
+    <div class="w-full max-w-sm flex flex-col gap-3">
+        <div class="text-center mb-2">
+            <h3 class="text-2xl font-black text-yellow-400 drop-shadow-md">👑 신화 선택권</h3>
+            <p class="text-[11px] text-slate-300">원하는 신화를 선택하여 확정 영입하세요!</p>
+        </div>
+        <div id="mythic-select-list" class="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
+            </div>
+    </div>
+</div>
 </body>
 </html>
 
