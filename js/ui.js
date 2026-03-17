@@ -2,6 +2,33 @@
 // 4. UI MANAGER
 // =========================================================================
 const UIManager = {
+
+    // ui.js의 UIManager 안에 추가!
+    
+    openMailboxModal() {
+        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+        if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+        
+        const modal = document.getElementById('mailbox-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
+            
+            // 창을 열 때 우편 목록을 그립니다!
+            if (window.GameSystem && GameSystem.Mail) {
+                GameSystem.Mail.renderMailList();
+            }
+        }
+    },
+
+    closeMailboxModal() {
+        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+        const modal = document.getElementById('mailbox-modal');
+        if (modal) {
+            modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'active');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        }
+    },
     
 // 🌟 [신규 추가] 천장 게이지 및 버튼 업데이트 엔진
     updateGachaPityUI() {
