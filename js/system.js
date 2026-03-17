@@ -2645,7 +2645,7 @@ const AssetPreloader = {
     }
 };
 // =========================================================================
-// 🌟 [신규] 파이어베이스 프로필 & 좋아요 서버 동기화 엔진
+// 🌟 파이어베이스 프로필 & 좋아요 서버 동기화 엔진
 // =========================================================================
 GameSystem.Profile = {
     async syncToServer() {
@@ -2653,7 +2653,6 @@ GameSystem.Profile = {
         try {
             const userRef = window.doc(window.db, "users", GameState.nickname);
             
-            // 🚨 [대수술 완료] 구조를 완벽하게 분리하고 찌꺼기를 날려버렸습니다!
             await window.setDoc(userRef, {
                 nickname: GameState.nickname,
                 totalStats: GameState.getTotalStats(), 
@@ -2663,7 +2662,6 @@ GameSystem.Profile = {
                 prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
                 
-                // 장착 중인 아이템과 파트너 ID 모음
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
                     armor: GameState.equippedArmor || null,
@@ -2671,16 +2669,20 @@ GameSystem.Profile = {
                     partner: GameState.equippedPartner || null
                 },
                 
-                // 장착 중인 아이템의 강화 수치 모음
                 itemUpgrades: {
                     weapon: GameState.equippedWeapon ? (GameState.itemUpgrades[GameState.equippedWeapon] || 0) : 0,
                     armor: GameState.equippedArmor ? (GameState.itemUpgrades[GameState.equippedArmor] || 0) : 0,
                     accessory: GameState.equippedAccessory ? (GameState.itemUpgrades[GameState.equippedAccessory] || 0) : 0
                 },
                 
-                // 🌸 [추가 완료] 장착 중인 파트너의 레벨 모음!
+                // 🌸 장착 중인 파트너의 레벨 모음!
                 partnerLevels: {
                     [GameState.equippedPartner || 'none']: GameState.equippedPartner ? (GameState.partnerLevels[GameState.equippedPartner] || 0) : 0
+                },
+                
+                // 👇 [여기에 쏙 들어갑니다!] 타 유저에게 내 호감도 일러스트를 보여주기 위해 서버에 전송!
+                partnerAffectionLevel: {
+                    [GameState.equippedPartner || 'none']: GameState.equippedPartner ? (GameState.partnerAffectionLevel[GameState.equippedPartner] || 1) : 1
                 },
                 
                 lastUpdated: window.serverTimestamp()
@@ -2735,4 +2737,4 @@ GameSystem.Profile = {
         }
     }
 };
-// 🚨 (이 밑으로는 아무 코드도 없어야 합니다! 파일 끝!)
+// 🚨 (이 밑으로는 아무 코드도 없어야 합니다! system.js 파일 끝!)
