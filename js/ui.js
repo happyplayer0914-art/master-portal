@@ -105,6 +105,8 @@ const UIManager = {
         if (typeof GameState !== 'undefined') {
             if (typeof GameState.load === 'function') GameState.load(); 
             this.updateCurrencyUI(); 
+            // 👇 [여기 추가!] 게임 켤 때 천장 게이지도 쫙! 불러와서 그려줍니다.
+            if (this.updateGachaPityUI) this.updateGachaPityUI();
             this.applyAvatarSkin(); 
             this.initCheckinButton(); 
             this.updateIdleUI(); 
