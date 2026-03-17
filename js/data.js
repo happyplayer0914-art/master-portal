@@ -219,18 +219,169 @@ const GameData = {
             skillName: '뇌명의 축복', skillDesc: '10초마다 4초 동안 마스터의 크리티컬 확률 40% 대폭 상승',
             flavorText: '"벼락이여, 마스터의 검에 치명적인 힘을 깃드소서!"'
         },
+
+        // ==========================================
+        // 🌟 [MYTHIC] MBTI 신화 등급 전용 파트너 (16종)
+        // ==========================================
         
-      // 🌟 6. 빛 (Light) - 신화 파트너 예시
-        'pt_m1': { 
-            id: 'pt_m1', name: '차원의 마녀 노아', rarity: 'mythic', emoji: '🌌',
-            img_icon: 'noah_icon.png',
-            img_sd: 'partner_noah_sd.png', // 인벤토리용 쪼꼬미 이미지
-            img_full: 'partner_noah_full.png', // 👈 내 정보(프로필) 창에 세워둘 얌전한 스탠딩 이미지
-            img_cutin: 'partner_noah_cutin.png', // 👈 [신규 추가!] 가챠 연출 때 뽝! 하고 나올 역동적인 컷인 이미지
-            atkMult: 2.00, hpMult: 1.50, critRate: 15, critDmg: 50, vamp: 10,
-            element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 5000,
-            skillName: '심연의 빛', skillDesc: '10초마다 5초간 적의 데미지와 명중률 30% 감소 (약화)',
-            flavorText: '"후후... 이 우주에서 나를 다룰 수 있는 건 당신뿐이야."'
+        // 👑 ENTJ: 전장을 지배하는 군주
+        'pt_m_entj': { 
+            id: 'pt_m_entj', name: '전장의 군주 레온', rarity: 'mythic', emoji: '👑',
+            img_icon: 'partner_entj_icon.png', img_sd: 'partner_entj_sd.png', img_full: 'partner_entj_full.png', img_cutin: 'partner_entj_cutin.png',
+            atkMult: 2.50, hpMult: 1.50, critRate: 20, critDmg: 100, spd: 10,
+            element: 'fire', skillCooldown: 12000, skillValue: 300, skillDuration: 5000,
+            skillName: '제국의 위엄', skillDesc: '12초마다 5초간 마스터의 공격력을 폭발적으로 증가시키고 적에게 강력한 화염 피해',
+            flavorText: '"나의 깃발 아래, 패배란 존재하지 않는다. 전군 돌격!"'
+        },
+        
+        // 📖 INTJ: 심연의 대마법사
+        'pt_m_intj': { 
+            id: 'pt_m_intj', name: '심연의 마법사 모르가나', rarity: 'mythic', emoji: '📖',
+            img_icon: 'partner_intj_icon.png', img_sd: 'partner_intj_sd.png', img_full: 'partner_intj_full.png', img_cutin: 'partner_intj_cutin.png',
+            atkMult: 3.00, hpMult: 1.20, critRate: 15, def: 20, eva: 10,
+            element: 'ice', skillCooldown: 10000, skillValue: 500, skillDuration: 2000,
+            skillName: '절대 영도', skillDesc: '10초마다 적에게 500%의 마법 피해를 입히고 2초간 꽁꽁 얼려버림(행동 불가)',
+            flavorText: '"모든 변수는 이미 내 계산 안에 있어. 끝내지."'
+        },
+        
+        // 🌿 INFP: 달빛의 은둔술사
+        'pt_m_infp': { 
+            id: 'pt_m_infp', name: '은둔술사 루나', rarity: 'mythic', emoji: '🌿',
+            img_icon: 'partner_infp_icon.png', img_sd: 'partner_infp_sd.png', img_full: 'partner_infp_full.png', img_cutin: 'partner_infp_cutin.png',
+            atkMult: 1.50, hpMult: 2.50, vamp: 25, eva: 15, def: 15,
+            element: 'light', skillCooldown: 8000, skillValue: 40, skillDuration: 4000,
+            skillName: '달빛의 축복', skillDesc: '8초마다 4초간 마스터의 피흡 능력을 극대화하고 적의 명중률 감소',
+            flavorText: '"당신의 상처는 부드러운 달빛이 보듬어 줄 거예요."'
+        },
+        
+        // 🪓 ESTP: 폭풍의 무법자
+        'pt_m_estp': { 
+            id: 'pt_m_estp', name: '폭풍의 무법자 잭', rarity: 'mythic', emoji: '🌪️',
+            img_icon: 'partner_estp_icon.png', img_sd: 'partner_estp_sd.png', img_full: 'partner_estp_full.png', img_cutin: 'partner_estp_cutin.png',
+            atkMult: 2.20, hpMult: 1.30, critRate: 25, critDmg: 150, spd: 30,
+            element: 'air', skillCooldown: 6000, skillValue: 200, skillDuration: 0,
+            skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해',
+            flavorText: '"하하하! 누가 날 막겠다고? 바람처럼 쓸어버려 주마!"'
+        },
+        
+        // 🛡️ ISFJ: 성소를 지키는 가디언
+        'pt_m_isfj': { 
+            id: 'pt_m_isfj', name: '가디언 미카엘', rarity: 'mythic', emoji: '🛡️',
+            img_icon: 'partner_isfj_icon.png', img_sd: 'partner_isfj_sd.png', img_full: 'partner_isfj_full.png', img_cutin: 'partner_isfj_cutin.png',
+            atkMult: 1.30, hpMult: 3.00, def: 40, vamp: 15, eva: 5,
+            element: 'earth', skillCooldown: 12000, skillValue: 50, skillDuration: 6000,
+            skillName: '절대 수호진', skillDesc: '12초마다 마스터 최대 체력의 50%만큼 무적에 가까운 쉴드 생성',
+            flavorText: '"걱정 마십시오. 제 목숨을 바쳐서라도 성소와 당신을 지키겠습니다."'
+        },
+        
+        // ⚔️ ISTJ: 철의 규율 기사단장
+        'pt_m_istj': { 
+            id: 'pt_m_istj', name: '기사단장 발터', rarity: 'mythic', emoji: '⚔️',
+            img_icon: 'partner_istj_icon.png', img_sd: 'partner_istj_sd.png', img_full: 'partner_istj_full.png', img_cutin: 'partner_istj_cutin.png',
+            atkMult: 1.80, hpMult: 2.20, def: 35, critRate: 15, spd: 5,
+            element: 'earth', skillCooldown: 10000, skillValue: 250, skillDuration: 3000,
+            skillName: '처단과 심판', skillDesc: '10초마다 적에게 방어력을 무시하는 일격을 날리고 3초간 기절시킴',
+            flavorText: '"원칙과 규율에 따라, 심연의 존재를 처단한다."'
+        },
+        
+        // 🎵 ISFP: 바람의 음유시인
+        'pt_m_isfp': { 
+            id: 'pt_m_isfp', name: '음유시인 아리엘', rarity: 'mythic', emoji: '🎵',
+            img_icon: 'partner_isfp_icon.png', img_sd: 'partner_isfp_sd.png', img_full: 'partner_isfp_full.png', img_cutin: 'partner_isfp_cutin.png',
+            atkMult: 1.60, hpMult: 1.80, eva: 35, spd: 20, def: 10,
+            element: 'air', skillCooldown: 9000, skillValue: 30, skillDuration: 4000,
+            skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프',
+            flavorText: '"제 노래가 바람을 타고 당신의 검 끝에 닿기를..."'
+        },
+        
+        // 🔮 INTP: 미궁의 연금술사
+        'pt_m_intp': { 
+            id: 'pt_m_intp', name: '연금술사 호엔하임', rarity: 'mythic', emoji: '🧪',
+            img_icon: 'partner_intp_icon.png', img_sd: 'partner_intp_sd.png', img_full: 'partner_intp_full.png', img_cutin: 'partner_intp_cutin.png',
+            atkMult: 2.30, hpMult: 1.50, critRate: 20, def: 20, eva: 15,
+            element: 'lightning', skillCooldown: 11000, skillValue: 400, skillDuration: 0,
+            skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해',
+            flavorText: '"모든 물질은 분해되고 재조립되지. 너도 예외는 아니야."'
+        },
+        
+        // 🥷 ISTP: 그림자의 암살자
+        'pt_m_istp': { 
+            id: 'pt_m_istp', name: '그림자 섀도우', rarity: 'mythic', emoji: '🥷',
+            img_icon: 'partner_istp_icon.png', img_sd: 'partner_istp_sd.png', img_full: 'partner_istp_full.png', img_cutin: 'partner_istp_cutin.png',
+            atkMult: 2.80, hpMult: 1.10, critRate: 35, critDmg: 200, spd: 25,
+            element: 'air', skillCooldown: 7000, skillValue: 300, skillDuration: 0,
+            skillName: '치명적 포착', skillDesc: '7초마다 그림자 속에서 나타나 적의 급소를 찌르는 강력한 일격',
+            flavorText: '"소리 없이 다가가, 확실하게 끝낸다."'
+        },
+        
+        // 💃 ESFP: 환희의 무희
+        'pt_m_esfp': { 
+            id: 'pt_m_esfp', name: '무희 카르멘', rarity: 'mythic', emoji: '💃',
+            img_icon: 'partner_esfp_icon.png', img_sd: 'partner_esfp_sd.png', img_full: 'partner_esfp_full.png', img_cutin: 'partner_esfp_cutin.png',
+            atkMult: 1.90, hpMult: 1.60, eva: 25, spd: 35, critRate: 15,
+            element: 'fire', skillCooldown: 8000, skillValue: 20, skillDuration: 5000,
+            skillName: '매혹의 불꽃무', skillDesc: '8초마다 5초간 화려한 춤으로 적을 현혹하여 공격력을 20% 감소시킴',
+            flavorText: '"이 전장은 나의 스테이지야! 다들 나만 보라고~!"'
+        },
+        
+        // 🧭 ENFP: 혜성의 탐험가
+        'pt_m_enfp': { 
+            id: 'pt_m_enfp', name: '탐험가 핀', rarity: 'mythic', emoji: '🧭',
+            img_icon: 'partner_enfp_icon.png', img_sd: 'partner_enfp_sd.png', img_full: 'partner_enfp_full.png', img_cutin: 'partner_enfp_cutin.png',
+            atkMult: 1.70, hpMult: 1.90, spd: 40, eva: 20, vamp: 10,
+            element: 'lightning', skillCooldown: 9000, skillValue: 150, skillDuration: 3000,
+            skillName: '별똥별 러시', skillDesc: '9초마다 혜성처럼 돌진하여 적에게 피해를 주고 3초간 감전',
+            flavorText: '"새로운 세상이 저기에 있어! 빨리 가보자, 마스터!"'
+        },
+        
+        // ☄️ ENTP: 혼돈의 마도공학자
+        'pt_m_entp': { 
+            id: 'pt_m_entp', name: '마도공학자 징크스', rarity: 'mythic', emoji: '⚙️',
+            img_icon: 'partner_entp_icon.png', img_sd: 'partner_entp_sd.png', img_full: 'partner_entp_full.png', img_cutin: 'partner_entp_cutin.png',
+            atkMult: 3.20, hpMult: 1.20, critRate: 15, critDmg: 250, spd: 15,
+            element: 'lightning', skillCooldown: 13000, skillValue: 600, skillDuration: 0,
+            skillName: '하이퍼 레이저', skillDesc: '13초마다 오버클럭된 차원 파괴포를 발사해 전장을 싹쓸이함',
+            flavorText: '"이게 터질지 안 터질지는 나도 몰라! 일단 쏴보고 생각하자고!"'
+        },
+        
+        // 🚩 ESTJ: 강철의 총사령관
+        'pt_m_estj': { 
+            id: 'pt_m_estj', name: '총사령관 빅토리아', rarity: 'mythic', emoji: '🚩',
+            img_icon: 'partner_estj_icon.png', img_sd: 'partner_estj_sd.png', img_full: 'partner_estj_full.png', img_cutin: 'partner_estj_cutin.png',
+            atkMult: 2.10, hpMult: 2.40, def: 30, spd: 10, critRate: 10,
+            element: 'fire', skillCooldown: 15000, skillValue: 30, skillDuration: 6000,
+            skillName: '전군 총공세', skillDesc: '15초마다 6초 동안 마스터의 모든 스탯(공/방/속)을 대폭 상승시킴',
+            flavorText: '"진형을 유지하라! 나를 따르는 자에게 영광이 있을 것이다!"'
+        },
+        
+        // 🔰 ESFJ: 여명의 성기사단장
+        'pt_m_esfj': { 
+            id: 'pt_m_esfj', name: '성기사단장 솔라', rarity: 'mythic', emoji: '🔰',
+            img_icon: 'partner_esfj_icon.png', img_sd: 'partner_esfj_sd.png', img_full: 'partner_esfj_full.png', img_cutin: 'partner_esfj_cutin.png',
+            atkMult: 1.40, hpMult: 2.80, def: 35, vamp: 20, eva: 10,
+            element: 'light', skillCooldown: 11000, skillValue: 30, skillDuration: 4000,
+            skillName: '여명의 구원', skillDesc: '11초마다 마스터의 체력을 즉시 회복하고 4초간 받는 피해 감소',
+            flavorText: '"어둠이 짙을수록 여명은 더욱 찬란하게 빛나는 법입니다."'
+        },
+        
+        // 🪄 ENFJ: 태양의 선지자
+        'pt_m_enfj': { 
+            id: 'pt_m_enfj', name: '선지자 아폴로', rarity: 'mythic', emoji: '☀️',
+            img_icon: 'partner_enfj_icon.png', img_sd: 'partner_enfj_sd.png', img_full: 'partner_enfj_full.png', img_cutin: 'partner_enfj_cutin.png',
+            atkMult: 1.80, hpMult: 2.20, critRate: 20, vamp: 15, spd: 15,
+            element: 'fire', skillCooldown: 10000, skillValue: 40, skillDuration: 5000,
+            skillName: '태양의 찬가', skillDesc: '10초마다 5초간 적을 불태워 지속 피해를 입히고 마스터의 속도를 고양시킴',
+            flavorText: '"모두가 하나 된 마음으로 노래할 때, 태양은 응답할 것입니다."'
+        },
+        
+        // 🔮 INFJ: 별을 읽는 예언자
+        'pt_m_infj': { 
+            id: 'pt_m_infj', name: '예언자 스텔라', rarity: 'mythic', emoji: '🌌',
+            img_icon: 'partner_infj_icon.png', img_sd: 'partner_infj_sd.png', img_full: 'partner_infj_full.png', img_cutin: 'partner_infj_cutin.png',
+            atkMult: 2.00, hpMult: 1.80, eva: 40, def: 15, critDmg: 80,
+            element: 'light', skillCooldown: 14000, skillValue: 100, skillDuration: 3000,
+            skillName: '운명의 궤적', skillDesc: '14초마다 3초간 마스터의 회피율을 극한으로 끌어올려 공격을 흘려보냄',
+            flavorText: '"별들은 이미 이 전투의 결말을 알고 있답니다."'
         }
     }, // <-- 요 쉼표(,) 필수! 바로 밑에 cosmetics: { 가 이어집니다.
 
