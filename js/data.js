@@ -191,6 +191,7 @@ const GameData = {
             img_cutin: 'acc_infj_cutin.png', 
             flavorText: '"별들은 이미 이 전투의 결말을 모두 알고 있답니다."' 
         },
+        },// 👈👈👈 [바로 이거!!!] 아이템 가방(items)을 닫아주는 마법의 괄호 추가!
     monsters: {
         // 💡 [테마별 구역 시스템] 10층 단위로 등장하는 몬스터가 바뀝니다!
         normal: {
