@@ -483,10 +483,10 @@ Gacha: {
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                if (roll < 0.8) rarity = 'mythic';               
-                else if (roll < 0.8 + 2.5) rarity = 'legendary'; 
-                else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; 
-                else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
+                if (roll < 50) rarity = 'mythic';               
+                else if (roll < 50 + 2.5) rarity = 'legendary'; 
+                else if (roll < 50 + 2.5 + 7.5) rarity = 'epic'; 
+                else if (roll < 50 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
                 else rarity = 'common';                          
                 
                 if (type === 'partner') {
