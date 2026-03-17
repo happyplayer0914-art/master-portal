@@ -1269,6 +1269,164 @@ Ranking: {
             } catch(e) { console.error(e); list.innerHTML = '<div class="text-center py-8 text-red-400">명예의 전당을 불러오지 못했습니다.</div>'; }
         }
     }, // 🚨 [랭킹 끝]
+
+// system.js 안의 GameSystem 객체 내부 (Chat이나 Ranking 아래쪽에 추가!)
+
+    Mail: {
+        mailList: [], // 서버에서 날아온 우편을 담아둘 가방
+        unsubMail: null,
+
+        init() {
+            if (!window.db) return;
+            
+            // 💡 파이어베이스의 "mails" 폴더에서 편지를 최신순으로 가져옵니다!
+            const qMail = window.query(window.collection(window.db, "mails"), window.orderBy("timestamp", "desc"), window.limit(20));
+            
+            this.unsubMail = window.onSnapshot(qMail, (snapshot) => {
+                this.mailList = [];
+                let hasUnread = false;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id; // 파이어베이스가 만든 고유 문서 번호
+                    this.mailList.push(data);
+
+                    // 💡 내 수첩(claimedMails)에 없는 번호라면 = 안 읽은 우편!
+                    if (!GameState.claimedMails) GameState.claimedMails = [];
+                    if (!GameState.claimedMails.includes(data.id)) {
+                        hasUnread = true;
+                    }
+                });
+
+                // 안 읽은 게 있으면 상단 헤더에 빨간 점(Red Dot) 켜기!
+                const notiDot = document.getElementById('mail-noti-dot');
+                if (notiDot) {
+                    if (hasUnread) notiDot.classList.remove('hidden');
+                    else notiDot.classList.add('hidden');
+                }
+
+                // 만약 유저가 우편함 창을 열어보고 있는 중이라면 실시간으로 싹 다시 그려줌!
+                const modal = document.getElementById('mailbox-modal');
+                if (modal && modal.classList.contains('active')) {
+                    this.renderMailList();
+                }
+            });
+        },
+
+        renderMailList() {
+            const container = document.getElementById('mailbox-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (this.mailList.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-slate-500 text-xs font-bold">도착한 우편이 없습니다. 텅~ 📭</div>';
+                return;
+            }
+
+            this.mailList.forEach(mail => {
+                if (!GameState.claimedMails) GameState.claimedMails = [];
+                const isClaimed = GameState.claimedMails.includes(mail.id);
+                
+                // 보상 딱지 만들기 (골드나 젬이 있으면 그려줌)
+                let rewardHtml = '';
+                if (mail.gold) rewardHtml += `<span class="text-yellow-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">🪙 ${mail.gold.toLocaleString()}</span>`;
+                if (mail.gem) rewardHtml += `<span class="text-cyan-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">💎 ${mail.gem.toLocaleString()}</span>`;
+                
+                const dateStr = mail.timestamp ? new Date(mail.timestamp.toMillis()).toLocaleDateString() : '방금 전';
+
+                // 버튼 색상 바꾸기 (받은 건 회색, 안 받은 건 초록색 펄스!)
+                const btnHtml = isClaimed 
+                    ? `<button disabled class="px-4 py-2.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded-xl border border-slate-700 w-full mt-2 cursor-not-allowed transition-all">수령 완료</button>`
+                    : `<button onclick="GameSystem.Mail.claimReward('${mail.id}')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[11px] font-black rounded-xl border border-emerald-400 w-full mt-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] animate-pulse active:scale-95 transition-all">보상 받기</button>`;
+
+                container.innerHTML += `
+                    <div class="glass-card p-4 border ${isClaimed ? 'border-slate-700/50 bg-slate-900/40 opacity-70' : 'border-emerald-500/50 bg-slate-800/80'} flex flex-col gap-1 transition-all">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h4 class="text-[13px] font-black text-white flex items-center gap-1.5"><span class="text-emerald-400 text-base">💌</span> ${mail.title || '운영자 우편'}</h4>
+                            <span class="text-[9px] text-slate-400 font-bold">${dateStr}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 leading-snug break-keep mb-3 whitespace-pre-wrap">${mail.content || '보상이 도착했습니다.'}</p>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            ${rewardHtml}
+                        </div>
+                        ${btnHtml}
+                    </div>
+                `;
+            });
+        },
+
+        claimReward(mailId) {
+            if (!GameState.claimedMails) GameState.claimedMails = [];
+            if (GameState.claimedMails.includes(mailId)) return; // 해커 방어 (연타 방지)
+
+            const mail = this.mailList.find(m => m.id === mailId);
+            if (!mail) return;
+
+            // 보상 지급!
+            if (mail.gold) GameState.gold += Number(mail.gold);
+            if (mail.gem) GameState.gem += Number(mail.gem);
+
+            // 수첩에 번호 적고 세이브
+            GameState.claimedMails.push(mailId);
+            GameState.save();
+
+            // 효과음 & 이펙트
+            if (window.UIManager) {
+                UIManager.updateCurrencyUI();
+                if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+                UIManager.showToast(`🎁 우편 보상을 수령했습니다!`);
+            }
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+
+            // UI 갱신 (빨간 점 끄기 + 버튼 회색으로 바꾸기)
+            this.checkNotiDot();
+            this.renderMailList();
+        },
+
+        claimAll() {
+            if (!GameState.claimedMails) GameState.claimedMails = [];
+            let claimedCount = 0;
+            let totalGold = 0;
+            let totalGem = 0;
+
+            this.mailList.forEach(mail => {
+                if (!GameState.claimedMails.includes(mail.id)) {
+                    if (mail.gold) totalGold += Number(mail.gold);
+                    if (mail.gem) totalGem += Number(mail.gem);
+                    GameState.claimedMails.push(mail.id);
+                    claimedCount++;
+                }
+            });
+
+            if (claimedCount === 0) {
+                return UIManager.showToast("새로 받을 보상이 없습니다. 📭");
+            }
+
+            GameState.gold += totalGold;
+            GameState.gem += totalGem;
+            GameState.save();
+
+            if (window.UIManager) {
+                UIManager.updateCurrencyUI();
+                if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+                UIManager.showToast(`🎁 한 번에 수령 완료! (🪙 +${totalGold} / 💎 +${totalGem})`);
+            }
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
+
+            this.checkNotiDot();
+            this.renderMailList();
+        },
+
+        checkNotiDot() {
+            const notiDot = document.getElementById('mail-noti-dot');
+            if (!notiDot) return;
+            
+            const hasUnread = this.mailList.some(mail => !GameState.claimedMails.includes(mail.id));
+            if (hasUnread) notiDot.classList.remove('hidden');
+            else notiDot.classList.add('hidden');
+        }
+    },
+        
 // 💬 [개편] 실시간 다중 채널 채팅 & 공지 시스템!
    // ... (기존 GameSystem 코드) ...
     Chat: {
@@ -2703,7 +2861,11 @@ window.onRewardEarned = function() {
 };
 
 // 게임 시작 후 2초 뒤에 채팅 수신기 자동 가동!
-setTimeout(() => { if (window.db && GameSystem.Chat) GameSystem.Chat.init(); }, 2000);
+setTimeout(() => { 
+    if (window.db && GameSystem.Chat) GameSystem.Chat.init(); 
+    // 👇 이 줄을 추가해줘!
+    if (window.db && GameSystem.Mail) GameSystem.Mail.init(); 
+}, 2000);
 
 // 🌟 [초거대 글로벌 프리로더 엔진] - 몬스터, 배경 싹쓸이 캐싱 (가비지 컬렉터 방어 탑재!)
 const AssetPreloader = {
