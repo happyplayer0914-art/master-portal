@@ -1611,7 +1611,7 @@ Ranking: {
             this.checkAndRender();
         },
 
-        claimAll() {
+       claimAll() {
             if (!GameState.claimedMails) GameState.claimedMails = [];
             let claimedCount = 0;
 
@@ -1637,8 +1637,29 @@ Ranking: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
 
             this.checkAndRender();
+        }, // 👈 [수정됨] 여기서 Mail이 닫히면 안 돼! claimAll만 닫고 콤마(,)로 연결!
+
+        // 🌟 [신규 추가] 보상을 받은 우편을 내 우편함에서 영구 삭제(숨김)하는 기능!
+        deleteMail(mailId) {
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            
+            if (!GameState.deletedMails) GameState.deletedMails = [];
+            
+            // 삭제 리스트에 등록!
+            if (!GameState.deletedMails.includes(mailId)) {
+                GameState.deletedMails.push(mailId);
+                GameState.save();
+                
+                if (window.UIManager) {
+                    UIManager.triggerHaptic();
+                    UIManager.showToast("🗑️ 우편을 깔끔하게 삭제했습니다!");
+                }
+                
+                // 화면 즉시 새로고침해서 우편 날려버리기!
+                this.checkAndRender(); 
+            }
         }
-    },
+    }, // <-- 👈 여기가 진짜 Mail 덩어리 끝나는 괄호!
         
 // 💬 [개편] 실시간 다중 채널 채팅 & 공지 시스템!
    // ... (기존 GameSystem 코드) ...
