@@ -2141,7 +2141,7 @@ Ranking: {
             this.startPartnerSkillEngine();
         },
 
-        startPartnerSkillEngine() {
+       startPartnerSkillEngine() {
             clearInterval(this.partnerInterval);
             const ptId = GameState.equippedPartner;
             if (!ptId || !GameData.partners || !GameData.partners[ptId]) return;
@@ -2149,11 +2149,19 @@ Ranking: {
             const pt = GameData.partners[ptId];
             if (!pt.element || !pt.skillCooldown) return;
 
+            // 💖 [호감도 보너스 1] 쿨타임 감소 (1렙당 2% -> 10렙이면 20% 더 빠르게 쏩니다!)
+            const affLv = GameState.partnerAffectionLevel[ptId] || 1;
+            const cdReduction = 1.0 - (affLv * 0.02);
+            const finalCooldown = pt.skillCooldown * cdReduction;
+
             this.partnerInterval = setInterval(() => {
                 if (!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
                 
                 const stats = GameState.getTotalStats();
                 const now = Date.now();
+
+                // 💖 [호감도 보너스 2] 스킬 위력 증폭 (1렙당 5% -> 10렙이면 50% 쎄집니다!)
+                const pMult = 1.0 + (affLv * 0.05);
 
                 const ptSlot = document.getElementById('battle-partner-slot');
                 if (ptSlot) {
@@ -2162,11 +2170,11 @@ Ranking: {
                 }
 
                 this.showDamageText('battle-partner-slot', `[${pt.skillName}]`, 'text-pink-300 font-black text-[10px] sm:text-xs drop-shadow-md whitespace-nowrap -mt-6');
-                AudioEngine.sfx.equip(); 
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
 
                 switch(pt.element) {
                     case 'fire': 
-                        let fireDmg = Math.floor(stats.atk * (pt.skillValue / 100));
+                        let fireDmg = Math.floor(stats.atk * (pt.skillValue / 100) * pMult);
                         this.monsterCurrentHp -= fireDmg;
                         this.showDamageText('monster-avatar-wrap', fireDmg, 'text-orange-500 font-black text-xl drop-shadow-md');
                         this.addLog(`🔥 [${pt.name}] ${pt.skillName}! ${fireDmg} 피해!`, 'text-orange-400');
@@ -2175,35 +2183,36 @@ Ranking: {
                         break;
                         
                     case 'air': 
-                        let airDmg = stats.atk; 
+                        let airDmg = Math.floor(stats.atk * pMult); 
                         this.monsterCurrentHp -= airDmg;
                         this.showDamageText('monster-avatar-wrap', airDmg, 'text-teal-300 font-black text-2xl drop-shadow-md');
                         this.addLog(`🌪️ [${pt.name}] ${pt.skillName}! ${airDmg} 추가 피해!`, 'text-teal-300');
                         break;
                         
                     case 'ice': 
-                        let iceDmg = Math.floor(stats.atk * (pt.skillValue / 100));
+                        let iceDmg = Math.floor(stats.atk * (pt.skillValue / 100) * pMult);
                         this.monsterCurrentHp -= iceDmg;
-                        this.battleState.stunUntil = now + pt.skillDuration; 
+                        // 빙결 시간도 호감도에 따라 늘어납니다!
+                        this.battleState.stunUntil = now + (pt.skillDuration * pMult); 
                         this.showDamageText('monster-avatar-wrap', "FROZEN!", 'text-cyan-300 font-black text-2xl drop-shadow-[0_0_10px_cyan]');
                         this.addLog(`❄️ [${pt.name}] ${pt.skillName}! 몬스터 빙결!`, 'text-cyan-300');
                         break;
 
                     case 'earth': 
-                        let shieldAmt = Math.floor(stats.hp * (pt.skillValue / 100));
+                        let shieldAmt = Math.floor(stats.hp * (pt.skillValue / 100) * pMult);
                         this.battleState.shield = shieldAmt; 
                         this.showDamageText('battle-player-hp-text', `+🛡️${shieldAmt}`, 'text-amber-600 font-black text-2xl drop-shadow-md');
                         this.addLog(`🪨 [${pt.name}] ${pt.skillName}! 보호막 획득 (+${shieldAmt})`, 'text-amber-400');
                         break;
 
                     case 'lightning': 
-                        this.battleState.buffUntil = now + pt.skillDuration;
+                        this.battleState.buffUntil = now + (pt.skillDuration * pMult);
                         this.showDamageText('battle-player-hp-text', "⚡ CRIT UP!", 'text-yellow-400 font-black text-xl drop-shadow-md');
                         this.addLog(`⚡ [${pt.name}] ${pt.skillName}! 크리티컬 대폭 상승!`, 'text-yellow-300');
                         break;
 
                     case 'light': 
-                        this.battleState.debuffUntil = now + pt.skillDuration;
+                        this.battleState.debuffUntil = now + (pt.skillDuration * pMult);
                         this.showDamageText('monster-avatar-wrap', "⬇️ WEAK", 'text-purple-400 font-black text-xl drop-shadow-md');
                         this.addLog(`🌟 [${pt.name}] ${pt.skillName}! 몬스터 약화!`, 'text-purple-300');
                         break;
@@ -2212,7 +2221,7 @@ Ranking: {
                 this.updateBattleUI();
                 if (this.monsterCurrentHp <= 0) setTimeout(() => this.endBattle(true), 300);
 
-            }, pt.skillCooldown);
+            }, finalCooldown); // 💡 최종적으로 깎인 쿨타임이 적용됩니다!
         },
 
         updateBattleUI() {
