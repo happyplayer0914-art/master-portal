@@ -1081,13 +1081,16 @@ Ranking: {
             this.currentTab = tab;
             const btnStage = document.getElementById('rank-tab-stage');
             const btnPop = document.getElementById('rank-tab-popularity');
-            
+            const descEl = document.getElementById('ranking-desc'); // 👈 신규 추가! 멘트 조종기
+
             if (tab === 'stage') {
                 if (btnStage) btnStage.className = "flex-1 py-1.5 bg-indigo-600 text-white font-bold rounded shadow-inner text-xs transition-all border border-indigo-500";
                 if (btnPop) btnPop.className = "flex-1 py-1.5 bg-transparent text-slate-400 hover:text-white font-bold rounded text-xs transition-all border border-transparent";
+                if (descEl) descEl.innerText = "심연의 탑을 가장 높이 올라간 위대한 마스터들입니다."; // 👈 기본 멘트
             } else {
                 if (btnStage) btnStage.className = "flex-1 py-1.5 bg-transparent text-slate-400 hover:text-white font-bold rounded text-xs transition-all border border-transparent";
                 if (btnPop) btnPop.className = "flex-1 py-1.5 bg-pink-600 text-white font-bold rounded shadow-inner text-xs transition-all border border-pink-500";
+                if (descEl) descEl.innerText = "가장 많은 하트를 받은 인기 만점 마스터들입니다."; // 👈 인기도 탭 전용 멘트!
             }
             
             this.loadRanking(); // 탭을 바꿨으니 리스트 다시 불러오기!
