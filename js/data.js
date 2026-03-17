@@ -59,7 +59,14 @@ const GameData = {
 // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
         // ==========================================
-        'mythic_entj_w': { id: 'mythic_entj_w', name: '태양의 심판검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '☀️', atkMult: 4.5, critDmg: 200, spd: 15, mbti: 'ENTJ', job: '전장을 지배하는 군주', passive: '절대 권력', desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.' },
+       'mythic_entj_w': { 
+            id: 'mythic_entj_w', name: '태양의 심판검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '☀️', 
+            atkMult: 4.5, critDmg: 200, spd: 15, mbti: 'ENTJ', job: '전장을 지배하는 군주', passive: '절대 권력', 
+            desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.',
+            // 👇 여기에 이미지와 대사를 추가해 주세요!
+            img_cutin: 'weapon_entj_cutin.png', 
+            flavorText: '"모든 전장은 나의 지휘 아래 통제된다. 꿇어라!"' 
+        },
         'mythic_intj_w': { id: 'mythic_intj_w', name: '금기된 마도서', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '📖', atkMult: 5.0, critRate: 15, spd: 10, mbti: 'INTJ', job: '심연의 대마법사', passive: '천재의 영역', desc: '[INTJ 신화] 심연의 지식이 담긴 마도서.' },
         'mythic_infp_w': { id: 'mythic_infp_w', name: '세계수의 하프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', atkMult: 3.0, hpMult: 3.0, vamp: 20, mbti: 'INFP', job: '달빛의 은둔술사', passive: '요정의 축복', desc: '[INFP 신화] 상처를 치유하는 달빛의 선율.' },
         'mythic_estp_w': { id: 'mythic_estp_w', name: '전신의 쌍도끼', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', atkMult: 3.5, spd: 45, critDmg: 150, mbti: 'ESTP', job: '폭풍의 무법자', passive: '아드레날린 폭주', desc: '[ESTP 신화] 멈추지 않는 폭풍의 연격.' },
