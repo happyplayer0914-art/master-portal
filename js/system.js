@@ -160,7 +160,7 @@ const GameSystem = {
                 `;
             },
 
-            attemptUpgrade() {
+         attemptUpgrade() {
                 if(!this.selectedId) return;
                 const level = this.currentTab === 'partner' ? (GameState.partnerLevels[this.selectedId] || 0) : (GameState.itemUpgrades[this.selectedId] || 0);
                 if(level >= 10) return;
@@ -178,27 +178,69 @@ const GameSystem = {
                 if(count < 2) return UIManager.showToast("제물로 바칠 장비/파트너가 부족합니다.");
                 if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다.");
 
-                // 💸 비용 지불 및 제물 파괴
+                // 💸 비용 지불 및 제물 파괴 (2개 소모)
                 GameState.gold -= cost;
                 if (this.currentTab === 'partner') {
-                    const index = GameState.ownedPartners.indexOf(this.selectedId);
-                    if(index > -1) GameState.ownedPartners.splice(index, 1);
+                    let removed = 0;
+                    GameState.ownedPartners = GameState.ownedPartners.filter(id => {
+                        if(removed < 2 && id === this.selectedId && id !== GameState.equippedPartner) { removed++; return false; }
+                        return true;
+                    });
                 } else {
-                    const index = GameState.inventory.indexOf(this.selectedId);
-                    if(index > -1) GameState.inventory.splice(index, 1);
+                    let removed = 0;
+                    GameState.inventory = GameState.inventory.filter(id => {
+                        if(removed < 2 && id === this.selectedId) { removed++; return false; }
+                        return true;
+                    });
                 }
 
                 const prob = this.probs[level];
                 const roll = Math.random() * 100;
+                const isPartner = (this.currentTab === 'partner');
+                const itemData = isPartner ? GameData.partners[this.selectedId] : GameData.items[this.selectedId];
 
                 if(roll < prob) {
-                    if (this.currentTab === 'partner') GameState.partnerLevels[this.selectedId] = level + 1;
-                    else GameState.itemUpgrades[this.selectedId] = level + 1;
+                    const newLevel = level + 1;
+                    if (isPartner) GameState.partnerLevels[this.selectedId] = newLevel;
+                    else GameState.itemUpgrades[this.selectedId] = newLevel;
                     
-                    const itemName = this.currentTab === 'partner' ? GameData.partners[this.selectedId].name : GameData.items[this.selectedId].name;
                     AudioEngine.sfx.equip();
                     UIManager.triggerHeavyHaptic();
-                    UIManager.showToast(`✨ 돌파 성공! [+${level+1} ${itemName}]`, 3000);
+                    UIManager.showToast(`✨ 돌파 성공! [+${newLevel} ${itemData.name}]`, 3000);
+
+                    // 🌟 [핵심] 10강(MAX) 달성 시 잉여 재료 골드 환산!
+                    if (newLevel === 10) {
+                        const refundRates = { common: 10, rare: 30, epic: 200, legendary: 1000, mythic: 5000 };
+                        const refundPrice = refundRates[itemData.rarity] || 10;
+                        let overflowCount = 0;
+
+                        if (isPartner) {
+                            const keep = [];
+                            GameState.ownedPartners.forEach(id => {
+                                if (id === this.selectedId && id !== GameState.equippedPartner) overflowCount++;
+                                else keep.push(id);
+                            });
+                            GameState.ownedPartners = keep;
+                        } else {
+                            const keep = [];
+                            const equipped = [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory];
+                            GameState.inventory.forEach(id => {
+                                if (id === this.selectedId && !equipped.includes(id)) overflowCount++;
+                                else keep.push(id);
+                            });
+                            GameState.inventory = keep;
+                        }
+
+                        if (overflowCount > 0) {
+                            const totalRefund = overflowCount * refundPrice;
+                            GameState.gold += totalRefund;
+                            setTimeout(() => {
+                                UIManager.showToast(`💰 MAX 달성! 남은 재료 ${overflowCount}개가 ${totalRefund}G로 환산되었습니다.`);
+                                UIManager.updateCurrencyUI();
+                            }, 1500);
+                        }
+                    }
+
                 } else {
                     AudioEngine.sfx.hit_player(); 
                     UIManager.triggerHaptic();
@@ -209,8 +251,7 @@ const GameSystem = {
                 UIManager.updateCurrencyUI();
                 this.renderList();
                 this.renderDetails();
-            }
-        },
+            },
 
     Lobby: {
        applyBackground() {
@@ -583,7 +624,7 @@ Gacha: {
             
             this._executeGachaLogic(times, type);
         },
-        _executeGachaLogic(times, type = 'gear') {
+    _executeGachaLogic(times, type = 'gear') {
             const cost = type === 'partner' ? times * 100 : times * 50;
             GameState.gem -= cost; GameState.save(); UIManager.updateCurrencyUI();
             
@@ -598,65 +639,76 @@ Gacha: {
             anim.classList.remove('hidden'); 
             closeBtn.classList.add('hidden');
             
-            // 🎁 1. 결과 미리 계산
             let results = [];
+            const refundRates = { common: 10, rare: 50, epic: 200, legendary: 1000, mythic: 5000 };
 
-            // 🚨 [안전장치 1] 옛날 세이브 파일 때문에 천장 데이터가 없거나 꼬여있으면 강제로 새로 만들어줍니다!
             if (!GameState.gachaPity) GameState.gachaPity = { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } };
-            if (!GameState.gachaPity.gear) GameState.gachaPity.gear = { mythic: 0, select: 0 };
-            if (!GameState.gachaPity.partner) GameState.gachaPity.partner = { mythic: 0, select: 0 };
 
             for(let i=0; i<times; i++) {
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                // (마스터님 테스트용 50%)
                 if (roll < 0.8) rarity = 'mythic';               
                 else if (roll < 0.8 + 2.5) rarity = 'legendary'; 
                 else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; 
                 else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
                 else rarity = 'common';                          
                 
-                // 🌟 천장 스택 누적!
                 if(GameState.gachaPity[type].select < 500) GameState.gachaPity[type].select += 1;
                 if(GameState.gachaPity[type].mythic < 200) {
-                    if (rarity === 'mythic') GameState.gachaPity[type].mythic = 0; // 신화 뜨면 0으로 리셋!
-                    else GameState.gachaPity[type].mythic += 1; // 안 뜨면 1 증가!
+                    if (rarity === 'mythic') GameState.gachaPity[type].mythic = 0; 
+                    else GameState.gachaPity[type].mythic += 1; 
                 }
                 
-             if (type === 'partner') {
+                // 🌟 [핵심 1] 파트너 뽑기인데 '일반'이 나왔을 때 무조건 10골드 환산!
+                if (type === 'partner' && rarity === 'common') {
+                    GameState.gold += 10;
+                    results.push({ isRefund: true, refundGold: 10, name: "지원금 환산", rarity: 'common', originalName: "일반 파트너 미등장" });
+                    continue; // 아이템 뽑기 패스하고 다음 루프로!
+                }
+
+                // 뽑기 진행
+                let pickedItem;
+                if (type === 'partner') {
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
-                    const safePool = pool.length > 0 ? pool : Object.values(GameData.partners).filter(it => it.rarity === 'rare');
-                    const pt = safePool[Math.floor(Math.random() * safePool.length)];
-                    
-                    // 무조건 인벤토리로 직행! (자동 레벨업 삭제)
-                    GameState.ownedPartners.push(pt.id);
-                    if (GameState.partnerLevels[pt.id] === undefined) GameState.partnerLevels[pt.id] = 0;
-                    if (GameState.partnerAffectionExp[pt.id] === undefined) GameState.partnerAffectionExp[pt.id] = 0;
-                    if (GameState.partnerAffectionLevel[pt.id] === undefined) GameState.partnerAffectionLevel[pt.id] = 1;
-                    
-                    results.push({ ...pt, isDup: false }); 
+                    pickedItem = pool[Math.floor(Math.random() * pool.length)];
                 } else {
                     const pool = Object.values(GameData.items).filter(it => it.rarity === rarity);
                     const safePool = pool.length > 0 ? pool : Object.values(GameData.items).filter(it => it.rarity === 'common');
-                    const item = safePool[Math.floor(Math.random() * safePool.length)];
-                    
-                    const itemId = item.id || Object.keys(GameData.items).find(key => GameData.items[key] === item);
-                    results.push({ id: itemId, ...item }); 
-                    GameState.inventory.push(itemId);
+                    pickedItem = safePool[Math.floor(Math.random() * safePool.length)];
                 }
-            } // 👈 for문 끝!
+                
+                const itemId = pickedItem.id;
+                const currentLv = type === 'partner' ? (GameState.partnerLevels[itemId] || 0) : (GameState.itemUpgrades[itemId] || 0);
 
-            // 🚨 [안전장치 2] 가챠를 다 돌렸으니 천장 스택을 꾹 저장하고, 화면의 게이지 바를 즉시 다시 그립니다!
+                // 🌟 [핵심 2] 이미 10강(MAX)인 아이템이 나오면 인벤에 안 넣고 즉시 골드 환산!
+                if (currentLv >= 10) {
+                    const refundGold = refundRates[pickedItem.rarity] || 10;
+                    GameState.gold += refundGold;
+                    results.push({ isRefund: true, refundGold: refundGold, name: "MAX 레벨 환산", rarity: pickedItem.rarity, originalName: pickedItem.name });
+                } else {
+                    // 10강 미만이면 정상적으로 인벤토리에 넣기
+                    if (type === 'partner') {
+                        GameState.ownedPartners.push(itemId);
+                        if (GameState.partnerLevels[itemId] === undefined) GameState.partnerLevels[itemId] = 0;
+                        if (GameState.partnerAffectionExp[itemId] === undefined) GameState.partnerAffectionExp[itemId] = 0;
+                        if (GameState.partnerAffectionLevel[itemId] === undefined) GameState.partnerAffectionLevel[itemId] = 1;
+                        results.push({ ...pickedItem }); 
+                    } else {
+                        GameState.inventory.push(itemId);
+                        results.push({ ...pickedItem }); 
+                    }
+                }
+            } 
+
             GameState.save();
-            if (window.UIManager && UIManager.updateGachaPityUI) {
-                UIManager.updateGachaPityUI();
-            }
+            if (window.UIManager && UIManager.updateGachaPityUI) UIManager.updateGachaPityUI();
    
 
-            // 🎁 2. 포탈 색상 및 텍스트 설정 (이모티콘 구문 완전 삭제 완료!)
-            let hasMythic = results.some(r => r.rarity === 'mythic');
-            let hasLegendary = results.some(r => r.rarity === 'legendary');
+           // 🎁 2. 포탈 색상 및 텍스트 설정
+            // 👇 환산된 아이템(!r.isRefund)이 아닐 때만 이펙트 터지게 수정!
+            let hasMythic = results.some(r => r.rarity === 'mythic' && !r.isRefund);
+            let hasLegendary = results.some(r => r.rarity === 'legendary' && !r.isRefund);
             
             let portalMsg = type === 'partner' ? "🌸 차원의 문 개방 중..." : "소환의식 진행 중...";
             let titleColor = "text-white";
@@ -689,10 +741,10 @@ Gacha: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-       // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
+      // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
             setTimeout(() => {
-                // 💡 [수정 1] 파트너 뽑기 전용 제한을 풀고, 장비 뽑기에서도 신화 등급을 전부 찾아냅니다!
-                const mythics = results.filter(r => r.rarity === 'mythic');
+                // 👇 여기도 마찬가지로 환산된 신화는 컷인 애니메이션에서 제외!
+                const mythics = results.filter(r => r.rarity === 'mythic' && !r.isRefund);
                 
                 // 신화가 1개 이상 있다면 연출 시작!
                 if (mythics.length > 0) {
@@ -944,17 +996,31 @@ Gacha: {
             }
         },
 
-       // 🌟 [천장] 확정 보상 처리 및 연출 연결
+      // 🌟 [천장] 확정 보상 처리 및 연출 연결
         _processPityReward(type, picked) {
-            // 인벤토리에 넣기 (자동 레벨업 삭제! 무조건 배열에 밀어넣기)
-            if (type === 'partner') {
-                GameState.ownedPartners.push(picked.id);
-                // 처음 얻은 거라면 레벨과 호감도를 0/1로 세팅!
-                if (GameState.partnerLevels[picked.id] === undefined) GameState.partnerLevels[picked.id] = 0;
-                if (GameState.partnerAffectionExp[picked.id] === undefined) GameState.partnerAffectionExp[picked.id] = 0;
-                if (GameState.partnerAffectionLevel[picked.id] === undefined) GameState.partnerAffectionLevel[picked.id] = 1;
+            // 🌟 1. 현재 레벨 확인! (10강인지 체크)
+            const currentLv = type === 'partner' ? (GameState.partnerLevels[picked.id] || 0) : (GameState.itemUpgrades[picked.id] || 0);
+            
+            if (currentLv >= 10) {
+                // MAX 레벨이면 인벤토리에 넣지 않고 골드로 환산! (신화는 5000G)
+                const refundRates = { common: 10, rare: 50, epic: 200, legendary: 1000, mythic: 5000 };
+                const refundGold = refundRates[picked.rarity] || 5000;
+                GameState.gold += refundGold;
+                
+                // 결과창에서 골드 코인으로 보여주기 위한 꼬리표 달기
+                picked.isRefund = true;
+                picked.refundGold = refundGold;
+                picked.originalName = picked.name;
             } else {
-                GameState.inventory.push(picked.id);
+                // 10강 미만이면 정상적으로 인벤토리에 넣기
+                if (type === 'partner') {
+                    GameState.ownedPartners.push(picked.id);
+                    if (GameState.partnerLevels[picked.id] === undefined) GameState.partnerLevels[picked.id] = 0;
+                    if (GameState.partnerAffectionExp[picked.id] === undefined) GameState.partnerAffectionExp[picked.id] = 0;
+                    if (GameState.partnerAffectionLevel[picked.id] === undefined) GameState.partnerAffectionLevel[picked.id] = 1;
+                } else {
+                    GameState.inventory.push(picked.id);
+                }
             }
             GameState.save();
             
@@ -978,8 +1044,15 @@ Gacha: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-            // 👇 [여기서부터 교체!] 스킵 타이머를 지우고, 천장 전용 확정 컷인 연출을 재생합니다!
+            // 1.5초 동안 마법진이 돌고 컷인 시작!
             setTimeout(() => {
+                // 🌟 2. 만약 10강이라서 환산(isRefund)된 거라면, 일러스트 컷인을 생략하고 바로 결과창으로 점프!
+                if (picked.isRefund) {
+                    this._revealResults(type, 1, [picked], anim, resBox, closeBtn);
+                    return; // 여기서 함수 종료!
+                }
+
+                // 🌟 3. 정상적으로 획득한 신화라면 화려한 일러스트 컷인 연출 진행!
                 anim.classList.add('hidden'); 
                 resBox.classList.remove('hidden'); 
                 resBox.className = "w-full max-w-md flex flex-col justify-center items-center min-h-[400px] relative"; 
@@ -1057,7 +1130,7 @@ Gacha: {
                         overlay.addEventListener('click', handleCutinClick); 
                     }, 400); 
                 }, 2000); 
-            }, 1500); // 1.5초 동안 마법진이 돌고 컷인 시작!
+            }, 1500); 
         }
     }, // <-- Gacha 객체 끝나는 부분
     
