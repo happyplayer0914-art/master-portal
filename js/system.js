@@ -845,7 +845,7 @@ Gacha: {
             }, 1500);
         },
 
-       // 🎁 5. 실제 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
+     // 🎁 5. 실제 카드가 순차적으로 타다닥! 꽂히는 공통 연출 함수
         _revealResults(type, times, results, anim, resBox, closeBtn) {
             GameState.save();
             
@@ -873,32 +873,42 @@ Gacha: {
                     let rarityLabel = item.rarity === 'mythic' ? "✨신화✨" : item.rarity === 'legendary' ? "전설" : item.rarity === 'epic' ? "영웅" : item.rarity === 'rare' ? "희귀" : "일반";
                     let colorClass = item.rarity === 'mythic' ? "text-pink-400 font-extrabold animate-pulse" : item.rarity === 'legendary' ? "text-yellow-400 font-extrabold" : (item.color || "text-gray-300");
                     
-                    let dupText = ''; // "조각 변환" 텍스트 제거 완료
-                    
-                   // 💡 [수정] 가챠 결과창 장비 아이콘 이미지 지원
-                    let iconHtml = type === 'partner' 
-                        ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
-                        : (item.img 
-                            ? `<img src="assets/items/${item.img}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
-                            : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`);
+                    let cardHtml = '';
 
-                    const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
-                        ${dupText}
-                        <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
-                        ${iconHtml} <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
-                    </div>`;
+                    // 🌟 [핵심 3] 골드로 환산된 경우 골드 전용 카드로 그림!
+                    if (item.isRefund) {
+                        cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0 bg-slate-800" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                            <span class="text-[10px] font-bold mb-1 text-yellow-400 tracking-widest">[자동 환산]</span>
+                            <div class="text-4xl mb-1 filter drop-shadow-lg">🪙</div>
+                            <h4 class="text-yellow-300 font-black text-sm text-center break-keep">+${item.refundGold}G</h4>
+                            <div class="text-[8px] text-slate-400 truncate w-full text-center mt-1">${item.originalName}</div>
+                        </div>`;
+                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin(); 
+                    } else {
+                        // 기존 정상 아이템 렌더링
+                        let iconHtml = type === 'partner' 
+                            ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
+                            : (item.img 
+                                ? `<img src="assets/items/${item.img}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
+                                : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`);
+
+                        cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                            <span class="text-[10px] font-bold mb-1 ${colorClass} tracking-widest">[${rarityLabel}]</span>
+                            ${iconHtml} <h4 class="text-white font-bold text-xs text-center break-keep">${item.name}</h4>
+                        </div>`;
+                        
+                        if(item.rarity === 'mythic' || item.rarity === 'legendary') {
+                            if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
+                            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
+                        } else {
+                            if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+                            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.hit_normal();
+                        }
+                    }
                     
                     resBox.insertAdjacentHTML('beforeend', cardHtml);
-                    
-                    if(item.rarity === 'mythic' || item.rarity === 'legendary') {
-                        if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic(); 
-                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
-                    } else {
-                        if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
-                        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.hit_normal();
-                    }
 
-                    if(item.rarity === 'mythic') {
+                    if(item.rarity === 'mythic' && !item.isRefund) {
                         const overlay = document.getElementById('gacha-overlay');
                         if (overlay) {
                             overlay.classList.add('shake');
