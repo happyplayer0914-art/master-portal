@@ -229,7 +229,7 @@ const GameData = {
             img_cutin: 'partner_noah_cutin.png', // 👈 [신규 추가!] 가챠 연출 때 뽝! 하고 나올 역동적인 컷인 이미지
             atkMult: 2.00, hpMult: 1.50, critRate: 15, critDmg: 50, vamp: 10,
             element: 'light', skillCooldown: 10000, skillValue: 30, skillDuration: 5000,
-            skillName: '심연의 빛', skillDesc: '10초마다 5초간 적의 데미지와 공격 속도를 30% 감소 (약화)',
+            skillName: '심연의 빛', skillDesc: '10초마다 5초간 적의 데미지와 명중률 30% 감소 (약화)',
             flavorText: '"후후... 이 우주에서 나를 다룰 수 있는 건 당신뿐이야."'
         }
     }, // <-- 요 쉼표(,) 필수! 바로 밑에 cosmetics: { 가 이어집니다.
