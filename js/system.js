@@ -1272,45 +1272,75 @@ Ranking: {
 
 // system.js 안의 GameSystem 객체 내부 (Chat이나 Ranking 아래쪽에 추가!)
 
-    Mail: {
-        mailList: [], // 서버에서 날아온 우편을 담아둘 가방
-        unsubMail: null,
+ Mail: {
+        globalMails: [],   // 전체 공지 우편함
+        personalMails: [], // 내 전용 1:1 우편함
+        unsubGlobal: null,
+        unsubPersonal: null,
+
+        // 💡 [핵심] 두 우편함을 하나로 합치고 시간순으로 예쁘게 정렬해주는 마법의 가방!
+        get mailList() {
+            const combined = [...this.globalMails, ...this.personalMails];
+            return combined.sort((a, b) => {
+                const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : 0;
+                const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : 0;
+                return timeB - timeA;
+            });
+        },
 
         init() {
-            if (!window.db) return;
-            
-            // 💡 파이어베이스의 "mails" 폴더에서 편지를 최신순으로 가져옵니다!
-            const qMail = window.query(window.collection(window.db, "mails"), window.orderBy("timestamp", "desc"), window.limit(20));
-            
-            this.unsubMail = window.onSnapshot(qMail, (snapshot) => {
-                this.mailList = [];
-                let hasUnread = false;
+            // 닉네임 설정이 안 되어있으면 개인 우편을 받을 수 없으니 방어막 설치!
+            if (!window.db || !GameState.nickname || GameState.nickname === "위대한 길드장") return;
 
+            // 📢 1. 전체 공지 우편함 수신기 (기존)
+            const qGlobal = window.query(window.collection(window.db, "mails"), window.orderBy("timestamp", "desc"), window.limit(20));
+            this.unsubGlobal = window.onSnapshot(qGlobal, (snapshot) => {
+                this.globalMails = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    data.id = doc.id; // 파이어베이스가 만든 고유 문서 번호
-                    this.mailList.push(data);
-
-                    // 💡 내 수첩(claimedMails)에 없는 번호라면 = 안 읽은 우편!
-                    if (!GameState.claimedMails) GameState.claimedMails = [];
-                    if (!GameState.claimedMails.includes(data.id)) {
-                        hasUnread = true;
-                    }
+                    data.id = doc.id;
+                    this.globalMails.push(data);
                 });
-
-                // 안 읽은 게 있으면 상단 헤더에 빨간 점(Red Dot) 켜기!
-                const notiDot = document.getElementById('mail-noti-dot');
-                if (notiDot) {
-                    if (hasUnread) notiDot.classList.remove('hidden');
-                    else notiDot.classList.add('hidden');
-                }
-
-                // 만약 유저가 우편함 창을 열어보고 있는 중이라면 실시간으로 싹 다시 그려줌!
-                const modal = document.getElementById('mailbox-modal');
-                if (modal && modal.classList.contains('active')) {
-                    this.renderMailList();
-                }
+                this.checkAndRender();
             });
+
+            // 💌 2. 개인 1:1 우편함 수신기 (신규 탑재!)
+            // 경로: users -> 내 닉네임 -> mailbox 폴더를 감시합니다.
+            const qPersonal = window.query(window.collection(window.db, "users", GameState.nickname, "mailbox"), window.orderBy("timestamp", "desc"), window.limit(10));
+            this.unsubPersonal = window.onSnapshot(qPersonal, (snapshot) => {
+                this.personalMails = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // 전체 우편과 ID가 겹치지 않게 'p_' 꼬리표를 달아줍니다.
+                    data.id = "p_" + doc.id; 
+                    data.isPersonal = true; // 개인 우편임을 알리는 뱃지용
+                    this.personalMails.push(data);
+                });
+                this.checkAndRender();
+            });
+        },
+
+        checkAndRender() {
+            let hasUnread = false;
+            if (!GameState.claimedMails) GameState.claimedMails = [];
+
+            // 안 읽은 편지가 하나라도 있는지 검사!
+            this.mailList.forEach(mail => {
+                if (!GameState.claimedMails.includes(mail.id)) hasUnread = true;
+            });
+
+            // 빨간 점 컨트롤
+            const notiDot = document.getElementById('mail-noti-dot');
+            if (notiDot) {
+                if (hasUnread) notiDot.classList.remove('hidden');
+                else notiDot.classList.add('hidden');
+            }
+
+            // 우편함을 보고 있는 중이라면 실시간 새로고침
+            const modal = document.getElementById('mailbox-modal');
+            if (modal && modal.classList.contains('active')) {
+                this.renderMailList();
+            }
         },
 
         renderMailList() {
@@ -1318,31 +1348,38 @@ Ranking: {
             if (!container) return;
             container.innerHTML = '';
 
-            if (this.mailList.length === 0) {
+            const fullList = this.mailList;
+
+            if (fullList.length === 0) {
                 container.innerHTML = '<div class="text-center py-10 text-slate-500 text-xs font-bold">도착한 우편이 없습니다. 텅~ 📭</div>';
                 return;
             }
 
-            this.mailList.forEach(mail => {
+            fullList.forEach(mail => {
                 if (!GameState.claimedMails) GameState.claimedMails = [];
                 const isClaimed = GameState.claimedMails.includes(mail.id);
                 
-                // 보상 딱지 만들기 (골드나 젬이 있으면 그려줌)
+                // 보상 딱지
                 let rewardHtml = '';
                 if (mail.gold) rewardHtml += `<span class="text-yellow-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">🪙 ${mail.gold.toLocaleString()}</span>`;
                 if (mail.gem) rewardHtml += `<span class="text-cyan-400 font-bold text-[10px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700 shadow-sm">💎 ${mail.gem.toLocaleString()}</span>`;
                 
                 const dateStr = mail.timestamp ? new Date(mail.timestamp.toMillis()).toLocaleDateString() : '방금 전';
 
-                // 버튼 색상 바꾸기 (받은 건 회색, 안 받은 건 초록색 펄스!)
+                // 개인 우편 전용 특별 뱃지! 🌸
+                const personalBadge = mail.isPersonal 
+                    ? `<span class="text-[9px] bg-pink-600/80 text-white px-1.5 py-0.5 rounded border border-pink-400 shadow-sm ml-1 mb-0.5 animate-pulse">개인 우편</span>` 
+                    : '';
+
                 const btnHtml = isClaimed 
                     ? `<button disabled class="px-4 py-2.5 bg-slate-800 text-slate-500 text-[10px] font-bold rounded-xl border border-slate-700 w-full mt-2 cursor-not-allowed transition-all">수령 완료</button>`
                     : `<button onclick="GameSystem.Mail.claimReward('${mail.id}')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[11px] font-black rounded-xl border border-emerald-400 w-full mt-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] animate-pulse active:scale-95 transition-all">보상 받기</button>`;
 
+                // 개인 우편이면 테두리를 핑크색으로 예쁘게 바꿔줍니다!
                 container.innerHTML += `
-                    <div class="glass-card p-4 border ${isClaimed ? 'border-slate-700/50 bg-slate-900/40 opacity-70' : 'border-emerald-500/50 bg-slate-800/80'} flex flex-col gap-1 transition-all">
+                    <div class="glass-card p-4 border ${isClaimed ? 'border-slate-700/50 bg-slate-900/40 opacity-70' : (mail.isPersonal ? 'border-pink-500/50 bg-slate-800/80' : 'border-emerald-500/50 bg-slate-800/80')} flex flex-col gap-1 transition-all">
                         <div class="flex justify-between items-start mb-1.5">
-                            <h4 class="text-[13px] font-black text-white flex items-center gap-1.5"><span class="text-emerald-400 text-base">💌</span> ${mail.title || '운영자 우편'}</h4>
+                            <h4 class="text-[13px] font-black text-white flex items-center gap-1"><span class="text-base">${mail.isPersonal ? '💌' : '📢'}</span> ${mail.title || '운영자 우편'} ${personalBadge}</h4>
                             <span class="text-[9px] text-slate-400 font-bold">${dateStr}</span>
                         </div>
                         <p class="text-[11px] text-slate-300 leading-snug break-keep mb-3 whitespace-pre-wrap">${mail.content || '보상이 도착했습니다.'}</p>
@@ -1357,20 +1394,17 @@ Ranking: {
 
         claimReward(mailId) {
             if (!GameState.claimedMails) GameState.claimedMails = [];
-            if (GameState.claimedMails.includes(mailId)) return; // 해커 방어 (연타 방지)
+            if (GameState.claimedMails.includes(mailId)) return;
 
             const mail = this.mailList.find(m => m.id === mailId);
             if (!mail) return;
 
-            // 보상 지급!
             if (mail.gold) GameState.gold += Number(mail.gold);
             if (mail.gem) GameState.gem += Number(mail.gem);
 
-            // 수첩에 번호 적고 세이브
             GameState.claimedMails.push(mailId);
             GameState.save();
 
-            // 효과음 & 이펙트
             if (window.UIManager) {
                 UIManager.updateCurrencyUI();
                 if(UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
@@ -1378,9 +1412,7 @@ Ranking: {
             }
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
 
-            // UI 갱신 (빨간 점 끄기 + 버튼 회색으로 바꾸기)
-            this.checkNotiDot();
-            this.renderMailList();
+            this.checkAndRender();
         },
 
         claimAll() {
@@ -1413,17 +1445,7 @@ Ranking: {
             }
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.coin();
 
-            this.checkNotiDot();
-            this.renderMailList();
-        },
-
-        checkNotiDot() {
-            const notiDot = document.getElementById('mail-noti-dot');
-            if (!notiDot) return;
-            
-            const hasUnread = this.mailList.some(mail => !GameState.claimedMails.includes(mail.id));
-            if (hasUnread) notiDot.classList.remove('hidden');
-            else notiDot.classList.add('hidden');
+            this.checkAndRender();
         }
     },
         
