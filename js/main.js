@@ -27,6 +27,7 @@ setInterval(() => {
 window.onload = function() {
     window.GameData = GameData;
     window.GameSystem = GameSystem;
+    window.UIManager = UIManager;
 
     // 1. 보안/로그인 로딩
     try {
