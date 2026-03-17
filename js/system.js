@@ -102,10 +102,19 @@ const GameSystem = {
 
                 details.classList.remove('hidden');
 
+                // 💡 [추가] 대장간 전용 스마트 이미지 렌더러 (장비/파트너 공용)
+                const imgFolder = this.currentTab === 'partner' ? 'partners' : 'items';
+                const imgFile = item.img || item.img_sd;
+                
+                // 1. MAX 레벨일 때의 화면
                 if(level >= 10) {
+                    const maxImgHtml = imgFile 
+                        ? `<img src="assets/${imgFolder}/${imgFile}" class="w-16 h-16 object-contain inline-block filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block'; }, 10);"><span style="display:none;">${item.emoji || '📦'}</span>`
+                        : item.emoji || '📦';
+
                     details.innerHTML = `
                         <div class="text-center py-4">
-                            <div class="text-5xl mb-3 animate-bounce">${item.emoji || '📦'}</div>
+                            <div class="text-5xl mb-3 animate-bounce flex justify-center items-center h-16">${maxImgHtml}</div>
                             <h3 class="text-2xl font-black text-yellow-400 mb-2 drop-shadow-md">+MAX ${item.name}</h3>
                             <p class="text-slate-400 text-sm">더 이상 강화할 수 없는 궁극의 상태입니다.</p>
                         </div>
