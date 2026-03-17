@@ -542,8 +542,9 @@ Gacha: {
 
             document.getElementById('gacha-title').innerHTML = `<span class="${titleColor}">${portalMsg}</span>`;
             
-            // 🎁 3. 마법진 렌더링 (이모지 덮어쓰기 버그 수정 완료)
-            anim.className = 'mb-8 transition-all duration-500 flex justify-center w-full';
+          // 🎁 3. 마법진 렌더링 (이모지 덮어쓰기 버그 수정 완료)
+            // 👉 anim.className 에 'mt-10' 을 추가해서 위쪽 간격을 넉넉하게 띄웁니다!
+            anim.className = 'mt-10 mb-8 transition-all duration-500 flex justify-center w-full';
             anim.innerHTML = `
                 <div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full ${portalGlow} animate-[spin_4s_linear_infinite] flex items-center justify-center">
                     <img src="assets/ui/summon_portal.png" class="w-full h-full object-cover rounded-full filter ${portalFilter}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3242/3242257.png'; this.classList.add('opacity-30');">
@@ -568,7 +569,7 @@ Gacha: {
                     resBox.className = "w-full max-w-md flex flex-col justify-center items-center min-h-[400px] relative"; 
                     resBox.innerHTML = ''; 
 
-                    // 💡 [수정] HTML 구조 재설계 (코멘트와 일러스트 분리)
+          // 💡 [수정] HTML 구조 재설계 (코멘트와 일러스트 분리)
                     const cutinHTML = `
                         <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
                             <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${mythicPartner.flavorText.replace(/\\n/g, '\n')}"</h2>
@@ -577,7 +578,7 @@ Gacha: {
                         
                         <img id="mythic-cutin-illus" src="assets/partners/${mythicPartner.img_full}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
                         
-                        <div id="mythic-cutin-guide" class="absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 opacity-0 transition-opacity duration-500 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
+                        <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
                     `;
                     resBox.innerHTML = cutinHTML;
 
@@ -607,7 +608,11 @@ Gacha: {
                                 illus.style.transform = 'translate(-50%, -50%) scale(1.0)'; // 포커싱
                                 illus.style.filter = 'blur(0px)'; // 선명하게
                             }
-                            if(guide) guide.style.opacity = '3'; // 클릭 유도 등장
+                            
+                            // 👉 수정 2: 일러스트가 등장하고 1.5초 뒤에 가이드 텍스트 나타나게 딜레이 추가!
+                            setTimeout(() => {
+                                if(guide) guide.classList.remove('hidden'); 
+                            }, 1500);
 
                             // ➡️ 3단계: 클릭 시 결과 공개!
                             const overlay = document.getElementById('gacha-overlay');
@@ -615,11 +620,10 @@ Gacha: {
                                 e.stopPropagation(); 
                                 overlay.removeEventListener('click', handleCutinClick); 
 
-                                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+                                if(typeof AudioEngine !== 'undefined' && AudioEngine.sfx) AudioEngine.sfx.click();
                                 
-                                // 일러스트 스르륵 사라짐
                                 if(illus) illus.style.opacity = '0';
-                                if(guide) guide.style.opacity = '0';
+                                if(guide) guide.classList.add('hidden'); // 클릭하면 다시 숨김
 
                                 // 0.4초 후 최종 카드 공개
                                 setTimeout(() => {
