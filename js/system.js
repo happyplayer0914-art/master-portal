@@ -1062,19 +1062,42 @@ Gacha: {
     }, // <-- Gacha 객체 끝나는 부분
     
 Ranking: {
+        currentTab: 'stage', // 💡 현재 선택된 탭 기억하기
+
         openRegisterModal() { 
             UIManager.showToast("마스터의 최고 기록은 10초마다 명예의 전당에 자동 등록됩니다! 🚀");
         },
+        
         closeModal() { 
             const modal = document.getElementById('nickname-modal');
             if(modal) modal.classList.remove('active');
         },
-       async updateRankingSilently() {
+
+        // 🌟 [신규 추가] 탭 전환 엔진
+        switchTab(tab) {
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
+            
+            this.currentTab = tab;
+            const btnStage = document.getElementById('rank-tab-stage');
+            const btnPop = document.getElementById('rank-tab-popularity');
+            
+            if (tab === 'stage') {
+                if (btnStage) btnStage.className = "flex-1 py-1.5 bg-indigo-600 text-white font-bold rounded shadow-inner text-xs transition-all border border-indigo-500";
+                if (btnPop) btnPop.className = "flex-1 py-1.5 bg-transparent text-slate-400 hover:text-white font-bold rounded text-xs transition-all border border-transparent";
+            } else {
+                if (btnStage) btnStage.className = "flex-1 py-1.5 bg-transparent text-slate-400 hover:text-white font-bold rounded text-xs transition-all border border-transparent";
+                if (btnPop) btnPop.className = "flex-1 py-1.5 bg-pink-600 text-white font-bold rounded shadow-inner text-xs transition-all border border-pink-500";
+            }
+            
+            this.loadRanking(); // 탭을 바꿨으니 리스트 다시 불러오기!
+        },
+
+        async updateRankingSilently() {
             if (GameState.nickname === "위대한 길드장" || !window.db) return;
             const uid = localStorage.getItem('master_uid');
             if (!uid) return;
 
-            // 💡 현재 내 칭호를 판독기에서 가져옴!
             const titleInfo = GameSystem.Lobby.getCurrentTitle();
 
             try { 
@@ -1082,17 +1105,16 @@ Ranking: {
                     uid: uid,
                     nickname: GameState.nickname, 
                     stage: GameState.rpgStage, 
-                    skin: GameState.equippedSkin || 'none', 
                     prestige: GameState.prestigeCount || 0, 
-                    title: titleInfo ? titleInfo.full : null, // 👈 파이어베이스에 풀버전 칭호 저장!
-                   // 🌟 [추가됨!] 내가 낀 프로필 정보도 서버로 보냅니다!
+                    title: titleInfo ? titleInfo.full : null, 
                     profile: GameState.equippedProfile || 'none',  
                     skin: GameState.equippedSkin || 'none',
                     timestamp: window.serverTimestamp()
                 }, { merge: true }); 
             } catch(e) { console.error("오토 랭킹 갱신 실패", e); }
         },
-      async loadRanking() {
+
+        async loadRanking() {
             const list = document.getElementById('ranking-list'); 
             if(!list) return;
             list.innerHTML = '<div class="text-center py-8"><div class="loader"></div><p class="text-sm text-slate-400 mt-3">서버에서 전설을 불러오는 중...</p></div>';
@@ -1100,42 +1122,75 @@ Ranking: {
             if(!window.db) { list.innerHTML = '<div class="text-center py-8 text-red-400">데이터베이스 연결에 실패했습니다.</div>'; return; }
             
             try {
-                const q = window.query(window.collection(window.db, "rankings"), window.limit(100)); 
-                const snap = await window.getDocs(q);
-                let all = []; 
-                snap.forEach(d => all.push(d.data()));
-                
-                // 1순위: 환생, 2순위: 층수, 3순위: 도달 시간으로 정렬
-                all.sort((a,b) => { 
-                    const prestigeA = a.prestige || 0;
-                    const prestigeB = b.prestige || 0;
-                    if (prestigeA !== prestigeB) return prestigeB - prestigeA; 
-                    if (b.stage !== a.stage) return b.stage - a.stage; 
-                    
-                    const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
-                    const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
-                    return timeA - timeB; 
-                });
-                
-                // 💡 [핵심 복구] 같은 닉네임이나 계정이면 '최고 기록' 1개만 남기고 다 거르기!
                 let uniqueTop10 = [];
-                let seen = new Set();
                 
-                for (let d of all) {
-                    const id = d.uid || d.nickname; // 고유 ID가 없으면 닉네임으로라도 구별
-                    if (!seen.has(id)) {
-                        seen.add(id);
-                        uniqueTop10.push(d);
+                // 🗡️ [탭 1: 심연의 탑] 기존처럼 층수와 환생을 기준으로 정렬
+                if (this.currentTab === 'stage') {
+                    const q = window.query(window.collection(window.db, "rankings"), window.limit(100)); 
+                    const snap = await window.getDocs(q);
+                    let all = []; 
+                    snap.forEach(d => all.push(d.data()));
+                    
+                    all.sort((a,b) => { 
+                        const prestigeA = a.prestige || 0;
+                        const prestigeB = b.prestige || 0;
+                        if (prestigeA !== prestigeB) return prestigeB - prestigeA; 
+                        if (b.stage !== a.stage) return b.stage - a.stage; 
+                        
+                        const timeA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : a.timestamp) : Date.now(); 
+                        const timeB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : b.timestamp) : Date.now(); 
+                        return timeA - timeB; 
+                    });
+                    
+                    let seen = new Set();
+                    for (let d of all) {
+                        const id = d.uid || d.nickname; 
+                        if (!seen.has(id)) {
+                            seen.add(id);
+                            uniqueTop10.push(d);
+                        }
+                        if (uniqueTop10.length >= 10) break; 
                     }
-                    if (uniqueTop10.length >= 10) break; // 딱 10명 모이면 멈춤!
+                } 
+                // 💖 [탭 2: 인기 마스터] users 컬렉션에서 좋아요(likes) 순으로 가져오기
+                else {
+                    const q = window.query(window.collection(window.db, "users"), window.orderBy("likes", "desc"), window.limit(10));
+                    const snap = await window.getDocs(q);
+                    snap.forEach(d => {
+                        const data = d.data();
+                        if ((data.likes || 0) > 0) { // 좋아요가 1개라도 있는 사람만 표시
+                            uniqueTop10.push({
+                                nickname: data.nickname,
+                                stage: data.highestStage || 1,
+                                prestige: data.prestige || 0,
+                                title: data.title || null,
+                                profile: data.profile || 'none',
+                                skin: data.skin || 'none',
+                                likes: data.likes || 0
+                            });
+                        }
+                    });
                 }
                 
-                if(uniqueTop10.length === 0) { list.innerHTML = '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>'; return; }
+                if(uniqueTop10.length === 0) { 
+                    list.innerHTML = this.currentTab === 'stage' ? 
+                        '<div class="text-center py-8 text-slate-400">아직 명예의 전당에 오른 자가 없습니다.</div>' : 
+                        '<div class="text-center py-8 text-pink-400/70">아직 인기도를 받은 마스터가 없습니다.<br>가장 먼저 좋아요를 받아보세요! 💖</div>';
+                    return; 
+                }
+                
                 list.innerHTML = '';
                 
                 uniqueTop10.forEach((d, i) => {
-                   let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
-                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
+                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } 
+                    else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } 
+                    else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+                    
+                    // 인기도 1등은 핑크빛 오라 추가!
+                    if(this.currentTab === 'popularity' && i === 0) {
+                        bgClass = "bg-gradient-to-r from-pink-900/40 to-slate-900 border border-pink-500/50 shadow-[0_0_15px_rgba(236,72,153,0.2)]";
+                    }
                     
                     let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
                     let sId = d.skin;
@@ -1150,18 +1205,29 @@ Ranking: {
                         if (pfItem) innerIcon = pfItem.icon;
                     }
                     
-                    const isMe = (d.nickname === GameState.nickname); const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
+                    const isMe = (d.nickname === GameState.nickname); 
+                    const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     let prestigeText = d.prestige ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${d.prestige}환생]</span>` : '';
                     let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
                     
-                    // 🌟 [대수술 완료] 
-                    // 1. py-3 pl-2 pr-3 로 왼쪽 여백을 줄여서 '1위'를 왼쪽으로 바싹 붙였습니다.
-                    // 2. w-10 텍스트 크기를 살짝 줄여서 공간을 더 확보했습니다.
-                    // 3. 닉네임과 칭호에 마스터의 아이디어인 'rank-marquee-box' (슬라이딩)를 씌웠습니다!
-                list.innerHTML += `
+                    // 🌟 [핵심] 탭에 따라 오른쪽 표시 정보 다르게 처리!
+                    let rightSideHtml = '';
+                    if (this.currentTab === 'stage') {
+                        rightSideHtml = `
+                            <p class="text-[10px] sm:text-xs text-slate-400">도달 층수</p>
+                            <p class="text-base sm:text-lg font-black text-gradient-gold flex items-center justify-end">${prestigeText}${d.stage}F</p>
+                        `;
+                    } else {
+                        rightSideHtml = `
+                            <p class="text-[10px] sm:text-xs text-pink-300">인기도</p>
+                            <p class="text-base sm:text-lg font-black text-pink-400 flex items-center justify-end">💖 ${d.likes || 0}</p>
+                        `;
+                    }
+
+                    list.innerHTML += `
                         <div class="py-3 pl-2 pr-3 sm:py-4 sm:pl-3 sm:pr-4 rounded-xl flex items-center justify-between ${bgClass} border ${myHighlight} transition-all mb-3 gap-2">
                             <div class="flex items-center gap-2 flex-1 min-w-0">
-                                <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? 'text-yellow-400' : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
+                                <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? (this.currentTab === 'popularity' && i === 0 ? 'text-pink-400' : 'text-yellow-400') : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
                                 
                                 <div onclick="UIManager.openUserProfile('${d.nickname}', '${innerIcon}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${skinClass.replace(/'/g, "\\'")}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0 relative z-10">${innerIcon}</div>
                                 
@@ -1176,27 +1242,21 @@ Ranking: {
                                 </div>
                             </div>
                             
-                           <div class="text-right shrink-0 whitespace-nowrap pl-1">
-                                <p class="text-[10px] sm:text-xs text-slate-400">도달 층수</p>
-                                <p class="text-base sm:text-lg font-black text-gradient-gold flex items-center justify-end">${prestigeText}${d.stage}F</p>
+                            <div class="text-right shrink-0 whitespace-nowrap pl-1">
+                                ${rightSideHtml}
                             </div>
                         </div>`;
                 });
                 
-                // 🌟 [추가됨] 화면에 글씨가 다 그려지면, 상자 크기랑 글씨 길이를 비교합니다!
                 setTimeout(() => {
                     const boxes = list.querySelectorAll('.rank-marquee-box');
                     boxes.forEach(box => {
                         const textEl = box.querySelector('.rank-marquee-text');
-                        // 글씨 길이(scrollWidth)가 상자 크기(clientWidth)보다 크다면?
                         if (textEl && textEl.scrollWidth > box.clientWidth) {
-                            textEl.classList.add('is-long'); // 움직이는 애니메이션 스위치 ON!
-                            
-                            // 삐져나온 길이만큼만 딱 맞게 이동하도록 변수 설정!
+                            textEl.classList.add('is-long'); 
                             const moveDist = box.clientWidth - textEl.scrollWidth; 
                             textEl.style.setProperty('--slide-distance', `${moveDist}px`);
                         } else {
-                            // 글자가 짧아서 넉넉하다면, 오른쪽 끝이 흐려지는 효과(마스크)도 꺼버리기!
                             box.style.maskImage = 'none';
                             box.style.webkitMaskImage = 'none';
                         }
@@ -2707,6 +2767,11 @@ GameSystem.Profile = {
                 highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
                 prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
+                    // 👇 [여기에 3줄이 추가됐어!] 랭킹과 동일하게 아바타 정보 저장!
+                profile: GameState.equippedProfile || 'none',  
+                skin: GameState.equippedSkin || 'none',
+                title: titleInfo ? titleInfo.full : null,
+                // 👆
                 
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
