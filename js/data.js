@@ -7,6 +7,7 @@ const GameData = {
         'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', rarity: 'common', color: 'text-slate-400', atkMult: 1.15 },
         'w_c2': { id: 'w_c2', type: 'gear', subType: 'weapon', name: '녹슨 단검', emoji: '🔪', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, critRate: 5 },
         'w_c3': { id: 'w_c3', type: 'gear', subType: 'weapon', name: '거친 몽둥이', emoji: '🏏', rarity: 'common', color: 'text-slate-400', atkMult: 1.15 }, // 신규 추가 (높은 깡공격력)
+        'w_c4': { id: 'w_c4', type: 'gear', subType: 'weapon', name: '거친 톱', emoji: '🏏', rarity: 'common', color: 'text-slate-400', atkMult: 1.25 }, // 신규 추가 (높은 깡공격력)
         
         'a_c1': { id: 'a_c1', type: 'gear', subType: 'armor', name: '가죽 갑옷', emoji: '🦺', rarity: 'common', color: 'text-slate-400', hpMult: 1.10 },
         'a_c2': { id: 'a_c2', type: 'gear', subType: 'armor', name: '빛바랜 천옷', emoji: '👕', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2 }, // 신규 추가 (미세한 회피)
