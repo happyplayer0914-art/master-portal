@@ -554,10 +554,10 @@ Gacha: {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
 
-        // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
+       // 🎁 4. 컷인 애니메이션 분기 (순차 등장 로직)
             setTimeout(() => {
-                // 💡 [수정 1] find(1개만 찾기) 대신 filter(전부 다 찾기)를 사용합니다!
-                const mythics = type === 'partner' ? results.filter(r => r.rarity === 'mythic') : [];
+                // 💡 [수정 1] 파트너 뽑기 전용 제한을 풀고, 장비 뽑기에서도 신화 등급을 전부 찾아냅니다!
+                const mythics = results.filter(r => r.rarity === 'mythic');
                 
                 // 신화가 1개 이상 있다면 연출 시작!
                 if (mythics.length > 0) {
@@ -565,27 +565,31 @@ Gacha: {
                     resBox.classList.remove('hidden'); 
                     resBox.className = "w-full max-w-md flex flex-col justify-center items-center min-h-[400px] relative"; 
                     
-                    // 💡 [수정 2] 여러 명의 신화를 차례대로 보여주기 위한 릴레이 함수(재귀 함수) 생성!
                     const playMythicAnimation = (index) => {
-                        const currentMythic = mythics[index]; // 이번 순서의 신화 파트너
+                        const currentMythic = mythics[index]; 
                         
                         if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.boss();
                         if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
                         
-                        // HTML 구조 리셋 및 세팅
-                      const cutinHTML = `
+                        // 💡 [수정 2] 장비인지 파트너인지에 따라 이미지 폴더와 대사 텍스트를 유연하게 가져옵니다!
+                        const imgFolder = type === 'partner' ? 'partners' : 'items'; // (장비 이미지가 들어있는 폴더명으로 맞춰주세요)
+                        const commentText = currentMythic.flavorText || currentMythic.desc || "전설 속의 힘이 깨어납니다!";
+                        const imgFile = currentMythic.img_cutin || currentMythic.img_full || currentMythic.img || '';
+
+                        // HTML 구조 세팅
+                        const cutinHTML = `
                             <div id="mythic-cutin-text" class="w-[90%] z-30 text-center p-6 bg-slate-900/95 rounded-xl border-2 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.6)] opacity-0 transition-all duration-500 relative transform scale-95">
-                                <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${currentMythic.flavorText.replace(/\\n/g, '\n')}"</h2>
+                                <h2 class="text-lg sm:text-xl font-black text-pink-300 mb-3 drop-shadow-md whitespace-pre-wrap leading-relaxed">"${commentText.replace(/\\n/g, '\n')}"</h2>
                                 <p class="text-[11px] sm:text-xs text-white/80 font-bold tracking-widest">- ${currentMythic.name} -</p>
                             </div>
                             
-                            <img id="mythic-cutin-illus" src="assets/partners/${currentMythic.img_cutin || currentMythic.img_full}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
+                            <img id="mythic-cutin-illus" src="assets/${imgFolder}/${imgFile}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[140%] max-w-[450px] h-auto opacity-0 object-contain z-10 transition-all duration-[1000ms] scale-110 blur-sm pointer-events-none" onerror="this.style.display='none';">
                             
                             <div id="mythic-cutin-guide" class="hidden absolute bottom-[-20px] text-white font-black text-xs animate-pulse z-40 bg-black/70 px-4 py-2 rounded-full border border-white/20 pointer-events-none">화면을 클릭하여 결과 확인</div>
                         `;
                         resBox.innerHTML = cutinHTML;
 
-                        // ➡️ 1단계: 코멘트 먼저 등장!
+                        // ➡️ 1단계: 코멘트 등장
                         setTimeout(() => {
                             const textBox = document.getElementById('mythic-cutin-text');
                             if(textBox) {
@@ -594,7 +598,7 @@ Gacha: {
                             }
                         }, 100);
 
-                        // ➡️ 2단계: 2초 후 코멘트 퇴장 & 일러스트 웅장하게 등장!
+                        // ➡️ 2단계: 2초 후 코멘트 퇴장 & 일러스트 등장
                         setTimeout(() => {
                             const textBox = document.getElementById('mythic-cutin-text');
                             if(textBox) {
@@ -616,7 +620,7 @@ Gacha: {
                                     if(guide) guide.classList.remove('hidden'); 
                                 }, 1500);
 
-                                // ➡️ 3단계: 클릭 시 다음 신화가 있는지 확인!
+                                // ➡️ 3단계: 클릭 시 릴레이 분기
                                 const overlay = document.getElementById('gacha-overlay');
                                 const handleCutinClick = (e) => {
                                     e.stopPropagation(); 
@@ -627,13 +631,11 @@ Gacha: {
                                     if(illus) illus.style.opacity = '0';
                                     if(guide) guide.classList.add('hidden'); 
 
-                                    // 💡 [수정 3] 0.4초 후 다음 신화 연출을 틀어줄지, 최종 결과창을 띄울지 결정!
+                                    // 0.4초 후 다음 신화 연출 or 최종 결과창
                                     setTimeout(() => {
                                         if (index + 1 < mythics.length) {
-                                            // 아직 보여줄 신화가 남았다면 다음 타자 등판!
                                             playMythicAnimation(index + 1);
                                         } else {
-                                            // 모든 신화 연출이 끝났다면 최종 결과창 공개!
                                             this._revealResults(type, times, results, anim, resBox, closeBtn);
                                         }
                                     }, 400); 
@@ -644,11 +646,11 @@ Gacha: {
                         }, 2000); 
                     };
 
-                    // 🚀 릴레이 함수 시작! (0번째 신화부터 재생)
+                    // 🚀 릴레이 함수 시작!
                     playMythicAnimation(0);
 
                 } else {
-                    // 신화가 하나도 없으면 그냥 기존처럼 결과창 띄우기
+                    // 신화가 하나도 없으면 기존처럼 결과창 띄우기
                     this._revealResults(type, times, results, anim, resBox, closeBtn);
                 }
             }, 1500);
