@@ -2,6 +2,51 @@
 // 4. UI MANAGER
 // =========================================================================
 const UIManager = {
+    
+// 🌟 [신규 추가] 천장 게이지 및 버튼 업데이트 엔진
+    updateGachaPityUI() {
+        if (!GameState.gachaPity) return;
+        
+        ['gear', 'partner'].forEach(type => {
+            const mythicVal = GameState.gachaPity[type].mythic || 0;
+            const selectVal = GameState.gachaPity[type].select || 0;
+            
+            // 200번 천장 (랜덤 확정) 렌더링
+            const mythicText = document.getElementById(`pity-${type}-mythic-text`);
+            const mythicBar = document.getElementById(`pity-${type}-mythic-bar`);
+            const mythicBtn = document.getElementById(`btn-pity-${type}-mythic`);
+            
+            if (mythicText) mythicText.innerText = mythicVal;
+            if (mythicBar) mythicBar.style.width = `${Math.min((mythicVal / 200) * 100, 100)}%`;
+            if (mythicBtn) {
+                if (mythicVal >= 200) {
+                    mythicBtn.disabled = false;
+                    mythicBtn.className = "text-[9px] px-2 py-1 rounded bg-pink-600 text-white font-bold animate-pulse shadow-[0_0_10px_rgba(236,72,153,0.8)]";
+                } else {
+                    mythicBtn.disabled = true;
+                    mythicBtn.className = "text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold";
+                }
+            }
+
+            // 500번 천장 (선택 확정) 렌더링
+            const selectText = document.getElementById(`pity-${type}-select-text`);
+            const selectBar = document.getElementById(`pity-${type}-select-bar`);
+            const selectBtn = document.getElementById(`btn-pity-${type}-select`);
+            
+            if (selectText) selectText.innerText = selectVal;
+            if (selectBar) selectBar.style.width = `${Math.min((selectVal / 500) * 100, 100)}%`;
+            if (selectBtn) {
+                if (selectVal >= 500) {
+                    selectBtn.disabled = false;
+                    selectBtn.className = "text-[9px] px-2 py-1 rounded bg-yellow-500 text-slate-900 font-black animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.8)]";
+                } else {
+                    selectBtn.disabled = true;
+                    selectBtn.className = "text-[9px] px-2 py-1 rounded bg-slate-700 text-slate-400 font-bold";
+                }
+            }
+        });
+    },
+    
     selectedItems: [],
 
     // 🌟 [신규 추가] 랜덤 휴식 멘트 리스트
