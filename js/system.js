@@ -496,10 +496,10 @@ Gacha: {
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                if (roll < 0.8) rarity = 'mythic';               // ✨ 0.8% (신화)
-                else if (roll < 0.8 + 2.5) rarity = 'legendary'; // 2.5% (전설)
-                else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; // 7.5% (영웅)
-                else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; // 25.0% (희귀)
+                if (roll < 50) rarity = 'mythic';               // ✨ 0.8% (신화)
+                else if (roll < 50 + 2.5) rarity = 'legendary'; // 2.5% (전설)
+                else if (roll < 50 + 2.5 + 7.5) rarity = 'epic'; // 7.5% (영웅)
+                else if (roll < 50 + 2.5 + 7.5 + 25.0) rarity = 'rare'; // 25.0% (희귀)
                 else rarity = 'common';                          // 나머지 (일반)
                 
                 if (type === 'partner') {
