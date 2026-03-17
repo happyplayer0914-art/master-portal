@@ -904,7 +904,7 @@ updateProfileEquipmentSlots() {
                 el.onclick = null;
             }
         });
-    }
+    },
 
         // 🌸 파트너 전용 슬롯 연동 (얘도 getElementById로 콕 집음!)
         const ptEl = document.getElementById('profile-slot-partner');
