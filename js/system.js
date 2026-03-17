@@ -380,11 +380,11 @@ upgradeStat(t) {
             else { const m = GameState.getTotalStats().hp; if(GameState.currentHp >= m) return UIManager.showToast("이미 체력이 가득 찼습니다."); if(GameState.gold < 20) return UIManager.showToast("골드가 부족합니다! 🪙"); GameState.gold -= 20; GameState.currentHp = m; UIManager.showToast("여관에서 푹 쉬었습니다. ⛺"); }
             GameState.save(); UIManager.updateCurrencyUI(); UIManager.updateRpgLobbyUI(); AudioEngine.sfx.coin(); UIManager.triggerHaptic();
         },
-        toggleEquip(id) {
+       toggleEquip(id) {
             const item = GameData.items[id]; 
             if(!item) return;
             
-            // 💡 [핵심] 장비 부위(subType)에 맞춰서 각각의 칸에 장착/해제하기!
+            // 💡 장비 부위(subType)에 맞춰서 각각의 칸에 장착/해제하기!
             if (item.type === 'gear') {
                 if (item.subType === 'weapon') {
                     GameState.equippedWeapon = GameState.equippedWeapon === id ? null : id;
@@ -395,8 +395,13 @@ upgradeStat(t) {
                 }
             } 
             else { 
-                // 스킨은 그대로!
                 GameState.equippedSkin = GameState.equippedSkin === id ? null : id;
+            }
+            
+            // 🚨 [버그 수정] 장비를 뺐을 때 깎여나간 최대 체력보다 현재 체력이 높으면 깎아내기!
+            const newStats = GameState.getTotalStats();
+            if (GameState.currentHp > newStats.hp) {
+                GameState.currentHp = newStats.hp;
             }
             
             GameState.save(); 
@@ -412,20 +417,27 @@ upgradeStat(t) {
 // =========================================================================
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
-    Partner: {
+Partner: {
         toggleEquip(id) {
             const pt = GameData.partners[id]; 
             if(!pt) return;
             
-            // 1. 상태 변경 및 저장
+            // 1. 상태 변경
             GameState.equippedPartner = GameState.equippedPartner === id ? null : id;
+            
+            // 🚨 [버그 수정] 파트너 해제 시 최대 체력이 깎이면 현재 체력도 맞춰서 깎아내기!
+            const newStats = GameState.getTotalStats();
+            if (GameState.currentHp > newStats.hp) {
+                GameState.currentHp = newStats.hp;
+            }
+
             GameState.save(); 
             
-            // 🔥 2. 쓸데없는 window 조건문 싹 다 삭제!! 다이렉트로 무조건 그리기!!
-            UIManager.renderInventory();        // 프로필 스탯 및 장비 슬롯 갱신
-            UIManager.renderPartnerInventory(); // 파트너 명단 뱃지 갱신
-            UIManager.applyAvatarSkin();        // 내 정보창 배경 및 일러스트 갱신
-            UIManager.updateRpgLobbyUI();       // 로비(전투화면) 갱신
+            // 2. 화면 그리기
+            UIManager.renderInventory();        
+            UIManager.renderPartnerInventory(); 
+            UIManager.applyAvatarSkin();        
+            UIManager.updateRpgLobbyUI();       
             
             // 3. 사운드 및 진동
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip(); 
