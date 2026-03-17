@@ -3074,6 +3074,9 @@ GameSystem.Profile = {
         try {
             const userRef = window.doc(window.db, "users", GameState.nickname);
             
+            // 🚨 [핵심 버그 수정!!] 칭호 정보를 여기서 가져옵니다!
+            const titleInfo = GameSystem.Lobby.getCurrentTitle(); 
+            
             await window.setDoc(userRef, {
                 nickname: GameState.nickname,
                 totalStats: GameState.getTotalStats(), 
@@ -3082,11 +3085,10 @@ GameSystem.Profile = {
                 highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
                 prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
-                    // 👇 [여기에 3줄이 추가됐어!] 랭킹과 동일하게 아바타 정보 저장!
+                
                 profile: GameState.equippedProfile || 'none',  
                 skin: GameState.equippedSkin || 'none',
-                title: titleInfo ? titleInfo.full : null,
-                // 👆
+                title: titleInfo ? titleInfo.full : null, // 👈 칭호가 안전하게 저장됩니다!
                 
                 equipment: {
                     weapon: GameState.equippedWeapon || null,
@@ -3101,12 +3103,10 @@ GameSystem.Profile = {
                     accessory: GameState.equippedAccessory ? (GameState.itemUpgrades[GameState.equippedAccessory] || 0) : 0
                 },
                 
-                // 🌸 장착 중인 파트너의 레벨 모음!
                 partnerLevels: {
                     [GameState.equippedPartner || 'none']: GameState.equippedPartner ? (GameState.partnerLevels[GameState.equippedPartner] || 0) : 0
                 },
                 
-                // 👇 [여기에 쏙 들어갑니다!] 타 유저에게 내 호감도 일러스트를 보여주기 위해 서버에 전송!
                 partnerAffectionLevel: {
                     [GameState.equippedPartner || 'none']: GameState.equippedPartner ? (GameState.partnerAffectionLevel[GameState.equippedPartner] || 1) : 1
                 },
