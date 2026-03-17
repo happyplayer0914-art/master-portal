@@ -1075,7 +1075,7 @@ updateProfileEquipmentSlots() {
             const levelText = level > 0 ? `<span class="text-pink-300 font-black mr-0.5">★${level}</span>` : '';
             
             // 🌟 우측 상단에 갯수 뱃지 추가!
-            const countHTML = count > 1 ? `<div class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-indigo-400 shadow-md z-20">x${count}</div>` : '';
+           const countHTML = count > 1 ? `<div class="absolute bottom-1 right-2 text-slate-400 text-[10px] font-black z-20">x${count}</div>` : '';
 
             let rarityClass = "border-slate-600 bg-slate-800";
             if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
@@ -1407,7 +1407,21 @@ updateProfileEquipmentSlots() {
             
             document.getElementById('dc-skill-icon').innerText = item.emoji;
             document.getElementById('dc-skill-name').innerText = item.skillName;
-            document.getElementById('dc-skill-desc').innerText = item.skillDesc;
+           // 🌟 [여기서부터 덮어씌우기!] 호감도에 따른 스킬 위력 및 쿨타임 가속 동적 계산기!
+            let dynamicDesc = item.skillDesc;
+            const bonusPower = item.skillValue ? (item.skillValue * (affLv * 0.05)) : 0;
+            
+            if (item.skillValue && bonusPower > 0) {
+                // 스킬 설명 원본에서 숫자를 찾은 다음, 그 뒤에 (+보너스)를 화려하게 붙여줍니다!
+                const cleanBonus = bonusPower % 1 === 0 ? bonusPower : bonusPower.toFixed(1);
+                dynamicDesc = dynamicDesc.replace(item.skillValue.toString(), `${item.skillValue}<span class="text-pink-400 font-black">(+${cleanBonus})</span>`);
+            }
+            
+            // 쿨타임 감소 효과도 설명 밑에 덧붙여줍니다!
+            dynamicDesc += `<br><span class="text-cyan-400 text-[9px] font-bold mt-1.5 inline-block">⚡ 스킬 쿨타임 -${affLv * 2}% 가속 적용됨</span>`;
+            
+            // innerText 대신 HTML 태그가 먹히도록 innerHTML로 쏴줍니다!
+            document.getElementById('dc-skill-desc').innerHTML = dynamicDesc;
 
             const upgMult = 1.0 + (level * 0.1);
             let pStatsHtml = '';
