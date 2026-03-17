@@ -251,7 +251,8 @@ const GameSystem = {
                 UIManager.updateCurrencyUI();
                 this.renderList();
                 this.renderDetails();
-            },
+           } // attemptUpgrade 함수 끝
+        }, // 👈 [진짜 범인] 대장간(Forge) 전체를 닫아주는 이 괄호가 삭제됐었어!!
 
     Lobby: {
        applyBackground() {
