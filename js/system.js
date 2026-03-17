@@ -476,21 +476,58 @@ upgradeStat(t) {
                 }
             },
 
-            // 🌟 동적 일러스트 변환기 (호감도에 따라 진화!)
-            getDisplayImage(id) {
-                const pt = GameData.partners[id];
-                const lv = GameState.partnerAffectionLevel[id] || 1;
-                
-                if (pt.rarity === 'mythic') {
-                    if (lv >= 10) return pt.img_gif || pt.img_full; // 10렙: GIF
-                    if (lv >= 6) return pt.img_full;                 // 6~9렙: 전신
-                    return pt.img_sd;                                // 1~5렙: SD
-                } else if (pt.rarity === 'legendary') {
-                    if (lv >= 6) return pt.img_full;                 // 6~10렙: 전신
-                    return pt.img_sd;                                // 1~5렙: SD
-                }
-                return pt.img_full; // 영웅, 희귀는 기본 제공 이미지
-            },
+           // 🌟 해금된 모든 일러스트 목록 가져오기
+        getUnlockedSkins(id) {
+            const pt = GameData.partners[id];
+            const lv = GameState.partnerAffectionLevel[id] || 1;
+            let skins = [pt.img_sd]; // 기본 SD는 무조건 있음
+            
+            if (pt.rarity === 'mythic') {
+                if (lv >= 6) skins.push(pt.img_full);
+                if (lv >= 10 && pt.img_gif) skins.push(pt.img_gif);
+            } else if (pt.rarity === 'legendary') {
+                if (lv >= 6) skins.push(pt.img_full);
+            }
+            return skins;
+        },
+
+        // 🌟 현재 보여줄 일러스트 렌더링 (마스터가 픽한 스킨 최우선!)
+        getDisplayImage(id) {
+            if (!GameState.partnerSkins) GameState.partnerSkins = {};
+            const unlocked = this.getUnlockedSkins(id);
+            const savedSkin = GameState.partnerSkins[id];
+            
+            // 저장된 스킨이 있고, 현재 해금된 목록에 있다면 그걸 보여줌
+            if (savedSkin && unlocked.includes(savedSkin)) return savedSkin;
+            
+            // 없으면 가장 최근에 해금된 가장 멋진 일러스트(배열의 마지막)를 보여줌
+            return unlocked[unlocked.length - 1]; 
+        },
+
+        // 🌟 외형 순환 변경 버튼 액션!
+        cycleSkin(id) {
+            if (!GameState.partnerSkins) GameState.partnerSkins = {};
+            const unlocked = this.getUnlockedSkins(id);
+            
+            if (unlocked.length <= 1) {
+                return UIManager.showToast("🔒 호감도 레벨을 올려 새로운 외형을 해금하세요!");
+            }
+            
+            const currentSkin = this.getDisplayImage(id);
+            let nextIndex = unlocked.indexOf(currentSkin) + 1;
+            if (nextIndex >= unlocked.length) nextIndex = 0; // 끝까지 가면 다시 처음(SD)으로
+            
+            GameState.partnerSkins[id] = unlocked[nextIndex];
+            GameState.save();
+            
+            if(window.AudioEngine) AudioEngine.sfx.equip();
+            UIManager.showToast("✨ 파트너의 외형을 변경했습니다!");
+            
+            // 화면 갱신 3종 세트
+            UIManager.openDetailCard(id, 'partner'); 
+            UIManager.updateProfileUI(); 
+            UIManager.renderPartnerInventory();
+        },
 
             // 🌟 호감도 경험치 추가 엔진
             addAffection(id, amount) {
