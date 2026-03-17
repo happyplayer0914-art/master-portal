@@ -1494,6 +1494,19 @@ Partner: {
         battleState: { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 },
 
         showDamageText(targetId, text, typeClass) {
+                // 🌟 [신규] 전투 로그 배열 (최대 4줄 보관)
+        battleLogs: [],
+
+        // 🌟 [신규] 멀티라인 전투 로그 추가 함수
+        addLog(text, colorClass = "text-slate-300") {
+            const container = document.getElementById('battle-log-container');
+            if (!container) return;
+            
+            this.battleLogs.push(`<div class="${colorClass} animate-[fadeIn_0.2s_ease-out]">${text}</div>`);
+            if (this.battleLogs.length > 4) this.battleLogs.shift(); // 4줄이 넘어가면 가장 오래된 로그 삭제
+            
+            container.innerHTML = this.battleLogs.join('');
+        },
             const target = document.getElementById(targetId);
             if(!target) return;
             const textEl = document.createElement('div');
@@ -1673,48 +1686,61 @@ Partner: {
                 const stats = GameState.getTotalStats();
                 const now = Date.now();
 
+            // 🌸 파트너 슬롯 펄쩍! 뛰는 애니메이션
+                const ptSlot = document.getElementById('battle-partner-slot');
+                if (ptSlot) {
+                    ptSlot.style.transform = 'scale(1.2) translateY(-10px)';
+                    setTimeout(() => ptSlot.style.transform = 'scale(1) translateY(0)', 200);
+                }
+
+                // ✨ 마스터 머리 위가 아니라 '파트너 초상화' 위로 스킬 이름 플로팅 텍스트 띄우기!
+                this.showDamageText('battle-partner-slot', `[${pt.skillName}]`, 'text-pink-300 font-black text-[10px] sm:text-xs drop-shadow-md whitespace-nowrap -mt-6');
+                
+                // 🎧 파트너 전용 스킬 사운드 (기존 마법 소리 활용)
+                AudioEngine.sfx.equip(); 
+
                 switch(pt.element) {
-                    case 'fire': // 🔥 화염: 마스터 공격력의 x% 지속 데미지
+                    case 'fire': 
                         let fireDmg = Math.floor(stats.atk * (pt.skillValue / 100));
                         this.monsterCurrentHp -= fireDmg;
                         this.showDamageText('monster-avatar-wrap', fireDmg, 'text-orange-500 font-black text-xl drop-shadow-md');
-                        document.getElementById('battle-log').innerText = `🔥 [${pt.name}] 화염 공격! ${fireDmg} 피해!`;
+                        this.addLog(`🔥 [${pt.name}] ${pt.skillName}! ${fireDmg} 피해!`, 'text-orange-400');
                         const sprite = document.getElementById('monster-sprite');
-                        sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+                        if(sprite) { sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash'); }
                         break;
                         
-                    case 'air': // 🌬️ 바람: 분신 타격 (공격 1회 추가)
-                        let airDmg = stats.atk; // 마스터 공격력 100%
+                    case 'air': 
+                        let airDmg = stats.atk; 
                         this.monsterCurrentHp -= airDmg;
                         this.showDamageText('monster-avatar-wrap', airDmg, 'text-teal-300 font-black text-2xl drop-shadow-md');
-                        document.getElementById('battle-log').innerText = `🌪️ [${pt.name}] 분신 타격! ${airDmg} 추가 피해!`;
+                        this.addLog(`🌪️ [${pt.name}] ${pt.skillName}! ${airDmg} 추가 피해!`, 'text-teal-300');
                         break;
                         
-                    case 'ice': // ❄️ 빙결: 데미지 + 스턴
+                    case 'ice': 
                         let iceDmg = Math.floor(stats.atk * (pt.skillValue / 100));
                         this.monsterCurrentHp -= iceDmg;
-                        this.battleState.stunUntil = now + pt.skillDuration; // 몬스터 기절 타이머 설정!
+                        this.battleState.stunUntil = now + pt.skillDuration; 
                         this.showDamageText('monster-avatar-wrap', "FROZEN!", 'text-cyan-300 font-black text-2xl drop-shadow-[0_0_10px_cyan]');
-                        document.getElementById('battle-log').innerText = `❄️ [${pt.name}] 빙결! 몬스터가 얼어붙었습니다!`;
+                        this.addLog(`❄️ [${pt.name}] ${pt.skillName}! 몬스터 빙결!`, 'text-cyan-300');
                         break;
 
-                    case 'earth': // 🪨 대지: 쉴드 생성
+                    case 'earth': 
                         let shieldAmt = Math.floor(stats.hp * (pt.skillValue / 100));
-                        this.battleState.shield = shieldAmt; // 쉴드 장전!
+                        this.battleState.shield = shieldAmt; 
                         this.showDamageText('battle-player-hp-text', `+🛡️${shieldAmt}`, 'text-amber-600 font-black text-2xl drop-shadow-md');
-                        document.getElementById('battle-log').innerText = `🪨 [${pt.name}] 대지의 보호막 생성! (+${shieldAmt})`;
+                        this.addLog(`🪨 [${pt.name}] ${pt.skillName}! 보호막 획득 (+${shieldAmt})`, 'text-amber-400');
                         break;
 
-                    case 'lightning': // ⚡ 번개: 버프 (크리 확률 상승)
+                    case 'lightning': 
                         this.battleState.buffUntil = now + pt.skillDuration;
                         this.showDamageText('battle-player-hp-text', "⚡ CRIT UP!", 'text-yellow-400 font-black text-xl drop-shadow-md');
-                        document.getElementById('battle-log').innerText = `⚡ [${pt.name}] 뇌명 버프! 크리티컬 확률 대폭 상승!`;
+                        this.addLog(`⚡ [${pt.name}] ${pt.skillName}! 크리티컬 대폭 상승!`, 'text-yellow-300');
                         break;
 
-                    case 'light': // 🌟 빛: 디버프 (적 공격력/공속 감소)
+                    case 'light': 
                         this.battleState.debuffUntil = now + pt.skillDuration;
                         this.showDamageText('monster-avatar-wrap', "⬇️ WEAK", 'text-purple-400 font-black text-xl drop-shadow-md');
-                        document.getElementById('battle-log').innerText = `🌟 [${pt.name}] 심연의 빛! 몬스터가 약화되었습니다!`;
+                        this.addLog(`🌟 [${pt.name}] ${pt.skillName}! 몬스터 약화!`, 'text-purple-300');
                         break;
                 }
 
@@ -1724,18 +1750,31 @@ Partner: {
             }, pt.skillCooldown);
         },
 
-        updateBattleUI() {
+       updateBattleUI() {
             const stats = GameState.getTotalStats(); 
-            
-            // 💡 [수정] 쉴드가 있으면 체력바 옆에 [🛡️1000] 식으로 띄워줍니다!
             let shieldText = this.battleState.shield > 0 ? ` <span class="text-[10px] text-amber-500 font-black">[🛡️${this.battleState.shield}]</span>` : '';
             document.getElementById('battle-player-hp-text').innerHTML = `${Math.max(0, GameState.currentHp)} / ${stats.hp}${shieldText}`;
-            
             document.getElementById('battle-player-hp-bar').style.width = `${Math.max(0, (GameState.currentHp / stats.hp) * 100)}%`;
-            document.getElementById('battle-player-buff-text').innerText = GameState.equippedPartner ? `[파트너 동행]` : ''; 
             document.getElementById('battle-monster-hp-text').innerText = `${Math.max(0, Math.floor(this.monsterCurrentHp))} / ${this.monsterMaxHp}`;
             document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (this.monsterCurrentHp / this.monsterMaxHp) * 100)}%`;
             document.getElementById('battle-potion-count').innerText = GameState.potions;
+
+            // 🌸 [신규] 파트너 슬롯에 SD 이미지 그려주기
+            const ptSlot = document.getElementById('battle-partner-slot');
+            if (ptSlot) {
+                if (GameState.equippedPartner && window.GameData && GameData.partners[GameState.equippedPartner]) {
+                    const pt = GameData.partners[GameState.equippedPartner];
+                    let borderClass = "border-pink-500/50 bg-pink-900/30";
+                    if(pt.rarity === 'mythic') borderClass = "rarity-mythic";
+                    else if(pt.rarity === 'legendary') borderClass = "border-yellow-400/80 bg-yellow-900/30";
+                    
+                    ptSlot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 flex items-center justify-center relative flex-shrink-0 transition-transform duration-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] ${borderClass}`;
+                    ptSlot.innerHTML = `<img src="assets/partners/${pt.img_sd}" class="w-10 h-10 sm:w-12 sm:h-12 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-3xl filter drop-shadow-md">${pt.emoji}</div>`;
+                } else {
+                    ptSlot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800 flex items-center justify-center relative flex-shrink-0 transition-transform`;
+                    ptSlot.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">비어있음</span>`;
+                }
+            }
         },
 
         usePotionInBattle() {
