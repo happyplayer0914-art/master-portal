@@ -906,38 +906,6 @@ updateProfileEquipmentSlots() {
         });
     },
 
-        // 🌸 파트너 전용 슬롯 연동 (얘도 getElementById로 콕 집음!)
-        const ptEl = document.getElementById('profile-slot-partner');
-        if (ptEl) {
-            const ptId = GameState.equippedPartner;
-            if (ptId && window.GameData && GameData.partners && GameData.partners[ptId]) {
-                const pt = GameData.partners[ptId];
-                let rarityClass = "border-pink-500/50 bg-pink-900/30";
-                if(pt.rarity === 'mythic') rarityClass = "rarity-mythic animate-pulse";
-                else if(pt.rarity === 'legendary') rarityClass = "rarity-legendary";
-                else if(pt.rarity === 'epic') rarityClass = "rarity-epic";
-                else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
-
-                const level = GameState.partnerLevels[ptId] || 0;
-              ptEl.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
-                
-                // 💡 [수정 완료] 여기도 동일하게 setTimeout 안전장치 부착!
-                ptEl.innerHTML = `
-                    <img src="assets/partners/${pt.img_icon}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
-                    <div style="display:none;" class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
-                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
-                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level}</div>
-                `;
-                ptEl.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level}] ${pt.skillDesc}`); };
-            } else {
-                ptEl.className = "aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative opacity-50";
-                ptEl.innerHTML = `<span class="text-[9px] text-pink-400 font-bold">파트너</span>`;
-                ptEl.onclick = null;
-            }
-        }
-    },
-
-
    // ✍️ 3단계용! 한 줄 소개 수정 스위치
     editStatusMessage() {
         const currentMsg = GameState.statusMessage || "";
