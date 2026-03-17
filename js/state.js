@@ -33,6 +33,8 @@ const GameState = {
         daily: { date: "", progress: {} }, 
         achievements: { progress: {}, completed: [] } 
     },
+    // 👇 [신규 추가] 장비와 파트너의 천장 데이터를 분리해서 저장!
+    gachaPity: { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } },
     
     // 🔒 [보안 강화] 데이터를 외계어로 변환 (Base64)
     _encode(value) {
@@ -109,6 +111,8 @@ const GameState = {
         this.potions = this._safeLoad('master_potions', 1);
         this.inventory = this._safeLoad('master_inventory', []);
         this.prestigeCount = this._safeLoad('master_prestige', 0);
+      // 👇 [신규 추가] 로드할 때 천장 데이터도 불러오기!
+        this.gachaPity = this._safeLoad('master_gacha_pity', { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } });
         
         let w = this._safeLoad('master_equipped_weapon', 'none'); this.equippedWeapon = (w === 'none' ? null : w);
         let a = this._safeLoad('master_equipped_armor', 'none'); this.equippedArmor = (a === 'none' ? null : a);
@@ -167,6 +171,8 @@ const GameState = {
         localStorage.setItem('master_inventory', this._encode(this.inventory));
         localStorage.setItem('master_quest_data', this._encode(this.questData));
         localStorage.setItem('master_prestige', this._encode(this.prestigeCount));
+      // 👇 [신규 추가] 저장할 때 천장 데이터도 묶어서 암호화!
+        localStorage.setItem('master_gacha_pity', this._encode(this.gachaPity));
         
         localStorage.setItem('master_equipped_weapon', this._encode(this.equippedWeapon || 'none'));
         localStorage.setItem('master_equipped_armor', this._encode(this.equippedArmor || 'none'));
