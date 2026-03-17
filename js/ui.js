@@ -922,7 +922,7 @@ updateProfileEquipmentSlots() {
                 
                 // 💡 [수정 완료] 여기도 동일하게 setTimeout 안전장치 부착!
                 ptEl.innerHTML = `
-                    <img src="assets/partners/${pt.img_sd}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
+                    <img src="assets/partners/${pt.img_icon}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
                     <div style="display:none;" class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
                     <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
                     <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level}</div>
@@ -1124,7 +1124,7 @@ updateProfileEquipmentSlots() {
             <div onclick="UIManager.openDetailCard('${id}', 'partner')" class="item-card ${rarityClass} ${isEquipped ? 'equipped !border-pink-500 shadow-[inset_0_0_20px_rgba(236,72,153,0.4)]' : ''} relative flex flex-col justify-start items-center p-2 h-auto min-h-[140px] w-full hover:scale-105 transition-all cursor-pointer">
                 ${badgeHTML}
                 
-                <img src="assets/partners/${pt.img_sd}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
+                <img src="assets/partners/${pt.img_icon}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1 mt-2 flex-shrink-0" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
                 <div style="display:none;" class="text-4xl mb-1 mt-2 filter drop-shadow-md flex-shrink-0">${pt.emoji}</div>
                 
                 <h4 class="text-white font-bold text-[10px] text-center leading-tight mb-1.5 break-keep">${levelText}${pt.name}</h4>
