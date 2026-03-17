@@ -3267,7 +3267,55 @@ GameSystem.Profile = {
             }
         } catch(e) {
             console.error("내 프로필 로드 실패:", e);
-        }
+      }
+    }
+}; // 👈 GameSystem 거대 상자 끝! (절대 건드리지 마시오)
+
+// =========================================================================
+// 👑 [GM 전용] 파이어베이스 전체 우편(mails) 발송 엔진! (GameSystem 바깥에 위치)
+// =========================================================================
+window.sendGMMail = async function() {
+    const title = document.getElementById('gm-title').value;
+    const content = document.getElementById('gm-content').value;
+    const gold = parseInt(document.getElementById('gm-gold').value) || 0;
+    const gem = parseInt(document.getElementById('gm-gem').value) || 0;
+    const item = document.getElementById('gm-item').value;
+    const partner = document.getElementById('gm-partner').value;
+
+    if (!title) return UIManager.showToast("🚨 제목은 필수로 입력해야 합니다!");
+
+    const mailData = {
+        title: title,
+        content: content,
+        gold: gold,
+        gem: gem,
+        timestamp: new Date() // 서버 시간에 맞춰 발송됨!
+    };
+    
+    // 빈칸이 아니면 아이템/파트너 보상 추가!
+    if (item) mailData.item = item.trim();
+    if (partner) mailData.partner = partner.trim();
+
+    try {
+        // 🚨 mails 폴더로 전체 우편 쏘기!
+        await window.addDoc(window.collection(window.db, "mails"), mailData);
+        
+        UIManager.showToast("🚀 [GM] 전체 우편(mails) 발송 완료!!");
+        if (window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+        
+        // 보낸 후 창 닫고 입력창 초기화
+        document.getElementById('gm-mail-modal').classList.replace('flex', 'hidden');
+        document.getElementById('gm-title').value = '';
+        document.getElementById('gm-content').value = '';
+        document.getElementById('gm-gold').value = '';
+        document.getElementById('gm-gem').value = '';
+        document.getElementById('gm-item').value = '';
+        document.getElementById('gm-partner').value = '';
+        
+    } catch (e) {
+        console.error("우편 발송 실패:", e);
+        UIManager.showToast("🚨 발송 실패! 콘솔을 확인하세요.");
     }
 };
-// 🚨 (이 밑으로는 아무 코드도 없어야 합니다! system.js 파일 끝!)
+
+// 진짜 system.js 파일 끝!
