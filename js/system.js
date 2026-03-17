@@ -1485,16 +1485,25 @@ Partner: {
         }
     }, // 👈 요 콤마 필수! (다음이 Battle 이니까)
     
-    Battle: {
+  Battle: {
         monsterMaxHp: 0, monsterCurrentHp: 0, monsterAtkObj: 0, 
         battleInterval: null, lastAttackTime: 0, bossAttackCount: 0,
         
-        // 🌟 [신규] 파트너 전용 타이머와 전투 임시 상태(버프, 쉴드 등)를 저장하는 공간!
         partnerInterval: null,
         battleState: { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 },
+        battleLogs: [], // 🌟 멀티라인 로그 배열
+
+        // 🌟 [신규] 멀티라인 전투 로그 추가 함수
+        addLog(text, colorClass = "text-slate-300") {
+            const container = document.getElementById('battle-log-container');
+            if (!container) return;
+            
+            this.battleLogs.push(`<div class="${colorClass} animate-[fadeIn_0.2s_ease-out] mb-0.5">${text}</div>`);
+            if (this.battleLogs.length > 3) this.battleLogs.shift(); // 3줄 유지
+            container.innerHTML = this.battleLogs.join('');
+        },
 
         showDamageText(targetId, text, typeClass) {
-             
             const target = document.getElementById(targetId);
             if(!target) return;
             const textEl = document.createElement('div');
@@ -1506,19 +1515,6 @@ Partner: {
             textEl.style.top = `calc(50% + ${randomY}px)`;
             target.appendChild(textEl);
             setTimeout(() => { textEl.remove(); }, 700);
-        },
-            // 🌟 [신규] 전투 로그 배열 (최대 4줄 보관)
-        battleLogs: [],
-
-        // 🌟 [신규] 멀티라인 전투 로그 추가 함수
-        addLog(text, colorClass = "text-slate-300") {
-            const container = document.getElementById('battle-log-container');
-            if (!container) return;
-            
-            this.battleLogs.push(`<div class="${colorClass} animate-[fadeIn_0.2s_ease-out]">${text}</div>`);
-            if (this.battleLogs.length > 4) this.battleLogs.shift(); // 4줄이 넘어가면 가장 오래된 로그 삭제
-            
-            container.innerHTML = this.battleLogs.join('');
         },
 
         enterDungeon() {
@@ -1548,7 +1544,7 @@ Partner: {
             }
         },
 
-        triggerRandomEvent() { /* 기존 코드와 동일 (생략 방지용 전체 복붙) */
+        triggerRandomEvent() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
             document.getElementById('screen-rpg-event').classList.add('active');
             const titleEl = document.getElementById('event-title');
@@ -1600,8 +1596,8 @@ Partner: {
             GameState.isBattling = true;
             localStorage.setItem('master_in_battle', 'true');
 
-            // 🌟 [전투 초기화] 시작할 때 쉴드 및 모든 버프 시간 리셋!
             this.battleState = { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 };
+            this.battleLogs = []; // 전투 시작 시 로그 싹 비우기!
 
             let prestigeCount = GameState.prestigeCount || 0;
             let effStage = GameState.rpgStage + (prestigeCount * 100);
@@ -1656,22 +1652,22 @@ Partner: {
                 }
             });
         
-            document.getElementById('battle-log').innerText = "전투 시작! 화면을 탭하여 공격하세요!";
             document.getElementById('btn-attack').disabled = false; 
             document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
             
             this.lastAttackTime = 0; 
             this.bossAttackCount = 0; 
             this.updateBattleUI();
+
+            // 💡 [수정] 옛날 구닥다리 로그 대신 새로운 스크롤 엔진 가동!
+            this.addLog("⚔️ 전투 시작! 화면을 탭하여 공격하세요!", "text-yellow-400");
             
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
 
-            // 🌟 [핵심] 파트너 스킬 오토마타 엔진 가동!
             this.startPartnerSkillEngine();
         },
 
-        // 🌟 [신규] 파트너 오토마타 엔진
         startPartnerSkillEngine() {
             clearInterval(this.partnerInterval);
             const ptId = GameState.equippedPartner;
@@ -1680,24 +1676,19 @@ Partner: {
             const pt = GameData.partners[ptId];
             if (!pt.element || !pt.skillCooldown) return;
 
-            // 정해진 쿨타임마다 스킬을 투척합니다!
             this.partnerInterval = setInterval(() => {
                 if (!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
                 
                 const stats = GameState.getTotalStats();
                 const now = Date.now();
 
-            // 🌸 파트너 슬롯 펄쩍! 뛰는 애니메이션
                 const ptSlot = document.getElementById('battle-partner-slot');
                 if (ptSlot) {
                     ptSlot.style.transform = 'scale(1.2) translateY(-10px)';
                     setTimeout(() => ptSlot.style.transform = 'scale(1) translateY(0)', 200);
                 }
 
-                // ✨ 마스터 머리 위가 아니라 '파트너 초상화' 위로 스킬 이름 플로팅 텍스트 띄우기!
                 this.showDamageText('battle-partner-slot', `[${pt.skillName}]`, 'text-pink-300 font-black text-[10px] sm:text-xs drop-shadow-md whitespace-nowrap -mt-6');
-                
-                // 🎧 파트너 전용 스킬 사운드 (기존 마법 소리 활용)
                 AudioEngine.sfx.equip(); 
 
                 switch(pt.element) {
@@ -1751,7 +1742,7 @@ Partner: {
             }, pt.skillCooldown);
         },
 
-       updateBattleUI() {
+        updateBattleUI() {
             const stats = GameState.getTotalStats(); 
             let shieldText = this.battleState.shield > 0 ? ` <span class="text-[10px] text-amber-500 font-black">[🛡️${this.battleState.shield}]</span>` : '';
             document.getElementById('battle-player-hp-text').innerHTML = `${Math.max(0, GameState.currentHp)} / ${stats.hp}${shieldText}`;
@@ -1760,17 +1751,18 @@ Partner: {
             document.getElementById('battle-monster-hp-bar').style.width = `${Math.max(0, (this.monsterCurrentHp / this.monsterMaxHp) * 100)}%`;
             document.getElementById('battle-potion-count').innerText = GameState.potions;
 
-            // 🌸 [신규] 파트너 슬롯에 SD 이미지 그려주기
             const ptSlot = document.getElementById('battle-partner-slot');
             if (ptSlot) {
                 if (GameState.equippedPartner && window.GameData && GameData.partners[GameState.equippedPartner]) {
                     const pt = GameData.partners[GameState.equippedPartner];
                     let borderClass = "border-pink-500/50 bg-pink-900/30";
-                    if(pt.rarity === 'mythic') borderClass = "rarity-mythic";
+                    if(pt.rarity === 'mythic') borderClass = "rarity-mythic animate-pulse";
                     else if(pt.rarity === 'legendary') borderClass = "border-yellow-400/80 bg-yellow-900/30";
+                    else if(pt.rarity === 'epic') borderClass = "border-purple-400/80 bg-purple-900/30";
+                    else if(pt.rarity === 'rare') borderClass = "border-blue-400/80 bg-blue-900/30";
                     
-                    ptSlot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 flex items-center justify-center relative flex-shrink-0 transition-transform duration-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] ${borderClass}`;
-                    ptSlot.innerHTML = `<img src="assets/partners/${pt.img_sd}" class="w-10 h-10 sm:w-12 sm:h-12 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-3xl filter drop-shadow-md">${pt.emoji}</div>`;
+                    ptSlot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 flex flex-col items-center justify-center relative flex-shrink-0 transition-transform duration-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] ${borderClass} overflow-hidden`;
+                    ptSlot.innerHTML = `<img src="assets/partners/${pt.img_sd}" class="w-full h-full object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-3xl filter drop-shadow-md">${pt.emoji}</div>`;
                 } else {
                     ptSlot.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-dashed border-slate-600 bg-slate-800 flex items-center justify-center relative flex-shrink-0 transition-transform`;
                     ptSlot.innerHTML = `<span class="text-[10px] text-slate-500 font-bold">비어있음</span>`;
@@ -1783,7 +1775,9 @@ Partner: {
             if(!GameState.isBattling || GameState.currentHp <= 0 || this.monsterCurrentHp <= 0 || GameState.potions <= 0 || GameState.currentHp >= stats.hp) return;
             AudioEngine.sfx.click(); UIManager.triggerHaptic(); GameState.potions -= 1;
             let healAmt = Math.floor(stats.hp * 0.5); GameState.currentHp = Math.min(stats.hp, GameState.currentHp + healAmt);
-            GameState.save(); this.updateBattleUI(); document.getElementById('battle-log').innerText = `✨ 물약 사용! 체력 회복!`;
+            GameState.save(); this.updateBattleUI(); 
+            // 💡 [수정] 물약 먹는 소리도 스크롤 창으로 슝!
+            this.addLog("✨ 물약 사용! 체력 회복!", "text-emerald-400");
         },
 
         playerAttack() {
@@ -1800,10 +1794,9 @@ Partner: {
             let myAtk = stats.atk; 
             let critChance = stats.critRate;
             
-            // ⚡ [버프 적용] 번개 속성 파트너 버프가 켜져 있다면 크리 확률 증가!
             if (now < this.battleState.buffUntil && GameState.equippedPartner) {
                 const pt = GameData.partners[GameState.equippedPartner];
-                if (pt) critChance += pt.skillValue; // 예: 40% 추가
+                if (pt) critChance += pt.skillValue; 
             }
             
             let isCrit = Math.random() < (critChance / 100); 
@@ -1827,7 +1820,9 @@ Partner: {
             sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
             
             this.showDamageText('monster-avatar-wrap', isCrit ? `CRIT! ${damage}` : damage, isCrit ? 'damage-crit' : 'damage-monster');
-            document.getElementById('battle-log').innerText = `🗡️ 공격! ${damage} 데미지! ${isCrit ? '(크리티컬!)' : ''}`;
+            
+            // 💡 [수정] 마스터의 공격도 스크롤 창에 남기기!
+            this.addLog(`🗡️ 마스터 공격! ${damage} 피해! ${isCrit ? '(크리티컬!)' : ''}`, isCrit ? "text-yellow-300" : "text-white");
             
             const btn = document.getElementById('btn-attack');
             btn.disabled = true; btn.classList.add('opacity-50');
@@ -1851,15 +1846,14 @@ Partner: {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) { clearInterval(this.battleInterval); return; }
             
             const now = Date.now();
-            // ❄️ [스턴 확인] 얼음 파트너에게 맞아서 기절 상태면 공격 패스!
             if (now < this.battleState.stunUntil) {
-                document.getElementById('battle-log').innerText = "❄️ 몬스터가 얼어붙어 공격하지 못합니다!";
+                // 💡 [수정] 상태이상 로그
+                this.addLog("❄️ 몬스터가 얼어붙어 공격하지 못합니다!", "text-cyan-300");
                 return;
             }
 
-            // 🌟 [디버프 확인] 빛 파트너에게 맞아서 디버프 상태면 확률적으로 공격 빗나감 (공속 감소 구현)
             if (now < this.battleState.debuffUntil && Math.random() < 0.3) {
-                document.getElementById('battle-log').innerText = "🌟 몬스터가 빛에 눈이 부셔 공격을 허공에 날렸습니다!";
+                this.addLog("🌟 몬스터가 빛에 눈이 부셔 공격을 빗맞혔습니다!", "text-slate-400");
                 return;
             }
 
@@ -1876,16 +1870,15 @@ Partner: {
             if (Math.random() * 100 < evaChance) {
                 AudioEngine.sfx.evade();
                 this.showDamageText('battle-card', "MISS!", 'text-gray-300 font-black text-2xl drop-shadow-md'); 
-                document.getElementById('battle-log').innerText = "💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)";
+                this.addLog("💨 몬스터의 공격을 가볍게 회피했습니다! (MISS)", "text-slate-400");
                 return; 
             }
 
             let rawDamage = Math.floor(this.monsterAtkObj * (0.8 + Math.random() * 0.4));
             
-            // 🌟 [디버프 데미지 감소]
             if (now < this.battleState.debuffUntil && GameState.equippedPartner) {
                 const pt = GameData.partners[GameState.equippedPartner];
-                if (pt) rawDamage = Math.floor(rawDamage * (1 - (pt.skillValue / 100))); // 예: 30% 감소
+                if (pt) rawDamage = Math.floor(rawDamage * (1 - (pt.skillValue / 100))); 
             }
 
             if (isUltimate) rawDamage = Math.floor(rawDamage * 2.5);
@@ -1893,23 +1886,19 @@ Partner: {
             let damageReduction = Math.min(stats.def, 90) / 100; 
             let finalDamage = Math.max(1, Math.floor(rawDamage * (1 - damageReduction)));
             
-            // 🪨 [쉴드 차감 로직!] 데미지를 입을 때 쉴드부터 깎아냅니다!
             if (this.battleState.shield > 0) {
                 if (this.battleState.shield >= finalDamage) {
-                    // 쉴드로 데미지 완벽 방어!
                     this.battleState.shield -= finalDamage;
                     this.showDamageText('battle-card', "BLOCKED!", 'text-amber-500 font-black text-2xl drop-shadow-md');
-                    document.getElementById('battle-log').innerText = `🪨 대지의 쉴드가 몬스터의 공격을 완벽히 막아냈습니다!`;
+                    this.addLog(`🪨 대지의 쉴드가 몬스터의 공격을 완벽히 막아냈습니다!`, "text-amber-400");
                     finalDamage = 0; 
                 } else {
-                    // 쉴드가 깨지고 남은 데미지만 들어옴
                     finalDamage -= this.battleState.shield;
                     this.battleState.shield = 0;
-                    document.getElementById('battle-log').innerText = `🪨 쉴드가 파괴되며 몬스터의 공격을 약화시켰습니다!`;
+                    this.addLog(`🪨 쉴드가 파괴되며 몬스터의 공격을 약화시켰습니다!`, "text-amber-400");
                 }
             }
 
-            // 남은 데미지가 있다면 본체 HP 깎기
             if (finalDamage > 0) {
                 GameState.currentHp -= finalDamage; 
                 GameState.save(); 
@@ -1921,12 +1910,14 @@ Partner: {
                     if(battleCard) battleCard.classList.add('shake'); 
                     setTimeout(() => { document.body.classList.remove('boss-ultimate-flash'); if(battleCard) battleCard.classList.remove('shake'); }, 300);
                     this.showDamageText('battle-card', `FATAL! -${finalDamage}`, 'text-red-500 font-black text-4xl drop-shadow-[0_0_15px_rgba(239,68,68,1)]');
-                    document.getElementById('battle-log').innerText = `☠️ 보스의 필살기!! ${finalDamage}의 치명적인 피해!`;
+                    // 💡 [수정] 보스 공격 로그
+                    this.addLog(`☠️ 보스의 필살기!! ${finalDamage}의 치명적인 피해!`, "text-red-500");
                 } else {
                     AudioEngine.sfx.hit_player(); UIManager.triggerHaptic();
                     if(battleCard) { battleCard.classList.add('shake'); setTimeout(() => battleCard.classList.remove('shake'), 200); }
                     this.showDamageText('battle-card', `-${finalDamage}`, 'damage-player');
-                    if (this.battleState.shield <= 0) document.getElementById('battle-log').innerText = `💥 몬스터 반격! ${finalDamage} 피해!`;
+                    // 💡 [수정] 일반 몬스터 반격 로그
+                    if (this.battleState.shield <= 0) this.addLog(`💥 몬스터 반격! ${finalDamage} 피해!`, "text-red-400");
                 }
             }
 
@@ -1936,8 +1927,8 @@ Partner: {
 
         endBattle(isWin) {
             clearInterval(this.battleInterval); 
-            clearInterval(this.partnerInterval); // 🌟 전투 끝나면 파트너 스킬 엔진도 칼같이 종료!
-            this.battleState = { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 }; // 상태 초기화
+            clearInterval(this.partnerInterval); 
+            this.battleState = { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 }; 
 
             GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
             const btnAtk = document.getElementById('btn-attack');
@@ -1970,8 +1961,8 @@ Partner: {
                 if (GameSystem.Ranking) GameSystem.Ranking.updateRankingSilently();
                 UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
                 
-                const battleLog = document.getElementById('battle-log');
-                if (battleLog) battleLog.innerText = `토벌 성공! 보상을 획득했습니다.`;
+                // 💡 [수정] 승리 시 텍스트
+                this.addLog(`🎉 토벌 성공! 보상을 획득했습니다.`, "text-yellow-400");
                 
                 setTimeout(() => { UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); }, 1500);
 
@@ -1986,7 +1977,7 @@ Partner: {
             }
         },
 
-        doPrestige(isAd = false) { /* 기존 코드 동일 */
+        doPrestige(isAd = false) { 
             if (GameState.rpgStage < 100) return UIManager.showToast("100층의 심연의 군주를 토벌해야 환생할 수 있습니다! 👑");
             if (isAd) {
                 window.currentAdAction = 'prestige_double';
@@ -2000,7 +1991,7 @@ Partner: {
             this.executePrestige(1);
         },
 
-        executePrestige(multiplier = 1) { /* 기존 코드 동일 */
+        executePrestige(multiplier = 1) { 
             const rewardDiamond = (GameState.rpgStage * 10) * multiplier;
             const rewardGold = (GameState.rpgStage * 30) * multiplier;
             GameState.gem += rewardDiamond; GameState.gold += rewardGold;
