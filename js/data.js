@@ -223,6 +223,7 @@ const GameData = {
       // 🌟 6. 빛 (Light) - 신화 파트너 예시
         'pt_m1': { 
             id: 'pt_m1', name: '차원의 마녀 노아', rarity: 'mythic', emoji: '🌌',
+            img_icon: 'noah_icon.png',
             img_sd: 'partner_noah_sd.png', // 인벤토리용 쪼꼬미 이미지
             img_full: 'partner_noah_full.png', // 👈 내 정보(프로필) 창에 세워둘 얌전한 스탠딩 이미지
             img_cutin: 'partner_noah_cutin.png', // 👈 [신규 추가!] 가챠 연출 때 뽝! 하고 나올 역동적인 컷인 이미지
