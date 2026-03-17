@@ -488,11 +488,23 @@ Gacha: {
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                if (roll < 50) rarity = 'mythic';               
-                else if (roll < 50 + 2.5) rarity = 'legendary'; 
-                else if (roll < 50 + 2.5 + 7.5) rarity = 'epic'; 
-                else if (roll < 50 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
-                else rarity = 'common';                          
+                if (roll < 0.8) rarity = 'mythic';               
+                else if (roll < 0.8 + 2.5) rarity = 'legendary'; 
+                else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; 
+                else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
+                else rarity = 'common';    
+                    // 👇 [신규 추가] 천장 스택 계산기
+                if(!GameState.gachaPity) GameState.gachaPity = { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } };
+                
+                // 500뽑 천장은 신화 등장과 무조건 상관없이 스택 증가
+                if(GameState.gachaPity[type].select < 500) GameState.gachaPity[type].select += 1;
+                
+                // 200뽑 천장은 신화가 뜨면 즉시 0으로 초기화! 아니면 스택 증가!
+                if(GameState.gachaPity[type].mythic < 200) {
+                    if (rarity === 'mythic') GameState.gachaPity[type].mythic = 0;
+                    else GameState.gachaPity[type].mythic += 1;
+                }
+                // 👆 천장 스택 계산 끝
                 
                 if (type === 'partner') {
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
@@ -720,7 +732,7 @@ Gacha: {
             setTimeout(() => { closeBtn.classList.remove('hidden'); }, results.length * 200 + 300);
         },
         
-        closeGacha() { 
+       closeGacha() { 
             AudioEngine.sfx.click(); 
             document.getElementById('gacha-overlay').classList.remove('active'); 
             document.getElementById('bottom-nav').style.display = 'flex'; 
@@ -730,8 +742,117 @@ Gacha: {
                 if(UIManager.renderPartnerInventory) UIManager.renderPartnerInventory();
                 UIManager.updateRpgLobbyUI(); 
             }
+        }, // 👈 1. 기존 closeGacha 끝나는 괄호 뒤에 콤마(,)를 꼭 찍어주세요!
+
+        // 👇 2. 여기서부터 아래로 천장 관련 함수 4개를 통째로 붙여넣습니다!
+        
+        // 🌟 [천장] 200뽑 랜덤 신화 수령
+        claimPity200(type) {
+            if(GameState.gachaPity[type].mythic < 200) return;
+            GameState.gachaPity[type].mythic -= 200; // 200 차감
+            GameState.save();
+            UIManager.updateGachaPityUI();
+            
+            const pool = Object.values(type === 'partner' ? GameData.partners : GameData.items).filter(it => it.rarity === 'mythic');
+            const picked = pool[Math.floor(Math.random() * pool.length)]; // 랜덤 픽!
+            this._processPityReward(type, picked);
+        },
+
+        // 🌟 [천장] 500뽑 선택 팝업창 띄우기
+        openSelectModal(type) {
+            if(GameState.gachaPity[type].select < 500) return;
+            
+            const listEl = document.getElementById('mythic-select-list');
+            if(!listEl) return;
+            listEl.innerHTML = '';
+            
+            const pool = Object.values(type === 'partner' ? GameData.partners : GameData.items).filter(it => it.rarity === 'mythic');
+            
+            pool.forEach(item => {
+                const imgFolder = type === 'partner' ? 'partners' : 'items';
+                const imgFile = item.img_sd || item.img || '';
+                const iconStr = imgFile 
+                    ? `<img src="assets/${imgFolder}/${imgFile}" class="w-12 h-12 object-contain filter drop-shadow-md mb-1"><div style="display:none;">${item.emoji}</div>`
+                    : `<div class="text-3xl mb-1 filter drop-shadow-md">${item.emoji}</div>`;
+                        
+                listEl.innerHTML += `
+                    <div onclick="GameSystem.Gacha.claimPity500('${type}', '${item.id}')" class="item-card rarity-mythic relative flex flex-col justify-start items-center p-3 h-auto cursor-pointer hover:scale-105 transition-transform animate-pulse">
+                        ${iconStr}
+                        <h4 class="text-white font-bold text-[11px] text-center leading-tight break-keep mb-1">${item.name}</h4>
+                        <div class="mt-auto text-[9px] text-yellow-300 font-bold bg-black/50 px-3 py-1 rounded-full border border-yellow-500/50">확정 선택</div>
+                    </div>
+                `;
+            });
+            
+            const modal = document.getElementById('mythic-select-modal');
+            if(modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+            }
+        },
+
+        // 🌟 [천장] 500뽑 선택 확정 지급
+        claimPity500(type, itemId) {
+            if(GameState.gachaPity[type].select < 500) return;
+            
+            if(confirm("이 신화를 확정으로 영입하시겠습니까?")) {
+                GameState.gachaPity[type].select -= 500; // 게이지 500 깎기
+                GameState.save();
+                UIManager.updateGachaPityUI();
+                
+                const modal = document.getElementById('mythic-select-modal');
+                if(modal) {
+                    modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                    modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                }
+                
+                const picked = (type === 'partner' ? GameData.partners : GameData.items)[itemId];
+                this._processPityReward(type, picked);
+            }
+        },
+
+        // 🌟 [천장] 확정 보상 처리 및 연출 연결
+        _processPityReward(type, picked) {
+            // 인벤토리에 넣기
+            if (type === 'partner') {
+                const isDup = GameState.ownedPartners.includes(picked.id);
+                if (isDup) { 
+                    GameState.partnerLevels[picked.id] = Math.min((GameState.partnerLevels[picked.id] || 0) + 1, 10); 
+                } else { 
+                    GameState.ownedPartners.push(picked.id); 
+                    GameState.partnerLevels[picked.id] = 0; 
+                }
+            } else {
+                GameState.inventory.push(picked.id);
+            }
+            GameState.save();
+            
+            // UI 세팅 (마법진 띄우기)
+            document.getElementById('bottom-nav').style.display = 'none'; 
+            const over = document.getElementById('gacha-overlay'); 
+            const resBox = document.getElementById('gacha-results-container'); 
+            const anim = document.getElementById('gacha-animation');
+            const closeBtn = document.getElementById('gacha-close-btn');
+            
+            over.classList.add('active'); 
+            resBox.classList.add('hidden'); resBox.innerHTML = ''; 
+            closeBtn.classList.add('hidden');
+            
+            document.getElementById('gacha-title').innerHTML = `<span class="text-pink-400 font-black animate-pulse drop-shadow-md">심연의 틈새가 열립니다...!!</span>`;
+            
+            anim.classList.remove('hidden'); 
+            anim.className = 'mt-10 mb-8 transition-all duration-500 flex justify-center w-full';
+            anim.innerHTML = `<div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full shadow-[0_0_80px_rgba(236,72,153,1)] animate-[spin_4s_linear_infinite] flex items-center justify-center"><img src="assets/ui/summon_portal.png" class="w-full h-full object-cover rounded-full filter hue-rotate-[-45deg] saturate-200"></div>`;
+            
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.gacha_build(); 
+            if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+
+            // 0.5초 뒤에 결과창 띄우기 (천장은 이미 알고 뽑는 거라 스피디하게 넘깁니다!)
+            setTimeout(() => {
+                this._revealResults(type, 1, [picked], anim, resBox, closeBtn);
+            }, 1000);
         }
-    },
+    }, // 👈 3. Gacha 객체가 끝나는 괄호! (이 밑으로 Ranking: { 이 이어집니다)
 
     
 Ranking: {
