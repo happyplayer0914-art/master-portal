@@ -1383,6 +1383,27 @@
         </div>
     </div>
 </div>
+    <div id="gm-mail-modal" class="fixed inset-0 bg-black/80 z-[9999] hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-900 border-2 border-pink-500 rounded-2xl p-5 w-full max-w-sm flex flex-col gap-3 shadow-[0_0_40px_rgba(236,72,153,0.4)]">
+            <h2 class="text-pink-400 font-black text-xl text-center mb-1 drop-shadow-md">👑 GM 전체 우편 발송기 👑</h2>
+            <p class="text-slate-400 text-xs text-center mb-3">모든 유저의 우편함으로 즉시 발송됩니다.</p>
+            
+            <input id="gm-title" type="text" placeholder="제목 (예: 런칭 기념 깜짝 선물!)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-pink-500 font-bold">
+            <textarea id="gm-content" placeholder="우편 내용 (줄바꿈 가능)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-pink-500 h-24 resize-none custom-scrollbar"></textarea>
+            
+            <div class="flex gap-2">
+                <input id="gm-gold" type="number" placeholder="골드 🪙" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white w-1/2 text-center font-bold">
+                <input id="gm-gem" type="number" placeholder="젬 💎" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white w-1/2 text-center font-bold">
+            </div>
+            <div class="flex gap-2">
+                <input id="gm-item" type="text" placeholder="장비 ID (선택)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white w-1/2 text-center">
+                <input id="gm-partner" type="text" placeholder="파트너 ID (선택)" class="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm text-white w-1/2 text-center">
+            </div>
+            
+            <button onclick="window.sendGMMail()" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black py-3 rounded-xl mt-3 shadow-lg active:scale-95 transition-all text-lg">🚀 서버 전체 발송!</button>
+            <button onclick="document.getElementById('gm-mail-modal').classList.replace('flex', 'hidden')" class="text-slate-500 text-sm font-bold underline mt-1 hover:text-slate-300">닫기</button>
+        </div>
+    </div>
 </body>
 </html>
 
