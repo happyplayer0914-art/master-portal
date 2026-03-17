@@ -484,27 +484,29 @@ Gacha: {
             
             // 🎁 1. 결과 미리 계산
             let results = [];
+
+            // 🚨 [안전장치 1] 옛날 세이브 파일 때문에 천장 데이터가 없거나 꼬여있으면 강제로 새로 만들어줍니다!
+            if (!GameState.gachaPity) GameState.gachaPity = { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } };
+            if (!GameState.gachaPity.gear) GameState.gachaPity.gear = { mythic: 0, select: 0 };
+            if (!GameState.gachaPity.partner) GameState.gachaPity.partner = { mythic: 0, select: 0 };
+
             for(let i=0; i<times; i++) {
                 const roll = Math.random() * 100; 
                 let rarity = 'common'; 
                 
-                if (roll < 0.8) rarity = 'mythic';               
-                else if (roll < 0.8 + 2.5) rarity = 'legendary'; 
-                else if (roll < 0.8 + 2.5 + 7.5) rarity = 'epic'; 
-                else if (roll < 0.8 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
-                else rarity = 'common';    
-                    // 👇 [신규 추가] 천장 스택 계산기
-                if(!GameState.gachaPity) GameState.gachaPity = { gear: { mythic: 0, select: 0 }, partner: { mythic: 0, select: 0 } };
+                // (마스터님 테스트용 50%)
+                if (roll < 50) rarity = 'mythic';               
+                else if (roll < 50 + 2.5) rarity = 'legendary'; 
+                else if (roll < 50 + 2.5 + 7.5) rarity = 'epic'; 
+                else if (roll < 50 + 2.5 + 7.5 + 25.0) rarity = 'rare'; 
+                else rarity = 'common';                          
                 
-                // 500뽑 천장은 신화 등장과 무조건 상관없이 스택 증가
+                // 🌟 천장 스택 누적!
                 if(GameState.gachaPity[type].select < 500) GameState.gachaPity[type].select += 1;
-                
-                // 200뽑 천장은 신화가 뜨면 즉시 0으로 초기화! 아니면 스택 증가!
                 if(GameState.gachaPity[type].mythic < 200) {
-                    if (rarity === 'mythic') GameState.gachaPity[type].mythic = 0;
-                    else GameState.gachaPity[type].mythic += 1;
+                    if (rarity === 'mythic') GameState.gachaPity[type].mythic = 0; // 신화 뜨면 0으로 리셋!
+                    else GameState.gachaPity[type].mythic += 1; // 안 뜨면 1 증가!
                 }
-                // 👆 천장 스택 계산 끝
                 
                 if (type === 'partner') {
                     const pool = Object.values(GameData.partners).filter(it => it.rarity === rarity);
@@ -529,7 +531,14 @@ Gacha: {
                     results.push({ id: itemId, ...item }); 
                     GameState.inventory.push(itemId);
                 }
+            } // 👈 for문 끝!
+
+            // 🚨 [안전장치 2] 가챠를 다 돌렸으니 천장 스택을 꾹 저장하고, 화면의 게이지 바를 즉시 다시 그립니다!
+            GameState.save();
+            if (window.UIManager && UIManager.updateGachaPityUI) {
+                UIManager.updateGachaPityUI();
             }
+   
 
             // 🎁 2. 포탈 색상 및 텍스트 설정 (이모티콘 구문 완전 삭제 완료!)
             let hasMythic = results.some(r => r.rarity === 'mythic');
