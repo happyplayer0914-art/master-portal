@@ -1292,8 +1292,13 @@
         </button>
 
         <div class="relative w-full h-64 bg-slate-800 shrink-0 overflow-hidden flex items-center justify-center">
-            <div id="dc-bg" class="absolute inset-0 w-full h-full bg-cover bg-center opacity-30 blur-sm"></div>
-            <img id="dc-image" src="" class="absolute z-10 max-h-[110%] object-contain drop-shadow-2xl pointer-events-none">
+            <div id="dc-bg" class="absolute inset-0 w-full h-full bg-cover bg-center opacity-60"></div>
+            
+            <button id="dc-btn-skin" onclick="" class="hidden absolute top-3 left-3 z-30 bg-slate-900/80 hover:bg-slate-700 text-white border border-slate-500 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-md transition-colors backdrop-blur-sm">
+                <i class="fa-solid fa-shirt"></i> 외형 변경
+            </button>
+            
+            <img id="dc-image" src="" class="absolute z-10 max-h-[110%] object-contain drop-shadow-2xl pointer-events-none transition-all duration-300">
             <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent z-10"></div>
             
             <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end z-20">
