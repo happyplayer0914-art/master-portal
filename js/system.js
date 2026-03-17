@@ -418,7 +418,59 @@ upgradeStat(t) {
     // 🌸 [신규 시스템] 미소녀 파트너 동행 엔진
     // =========================================================================
 Partner: {
-        toggleEquip(id) {
+        toggleEquip(id) { /* 기존 유지 */ },
+
+        // 🌟 [신규] 동적 일러스트 변환기 (호감도에 따라 진화!)
+        getDisplayImage(id) {
+            const pt = GameData.partners[id];
+            const lv = GameState.partnerAffectionLevel[id] || 1;
+            
+            if (pt.rarity === 'mythic') {
+                if (lv === 10) return pt.img_gif || pt.img_full; // 10렙: GIF
+                if (lv >= 6) return pt.img_full;                 // 6~9렙: 전신
+                return pt.img_sd;                                // 1~5렙: SD
+            } else if (pt.rarity === 'legendary') {
+                if (lv >= 6) return pt.img_full;                 // 6~10렙: 전신
+                return pt.img_sd;                                // 1~5렙: SD
+            }
+            return pt.img_full; // 영웅, 희귀는 기본 제공 이미지
+        },
+
+        // 🌟 [신규] 호감도 경험치 추가 엔진
+        addAffection(id, amount) {
+            if (!GameState.partnerAffectionExp[id]) GameState.partnerAffectionExp[id] = 0;
+            if (!GameState.partnerAffectionLevel[id]) GameState.partnerAffectionLevel[id] = 1;
+
+            let currentLv = GameState.partnerAffectionLevel[id];
+            if (currentLv >= 10) return; // 만렙
+
+            GameState.partnerAffectionExp[id] += amount;
+
+            // 💡 점진적 요구량 (1렙->2렙: 100, 2렙->3렙: 200, 3렙->4렙: 300 ...)
+            let reqExp = currentLv * 100;
+            
+            while (GameState.partnerAffectionExp[id] >= reqExp && currentLv < 10) {
+                GameState.partnerAffectionExp[id] -= reqExp;
+                currentLv++;
+                GameState.partnerAffectionLevel[id] = currentLv;
+                UIManager.showToast(`💖 [${GameData.partners[id].name}] 호감도 레벨 UP! (Lv.${currentLv})`);
+                reqExp = currentLv * 100;
+            }
+            GameState.save();
+        },
+
+        giveGift(id) {
+            if (GameState.gem < 50) return UIManager.showToast("💎 젬이 부족합니다!");
+            if (GameState.partnerAffectionLevel[id] >= 10) return UIManager.showToast("이미 호감도가 최대치입니다!");
+            
+            GameState.gem -= 50;
+            this.addAffection(id, 100); // 50젬 = 경험치 100 획득
+            
+            if(window.AudioEngine) AudioEngine.sfx.equip();
+            UIManager.updateCurrencyUI();
+            UIManager.openDetailCard(id, 'partner'); // 화면 갱신
+        }
+    },
             const pt = GameData.partners[id]; 
             if(!pt) return;
             
@@ -2303,6 +2355,10 @@ Ranking: {
                 
                 let rewardGold = 10 + (GameState.rpgStage * 2);
                 let rewardGem = 0;   
+                    // 👇 [신규 추가] 같이 싸운 파트너 호감도 경험치 +10 상승!
+                if (GameState.equippedPartner) {
+                    GameSystem.Partner.addAffection(GameState.equippedPartner, 10);
+                }
                 
                 if (isBoss) {
                     const bossTier = GameState.rpgStage / 10; 
