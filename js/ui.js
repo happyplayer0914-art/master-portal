@@ -403,7 +403,7 @@ const UIManager = {
                     const prestigeText = data.prestige > 0 ? `[${data.prestige}환생] ` : "";
                     document.getElementById('target-user-stage').innerText = `${prestigeText}${data.highestStage || stage}F`;
 
-                    // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
+                  // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
                     const bgEl = document.getElementById('target-profile-bg');
                     if (data.bgSkin && data.bgSkin !== 'none' && data.bgSkin !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
                         const bgItem = GameData.cosmetics.backgrounds.find(x => x.id === data.bgSkin);
@@ -412,12 +412,28 @@ const UIManager = {
                         bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
                     }
                     
+                    // 🌸 [신규 추가] 타 유저 파트너 전신 일러스트 렌더링!
+                    const targetPtImgEl = document.getElementById('target-profile-partner');
+                    if (targetPtImgEl) {
+                        if (data.equipment && data.equipment.partner && window.GameData && GameData.partners && GameData.partners[data.equipment.partner]) {
+                            const pt = GameData.partners[data.equipment.partner];
+                            targetPtImgEl.style.backgroundImage = `url('assets/partners/${pt.img_full}')`;
+                            targetPtImgEl.style.filter = "none"; 
+                            targetPtImgEl.style.opacity = "1";
+                            targetPtImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
+                        } else {
+                            targetPtImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
+                            targetPtImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)";
+                            targetPtImgEl.style.opacity = "0.5";
+                            targetPtImgEl.className = "absolute -right-8 bottom-0 h-[90%] w-[65%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
+                        }
+                    }
+                    
               // 상대방 장비 & 파트너 렌더링 엔진
                     const renderTargetSlot = (type, itemId, level) => {
                         const el = document.getElementById(`target-slot-${type}`);
                         if (!el) return;
-                        
-                        // 🌸 파트너 처리 로직
+                     // 🌸 파트너 처리 로직
                         if (type === 'partner') {
                             if (itemId && window.GameData && GameData.partners && GameData.partners[itemId]) {
                                 const pt = GameData.partners[itemId];
@@ -428,10 +444,13 @@ const UIManager = {
                                 else if(pt.rarity === 'rare') rarityClass = "rarity-rare";
 
                                 el.className = `aspect-square rounded-lg flex flex-col items-center justify-center relative cursor-pointer hover:scale-105 transition-transform border-2 ${rarityClass}`;
+                                
+                                // 💡 [수정됨] 타 유저 슬롯에도 SD 이미지와 에러 방지 타이머 적용!
                                 el.innerHTML = `
-                                    <div class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
-                                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md">🔍</div>
-                                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1">★${level || 0}</div>
+                                    <img src="assets/partners/${pt.img_sd}" class="w-8 h-8 object-contain filter drop-shadow-md" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);">
+                                    <div style="display:none;" class="text-2xl filter drop-shadow-md">${pt.emoji}</div>
+                                    <div class="absolute -top-1 -right-1 bg-pink-900 border border-pink-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
+                                    <div class="absolute bottom-0 w-full bg-black/60 text-pink-200 text-[9px] text-center font-bold rounded-b-lg py-0.5 truncate px-1 z-10">★${level || 0}</div>
                                 `;
                                 el.onclick = () => { UIManager.showToast(`🌸 [${pt.name} ★${level || 0}] ${pt.skillDesc}`); };
                             } else {
