@@ -1481,15 +1481,14 @@ Ranking: {
         unsubNotice: null, 
         initialLoadDone: false,
         
-        // 💡 [수정] 기본 채널을 통합 광장(G)으로 변경!
         currentRoom: 'G', 
+        currentSubRoom: 1, // 🌟 신규: 현재 접속 중인 서브 채널 번호
+        maxSubChannels: 10, // 🌟 신규: 총 생성할 채널 개수
 
         init() {
-            // ... (기존 init 로직 동일) ...
             if (!window.db) return;
             const qNotice = window.query(window.collection(window.db, "notices"), window.orderBy("timestamp", "desc"), window.limit(10));
             this.unsubNotice = window.onSnapshot(qNotice, (snapshot) => {
-                // ... (공지사항 수신 로직 동일) ...
                 const noticeBox = document.getElementById('notice-box');
                 if (!noticeBox) return;
                 let notices = [];
@@ -1501,95 +1500,45 @@ Ranking: {
                 }
             });
 
-            this.listenRoom(this.currentRoom);
-        },
-// 🚫 [신규] 유저 차단하기 (로컬 저장소에 블랙리스트 작성)
-        blockUser() {
-            if (!window.currentTargetUser) return;
-            if (!GameState.blockedUsers) GameState.blockedUsers = []; // 블랙리스트 수첩 만들기
+            // 🌟 [자동 채널 분산] 처음에 주점에 오면 1~5채널 중 하나로 랜덤하게 흩뿌려줍니다!
+            this.currentSubRoom = Math.floor(Math.random() * 5) + 1;
             
-            if (!GameState.blockedUsers.includes(window.currentTargetUser)) {
-                GameState.blockedUsers.push(window.currentTargetUser);
-                GameState.save();
-                UIManager.showToast(`🚫 [${window.currentTargetUser}] 유저를 차단했습니다. 이제 채팅이 보이지 않습니다.`);
-            } else {
-                UIManager.showToast(`이미 차단된 유저입니다.`);
-            }
-            
-            UIManager.closeUserProfile();
-            
-            // 채팅창을 새로고침해서 차단한 사람 글 싹 날려버리기!
-            const tempRoom = this.currentRoom;
-            this.currentRoom = null; 
-            this.switchRoom(tempRoom);
+            this.renderSubChannelUI(); // 채널 버튼 그리기
+            this.listenRoom(this.currentRoom, this.currentSubRoom);
         },
 
-        // 🚨 [신규] 파이어베이스에 진짜로 신고장 쏘기!
-        async submitReport() {
-            const reason = document.getElementById('report-reason-input').value.trim();
-            if (!reason) return UIManager.showToast("🚨 신고 사유를 작성해주세요!");
-            if (!window.db || !window.currentTargetUser) return;
-
-            try {
-                // 파이어베이스에 'reports' 라는 새 폴더를 만들어서 찔러넣기!
-                await window.addDoc(window.collection(window.db, "reports"), {
-                    reporter: GameState.nickname,
-                    target: window.currentTargetUser,
-                    reason: reason,
-                    timestamp: window.serverTimestamp()
-                });
+        // 🌟 [신규] 채널 가로 스크롤 바 그리기
+        renderSubChannelUI() {
+            const bar = document.getElementById('sub-channel-bar');
+            if(!bar) return;
+            let html = '';
+            for(let i = 1; i <= this.maxSubChannels; i++) {
+                const isActive = (i === this.currentSubRoom);
+                // 선택된 채널은 빛나게, 나머지는 어둡게!
+                const bgClass = isActive 
+                    ? 'bg-indigo-500 text-white font-black border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.5)]' 
+                    : 'bg-slate-800 text-slate-400 border-slate-600 hover:text-white hover:bg-slate-700';
                 
-                UIManager.showToast("🚨 신고가 정상적으로 접수되었습니다. 깨끗한 랩을 위해 노력하겠습니다!");
-                document.getElementById('report-reason-input').value = ''; // 썼던 내용 지우기
-                UIManager.closeReportModal();
-                UIManager.closeUserProfile();
-            } catch(e) {
-                console.error("신고 실패:", e);
-                UIManager.showToast("신고 접수에 실패했습니다 😢");
+                html += `<button onclick="GameSystem.Chat.switchSubRoom(${i})" class="px-4 py-1.5 rounded-full text-[10px] border transition-all ${bgClass} shrink-0">Ch.${i}</button>`;
             }
-        },
-            // 📋 [신규] 차단된 유저 목록 화면에 그리기
-        renderBlockedUsers() {
-            const listContainer = document.getElementById('blocked-users-list');
-            if (!listContainer) return;
-            
-            listContainer.innerHTML = '';
-            
-            if (!GameState.blockedUsers || GameState.blockedUsers.length === 0) {
-                listContainer.innerHTML = '<div class="text-center text-slate-500 text-xs py-8">차단한 유저가 없습니다.</div>';
-                return;
-            }
-            
-            GameState.blockedUsers.forEach(nickname => {
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-sm";
-                div.innerHTML = `
-                    <span class="text-white font-bold text-sm truncate pr-2">${nickname}</span>
-                    <button onclick="GameSystem.Chat.unblockUser('${nickname}')" class="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all active:scale-95">해제</button>
-                `;
-                listContainer.appendChild(div);
-            });
+            bar.innerHTML = html;
         },
 
-        // 🔓 [신규] 유저 차단 해제하기
-        unblockUser(nickname) {
-            if (!GameState.blockedUsers) return;
+        // 🌟 [신규] 서브 채널(Ch.1 ~ 10) 이동 로직
+        switchSubRoom(subNum) {
+            if (this.currentSubRoom === subNum) return;
+            if (window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             
-            // 블랙리스트에서 해당 닉네임 지우기
-            GameState.blockedUsers = GameState.blockedUsers.filter(name => name !== nickname);
-            GameState.save();
-            
-            UIManager.showToast(`✅ [${nickname}] 유저의 차단이 해제되었습니다.`);
-            
-            // 화면 목록 다시 그리기 (방금 해제한 사람 사라짐)
-            this.renderBlockedUsers();
-            
-            // 채팅창 새로고침 (차단 해제된 사람 글이 마법처럼 다시 등장!)
-            const tempRoom = this.currentRoom;
-            this.currentRoom = null; 
-            this.switchRoom(tempRoom);
+            this.currentSubRoom = subNum;
+            this.renderSubChannelUI(); // 버튼 색깔 다시 칠하기
+
+            const roomTitle = this.currentRoom === 'G' ? '통합' : this.currentRoom === 'I' ? 'I(내향)' : 'E(외향)';
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomTitle}] - Ch.${subNum} 에 입장했습니다!</div>`;
+
+            if (this.unsubChat) this.unsubChat(); // 기존 수신기 끄기
+            this.listenRoom(this.currentRoom, this.currentSubRoom); // 새 채널 수신기 켜기
         },
-        // 📺 [수정] 3개 채널 탭 색상 변경 및 이동 로직 (완벽 픽스!)
+
         switchRoom(roomName) {
             if (this.currentRoom === roomName) return; 
             this.currentRoom = roomName;
@@ -1598,12 +1547,10 @@ Ranking: {
             const btnI = document.getElementById('btn-room-I');
             const btnE = document.getElementById('btn-room-E');
             
-            // 1. 일단 3개 버튼의 불을 전부 확실하게 끕니다! (회색으로 초기화)
             if (btnG) btnG.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
             if (btnI) btnI.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
             if (btnE) btnE.className = "flex-1 bg-slate-800 text-slate-400 py-2 rounded-t-xl font-bold text-xs border border-slate-700 border-b-0 hover:text-white transition-all";
 
-            // 2. 지금 들어간 방의 버튼만 예쁜 색깔로 불을 켭니다!
             if (roomName === 'G' && btnG) {
                 btnG.className = "flex-1 bg-emerald-600 text-white py-2 rounded-t-xl font-bold text-xs border border-emerald-500 border-b-0 transition-all shadow-md";
             } else if (roomName === 'I' && btnI) {
@@ -1612,21 +1559,20 @@ Ranking: {
                 btnE.className = "flex-1 bg-orange-600 text-white py-2 rounded-t-xl font-bold text-xs border border-orange-500 border-b-0 transition-all shadow-md";
             }
 
-            // 3. 새 방에 들어왔으니 채팅창 안내 메시지 띄우기 (이름 변경 반영)
-            const roomTitle = roomName === 'G' ? '통합 주점' : roomName === 'I' ? 'I (내향) 주점' : 'E (외향) 주점';
-            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomTitle}] 채널에 입장했습니다!</div>`;
+            // 💡 대분류 탭을 바꾸면 서브 채널을 1채널로 이동시킬 수도 있지만,
+            // 보통 MMO는 자기가 있던 채널 번호를 유지해 주니까 번호는 놔두고 화면만 갱신!
+            const roomTitle = roomName === 'G' ? '통합' : roomName === 'I' ? 'I(내향)' : 'E(외향)';
+            document.getElementById('chat-messages').innerHTML = `<div class="text-center text-slate-500 text-xs py-8 font-bold">📡 [${roomTitle}] - Ch.${this.currentSubRoom} 에 입장했습니다!</div>`;
 
-            // 4. 기존 방 수신기 끄고, 새 방 수신기 켜기!
             if (this.unsubChat) this.unsubChat();
-            this.listenRoom(roomName);
+            this.listenRoom(this.currentRoom, this.currentSubRoom);
         },
 
-        // ... (아래 listenRoom, renderMessages, sendMessage 등은 기존 코드 그대로 유지) ...
-
-        // 🎧 특정 방의 채팅만 듣는 수신기!
-        listenRoom(roomName) {
-            // 💡 핵심: 방 이름에 따라 서버 폴더를 다르게 씀! (chats_I 또는 chats_E)
-            const qChat = window.query(window.collection(window.db, `chats_${roomName}`), window.orderBy("timestamp", "desc"), window.limit(30));
+        // 🌟 통신 채널 이름 변경 (예: chats_G_1)
+        listenRoom(roomName, subRoomNum) {
+            // 폴더 이름이 chats_G_1, chats_E_3 형태로 완벽하게 분리됩니다!
+            const collectionName = `chats_${roomName}_${subRoomNum}`;
+            const qChat = window.query(window.collection(window.db, collectionName), window.orderBy("timestamp", "desc"), window.limit(30));
             
             this.unsubChat = window.onSnapshot(qChat, (snapshot) => {
                 let messages = [];
@@ -1647,19 +1593,85 @@ Ranking: {
             });
         },
 
-   renderMessages(messages) {
+        blockUser() {
+            if (!window.currentTargetUser) return;
+            if (!GameState.blockedUsers) GameState.blockedUsers = []; 
+            
+            if (!GameState.blockedUsers.includes(window.currentTargetUser)) {
+                GameState.blockedUsers.push(window.currentTargetUser);
+                GameState.save();
+                UIManager.showToast(`🚫 [${window.currentTargetUser}] 유저를 차단했습니다. 이제 채팅이 보이지 않습니다.`);
+            } else {
+                UIManager.showToast(`이미 차단된 유저입니다.`);
+            }
+            
+            UIManager.closeUserProfile();
+            
+            // 차단 후 같은 채널을 다시 불러와서 글 날려버리기
+            if (this.unsubChat) this.unsubChat();
+            this.listenRoom(this.currentRoom, this.currentSubRoom);
+        },
+
+        async submitReport() {
+            // ... (기존 submitReport 로직 동일) ...
+            const reason = document.getElementById('report-reason-input').value.trim();
+            if (!reason) return UIManager.showToast("🚨 신고 사유를 작성해주세요!");
+            if (!window.db || !window.currentTargetUser) return;
+
+            try {
+                await window.addDoc(window.collection(window.db, "reports"), {
+                    reporter: GameState.nickname,
+                    target: window.currentTargetUser,
+                    reason: reason,
+                    timestamp: window.serverTimestamp()
+                });
+                UIManager.showToast("🚨 신고가 정상적으로 접수되었습니다.");
+                document.getElementById('report-reason-input').value = ''; 
+                UIManager.closeReportModal();
+                UIManager.closeUserProfile();
+            } catch(e) { console.error(e); }
+        },
+
+        renderBlockedUsers() {
+            // ... (기존 renderBlockedUsers 로직 동일) ...
+            const listContainer = document.getElementById('blocked-users-list');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+            if (!GameState.blockedUsers || GameState.blockedUsers.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-slate-500 text-xs py-8">차단한 유저가 없습니다.</div>';
+                return;
+            }
+            GameState.blockedUsers.forEach(nickname => {
+                listContainer.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-sm">
+                        <span class="text-white font-bold text-sm truncate pr-2">${nickname}</span>
+                        <button onclick="GameSystem.Chat.unblockUser('${nickname}')" class="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow transition-all active:scale-95">해제</button>
+                    </div>`;
+            });
+        },
+
+        unblockUser(nickname) {
+            if (!GameState.blockedUsers) return;
+            GameState.blockedUsers = GameState.blockedUsers.filter(name => name !== nickname);
+            GameState.save();
+            UIManager.showToast(`✅ [${nickname}] 차단 해제됨`);
+            this.renderBlockedUsers();
+            if (this.unsubChat) this.unsubChat();
+            this.listenRoom(this.currentRoom, this.currentSubRoom);
+        },
+
+        renderMessages(messages) {
+            // ... (기존 renderMessages 렌더링 로직은 완벽하므로 그대로 둡니다! 
+            // 안의 내용물은 이전 코드랑 똑같이 복사해서 넣어주면 돼!)
             const chatList = document.getElementById('chat-messages');
             if (!chatList) return;
-            
             chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">매너 채팅 부탁드립니다! ✨</div>`;
             
             messages.forEach(msg => {
-                // 🚫 [핵심 1] 내가 차단한 블랙리스트 유저면 여기서 바로 컷! (화면에 안 그립니다)
                 if (GameState.blockedUsers && GameState.blockedUsers.includes(msg.nickname)) return;
 
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
-                
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
                 let skinClass = "bg-slate-700 border border-slate-600"; 
@@ -1714,11 +1726,10 @@ Ranking: {
         },
 
         async sendMessage() {
+            // ... (기존 방어 로직 동일) ...
             const uid = localStorage.getItem('master_uid');
             if (!uid || GameState.nickname === "위대한 길드장") {
-                if (confirm("주점에서 대화하려면 구글 로그인과 닉네임 설정이 필요합니다!\n지금 설정하시겠습니까?")) {
-                    GameSystem.setFixedNickname();
-                }
+                if (confirm("주점에서 대화하려면 구글 로그인과 닉네임 설정이 필요합니다!\n지금 설정하시겠습니까?")) GameSystem.setFixedNickname();
                 return;
             }
 
@@ -1735,35 +1746,28 @@ Ranking: {
             input.value = '';
             this.lastChatTime = now;
 
-            // 💡 핵심: 현재 방 이름에 맞춰서 폴더를 골라 전송!
-            const collectionName = `chats_${this.currentRoom}`;
-            // 💡 현재 내 칭호 정보 가져오기!
+            // 🌟 쏘아 올리는 폴더 이름도 서브 채널 이름으로 조준!
+            const collectionName = `chats_${this.currentRoom}_${this.currentSubRoom}`;
             const titleInfo = GameSystem.Lobby.getCurrentTitle();
 
-          try {
-                // 👇 [수정됨] 여기에 skin 정보를 추가로 담아서 파이어베이스로 쏩니다!
+            try {
                 await window.addDoc(window.collection(window.db, collectionName), {
                     uid: uid,
                     nickname: GameState.nickname,
                     text: text,
                     titleShort: titleInfo ? titleInfo.short : null, 
-                    skin: GameState.equippedSkin || 'none', // ✨ 치장품(테두리) 정보 추가!
-                    bubble: GameState.equippedBubble || 'none', // 👈 [추가됨] 말풍선 정보도 랭킹 서버로 슝!
-                        // 🌟 [추가됨!] 채팅 칠 때 프로필 정보도 묶어서 쏩니다!
+                    skin: GameState.equippedSkin || 'none', 
+                    bubble: GameState.equippedBubble || 'none', 
                     profile: GameState.equippedProfile || 'none',
                     timestamp: window.serverTimestamp()
                 });
 
-                // 청소기도 해당 방만 청소하도록 업그레이드!
                 if (Math.random() < 0.1) {
                     const oldQuery = window.query(window.collection(window.db, collectionName), window.orderBy("timestamp", "asc"), window.limit(5));
                     const snap = await window.getDocs(oldQuery);
                     snap.forEach(d => window.deleteDoc(d.ref));
                 }
-            } catch(e) {
-                console.error(e);
-                UIManager.showToast("채팅 전송에 실패했습니다 😢");
-            }
+            } catch(e) { console.error(e); }
         },
 
         // 📢 [시스템 공지 발송] - 이건 notices 폴더로 따로 날아감!
