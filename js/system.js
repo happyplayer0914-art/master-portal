@@ -59,12 +59,12 @@ const GameSystem = {
                     const count = counts[id];
                     const level = GameState.itemUpgrades[id] || 0;
                     
-                    const div = document.createElement('div');
-                    div.className = `bg-slate-700 border ${this.selectedId === id ? 'border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'border-slate-600'} rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-600 transition-all relative`;
-                    div.onclick = () => { this.selectedId = id; this.renderList(); this.renderDetails(); };
-                    
+                  const imgHtml = item.img 
+                        ? `<img src="assets/items/${item.img}" class="w-10 h-10 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-2xl mb-1">${item.emoji || '📦'}</div>`
+                        : `<div class="text-2xl mb-1">${item.icon || item.emoji || '📦'}</div>`;
+
                     div.innerHTML = `
-                        <div class="text-2xl mb-1">${item.icon || item.emoji || '📦'}</div>
+                        ${imgHtml}
                         <div class="text-[10px] text-white text-center w-full truncate">${level > 0 ? '<span class="text-purple-300 font-bold">+' + level + '</span>' : ''} ${item.name}</div>
                         <div class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-indigo-400 shadow-md">x${count}</div>
                     `;
@@ -681,9 +681,12 @@ Gacha: {
                     
                     let dupText = ''; // "조각 변환" 텍스트 제거 완료
                     
+                   // 💡 [수정] 가챠 결과창 장비 아이콘 이미지 지원
                     let iconHtml = type === 'partner' 
                         ? `<img src="assets/partners/${item.img_sd}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
-                        : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`;
+                        : (item.img 
+                            ? `<img src="assets/items/${item.img}" class="w-14 h-14 object-contain filter drop-shadow-md mb-1" onerror="this.style.display='none'; setTimeout(() => { if(this.nextElementSibling) this.nextElementSibling.style.display='block'; }, 10);"><div style="display:none;" class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`
+                            : `<div class="text-4xl mb-1 filter drop-shadow-lg">${item.emoji}</div>`);
 
                     const cardHtml = `<div class="gacha-item-card item-card rarity-${item.rarity} relative opacity-0" style="animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
                         ${dupText}
