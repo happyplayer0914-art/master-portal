@@ -3272,9 +3272,12 @@ GameSystem.Profile = {
 }; // 👈 GameSystem 거대 상자 끝! (절대 건드리지 마시오)
 
 // =========================================================================
-// 👑 [GM 전용] 파이어베이스 전체 우편(mails) 발송 엔진! (GameSystem 바깥에 위치)
+// 👑 [GM 전용] 파이어베이스 전체/개인 우편 발송 엔진! (GameSystem 바깥에 위치)
 // =========================================================================
 window.sendGMMail = async function() {
+    const targetType = document.getElementById('gm-target-type').value;
+    const targetNickname = document.getElementById('gm-target-nickname').value.trim();
+    
     const title = document.getElementById('gm-title').value;
     const content = document.getElementById('gm-content').value;
     const gold = parseInt(document.getElementById('gm-gold').value) || 0;
@@ -3282,28 +3285,47 @@ window.sendGMMail = async function() {
     const item = document.getElementById('gm-item').value;
     const partner = document.getElementById('gm-partner').value;
 
+    // 🚨 필수 입력값 검사
     if (!title) return UIManager.showToast("🚨 제목은 필수로 입력해야 합니다!");
+    if (targetType === 'personal' && !targetNickname) return UIManager.showToast("🚨 받을 유저의 닉네임을 입력하세요!");
 
+    // 💌 우편물 포장 (공통)
     const mailData = {
         title: title,
         content: content,
         gold: gold,
         gem: gem,
-        timestamp: new Date() // 서버 시간에 맞춰 발송됨!
+        timestamp: new Date(),
+        isPersonal: targetType === 'personal' // 개인 우편 뱃지 표시용 플래그
     };
-    
-    // 빈칸이 아니면 아이템/파트너 보상 추가!
     if (item) mailData.item = item.trim();
     if (partner) mailData.partner = partner.trim();
 
     try {
-        // 🚨 mails 폴더로 전체 우편 쏘기!
-        await window.addDoc(window.collection(window.db, "mails"), mailData);
-        
-        UIManager.showToast("🚀 [GM] 전체 우편(mails) 발송 완료!!");
+        if (targetType === 'global') {
+            // 📢 1. 전체 유저에게 발송 (mails 컬렉션)
+            await window.addDoc(window.collection(window.db, "mails"), mailData);
+            UIManager.showToast("🚀 [GM] 전체 우편(mails) 발송 완료!!");
+            
+        } else {
+            // 💌 2. 특정 유저에게 발송 (users 검색 후 해당 mailbox로!)
+            const usersRef = window.collection(window.db, "users");
+            const q = window.query(usersRef, window.where("nickname", "==", targetNickname));
+            const querySnapshot = await window.getDocs(q);
+
+            if (querySnapshot.empty) {
+                return UIManager.showToast("🚨 해당 닉네임의 유저를 찾을 수 없습니다!");
+            }
+
+            // 검색된 첫 번째 유저의 UID를 찾아 개인 우편함으로 쏙!
+            const targetUid = querySnapshot.docs[0].id;
+            await window.addDoc(window.collection(window.db, "users", targetUid, "mailbox"), mailData);
+            UIManager.showToast(`✨ [GM] '${targetNickname}'님에게 개인 우편 발송 완료!!`);
+        }
+
         if (window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
         
-        // 보낸 후 창 닫고 입력창 초기화
+        // 🧹 보낸 후 창 닫고 입력창 깔끔하게 초기화
         document.getElementById('gm-mail-modal').classList.replace('flex', 'hidden');
         document.getElementById('gm-title').value = '';
         document.getElementById('gm-content').value = '';
@@ -3311,6 +3333,7 @@ window.sendGMMail = async function() {
         document.getElementById('gm-gem').value = '';
         document.getElementById('gm-item').value = '';
         document.getElementById('gm-partner').value = '';
+        document.getElementById('gm-target-nickname').value = '';
         
     } catch (e) {
         console.error("우편 발송 실패:", e);
