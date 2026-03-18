@@ -77,7 +77,7 @@ const GameData = {
             desc: '[INTJ 신화] 심연의 지식이 담긴 스태프.',
             img: 'weapon_intj.png',
             img_cutin: 'weapon_intj_cutin.png', 
-            flavorText: '"존재하면 안되는 힘... 감당할 수 있겠어?"' 
+            flavorText: '"깊은 심연의 공포를 형상화한 금단의 스태프. 마법의 정수를 끊임없이 갈구한다..."' 
         },
         'mythic_infp_w': { 
             id: 'mythic_infp_w', name: '세계수의 하프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', 
