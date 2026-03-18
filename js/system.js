@@ -1642,16 +1642,27 @@ Ranking: {
             this.checkAndRender();
         }, // 👈 [수정됨] 여기서 Mail이 닫히면 안 돼! claimAll만 닫고 콤마(,)로 연결!
 
-        // 🌟 [신규 추가] 보상을 받은 우편을 내 우편함에서 영구 삭제(숨김)하는 기능!
-        deleteMail(mailId) {
+       // 🌟 [업그레이드] 보상을 받은 우편을 완전 영구 삭제(파이어베이스까지!)
+        async deleteMail(mailId) { // 👈 🚨 여기에 async 가 추가됐어!
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             
             if (!GameState.deletedMails) GameState.deletedMails = [];
             
             // 삭제 리스트에 등록!
             if (!GameState.deletedMails.includes(mailId)) {
+                // 1. 로컬(내 폰)에 지웠다고 기록 (전체 우편 가림막 용도)
                 GameState.deletedMails.push(mailId);
                 GameState.save();
+                
+                // 2. 🚨 [신규] 파이어베이스 개인 금고에서 진짜 편지 태워버리기!
+                if (window.db && GameState.uid) {
+                    try {
+                        // 내 우편함(mailbox)에서 해당 mailId를 가진 문서를 영구 삭제!
+                        await window.deleteDoc(window.doc(window.db, "users", GameState.uid, "mailbox", mailId));
+                    } catch(e) {
+                        // 전체(공용) 우편이어서 지울 수 없는 경우엔 조용히 패스!
+                    }
+                }
                 
                 if (window.UIManager) {
                     UIManager.triggerHaptic();
