@@ -521,32 +521,34 @@ upgradeStat(t) {
                 }
             },
 
-           // 🌟 해금된 모든 일러스트 목록 가져오기
-        getUnlockedSkins(id) {
+       // 🌟 해금된 모든 일러스트 목록 가져오기
+        getUnlockedSkins(id, customAffLv = null) {
             const pt = GameData.partners[id];
-            const lv = GameState.partnerAffectionLevel[id] || 1;
+            // 타 유저 정보를 볼 땐 그 유저의 호감도를, 내 꺼면 내 호감도를 사용!
+            const lv = customAffLv !== null ? customAffLv : (GameState.partnerAffectionLevel[id] || 1);
             let skins = [pt.img_sd]; // 기본 SD는 무조건 있음
             
+            // 💡 [원상복구 완료] 마스터님의 기획대로 신화/전설만 6레벨에 전신 해금!
             if (pt.rarity === 'mythic') {
-                if (lv >= 6) skins.push(pt.img_full);
+                if (lv >= 6 && pt.img_full) skins.push(pt.img_full);
                 if (lv >= 10 && pt.img_gif) skins.push(pt.img_gif);
             } else if (pt.rarity === 'legendary') {
-                if (lv >= 6) skins.push(pt.img_full);
+                if (lv >= 6 && pt.img_full) skins.push(pt.img_full);
             }
             return skins;
         },
 
-        // 🌟 현재 보여줄 일러스트 렌더링 (마스터가 픽한 스킨 최우선!)
-        getDisplayImage(id) {
+        // 🌟 현재 보여줄 일러스트 렌더링
+        getDisplayImage(id, customAffLv = null) {
             if (!GameState.partnerSkins) GameState.partnerSkins = {};
-            const unlocked = this.getUnlockedSkins(id);
+            const unlocked = this.getUnlockedSkins(id, customAffLv);
+
+            // 남의 프로필(관전 모드)일 때는 저장된 스킨 무시하고 해금된 최고 단계 스킨 표시
+            if (customAffLv !== null) return unlocked[unlocked.length - 1];
+
             const savedSkin = GameState.partnerSkins[id];
-            
-            // 저장된 스킨이 있고, 현재 해금된 목록에 있다면 그걸 보여줌
             if (savedSkin && unlocked.includes(savedSkin)) return savedSkin;
-            
-            // 없으면 가장 최근에 해금된 가장 멋진 일러스트(배열의 마지막)를 보여줌
-            return unlocked[unlocked.length - 1]; 
+            return unlocked[unlocked.length - 1];
         },
 
         // 🌟 외형 순환 변경 버튼 액션!
