@@ -3023,7 +3023,10 @@ Ranking: {
                 
                 GameState.gold += Number(rewardGold); 
                 GameState.gem += Number(rewardGem);
-                GameState.rpgStage++; GameState.save();
+                GameState.rpgStage++;
+                    // 🌟 [핵심 추가!!] 환생을 대비해 영구적인 최고 층수(최고 기록)를 매 층마다 갱신해서 기억해 둡니다!
+                GameState.maxStage = Math.max(GameState.maxStage || 1, GameState.rpgStage);
+                    GameState.save();
                 
                 if(GameSystem.Quest) {
                     GameSystem.Quest.update('daily', 'd1', 1);
@@ -3085,9 +3088,10 @@ Ranking: {
             this.executePrestige(1);
         },
 
-       executePrestige(multiplier = 1) { 
-            // 🌟 [핵심] 실제 지급할 때도 똑같이 환생 횟수만큼 배수를 곱해줍니다!
-            const nextPrestige = (GameState.prestigeCount || 0) + 1;
+      executePrestige(multiplier = 1) { 
+            // 🚨 [완벽 방어] 문자로 꼬인 걸 방지하기 위해 강제로 숫자로 변환
+            const currentPCount = Number(GameState.prestigeCount) || Number(GameState.prestige) || 0;
+            const nextPrestige = currentPCount + 1;
             
             // 층수 보상 * 환생 배율 * (광고 2배 배율)
             const rewardDiamond = (GameState.rpgStage * 10) * nextPrestige * multiplier;
@@ -3096,9 +3100,8 @@ Ranking: {
             GameState.gem += rewardDiamond; 
             GameState.gold += rewardGold;
             
-            // 🌟 [버그 방지] 환생 횟수를 여기서 확실하게 올려줍니다!
+            // 환생 횟수 갱신 및 1층 초기화
             GameState.prestigeCount = nextPrestige; 
-            
             GameState.rpgStage = 1; 
             GameState.rpgAtk = 10; 
             GameState.rpgMaxHp = 100;
@@ -3112,6 +3115,9 @@ Ranking: {
             UIManager.updateRpgLobbyUI();
             
             if(window.UIManager && UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+            
+            // 🚨 [핵심 추가!!] 환생하자마자 서버에 즉시 보고해서 랭킹과 프로필을 동기화!
+            if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.syncToServer) GameSystem.Profile.syncToServer();
             if (window.GameSystem && GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently(); 
             
             const adText = multiplier > 1 ? "(광고 2배 보너스!) " : "";
@@ -3406,7 +3412,7 @@ GameSystem.Profile = {
                 const data = docSnap.data();
                 if (data.likes !== undefined) GameState.likes = data.likes;
                 if (data.statusMessage) GameState.statusMessage = data.statusMessage;
-                if (data.prestige !== undefined) GameState.prestigeCount = data.prestige; 
+               
                 GameState.save(); 
                 
                 if (window.UIManager && UIManager.updateProfileUI) {
