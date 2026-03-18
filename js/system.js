@@ -2455,6 +2455,34 @@ Ranking: {
         partnerInterval: null,
         battleState: { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 },
         battleLogs: [], // 🌟 멀티라인 로그 배열
+          // 🤖 [신규 추가] 자동 전투용 엔진 변수들
+        isAutoMode: false,
+        autoAttackTimer: null,
+          // 🤖 [신규 추가] 자동 등반 스위치
+        toggleAutoMode() {
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            this.isAutoMode = !this.isAutoMode;
+            
+            if(this.isAutoMode) {
+                UIManager.showToast("🤖 자동 등반 모드 가동! 100층을 향해 질주합니다.");
+                this.enterDungeon(); // 켜자마자 바로 던전 진입!
+            } else {
+                UIManager.showToast("🛑 자동 등반 모드가 해제되었습니다.");
+            }
+        },
+
+        // 🤖 [신규 추가] 자동 등반 강제 정지
+        stopAutoMode() {
+            if (this.isAutoMode) {
+                this.isAutoMode = false;
+                UIManager.showToast("🛑 자동 등반 모드가 종료되었습니다.");
+                const btn = document.getElementById('btn-attack');
+                if (btn) {
+                    btn.innerHTML = "⚔️ 공격 (TAP!)";
+                    btn.classList.remove('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                }
+            }
+        },
 
         // 🌟 [신규] 멀티라인 전투 로그 추가 함수
         addLog(text, colorClass = "text-slate-300") {
@@ -2480,23 +2508,35 @@ Ranking: {
             setTimeout(() => { textEl.remove(); }, 700);
         },
 
+       // 👇 [교체] 진입 시 이벤트 스킵 로직 추가
         enterDungeon() {
-            if (GameState.currentHp <= 0) return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
-            if (GameState.rpgStage > 100) return UIManager.showToast("심연의 군주를 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
+            if (GameState.currentHp <= 0) {
+                this.stopAutoMode(); // 피 없으면 오토 종료!
+                return UIManager.showToast("체력이 없습니다! 여관에서 휴식하세요. ⛺");
+            }
+            if (GameState.rpgStage > 100) {
+                this.stopAutoMode(); // 군주 잡으면 오토 종료!
+                return UIManager.showToast("심연의 군주를 토벌했습니다! 차원의 여신에게 환생을 요청하세요. ✨");
+            }
             
-            AudioEngine.sfx.click(); UIManager.triggerHaptic(); 
+            if(window.AudioEngine) AudioEngine.sfx.click(); 
+            if(window.UIManager) UIManager.triggerHaptic(); 
             document.getElementById('bottom-nav').style.display = 'none'; 
             
             const isBoss = (GameState.rpgStage % 10 === 0);
-            if (!isBoss && Math.random() < 0.2) { 
+            
+            // 🚨 [핵심 수정] 자동 등반 중(!this.isAutoMode)일 때는 20% 랜덤 이벤트가 절대 발생하지 않습니다!
+            if (!isBoss && !this.isAutoMode && Math.random() < 0.2) { 
                 this.triggerRandomEvent(); 
             } else { 
                 if (isBoss) {
-                    if (AudioEngine.sfx.warning) AudioEngine.sfx.warning();
-                    else if (AudioEngine.sfx.boss) AudioEngine.sfx.boss();
+                    if (window.AudioEngine) {
+                        if (AudioEngine.sfx.warning) AudioEngine.sfx.warning();
+                        else if (AudioEngine.sfx.boss) AudioEngine.sfx.boss();
+                    }
                     const warning = document.getElementById('boss-warning-overlay');
                     if (warning) warning.classList.add('active');
-                    UIManager.triggerHeavyHaptic();
+                    if(window.UIManager) UIManager.triggerHeavyHaptic();
                     setTimeout(() => { 
                         if (warning) warning.classList.remove('active'); 
                         this.initBattle(true); 
@@ -2616,18 +2656,43 @@ Ranking: {
                 }
             });
         
-            document.getElementById('btn-attack').disabled = false; 
-            document.getElementById('btn-attack').innerHTML = "⚔️ 공격 (TAP!)";
+           // 버튼 UI 오토 모드에 맞게 세팅
+            const btnAtk = document.getElementById('btn-attack');
+            if (btnAtk) {
+                btnAtk.disabled = false; 
+                if (this.isAutoMode) {
+                    btnAtk.innerHTML = "🤖 자동 전투 중... (터치 시 정지)";
+                    btnAtk.classList.add('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                } else {
+                    btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
+                    btnAtk.classList.remove('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                }
+            }
             
             this.lastAttackTime = 0; 
             this.bossAttackCount = 0; 
             this.updateBattleUI();
 
-            // 💡 [수정] 옛날 구닥다리 로그 대신 새로운 스크롤 엔진 가동!
-            this.addLog("⚔️ 전투 시작! 화면을 탭하여 공격하세요!", "text-yellow-400");
+            this.addLog(this.isAutoMode ? "🤖 자동 전투 시스템 가동!" : "⚔️ 전투 시작! 화면을 탭하여 공격하세요!", "text-yellow-400");
             
             clearInterval(this.battleInterval); 
             this.battleInterval = setInterval(() => this.monsterAttack(), 1500);
+
+            // 🤖 [신규] 자동 공격 센서 (100ms마다 감지해서 쿨 돌면 바로 때림!)
+            clearInterval(this.autoAttackTimer);
+            if (this.isAutoMode) {
+                this.autoAttackTimer = setInterval(() => {
+                    if (this.isAutoMode && GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) {
+                        const stats = GameState.getTotalStats(); 
+                        let spdBonus = Math.min(stats.spd, 60); 
+                        const ATTACK_COOLDOWN = 1000 * (1 - (spdBonus / 100)); 
+                        
+                        if (Date.now() - this.lastAttackTime >= ATTACK_COOLDOWN) {
+                            this.playerAttack(true); // 자동 어택 발동!
+                        }
+                    }
+                }, 100);
+            }
 
             this.startPartnerSkillEngine();
         },
@@ -2753,9 +2818,17 @@ Ranking: {
             this.addLog("✨ 물약 사용! 체력 회복!", "text-emerald-400");
         },
 
-        playerAttack() {
+        // 👇 [교체] playerAttack (수동 개입 시 오토 꺼짐)
+        // 주의: 파라미터에 isAuto = false 가 들어갑니다!
+        playerAttack(isAuto = false) {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
             
+            // 🛑 [핵심] 오토 모드인데 유저가 화면(공격 버튼)을 직접 클릭했다? 바로 오토 강제 종료!
+            if (!isAuto && this.isAutoMode) {
+                this.stopAutoMode();
+                return;
+            }
+
             const stats = GameState.getTotalStats(); 
             let spdBonus = Math.min(stats.spd, 60); 
             const ATTACK_COOLDOWN = 1000 * (1 - (spdBonus / 100)); 
@@ -2776,8 +2849,8 @@ Ranking: {
             let critMultiplier = stats.critDmg / 100; 
             let damage = isCrit ? Math.floor(myAtk * critMultiplier) : myAtk;
 
-            if (isCrit) { AudioEngine.sfx.hit_crit(); UIManager.triggerHeavyHaptic(); } 
-            else { AudioEngine.sfx.hit_normal(); UIManager.triggerHaptic(); }
+            if (isCrit) { if(window.AudioEngine) AudioEngine.sfx.hit_crit(); if(window.UIManager) UIManager.triggerHeavyHaptic(); } 
+            else { if(window.AudioEngine) AudioEngine.sfx.hit_normal(); if(window.UIManager) UIManager.triggerHaptic(); }
 
             this.monsterCurrentHp -= damage;
             
@@ -2790,29 +2863,33 @@ Ranking: {
             }
 
             const sprite = document.getElementById('monster-sprite');
-            sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash');
+            if(sprite) { sprite.classList.remove('damage-flash'); void sprite.offsetWidth; sprite.classList.add('damage-flash'); }
             
             this.showDamageText('monster-avatar-wrap', isCrit ? `CRIT! ${damage}` : damage, isCrit ? 'damage-crit' : 'damage-monster');
-            
-            // 💡 [수정] 마스터의 공격도 스크롤 창에 남기기!
             this.addLog(`🗡️ 마스터 공격! ${damage} 피해! ${isCrit ? '(크리티컬!)' : ''}`, isCrit ? "text-yellow-300" : "text-white");
             
             const btn = document.getElementById('btn-attack');
-            btn.disabled = true; btn.classList.add('opacity-50');
-            let timeLeft = ATTACK_COOLDOWN;
-            
-            const cooldownTimer = setInterval(() => { 
-                timeLeft -= 100; 
-                if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { 
-                    clearInterval(cooldownTimer); 
-                    if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { 
-                        btn.disabled = false; btn.classList.remove('opacity-50'); btn.innerHTML = "⚔️ 공격 (TAP!)"; 
+            if(btn) {
+                btn.disabled = true; btn.classList.add('opacity-50');
+                let timeLeft = ATTACK_COOLDOWN;
+                
+                const cooldownTimer = setInterval(() => { 
+                    timeLeft -= 100; 
+                    if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { 
+                        clearInterval(cooldownTimer); 
+                        if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { 
+                            btn.disabled = false; btn.classList.remove('opacity-50'); 
+                            // 오토 모드가 아닐 때만 글씨를 텍스트로 되돌림
+                            if (!this.isAutoMode) btn.innerHTML = "⚔️ 공격 (TAP!)"; 
+                        } 
+                    } else { 
+                        if (!this.isAutoMode) btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; 
                     } 
-                } else { btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; } 
-            }, 100);
+                }, 100);
+            }
             
             this.updateBattleUI(); 
-            if (this.monsterCurrentHp <= 0) { clearInterval(cooldownTimer); setTimeout(() => this.endBattle(true), 300); }
+            if (this.monsterCurrentHp <= 0) { setTimeout(() => this.endBattle(true), 300); }
         },
         
         monsterAttack() {
@@ -2898,9 +2975,11 @@ Ranking: {
             if (GameState.currentHp <= 0) { clearInterval(this.battleInterval); setTimeout(() => this.endBattle(false), 300); }
         },
 
+        // 👇 [교체] endBattle (이기면 다음 층 자동 직행!)
         endBattle(isWin) {
             clearInterval(this.battleInterval); 
             clearInterval(this.partnerInterval); 
+            clearInterval(this.autoAttackTimer); // 🤖 [신규] 오토 어택 엔진 종료!
             this.battleState = { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 }; 
 
             GameState.isBattling = false; localStorage.removeItem('master_in_battle'); 
@@ -2911,18 +2990,16 @@ Ranking: {
             
             if (isWin) {
                 document.getElementById('bottom-nav').style.display = 'flex'; 
-                AudioEngine.sfx.coin(); UIManager.triggerHaptic();
+                if(window.AudioEngine) AudioEngine.sfx.coin(); 
+                if(window.UIManager) UIManager.triggerHaptic();
                     
-                    // 👇 [여기 3줄 추가!!] 같이 싸운 파트너 호감도 경험치 +10 상승!
                 if (GameState.equippedPartner) {
                     GameSystem.Partner.addAffection(GameState.equippedPartner, 10);
                 }
 
-                    
                 let rewardGold = 10 + (GameState.rpgStage * 2);
                 let rewardGem = 0;   
                
-                
                 if (isBoss) {
                     const bossTier = GameState.rpgStage / 10; 
                     rewardGold = 150 * bossTier; 
@@ -2933,20 +3010,42 @@ Ranking: {
                 GameState.gem += Number(rewardGem);
                 GameState.rpgStage++; GameState.save();
                 
-                GameSystem.Quest.update('daily', 'd1', 1);
-                GameSystem.Quest.update('weekly', 'w1', 1);
-                if (isBoss) GameSystem.Quest.update('weekly', 'w2', 1);
+                if(GameSystem.Quest) {
+                    GameSystem.Quest.update('daily', 'd1', 1);
+                    GameSystem.Quest.update('weekly', 'w1', 1);
+                    if (isBoss) GameSystem.Quest.update('weekly', 'w2', 1);
+                }
 
-                UIManager.updateCurrencyUI(); 
-                if (GameSystem.Ranking) GameSystem.Ranking.updateRankingSilently();
-                UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
+                if(window.UIManager) {
+                    UIManager.updateCurrencyUI(); 
+                    UIManager.showToast(`🎉 토벌 성공! 🪙 +${rewardGold}G ${isBoss ? ' / 💎 +'+rewardGem : ''}`);
+                }
+                if (GameSystem.Ranking && GameSystem.Ranking.updateRankingSilently) GameSystem.Ranking.updateRankingSilently();
                 
-                // 💡 [수정] 승리 시 텍스트
                 this.addLog(`🎉 토벌 성공! 보상을 획득했습니다.`, "text-yellow-400");
                 
-                setTimeout(() => { UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); }, 1500);
+                // 🤖 [핵심 신규 로직] 오토 모드 연쇄 진행!
+                if (this.isAutoMode && GameState.rpgStage <= 100) {
+                    setTimeout(() => {
+                        // 유저가 그 1.5초 사이에 끄지 않았다면 다음 층 고고!
+                        if (this.isAutoMode) {
+                            this.addLog(`🚀 다음 층으로 자동 진입합니다!`, "text-indigo-400 font-bold animate-pulse");
+                            this.enterDungeon(); 
+                        }
+                    }, 1500);
+                } else {
+                    // 군주를 잡았거나 수동 모드일 때는 얌전히 로비로 복귀
+                    if (this.isAutoMode && GameState.rpgStage > 100) {
+                        this.stopAutoMode();
+                        if(window.UIManager) UIManager.showToast("👑 심연의 군주 토벌 완료! 자동 등반을 마칩니다.");
+                    }
+                    setTimeout(() => { if(window.UIManager) UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); }, 1500);
+                }
 
             } else {
+                // ☠️ 죽으면 오토 모드 강제 종료!
+                this.stopAutoMode();
+                
                 GameState.currentHp = 0; 
                 GameState.save();
                 const deathModal = document.getElementById('revive-modal'); 
