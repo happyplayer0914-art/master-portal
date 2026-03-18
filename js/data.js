@@ -4,57 +4,57 @@
 const GameData = {
     items: {
   // 🟢 일반 (Common) - 초반용 깡스탯 위주
-   'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', image: 'assets/items/w_c1.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.15, flavorText: '이음새가 헐거워진 평범한 철검. 맨손보다는 확실히 낫다.' },
-   'w_c2': { id: 'w_c2', type: 'gear', subType: 'weapon', name: '녹슨 단검', emoji: '🔪', image: 'assets/items/w_c2.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, critRate: 5, flavorText: '녹이 슬어 묘하게 치명적인 상처를 입힐 수 있을 것 같은 단검.' },
-   'w_c3': { id: 'w_c3', type: 'gear', subType: 'weapon', name: '거친 몽둥이', emoji: '🏏', image: 'assets/items/w_c3.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.15, flavorText: '어느 숲에서나 주울 수 있을 법한 단단한 나뭇가지.' }, 
+   'w_c1': { id: 'w_c1', type: 'gear', subType: 'weapon', name: '낡은 철검', emoji: '🗡️', img: 'w_c1.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.15, flavorText: '이음새가 헐거워진 평범한 철검. 맨손보다는 확실히 낫다.' },
+   'w_c2': { id: 'w_c2', type: 'gear', subType: 'weapon', name: '녹슨 단검', emoji: '🔪', img: 'w_c2.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, critRate: 5, flavorText: '녹이 슬어 묘하게 치명적인 상처를 입힐 수 있을 것 같은 단검.' },
+   'w_c3': { id: 'w_c3', type: 'gear', subType: 'weapon', name: '거친 몽둥이', emoji: '🏏', img: 'w_c3.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.15, flavorText: '어느 숲에서나 주울 수 있을 법한 단단한 나뭇가지.' }, 
     
-   'a_c1': { id: 'a_c1', type: 'gear', subType: 'armor', name: '가죽 갑옷', emoji: '🦺', image: 'assets/items/a_c1.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.10, flavorText: '조잡하게 엮은 가죽 갑옷. 가벼운 찰과상 정도는 막아준다.' },
-   'a_c2': { id: 'a_c2', type: 'gear', subType: 'armor', name: '빛바랜 천옷', emoji: '👕', image: 'assets/items/a_c2.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2, flavorText: '오래 입어 색이 다 빠진 옷. 놀랍게도 활동하기엔 편해서 공격을 피하기 좋다.' }, 
-   'a_c3': { id: 'a_c3', type: 'gear', subType: 'armor', name: '나무 방패', emoji: '👕', image: 'assets/items/a_c3.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2, flavorText: '두꺼운 판자를 덧대어 만든 조악한 방패. 묵직한 일격엔 쪼개질지도 모른다.' }, 
+   'a_c1': { id: 'a_c1', type: 'gear', subType: 'armor', name: '가죽 갑옷', emoji: '🦺', img: 'a_c1.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.10, flavorText: '조잡하게 엮은 가죽 갑옷. 가벼운 찰과상 정도는 막아준다.' },
+   'a_c2': { id: 'a_c2', type: 'gear', subType: 'armor', name: '빛바랜 천옷', emoji: '👕', img: 'a_c2.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2, flavorText: '오래 입어 색이 다 빠진 옷. 놀랍게도 활동하기엔 편해서 공격을 피하기 좋다.' }, 
+   'a_c3': { id: 'a_c3', type: 'gear', subType: 'armor', name: '나무 방패', emoji: '👕', img: 'a_c3.png', rarity: 'common', color: 'text-slate-400', hpMult: 1.12, eva: 2, flavorText: '두꺼운 판자를 덧대어 만든 조악한 방패. 묵직한 일격엔 쪼개질지도 모른다.' }, 
     
-   'ac_c1': { id: 'ac_c1', type: 'gear', subType: 'accessory', name: '평범한 반지', emoji: '💍', image: 'assets/items/ac_c1.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, hpMult: 1.05, flavorText: '시장 구석에서 흔하게 파는 차가운 구리 반지.' },
-   'ac_c2': { id: 'ac_c2', type: 'gear', subType: 'accessory', name: '행운의 동전', emoji: '🪙', image: 'assets/items/ac_c2.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.02, critRate: 3, flavorText: '품고 있으면 어쩐지 오늘은 운수가 좋을 것 같은 기분이 드는 낡은 동전.' }, 
+   'ac_c1': { id: 'ac_c1', type: 'gear', subType: 'accessory', name: '평범한 반지', emoji: '💍', img: 'ac_c1.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.05, hpMult: 1.05, flavorText: '시장 구석에서 흔하게 파는 차가운 구리 반지.' },
+   'ac_c2': { id: 'ac_c2', type: 'gear', subType: 'accessory', name: '행운의 동전', emoji: '🪙', img: 'ac_c2.png', rarity: 'common', color: 'text-slate-400', atkMult: 1.02, critRate: 3, flavorText: '품고 있으면 어쩐지 오늘은 운수가 좋을 것 같은 기분이 드는 낡은 동전.' }, 
 
    // 🔵 희귀 (Rare) - 약간의 특성 부여 (공속, 회피, 방어력 등 등장)
-   'w_r1': { id: 'w_r1', type: 'gear', subType: 'weapon', name: '기사단의 롱소드', emoji: '⚔️', image: 'assets/items/w_r1.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.25, def: 5, flavorText: '제국 기사단이 사용하던 규격화된 검. 날이 예리하게 서 있고 밸런스가 뛰어나다.' }, 
-   'w_r2': { id: 'w_r2', type: 'gear', subType: 'weapon', name: '암살자의 비수', emoji: '🗡️', image: 'assets/items/w_r2.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, critRate: 15, critDmg: 20, flavorText: '빛을 반사하지 않는 새까만 단검. 오직 치명적인 일격을 위해 벼려졌다.' },
-   'w_r3': { id: 'w_r3', type: 'gear', subType: 'weapon', name: '사냥꾼의 뿔활', emoji: '🏹', image: 'assets/items/w_r3.png', rarity: 'rare', color: 'text-blue-400', atkMult: 6.20, spd: 50, flavorText: '거대 마수의 뿔을 깎아 만든 활. 시위를 당기는 손끝에서 매서운 바람이 인다.' }, 
+   'w_r1': { id: 'w_r1', type: 'gear', subType: 'weapon', name: '기사단의 롱소드', emoji: '⚔️', img: 'w_r1.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.25, def: 5, flavorText: '제국 기사단이 사용하던 규격화된 검. 날이 예리하게 서 있고 밸런스가 뛰어나다.' }, 
+   'w_r2': { id: 'w_r2', type: 'gear', subType: 'weapon', name: '암살자의 비수', emoji: '🗡️', img: 'w_r2.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, critRate: 15, critDmg: 20, flavorText: '빛을 반사하지 않는 새까만 단검. 오직 치명적인 일격을 위해 벼려졌다.' },
+   'w_r3': { id: 'w_r3', type: 'gear', subType: 'weapon', name: '사냥꾼의 뿔활', emoji: '🏹', img: 'w_r3.png', rarity: 'rare', color: 'text-blue-400', atkMult: 6.20, spd: 50, flavorText: '거대 마수의 뿔을 깎아 만든 활. 시위를 당기는 손끝에서 매서운 바람이 인다.' }, 
     
-   'a_r1': { id: 'a_r1', type: 'gear', subType: 'armor', name: '강철 방패', emoji: '🛡️', image: 'assets/items/a_r1.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.30, def: 10, flavorText: '전장의 포화 속에서도 주인을 든든하게 지켜준 견고한 방패.' }, 
-   'a_r2': { id: 'a_r2', type: 'gear', subType: 'armor', name: '쇠사슬 갑옷', emoji: '🧥', image: 'assets/items/a_r2.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.15, vamp: 2, flavorText: '적의 피가 스며들수록 은은하게 붉은빛을 띠는 섬뜩하고도 질긴 사슬 갑옷.' },
-   'a_r3': { id: 'a_r3', type: 'gear', subType: 'armor', name: '도적의 망토', emoji: '🧣', image: 'assets/items/a_r3.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.20, eva: 8, flavorText: '어둠 속으로 녹아들 수 있게 해주는 가벼운 천. 발걸음 소리마저 지워준다.' }, 
+   'a_r1': { id: 'a_r1', type: 'gear', subType: 'armor', name: '강철 방패', emoji: '🛡️', img: 'a_r1.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.30, def: 10, flavorText: '전장의 포화 속에서도 주인을 든든하게 지켜준 견고한 방패.' }, 
+   'a_r2': { id: 'a_r2', type: 'gear', subType: 'armor', name: '쇠사슬 갑옷', emoji: '🧥', img: 'a_r2.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.15, vamp: 2, flavorText: '적의 피가 스며들수록 은은하게 붉은빛을 띠는 섬뜩하고도 질긴 사슬 갑옷.' },
+   'a_r3': { id: 'a_r3', type: 'gear', subType: 'armor', name: '도적의 망토', emoji: '🧣', img: 'a_r3.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.20, eva: 8, flavorText: '어둠 속으로 녹아들 수 있게 해주는 가벼운 천. 발걸음 소리마저 지워준다.' }, 
     
-   'ac_r1': { id: 'ac_r1', type: 'gear', subType: 'accessory', name: '수호의 목걸이', emoji: '📿', image: 'assets/items/ac_r1.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.10, hpMult: 1.15, def: 5, flavorText: '은은한 축복이 깃든 목걸이. 목에 거는 순간 마음이 차분해지는 기분이 든다.' }, 
-   'ac_r2': { id: 'ac_r2', type: 'gear', subType: 'accessory', name: '바람의 장화', emoji: '🥾', image: 'assets/items/ac_r2.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.10, spd: 10, eva: 3, flavorText: '신고 뛰면 마치 중력이 약해진 것처럼 몸이 깃털처럼 가벼워진다.' }, 
-   'ac_r3': { id: 'ac_r3', type: 'gear', subType: 'accessory', name: '투사의 증표', emoji: '🏅', image: 'assets/items/ac_r3.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, hpMult: 1.05, critDmg: 25, flavorText: '피비린내 나는 투기장에서 끝까지 살아남은 자만이 쥘 수 있는 영광스러운 훈장.' }, 
+   'ac_r1': { id: 'ac_r1', type: 'gear', subType: 'accessory', name: '수호의 목걸이', emoji: '📿', img: 'ac_r1.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.10, hpMult: 1.15, def: 5, flavorText: '은은한 축복이 깃든 목걸이. 목에 거는 순간 마음이 차분해지는 기분이 든다.' }, 
+   'ac_r2': { id: 'ac_r2', type: 'gear', subType: 'accessory', name: '바람의 장화', emoji: '🥾', img: 'ac_r2.png', rarity: 'rare', color: 'text-blue-400', hpMult: 1.10, spd: 10, eva: 3, flavorText: '신고 뛰면 마치 중력이 약해진 것처럼 몸이 깃털처럼 가벼워진다.' }, 
+   'ac_r3': { id: 'ac_r3', type: 'gear', subType: 'accessory', name: '투사의 증표', emoji: '🏅', img: 'ac_r3.png', rarity: 'rare', color: 'text-blue-400', atkMult: 1.15, hpMult: 1.05, critDmg: 25, flavorText: '피비린내 나는 투기장에서 끝까지 살아남은 자만이 쥘 수 있는 영광스러운 훈장.' }, 
     
    // 🟣 영웅 (Epic) - 뚜렷한 컨셉 (크리 몰빵, 피흡 좀비, 쾌속 딜러 등)
-   'w_e1': { id: 'w_e1', type: 'gear', subType: 'weapon', name: '마력의 지팡이', emoji: '🪄', image: 'assets/items/w_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.50, critRate: 10, def: 10, flavorText: '끝없는 지혜와 마력이 소용돌이치는 지팡이. 손에 쥐는 순간 정신이 맑아진다.' },
-   'w_e2': { id: 'w_e2', type: 'gear', subType: 'weapon', name: '그림자 낫', emoji: '🪝', image: 'assets/items/w_e2.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.30, critRate: 25, critDmg: 50, flavorText: '영혼마저 베어낼 듯한 서늘한 기운을 뿜어내는 사신의 무기.' },
-   'w_e3': { id: 'w_e3', type: 'gear', subType: 'weapon', name: '흡혈귀의 이빨 단검', emoji: '🦇', image: 'assets/items/w_e3.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8, spd: 5, flavorText: '살점을 파고들어 적의 생명력을 탐욕스럽게 포식하는 섬뜩한 단검.' }, 
-   'w_e4': { id: 'w_e4', type: 'gear', subType: 'weapon', name: '강철의 대검', emoji: '🦇', image: 'assets/items/w_e4.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8, spd: 5, flavorText: '거대한 겉모습과 달리, 피를 묻힐수록 무게를 잃고 춤추듯 날렵해지는 기괴한 대검.' }, 
+   'w_e1': { id: 'w_e1', type: 'gear', subType: 'weapon', name: '마력의 지팡이', emoji: '🪄', img: 'w_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.50, critRate: 10, def: 10, flavorText: '끝없는 지혜와 마력이 소용돌이치는 지팡이. 손에 쥐는 순간 정신이 맑아진다.' },
+   'w_e2': { id: 'w_e2', type: 'gear', subType: 'weapon', name: '그림자 낫', emoji: '🪝', img: 'w_e2.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.30, critRate: 25, critDmg: 50, flavorText: '영혼마저 베어낼 듯한 서늘한 기운을 뿜어내는 사신의 무기.' },
+   'w_e3': { id: 'w_e3', type: 'gear', subType: 'weapon', name: '흡혈귀의 이빨 단검', emoji: '🦇', img: 'w_e3.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8, spd: 5, flavorText: '살점을 파고들어 적의 생명력을 탐욕스럽게 포식하는 섬뜩한 단검.' }, 
+   'w_e4': { id: 'w_e4', type: 'gear', subType: 'weapon', name: '강철의 대검', emoji: '🦇', img: 'w_e4.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.35, vamp: 8, spd: 5, flavorText: '거대한 겉모습과 달리, 피를 묻힐수록 무게를 잃고 춤추듯 날렵해지는 기괴한 대검.' }, 
     
-   'a_e1': { id: 'a_e1', type: 'gear', subType: 'armor', name: '성기사의 성갑', emoji: '🛡️', image: 'assets/items/a_e1.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.60, def: 15, flavorText: '신성한 기운이 감도는 은백색 갑옷. 어둠의 피조물들이 감히 접근하지 못한다.' }, 
-   'a_e2': { id: 'a_e2', type: 'gear', subType: 'armor', name: '망령의 망토', emoji: '👻', image: 'assets/items/a_e2.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.30, vamp: 5, critRate: 10, eva: 8, flavorText: '원혼들의 덧없는 속삭임이 들려오는 망토. 물리적인 공격을 기형적으로 흩어낸다.' },
-   'a_e3': { id: 'a_e3', type: 'gear', subType: 'armor', name: '닌자의 수의', emoji: '🥷', image: 'assets/items/a_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '그림자 일족의 비전이 담긴 옷. 걸치는 순간 바람 그 자체가 된 듯한 착각에 빠진다.' }, 
-   'a_e4': { id: 'a_e4', type: 'gear', subType: 'armor', name: '정령의 방패', emoji: '🥷', image: 'assets/items/a_e4.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '자연의 정령들이 감싸고 도는 신비로운 방패. 위험한 순간 스스로 움직여 주인을 보호한다.' }, 
+   'a_e1': { id: 'a_e1', type: 'gear', subType: 'armor', name: '성기사의 성갑', emoji: '🛡️', img: 'a_e1.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.60, def: 15, flavorText: '신성한 기운이 감도는 은백색 갑옷. 어둠의 피조물들이 감히 접근하지 못한다.' }, 
+   'a_e2': { id: 'a_e2', type: 'gear', subType: 'armor', name: '망령의 망토', emoji: '👻', img: 'a_e2.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.30, vamp: 5, critRate: 10, eva: 8, flavorText: '원혼들의 덧없는 속삭임이 들려오는 망토. 물리적인 공격을 기형적으로 흩어낸다.' },
+   'a_e3': { id: 'a_e3', type: 'gear', subType: 'armor', name: '닌자의 수의', emoji: '🥷', img: 'a_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '그림자 일족의 비전이 담긴 옷. 걸치는 순간 바람 그 자체가 된 듯한 착각에 빠진다.' }, 
+   'a_e4': { id: 'a_e4', type: 'gear', subType: 'armor', name: '정령의 방패', emoji: '🥷', img: 'a_e4.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '자연의 정령들이 감싸고 도는 신비로운 방패. 위험한 순간 스스로 움직여 주인을 보호한다.' }, 
     
-   'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', image: 'assets/items/ac_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25, def: 10, flavorText: '심연의 마력 결정체로 세공된 귀걸이. 신체의 무한한 잠재력을 일깨워준다.' },
-   'ac_e2': { id: 'ac_e2', type: 'gear', subType: 'accessory', name: '광전사의 뿔피리', emoji: '📯', image: 'assets/items/ac_e2.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.45, hpMult: 1.05, spd: 20, flavorText: '부는 순간 이성을 잃고 오직 살육에만 전념하게 만드는 저주받은 유물.' }, 
-   'ac_e3': { id: 'ac_e3', type: 'gear', subType: 'accessory', name: '세계수의 잎사귀', emoji: '🍃', image: 'assets/items/ac_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.40, vamp: 10, eva: 5, flavorText: '아무리 시간이 지나도 마르지 않는 생명력을 품고 있는 성스러운 잎사귀.' }, 
+   'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', img: 'ac_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25, def: 10, flavorText: '심연의 마력 결정체로 세공된 귀걸이. 신체의 무한한 잠재력을 일깨워준다.' },
+   'ac_e2': { id: 'ac_e2', type: 'gear', subType: 'accessory', name: '광전사의 뿔피리', emoji: '📯', img: 'ac_e2.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.45, hpMult: 1.05, spd: 20, flavorText: '부는 순간 이성을 잃고 오직 살육에만 전념하게 만드는 저주받은 유물.' }, 
+   'ac_e3': { id: 'ac_e3', type: 'gear', subType: 'accessory', name: '세계수의 잎사귀', emoji: '🍃', img: 'ac_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.40, vamp: 10, eva: 5, flavorText: '아무리 시간이 지나도 마르지 않는 생명력을 품고 있는 성스러운 잎사귀.' }, 
 
    // 🟡 전설 (Legendary) - 사기적인 능력치!
-   'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', image: 'assets/items/w_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50, def: 10, flavorText: '선택받은 자만이 뽑을 수 있다는 찬란한 성검. 검을 휘두를 때마다 빛의 궤적이 일대를 정화한다.' },
-   'w_l2': { id: 'w_l2', type: 'gear', subType: 'weapon', name: '파멸의 마검', emoji: '🗡️', image: 'assets/items/w_l2.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.80, critRate: 40, critDmg: 100, spd: 15, flavorText: '세상을 종말의 구렁텅이로 몰아넣었다고 전해지는 재앙의 검. 쥐는 자의 영혼마저 갉아먹는다.' },
-   'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주의 지팡이', emoji: '🩸', image: 'assets/items/w_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15, eva: 10, flavorText: '고대 뱀파이어 로드의 권좌를 상징하는 핏빛 지팡이. 주변의 모든 생명력을 탐욕스럽게 착취한다.' },
+   'w_l1': { id: 'w_l1', type: 'gear', subType: 'weapon', name: '전설의 엑스칼리버', emoji: '🗡️', img: 'w_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.20, critRate: 20, critDmg: 50, def: 10, flavorText: '선택받은 자만이 뽑을 수 있다는 찬란한 성검. 검을 휘두를 때마다 빛의 궤적이 일대를 정화한다.' },
+   'w_l2': { id: 'w_l2', type: 'gear', subType: 'weapon', name: '파멸의 마검', emoji: '🗡️', img: 'w_l2.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.80, critRate: 40, critDmg: 100, spd: 15, flavorText: '세상을 종말의 구렁텅이로 몰아넣었다고 전해지는 재앙의 검. 쥐는 자의 영혼마저 갉아먹는다.' },
+   'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주의 지팡이', emoji: '🩸', img: 'w_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15, eva: 10, flavorText: '고대 뱀파이어 로드의 권좌를 상징하는 핏빛 지팡이. 주변의 모든 생명력을 탐욕스럽게 착취한다.' },
     
-   'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', image: 'assets/items/a_l1.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50, def: 20, flavorText: '태양의 심장을 깎아 만든 듯한 눈부신 갑옷. 입는 자에게 절대적인 불패의 신화를 선사한다.' },
-   'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 심장', emoji: '❤️‍🔥', image: 'assets/items/a_l2.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.90, vamp: 12, def: 15, flavorText: '고동을 멈추지 않는 정체불명의 심장 조각. 죽음의 문턱에서 주인을 강제로 끄집어낸다.' },
-   'a_l3': { id: 'a_l3', type: 'gear', subType: 'armor', name: '환영의 거울 갑옷', emoji: '🪞', image: 'assets/items/a_l3.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.10, eva: 25, spd: 20, flavorText: '수천 개의 진실의 거울 파편으로 빚어진 갑옷. 적은 오직 자신의 헛된 환영만을 베게 될 뿐이다.' }, 
+   'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', img: 'a_l1.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50, def: 20, flavorText: '태양의 심장을 깎아 만든 듯한 눈부신 갑옷. 입는 자에게 절대적인 불패의 신화를 선사한다.' },
+   'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 심장', emoji: '❤️‍🔥', img: 'a_l2.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.90, vamp: 12, def: 15, flavorText: '고동을 멈추지 않는 정체불명의 심장 조각. 죽음의 문턱에서 주인을 강제로 끄집어낸다.' },
+   'a_l3': { id: 'a_l3', type: 'gear', subType: 'armor', name: '환영의 거울 갑옷', emoji: '🪞', img: 'a_l3.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.10, eva: 25, spd: 20, flavorText: '수천 개의 진실의 거울 파편으로 빚어진 갑옷. 적은 오직 자신의 헛된 환영만을 베게 될 뿐이다.' }, 
     
-   'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', image: 'assets/items/ac_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15, def: 10, flavorText: '필멸자의 한계를 아득히 뛰어넘게 해주는 기적의 반지. 손가락에 끼우는 순간 세계의 이면이 보인다.' },
-   'ac_l2': { id: 'ac_l2', type: 'gear', subType: 'accessory', name: '시간술사의 시계', emoji: '⏱️', image: 'assets/items/ac_l2.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.40, hpMult: 1.40, spd: 35, eva: 15, flavorText: '초침이 거꾸로 돌아가는 기묘한 회중시계. 전장의 시간을 지배하는 자가 곧 승리한다.' }, 
-   'ac_l3': { id: 'ac_l3', type: 'gear', subType: 'accessory', name: '파괴신의 눈물', emoji: '💧', image: 'assets/items/ac_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.00, critRate: 30, critDmg: 120, flavorText: '태초의 신이 분노로 흘린 단 한 방울의 눈물. 깃든 힘을 해방하면 대륙 하나가 증발한다.' },
+   'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', img: 'ac_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15, def: 10, flavorText: '필멸자의 한계를 아득히 뛰어넘게 해주는 기적의 반지. 손가락에 끼우는 순간 세계의 이면이 보인다.' },
+   'ac_l2': { id: 'ac_l2', type: 'gear', subType: 'accessory', name: '시간술사의 시계', emoji: '⏱️', img: 'ac_l2.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.40, hpMult: 1.40, spd: 35, eva: 15, flavorText: '초침이 거꾸로 돌아가는 기묘한 회중시계. 전장의 시간을 지배하는 자가 곧 승리한다.' }, 
+   'ac_l3': { id: 'ac_l3', type: 'gear', subType: 'accessory', name: '파괴신의 눈물', emoji: '💧', img: 'ac_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.00, critRate: 30, critDmg: 120, flavorText: '태초의 신이 분노로 흘린 단 한 방울의 눈물. 깃든 힘을 해방하면 대륙 하나가 증발한다.' },
 
       // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
