@@ -49,7 +49,7 @@ const GameData = {
    'w_l3': { id: 'w_l3', type: 'gear', subType: 'weapon', name: '피의 군주의 지팡이', emoji: '🩸', img: 'w_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.90, vamp: 15, eva: 10, flavorText: '고대 뱀파이어 로드의 권좌를 상징하는 핏빛 지팡이. 주변의 모든 생명력을 탐욕스럽게 착취한다.' },
     
    'a_l1': { id: 'a_l1', type: 'gear', subType: 'armor', name: '절대자의 황금 갑옷', emoji: '🛡️', img: 'a_l1.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.50, def: 20, flavorText: '태양의 심장을 깎아 만든 듯한 눈부신 갑옷. 입는 자에게 절대적인 불패의 신화를 선사한다.' },
-   'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 방패', emoji: '❤️‍🔥', img: 'a_l2.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.90, vamp: 12, def: 15, flavorText: '고동을 울리는 정체불명의 방패 조각. 전장의 피로 주인을 강제로 죽음에서 끌어올린다.' },
+   'a_l2': { id: 'a_l2', type: 'gear', subType: 'armor', name: '불사의 방패', emoji: '❤️‍🔥', img: 'a_l2.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 1.90, vamp: 12, def: 15, flavorText: '고동을 울리는 정체불명의 방패. 전장의 피로 주인을 강제로 죽음에서 끌어올린다.' },
    'a_l3': { id: 'a_l3', type: 'gear', subType: 'armor', name: '환영의 거울 갑옷', emoji: '🪞', img: 'a_l3.png', rarity: 'legendary', color: 'text-yellow-400', hpMult: 2.10, eva: 25, spd: 20, flavorText: '수천 개의 진실의 거울 파편으로 빚어진 갑옷. 적은 오직 자신의 헛된 환영만을 베게 될 뿐이다.' }, 
     
    'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', img: 'ac_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15, def: 10, flavorText: '필멸자의 한계를 아득히 뛰어넘게 해주는 기적의 반지. 손가락에 끼우는 순간 세계의 이면이 보인다.' },
