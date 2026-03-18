@@ -2594,7 +2594,7 @@ Ranking: {
             UIManager.navTo('screen-arena', document.querySelectorAll('.nav-item')[1]); 
         },
 
-        initBattle(isBoss) {
+      initBattle(isBoss) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-rpg-battle').classList.add('active');
             window.scrollTo(0, 0);
@@ -2604,7 +2604,8 @@ Ranking: {
             this.battleState = { shield: 0, stunUntil: 0, buffUntil: 0, debuffUntil: 0 };
             this.battleLogs = []; // 전투 시작 시 로그 싹 비우기!
 
-            let prestigeCount = GameState.prestigeCount || 0;
+            // 🚨 [수정 완료] 환생 횟수 변수를 더 안전하게 숫자로 가져옵니다.
+            let prestigeCount = Number(GameState.prestigeCount) || Number(GameState.prestige) || 0;
             let effStage = GameState.rpgStage + (prestigeCount * 100);
             let currentZone = Math.floor((GameState.rpgStage - 1) / 10) + 1; 
             if (currentZone > 10) currentZone = ((currentZone - 1) % 10) + 1;
@@ -2612,12 +2613,17 @@ Ranking: {
             let effectiveZone = Math.floor((effStage - 1) / 10);
             let zoneMultiplier = Math.pow(1.1, effectiveZone);
 
+            // ✨ [신규 추가!!] 마스터님과 공평하게! 몬스터도 환생마다 2배씩 강해집니다!
+            let monsterPrestigeMult = Math.pow(2, prestigeCount);
+
             let baseHp = (effStage * 40) + (isBoss ? 200 : 0);
             let baseAtk = (effStage * 4) + (isBoss ? 15 : 0);
 
-            this.monsterMaxHp = Math.floor(baseHp * zoneMultiplier); 
+            // 🚨 [수정 완료] 몬스터 체력과 공격력에 2배율(monsterPrestigeMult)을 곱해줍니다!
+            this.monsterMaxHp = Math.floor(baseHp * zoneMultiplier * monsterPrestigeMult); 
             this.monsterCurrentHp = this.monsterMaxHp;
-            this.monsterAtkObj = Math.floor(baseAtk * zoneMultiplier);
+            this.monsterAtkObj = Math.floor(baseAtk * zoneMultiplier * monsterPrestigeMult);
+    
             
             const zoneNames = { 1: "🌲 초보자의 숲", 2: "🏜️ 메마른 황무지", 3: "⛰️ 거친 산맥", 4: "🏚️ 버려진 유적", 5: "🌊 오염된 심해", 6: "🩸 저주받은 핏빛 성", 7: "🧊 얼어붙은 왕국", 8: "🌑 기사단의 무덤", 9: "🔥 불타는 지옥문", 10: "🌌 군주의 심연" };
             const battleCard = document.getElementById('battle-card');
