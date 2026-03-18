@@ -178,20 +178,21 @@ const GameSystem = {
                 if(count < 2) return UIManager.showToast("제물로 바칠 장비/파트너가 부족합니다.");
                 if(GameState.gold < cost) return UIManager.showToast("골드가 부족합니다.");
 
-                // 💸 비용 지불 및 제물 파괴 (2개 소모)
+       // 💸 비용 지불 및 제물 파괴 (재료 딱 1개만 소모!)
                 GameState.gold -= cost;
+                
                 if (this.currentTab === 'partner') {
-                    let removed = 0;
-                    GameState.ownedPartners = GameState.ownedPartners.filter(id => {
-                        if(removed < 2 && id === this.selectedId && id !== GameState.equippedPartner) { removed++; return false; }
-                        return true;
-                    });
+                    // 파트너 가방에서 재료용으로 딱 1개만 찾아서 삭제
+                    const materialIndex = GameState.ownedPartners.indexOf(this.selectedId);
+                    if (materialIndex > -1) {
+                        GameState.ownedPartners.splice(materialIndex, 1); 
+                    }
                 } else {
-                    let removed = 0;
-                    GameState.inventory = GameState.inventory.filter(id => {
-                        if(removed < 2 && id === this.selectedId) { removed++; return false; }
-                        return true;
-                    });
+                    // 장비 가방(인벤토리)에서 재료용으로 딱 1개만 찾아서 삭제
+                    const materialIndex = GameState.inventory.indexOf(this.selectedId);
+                    if (materialIndex > -1) {
+                        GameState.inventory.splice(materialIndex, 1); 
+                    }
                 }
 
                 const prob = this.probs[level];
