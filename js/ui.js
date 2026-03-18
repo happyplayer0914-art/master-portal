@@ -194,14 +194,13 @@ const UIManager = {
             }
         },
 
-        // 🎨 캔버스 그리기 함수
+       // 🎨 캔버스 그리기 함수
         refreshCanvas() {
             const canvas = document.getElementById('profile-sticker-canvas');
             if (!canvas) return;
             canvas.innerHTML = '';
 
             this.activeStickers.forEach(stk => {
-                // 구버전 스티커 데이터 호환용 안전장치
                 stk.rotation = stk.rotation || 0; 
 
                 const el = document.createElement('div');
@@ -209,11 +208,12 @@ const UIManager = {
                 
                 el.style.left = `${stk.x}%`;
                 el.style.top = `${stk.y}%`;
-                // ✨ 신규: rotate 속성이 추가되었습니다!
                 el.style.transform = `translate(-50%, -50%) rotate(${stk.rotation}deg) scale(${stk.scale})`;
                 
                 const isSelected = this.isEditMode && this.selectedUid === stk.uid;
-                let contentHtml = `<img src="assets/partners/${stk.imgFile}" draggable="false" class="w-32 h-32 sm:w-40 sm:h-40 object-contain filter drop-shadow-2xl pointer-events-none ${stk.flip ? '-scale-x-100' : ''}">`;
+                
+                // 🚨 [여기 수정!!] 클래스에 max-w-none 을 추가해서 오른쪽 벽에 닿아도 찌그러지지 않게 만듭니다!
+                let contentHtml = `<img src="assets/partners/${stk.imgFile}" draggable="false" class="w-32 h-32 sm:w-40 sm:h-40 max-w-none object-contain filter drop-shadow-2xl pointer-events-none ${stk.flip ? '-scale-x-100' : ''}">`;
                 
                 if (this.isEditMode) {
                     const borderClass = isSelected ? 'border-2 border-dashed border-indigo-400 bg-indigo-500/20' : 'border-2 border-transparent hover:border-white/30';
