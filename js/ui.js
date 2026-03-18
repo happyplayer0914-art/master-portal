@@ -1702,11 +1702,11 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-        // 🌟 2. 상단 이미지 영역 세팅 (호감도 스킨 연동 삭제 -> 전신 고정!)
+       // 🌟 2. 상단 이미지 영역 세팅 (상세페이지용)
         let imgFile = '';
         if (isPartner) {
-            // 💡 [수정됨] 이제 묻지도 따지지도 않고 상세페이지에선 큼직한 전신(img_full)을 띄웁니다!
-            imgFile = item.img_full || item.img_sd;
+            // 💡 [수정 완료] 신화 등급의 화려한 배경(cutin)이 있으면 무조건 1순위! 없으면 full, 그것도 없으면 sd!
+            imgFile = item.img_cutin || item.img_full || item.img_sd;
         } else {
             // 장비의 경우
             imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
