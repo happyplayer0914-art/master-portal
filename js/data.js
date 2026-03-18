@@ -468,7 +468,7 @@ const GameData = {
         
         // 📖 INTJ: 심연의 대마법사
         'pt_m_intj': { 
-            id: 'pt_m_intj', name: '심연의 마법사 모르가나', rarity: 'mythic', emoji: '📖',
+            id: 'pt_m_intj', name: '심연의 대마법사 멜리나', rarity: 'mythic', emoji: '📖',
             img_icon: 'partner_intj_icon.png', img_sd: 'partner_intj_sd.png', img_full: 'partner_intj_full.png', img_cutin: 'partner_intj_cutin.png',
             atkMult: 3.00, hpMult: 1.20, critRate: 15, def: 20, eva: 10,
             element: 'ice', skillCooldown: 10000, skillValue: 500, skillDuration: 2000,
