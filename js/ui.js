@@ -29,7 +29,11 @@ const UIManager = {
        openMode() {
             this.isEditMode = true;
             
-            // 💡 [수정] 도화지 터치 활성화 + 레이어를 UI(z-20) 위로 뚫고 나오게 확 끌어올리기 (z-50)
+            // 🚨 [모바일 스크롤 완벽 차단] 꾸미기 모드일 땐 화면을 강제로 얼려버립니다!
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+            
+            // 도화지 터치 활성화 + 레이어를 UI(z-20) 위로 뚫고 나오게 확 끌어올리기 (z-50)
             const canvas = document.getElementById('profile-sticker-canvas');
             if (canvas) {
                 canvas.classList.remove('pointer-events-none', 'z-10');
@@ -51,7 +55,11 @@ const UIManager = {
             this.isEditMode = false;
             this.selectedUid = null;
 
-            // 💡 [수정] 도화지 터치 비활성화 + 레이어를 다시 예쁘게 UI 아래로 쏙 집어넣기 (z-10)
+            // 🟢 [모바일 스크롤 원상 복구] 꾸미기가 끝나면 다시 화면 스크롤을 풀어줍니다!
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+
+            // 도화지 터치 비활성화 + 레이어를 다시 예쁘게 UI 아래로 쏙 집어넣기 (z-10)
             const canvas = document.getElementById('profile-sticker-canvas');
             if (canvas) {
                 canvas.classList.remove('pointer-events-auto', 'z-50');
