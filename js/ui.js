@@ -26,12 +26,15 @@ const UIManager = {
             this.refreshCanvas();
         },
 
-        openMode() {
+       openMode() {
             this.isEditMode = true;
             
-            // 도화지 터치 활성화 (편집 모드에서만!)
+            // 💡 [수정] 도화지 터치 활성화 + 레이어를 UI(z-20) 위로 뚫고 나오게 확 끌어올리기 (z-50)
             const canvas = document.getElementById('profile-sticker-canvas');
-            if (canvas) canvas.classList.remove('pointer-events-none');
+            if (canvas) {
+                canvas.classList.remove('pointer-events-none', 'z-10');
+                canvas.classList.add('pointer-events-auto', 'z-50'); 
+            }
             
             // 상단 저장 버튼 바 표시
             const controls = document.getElementById('sticker-edit-controls');
@@ -48,9 +51,12 @@ const UIManager = {
             this.isEditMode = false;
             this.selectedUid = null;
 
-            // 도화지 터치 비활성화 (평소엔 통과시켜야 됨)
+            // 💡 [수정] 도화지 터치 비활성화 + 레이어를 다시 예쁘게 UI 아래로 쏙 집어넣기 (z-10)
             const canvas = document.getElementById('profile-sticker-canvas');
-            if (canvas) canvas.classList.add('pointer-events-none');
+            if (canvas) {
+                canvas.classList.remove('pointer-events-auto', 'z-50');
+                canvas.classList.add('pointer-events-none', 'z-10'); 
+            }
             
             // 상단 컨트롤 바 숨기기
             const controls = document.getElementById('sticker-edit-controls');
