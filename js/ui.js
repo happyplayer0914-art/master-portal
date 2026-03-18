@@ -61,9 +61,9 @@ const UIManager = {
             const selectBtn = document.getElementById(`btn-pity-${type}-select`);
             
             if (selectText) selectText.innerText = selectVal;
-            if (selectBar) selectBar.style.width = `${Math.min((selectVal / 500) * 100, 100)}%`;
+            if (selectBar) selectBar.style.width = `${Math.min((selectVal / 10) * 100, 100)}%`;
             if (selectBtn) {
-                if (selectVal >= 500) {
+                if (selectVal >= 10) {
                     selectBtn.disabled = false;
                     selectBtn.className = "text-[9px] px-2 py-1 rounded bg-yellow-500 text-slate-900 font-black animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.8)]";
                 } else {
