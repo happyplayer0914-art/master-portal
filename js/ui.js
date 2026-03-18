@@ -1397,26 +1397,35 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-      // 🌟 2. 상단 이미지 영역 세팅 (외형 변경 적용)
-        const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img_cutin ? item.img_cutin : (item.img || ''));
+    // 🌟 2. 상단 이미지 영역 세팅 (상세 카드는 무조건 전신 우선!)
+        let imgFile = '';
+        if (isPartner) {
+            // 💡 [핵심] 파트너 상세 카드에서는 호감도 레벨과 상관없이 전신(img_full)을 1순위로 띄웁니다!
+            // (유저가 스킨을 직접 바꿨다면 그걸 존중하고, 없으면 full -> sd 순서로 찾음)
+            const savedSkin = GameState.partnerSkins ? GameState.partnerSkins[id] : null;
+            imgFile = savedSkin || item.img_full || item.img_sd;
+        } else {
+            // 장비의 경우
+            imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
+        }
+
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
-        // 🌟 [새로운 마법!] 빈 공간을 영롱하게 채우는 '다이내믹 블러 백드롭'
+        // 🌟 [다이내믹 블러 백드롭]
         const bgEl = document.getElementById('dc-bg');
         if (isPartner) {
-            // 파트너 일러스트 자체를 뒷배경으로 깔고, 흐리게(blur) 뭉갠 뒤 어둡게(brightness) 누르기
             bgEl.style.backgroundImage = `url('assets/${folder}/${imgFile}')`;
             bgEl.style.filter = "blur(16px) brightness(0.35)"; 
-            bgEl.style.transform = "scale(1.15)"; // 블러 처리 시 테두리 하얗게 비는 것 방지
+            bgEl.style.transform = "scale(1.15)";
         } else {
-            // 장비는 기존의 멋진 대장간/유적 배경 유지
             bgEl.style.backgroundImage = `url('assets/backgrounds/card_bg_gear.png')`;
             bgEl.style.filter = "none";
             bgEl.style.transform = "none";
+            bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/bg_zone1.png')`; };
         }
 
-        // 👇 외형 변경 버튼 로직 (안전하게 유지!)
+        // 👇 외형 변경 버튼 로직 (기존 유지)
         const skinBtn = document.getElementById('dc-btn-skin');
         if (isPartner && !isReadOnly) { 
             skinBtn.classList.remove('hidden');
