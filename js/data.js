@@ -58,7 +58,7 @@ const GameData = {
         
         'ac_l1': { id: 'ac_l1', type: 'gear', subType: 'accessory', name: '초월의 반지', emoji: '💍', image: 'assets/items/ac_l1.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.50, hpMult: 1.50, critRate: 15, def: 10 },
         'ac_l2': { id: 'ac_l2', type: 'gear', subType: 'accessory', name: '시간술사의 시계', emoji: '⏱️', image: 'assets/items/ac_l2.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 1.40, hpMult: 1.40, spd: 35, eva: 15 }, 
-        'ac_l3': { id: 'ac_l3', type: 'gear', subType: 'accessory', name: '파괴신의 눈물', emoji: '💧', image: 'assets/items/ac_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.00, critRate: 30, critDmg: 120 }
+        'ac_l3': { id: 'ac_l3', type: 'gear', subType: 'accessory', name: '파괴신의 눈물', emoji: '💧', image: 'assets/items/ac_l3.png', rarity: 'legendary', color: 'text-yellow-400', atkMult: 2.00, critRate: 30, critDmg: 120 },
 
       // ==========================================
         // 🌟 [MYTHIC] MBTI 신화 등급 전용 장비 (16종)
