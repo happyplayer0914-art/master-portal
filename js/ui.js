@@ -1383,13 +1383,11 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-      // 2. 이미지 세팅 (외형 변경 적용)
-        // 🌟 [마법의 주문 추가!] 장비일 때 'img_cutin'이 있으면 컷인을 쓰고, 없으면 원래 'img'를 씁니다!
+        // 🌟 [절대 건드리지 않음!] 2. 상단 이미지 영역 세팅 (외형 변경 적용)
         const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img_cutin ? item.img_cutin : (item.img || ''));
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
-        // 🌟 공용 배경 처리
         const bgImg = isPartner ? 'card_bg_partner.png' : 'card_bg_gear.png';
         const fallbackBg = isPartner ? 'bg_library.png' : 'bg_zone1.png';
         const bgEl = document.getElementById('dc-bg');
@@ -1397,7 +1395,6 @@ const UIManager = {
         bgEl.style.filter = "none";
         bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/${fallbackBg}')`; };
 
-        // 🌟 외형 변경 버튼 처리
         const skinBtn = document.getElementById('dc-btn-skin');
         if (isPartner && !isReadOnly) { 
             skinBtn.classList.remove('hidden');
@@ -1416,6 +1413,9 @@ const UIManager = {
         const partnerSec = document.getElementById('dc-partner-section');
         const gearSec = document.getElementById('dc-gear-section');
         const btnArea = document.getElementById('dc-btn-area');
+
+        // 💡 [공통 스탯 박스 디자인]
+        const statBoxClass = "text-[10px] sm:text-[11px] font-bold bg-slate-900/80 px-1.5 py-2 rounded-lg text-center shadow-inner whitespace-nowrap tracking-tight flex items-center justify-center";
 
         // 🌸 파트너 상세 카드 렌더링
         if (isPartner) {
@@ -1436,33 +1436,32 @@ const UIManager = {
             
             document.getElementById('dc-skill-icon').innerText = item.emoji;
             document.getElementById('dc-skill-name').innerText = item.skillName;
-           // 🌟 [여기서부터 덮어씌우기!] 호감도에 따른 스킬 위력 및 쿨타임 가속 동적 계산기!
+            
             let dynamicDesc = item.skillDesc;
             const bonusPower = item.skillValue ? (item.skillValue * (affLv * 0.05)) : 0;
             
             if (item.skillValue && bonusPower > 0) {
-                // 스킬 설명 원본에서 숫자를 찾은 다음, 그 뒤에 (+보너스)를 화려하게 붙여줍니다!
                 const cleanBonus = bonusPower % 1 === 0 ? bonusPower : bonusPower.toFixed(1);
                 dynamicDesc = dynamicDesc.replace(item.skillValue.toString(), `${item.skillValue}<span class="text-pink-400 font-black">(+${cleanBonus})</span>`);
             }
             
-            // 쿨타임 감소 효과도 설명 밑에 덧붙여줍니다!
             dynamicDesc += `<br><span class="text-cyan-400 text-[9px] font-bold mt-1.5 inline-block">⚡ 스킬 쿨타임 -${affLv * 2}% 가속 적용됨</span>`;
-            
-            // innerText 대신 HTML 태그가 먹히도록 innerHTML로 쏴줍니다!
             document.getElementById('dc-skill-desc').innerHTML = dynamicDesc;
 
             const upgMult = 1.0 + (level * 0.1);
             let pStatsHtml = '';
-            if (item.atkMult) pStatsHtml += `<div class="flex-1 text-[10px] text-red-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
-            if (item.hpMult) pStatsHtml += `<div class="flex-1 text-[10px] text-emerald-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
-            if (item.critRate) pStatsHtml += `<div class="flex-1 text-[10px] text-purple-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
-            if (item.critDmg) pStatsHtml += `<div class="flex-1 text-[10px] text-pink-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
-            if (item.def) pStatsHtml += `<div class="flex-1 text-[10px] text-blue-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">방어 +${Math.floor(item.def * upgMult)}</div>`;
-            if (item.eva) pStatsHtml += `<div class="flex-1 text-[10px] text-teal-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
-            if (item.spd) pStatsHtml += `<div class="flex-1 text-[10px] text-yellow-400 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
-            if (item.vamp) pStatsHtml += `<div class="flex-1 text-[10px] text-rose-500 font-bold bg-slate-900/50 px-1 py-1.5 rounded text-center whitespace-nowrap">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
+            if (item.atkMult) pStatsHtml += `<div class="${statBoxClass} text-red-400">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
+            if (item.hpMult) pStatsHtml += `<div class="${statBoxClass} text-emerald-400">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
+            if (item.critRate) pStatsHtml += `<div class="${statBoxClass} text-purple-400">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
+            if (item.critDmg) pStatsHtml += `<div class="${statBoxClass} text-pink-400">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
+            if (item.def) pStatsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`; // 🚨 방어력에 % 추가 완료!
+            if (item.eva) pStatsHtml += `<div class="${statBoxClass} text-teal-400">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
+            if (item.spd) pStatsHtml += `<div class="${statBoxClass} text-yellow-400">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
+            if (item.vamp) pStatsHtml += `<div class="${statBoxClass} text-rose-500">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
+            
+            // 💡 [요청 3] 한 줄당 최대 4개씩 깔끔하게 정렬!
+            document.getElementById('dc-partner-stats').className = "grid grid-cols-3 sm:grid-cols-4 gap-1.5 border-t border-slate-700 pt-3 mt-1 w-full";
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
         } 
         // 🗡️ 장비 상세 카드 렌더링
@@ -1471,23 +1470,39 @@ const UIManager = {
             document.getElementById('dc-level').innerText = `+${level}`;
             
             partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
-            gearSec.classList.remove('hidden');
+            
+            // 💡 [요청 2] 장비 카드 껍데기를 파트너와 동일하게 투명화!
+            gearSec.className = "flex-col gap-3 flex"; 
 
             const upgMult = 1.0 + (level * 0.1);
             let statsHtml = '';
-            if (item.atkMult) statsHtml += `<div class="text-[11px] text-red-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
-            if (item.hpMult) statsHtml += `<div class="text-[11px] text-emerald-400 font-bold bg-slate-900/50 px-2 py-1 rounded">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
-            if (item.critRate) statsHtml += `<div class="text-[11px] text-purple-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
-            if (item.critDmg) statsHtml += `<div class="text-[11px] text-pink-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리피해 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
-            if (item.def) statsHtml += `<div class="text-[11px] text-blue-400 font-bold bg-slate-900/50 px-2 py-1 rounded">방어 +${Math.floor(item.def * upgMult)}</div>`;
-            if (item.eva) statsHtml += `<div class="text-[11px] text-teal-400 font-bold bg-slate-900/50 px-2 py-1 rounded">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
-            if (item.spd) statsHtml += `<div class="text-[11px] text-yellow-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
-            if (item.vamp) statsHtml += `<div class="text-[11px] text-rose-500 font-bold bg-slate-900/50 px-2 py-1 rounded">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
-            document.getElementById('dc-gear-stats').innerHTML = statsHtml;
+            if (item.atkMult) statsHtml += `<div class="${statBoxClass} text-red-400">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
+            if (item.hpMult) statsHtml += `<div class="${statBoxClass} text-emerald-400">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
+            if (item.critRate) statsHtml += `<div class="${statBoxClass} text-purple-400">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
+            if (item.critDmg) statsHtml += `<div class="${statBoxClass} text-pink-400">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
+            if (item.def) statsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`; // 🚨 방어력에 % 추가 완료!
+            if (item.eva) statsHtml += `<div class="${statBoxClass} text-teal-400">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
+            if (item.spd) statsHtml += `<div class="${statBoxClass} text-yellow-400">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
+            if (item.vamp) statsHtml += `<div class="${statBoxClass} text-rose-500">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
+            
+            // 💡 [요청 2 & 3] 이미지 훼손 없이 flavorText 띄우고, 깔끔한 스탯 블록 렌더링!
+            const commentText = item.flavorText || item.desc || "전설 속의 장비입니다.";
+            
+            gearSec.innerHTML = `
+                <p class="text-[11px] sm:text-xs text-slate-300 italic text-center break-keep leading-snug px-2">"${commentText}"</p>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-inner">
+                    <p class="text-[10px] text-slate-400 mb-2.5 font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-simple"></i> 장착 효과 <span class="text-[9px] font-normal">(강화 수치 적용됨)</span>
+                    </p>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 w-full">
+                        ${statsHtml}
+                    </div>
+                </div>
+            `;
         }
 
-        // 🌟 [핵심] 남의 프로필 볼 때와 내 프로필 볼 때 버튼 분기!
+        // 🌟 남의 프로필 볼 때와 내 프로필 볼 때 버튼 분기!
         if (isReadOnly) {
             btnArea.innerHTML = `
                 <button onclick="document.getElementById('detail-card-modal').classList.remove('opacity-100', 'pointer-events-auto', 'scale-100'); document.getElementById('detail-card-modal').classList.add('opacity-0', 'pointer-events-none', 'scale-95');" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-black rounded-xl active:scale-95 text-sm transition-all shadow-md border border-slate-500">
@@ -1501,7 +1516,7 @@ const UIManager = {
                         <span class="text-xs flex items-center gap-1"><i class="fa-solid fa-gift"></i> 선물하기</span>
                         <span class="text-[9px] text-cyan-400 bg-slate-900 px-2 mt-0.5 rounded-full border border-cyan-900">💎 50</span>
                     </button>
-                    <button onclick="GameSystem.Partner.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'partner');" class="flex-[1.5] py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
+                    <button onclick="GameSystem.Partner.toggleEquip('${id}'); UIManager.openDetailCard('${id}', 'partner');" class="flex-[1.5] py-3 ${isEquipped ? 'bg-slate-700 text-slate-300 border border-slate-600' : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-600 text-white border border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]'} font-black rounded-xl active:scale-95 text-sm transition-all">
                         ${isEquipped ? '동행 해제하기' : '동행하기'}
                     </button>
                 `;
