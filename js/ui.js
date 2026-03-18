@@ -148,7 +148,7 @@ const UIManager = {
             `;
         },
 
-        addSticker(pid, type, imgFile) {
+       addSticker(pid, type, imgFile) {
             this.closeDrawer();
             
             const newSticker = {
@@ -156,9 +156,10 @@ const UIManager = {
                 id: pid,
                 type: type,
                 imgFile: imgFile,
-                x: 50, // 화면 정중앙 (50%)
+                x: 50, 
                 y: 50,
                 scale: 1.0,
+                rotation: 0, // ✨ 신규: 회전값 저장소 추가!
                 flip: false
             };
             
@@ -194,17 +195,18 @@ const UIManager = {
             canvas.innerHTML = '';
 
             this.activeStickers.forEach(stk => {
+                // 구버전 스티커 데이터 호환용 안전장치
+                stk.rotation = stk.rotation || 0; 
+
                 const el = document.createElement('div');
-                // 편집 모드일 때만 touch-none을 줘서 스크롤 대신 드래그가 먹히게 함
-                el.className = `absolute inline-block origin-center select-none ${this.isEditMode ? 'pointer-events-auto touch-none' : 'pointer-events-none'}`;
+                el.className = `absolute inline-block origin-center select-none ${this.isEditMode ? 'pointer-events-auto' : 'pointer-events-none'}`;
                 
                 el.style.left = `${stk.x}%`;
                 el.style.top = `${stk.y}%`;
-                el.style.transform = `translate(-50%, -50%) scale(${stk.scale})`;
+                // ✨ 신규: rotate 속성이 추가되었습니다!
+                el.style.transform = `translate(-50%, -50%) rotate(${stk.rotation}deg) scale(${stk.scale})`;
                 
                 const isSelected = this.isEditMode && this.selectedUid === stk.uid;
-                
-                // 스티커 이미지 (플립 방향 적용)
                 let contentHtml = `<img src="assets/partners/${stk.imgFile}" draggable="false" class="w-32 h-32 sm:w-40 sm:h-40 object-contain filter drop-shadow-2xl pointer-events-none ${stk.flip ? '-scale-x-100' : ''}">`;
                 
                 if (this.isEditMode) {
@@ -212,10 +214,10 @@ const UIManager = {
                     
                     let controlsHtml = '';
                     if (isSelected) {
-                        // X 삭제 버튼, ⇄ 좌우반전 버튼, ↘ 크기조절 버튼
+                        // 🚨 [터치 버그 수정] onmousedown, ontouchstart 등 복잡한 걸 싹 빼고 단순 onclick으로 통합! 모바일 이중 클릭 방어 완료.
                         controlsHtml = `
-                            <div class="absolute -top-3 -right-3 bg-rose-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-black shadow-lg cursor-pointer z-50 border-2 border-white" onmousedown="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();" ontouchstart="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();">&times;</div>
-                            <div class="absolute -bottom-3 -left-3 bg-blue-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white" onmousedown="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();" ontouchstart="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();">⇄</div>
+                            <div class="absolute -top-3 -right-3 bg-rose-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-black shadow-lg cursor-pointer z-50 border-2 border-white" onclick="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();">&times;</div>
+                            <div class="absolute -bottom-3 -left-3 bg-blue-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white" onclick="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();">⇄</div>
                             <div class="absolute -bottom-3 -right-3 bg-emerald-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white resize-handle" data-uid="${stk.uid}">⤡</div>
                         `;
                     }
@@ -229,116 +231,127 @@ const UIManager = {
                 } else {
                     el.innerHTML = contentHtml;
                 }
-
                 canvas.appendChild(el);
             });
 
             if (this.isEditMode) this.attachTouchEvents();
         },
 
-        // 🖐️ 터치 & 드래그 핵심 엔진!
+        // 🖐️ 무적의 터치 & 드래그 & 회전 엔진
+        touchState: { isDragging: false, isResizing: false, currentUid: null, startX: 0, startY: 0, initX: 0, initY: 0, initScale: 1, initRot: 0, cx: 0, cy: 0, startDist: 0, startAngle: 0 },
+
         attachTouchEvents() {
             const canvas = document.getElementById('profile-sticker-canvas');
             if (!canvas) return;
 
-            let isDragging = false;
-            let isResizing = false;
-            let currentUid = null;
-            let startX, startY;
-            let initialX, initialY, initialScale;
-            const engine = this;
+            const engine = this; // 이벤트 클로저용
 
-            const getEventCoords = (e) => {
-                if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                return { x: e.clientX, y: e.clientY };
-            };
-
-            const onStart = (e) => {
-                const resizeHandle = e.target.closest('.resize-handle');
-                const dragHandle = e.target.closest('.drag-handle');
-
-                if (resizeHandle) {
-                    isResizing = true;
-                    currentUid = resizeHandle.getAttribute('data-uid');
-                } else if (dragHandle) {
-                    isDragging = true;
-                    currentUid = dragHandle.getAttribute('data-uid');
-                    engine.selectedUid = currentUid; 
-                    engine.refreshCanvas(); 
-                } else {
-                    // 빈 공간 누르면 선택 해제
-                    engine.selectedUid = null;
-                    engine.refreshCanvas();
-                    return;
-                }
-
-                const coords = getEventCoords(e);
-                startX = coords.x;
-                startY = coords.y;
-
-                const stk = engine.activeStickers.find(s => s.uid === currentUid);
-                if (stk) {
-                    initialX = stk.x;
-                    initialY = stk.y;
-                    initialScale = stk.scale;
-                }
-                
-                e.stopPropagation();
-            };
-
-            const onMove = (e) => {
-                if (!isDragging && !isResizing) return;
-                if (!currentUid) return;
-
-                const coords = getEventCoords(e);
-                const dx = coords.x - startX;
-                const dy = coords.y - startY;
-                const stk = engine.activeStickers.find(s => s.uid === currentUid);
-                if (!stk) return;
-
-                const rect = canvas.getBoundingClientRect();
-
-                if (isDragging) {
-                    // 픽셀 이동 거리를 도화지 퍼센트(%)로 변환하여 저장
-                    const dxPercent = (dx / rect.width) * 100;
-                    const dyPercent = (dy / rect.height) * 100;
-                    stk.x = Math.max(-20, Math.min(120, initialX + dxPercent));
-                    stk.y = Math.max(-20, Math.min(120, initialY + dyPercent));
-                } else if (isResizing) {
-                    // 우측 하단으로 드래그할수록 커짐
-                    const dist = (dx + dy) / 2; 
-                    const scaleFactor = dist / 150; // 민감도 조절
-                    stk.scale = Math.max(0.4, Math.min(3.0, initialScale + scaleFactor));
-                }
-
-                // 부드러운 움직임을 위해 전체 새로고침 대신 DOM 직접 제어
-                const dragEl = document.querySelector(`.drag-handle[data-uid="${currentUid}"]`);
-                if(dragEl && dragEl.parentElement) {
-                    dragEl.parentElement.style.left = `${stk.x}%`;
-                    dragEl.parentElement.style.top = `${stk.y}%`;
-                    dragEl.parentElement.style.transform = `translate(-50%, -50%) scale(${stk.scale})`;
-                }
-                
-                if (e.cancelable) e.preventDefault(); // 화면 스크롤 방지
-            };
-
-            const onEnd = () => {
-                isDragging = false;
-                isResizing = false;
-                currentUid = null;
-            };
-
-            // 중복 방지를 위해 캔버스 초기화
-            canvas.onmousedown = onStart;
-            canvas.ontouchstart = onStart;
+            // 🚨 중복 이벤트 증식을 막기 위해 캔버스와 윈도우 객체에 직접 할당
+            canvas.onmousedown = (e) => engine.handleTouchStart(e);
+            canvas.ontouchstart = (e) => engine.handleTouchStart(e);
             
-            // 화면 밖으로 손가락이 나가도 유지되도록 window에 부착
-            window.onmousemove = onMove;
-            window.ontouchmove = onMove;
-            window.onmouseup = onEnd;
-            window.ontouchend = onEnd;
+            window.onmousemove = (e) => engine.handleTouchMove(e);
+            window.ontouchmove = (e) => engine.handleTouchMove(e);
+            window.onmouseup = (e) => engine.handleTouchEnd(e);
+            window.ontouchend = (e) => engine.handleTouchEnd(e);
+        },
+
+        handleTouchStart(e) {
+            // 버튼들(x, 좌우반전)을 눌렀을 때는 드래그 로직 무시
+            if (e.target.closest('[onclick]')) return;
+
+            const resizeHandle = e.target.closest('.resize-handle');
+            const dragHandle = e.target.closest('.drag-handle');
+            const coords = (e.touches && e.touches.length > 0) ? e.touches[0] : e;
+
+            if (resizeHandle) {
+                this.touchState.isResizing = true;
+                this.touchState.currentUid = resizeHandle.getAttribute('data-uid');
+            } else if (dragHandle) {
+                this.touchState.isDragging = true;
+                this.touchState.currentUid = dragHandle.getAttribute('data-uid');
+            } else {
+                // 빈 공간을 누르면 선택 해제
+                this.selectedUid = null;
+                this.refreshCanvas();
+                return;
+            }
+
+            this.selectedUid = this.touchState.currentUid;
+            this.refreshCanvas();
+
+            const stk = this.activeStickers.find(s => s.uid === this.touchState.currentUid);
+            if (stk) {
+                this.touchState.initX = stk.x;
+                this.touchState.initY = stk.y;
+                this.touchState.initScale = stk.scale;
+                this.touchState.initRot = stk.rotation || 0;
+                this.touchState.startX = coords.clientX;
+                this.touchState.startY = coords.clientY;
+
+                // 🔄 크기 & 회전을 위한 중심점 수학 계산
+                if (this.touchState.isResizing) {
+                    const dragEl = document.querySelector(`.drag-handle[data-uid="${stk.uid}"]`);
+                    if (dragEl) {
+                        const rect = dragEl.getBoundingClientRect();
+                        this.touchState.cx = rect.left + rect.width / 2;
+                        this.touchState.cy = rect.top + rect.height / 2;
+                        
+                        this.touchState.startDist = Math.hypot(coords.clientX - this.touchState.cx, coords.clientY - this.touchState.cy);
+                        this.touchState.startAngle = Math.atan2(coords.clientY - this.touchState.cy, coords.clientX - this.touchState.cx) * (180 / Math.PI);
+                    }
+                }
+            }
+        },
+
+        handleTouchMove(e) {
+            if (!this.touchState.isDragging && !this.touchState.isResizing) return;
+            if (!this.touchState.currentUid) return;
+
+            // 🚨 드래그 중일 때는 모바일 화면 자체가 위아래로 스크롤되는 것을 강제로 막아버립니다!
+            if (e.cancelable) e.preventDefault();
+
+            const coords = (e.touches && e.touches.length > 0) ? e.touches[0] : e;
+            const stk = this.activeStickers.find(s => s.uid === this.touchState.currentUid);
+            if (!stk) return;
+
+            // 이동 (Dragging)
+            if (this.touchState.isDragging) {
+                const canvas = document.getElementById('profile-sticker-canvas');
+                const rect = canvas.getBoundingClientRect();
+                const dx = coords.clientX - this.touchState.startX;
+                const dy = coords.clientY - this.touchState.startY;
+                
+                stk.x = this.touchState.initX + (dx / rect.width) * 100;
+                stk.y = this.touchState.initY + (dy / rect.height) * 100;
+
+            // 크기 조절 및 회전 (Resizing & Rotating)
+            } else if (this.touchState.isResizing) {
+                // 1. 크기 (중심점으로부터 멀어진 거리의 비율)
+                const currentDist = Math.hypot(coords.clientX - this.touchState.cx, coords.clientY - this.touchState.cy);
+                const scaleFactor = currentDist / this.touchState.startDist;
+                stk.scale = Math.max(0.3, Math.min(3.5, this.touchState.initScale * scaleFactor));
+                
+                // 2. 🔄 회전 (처음 잡았을 때의 각도와 현재 손가락 각도의 차이)
+                const currentAngle = Math.atan2(coords.clientY - this.touchState.cy, coords.clientX - this.touchState.cx) * (180 / Math.PI);
+                const angleDiff = currentAngle - this.touchState.startAngle;
+                stk.rotation = this.touchState.initRot + angleDiff;
+            }
+
+            // 렌더링 함수를 매번 부르지 않고, DOM을 즉시 업데이트 (버벅임 방지)
+            const dragEl = document.querySelector(`.drag-handle[data-uid="${stk.uid}"]`);
+            if (dragEl && dragEl.parentElement) {
+                dragEl.parentElement.style.left = `${stk.x}%`;
+                dragEl.parentElement.style.top = `${stk.y}%`;
+                dragEl.parentElement.style.transform = `translate(-50%, -50%) rotate(${stk.rotation}deg) scale(${stk.scale})`;
+            }
+        },
+
+        handleTouchEnd(e) {
+            this.touchState.isDragging = false;
+            this.touchState.isResizing = false;
         }
-    },
+    }, // <-- StickerEngine 객체의 끝!
 
     // ui.js의 UIManager 안에 추가!
     
