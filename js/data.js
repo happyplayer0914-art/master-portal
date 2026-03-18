@@ -69,7 +69,7 @@ const GameData = {
             desc: '[ENTJ 신화] 적을 굴복시키는 군주의 검.',
             img: 'weapon_entj.png',
             img_cutin: 'weapon_entj_cutin.png', 
-            flavorText: '"모든 전장은 나의 지휘 아래 통제된다. 꿇어라!"' 
+            flavorText: '태양의 힘을 가득 머금은 검. 금방이라도 일대를 태워버릴 것 같다...' 
         },
         'mythic_intj_w': { 
             id: 'mythic_intj_w', name: '금기된 심연의 스태프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '📖', 
