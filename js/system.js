@@ -1037,7 +1037,7 @@ Gacha: {
 
         // 🌟 [천장] 500뽑 선택 팝업창 띄우기
         openSelectModal(type) {
-            if(GameState.gachaPity[type].select < 500) return;
+            if(GameState.gachaPity[type].select < 10) return;
             
             const listEl = document.getElementById('mythic-select-list');
             if(!listEl) return;
@@ -1070,10 +1070,10 @@ Gacha: {
 
         // 🌟 [천장] 500뽑 선택 확정 지급
         claimPity500(type, itemId) {
-            if(GameState.gachaPity[type].select < 500) return;
+            if(GameState.gachaPity[type].select < 10) return;
             
             if(confirm("이 신화를 확정으로 영입하시겠습니까?")) {
-                GameState.gachaPity[type].select -= 500; // 게이지 500 깎기
+                GameState.gachaPity[type].select -= 10; // 게이지 500 깎기
                 GameState.save();
                 UIManager.updateGachaPityUI();
                 
