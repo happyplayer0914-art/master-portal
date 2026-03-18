@@ -909,18 +909,19 @@
 
         <div class="px-4 mb-6">
        <div id="my-profile-card" class="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-slate-900">
-                <div id="profile-bg-image" class="absolute inset-0 w-full h-full bg-slate-800 bg-cover bg-center opacity-80" style="background-image: url('assets/backgrounds/bg_library.png');"></div>
+                <div id="profile-bg-image" class="absolute inset-0 w-full h-full bg-slate-800 bg-cover bg-center opacity-90" style="background-image: url('assets/backgrounds/bg_library.png');"></div>
                 
                 <div id="profile-partner-image" class="absolute -right-4 bottom-0 h-[95%] w-[70%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none z-10 transition-all duration-300" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png'); filter: brightness(0) invert(1) opacity(0.2);"></div>
                 
-                <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-transparent pointer-events-none z-10"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent pointer-events-none z-10"></div>
 
                 <div class="relative z-20 w-full h-full p-4 flex flex-col justify-between">
                     
                     <div class="flex justify-between items-start">
                         <div class="flex gap-3">
-                            <div class="relative shrink-0">
+                            <div class="relative shrink-0 avatar-click-zone cursor-pointer" onclick="UIManager.cycleMasterAvatar()">
                                 <div id="profile-big-icon" class="master-avatar w-14 h-14 rounded-full bg-slate-700 flex items-center justify-center text-2xl border-2 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)] relative">M</div>
+                                <div class="absolute -bottom-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] text-slate-400 z-10">🔄</div>
                             </div>
                             <div class="flex flex-col justify-center text-left">
                                 <div id="profile-job-title" class="text-[9px] text-yellow-300 font-bold mb-0.5 animate-pulse">✨ 길드장 ✨</div>
@@ -957,11 +958,11 @@
                                 <p class="text-[9px] text-slate-400 font-bold">장비 & 파트너</p>
                                 <button onclick="UIManager.openStatsModal()" class="text-indigo-300 hover:text-white flex items-center gap-1 text-[9px] font-bold"><i class="fa-solid fa-magnifying-glass-chart"></i> 스탯</button>
                             </div>
-                            <div class="grid grid-cols-2 gap-1.5">
-                                <div id="profile-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">무기</span></div>
-                                <div id="profile-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">방어구</span></div>
-                                <div id="profile-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">장신구</span></div>
-                                <div id="profile-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[8px] text-pink-400 font-bold">파트너</span></div>
+                            <div class="grid grid-cols-2 gap-1 mx-auto max-w-[110px]">
+                                <div id="profile-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">무기</span></div>
+                                <div id="profile-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">방어구</span></div>
+                                <div id="profile-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">장신구</span></div>
+                                <div id="profile-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[7px] text-pink-400 font-bold">파트너</span></div>
                             </div>
                         </div>
                     </div>
@@ -1120,24 +1121,24 @@
         
     </div>
 </div>
-  <div class="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-slate-900">
+ <div class="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-slate-900">
             
-            <div id="target-profile-bg" class="absolute inset-0 w-full h-full bg-slate-800 bg-cover bg-center opacity-80" style="background-image: url('assets/backgrounds/bg_library.png');"></div>
+            <div id="target-profile-bg" class="absolute inset-0 w-full h-full bg-slate-800 bg-cover bg-center opacity-90" style="background-image: url('assets/backgrounds/bg_library.png');"></div>
 
             <div id="target-profile-partner" class="absolute -right-4 bottom-0 h-[95%] w-[70%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none z-10 transition-all duration-300" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png'); filter: brightness(0) invert(1) opacity(0.2);"></div>
 
-            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-transparent pointer-events-none z-10"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent pointer-events-none z-10"></div>
 
             <div class="relative z-20 w-full h-full p-4 flex flex-col justify-between">
                 
                 <div class="flex justify-between items-start">
                     <div class="flex gap-3">
-                        <div class="relative shrink-0">
+                        <div class="relative shrink-0avatar-click-zone cursor-pointer" onclick="UIManager.viewTargetMasterAvatar()">
                             <div id="target-user-avatar" class="master-avatar w-14 h-14 rounded-full bg-slate-700 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)] relative">?</div>
                         </div>
                         <div class="flex flex-col justify-center text-left">
                             <div id="target-user-title" class="text-[9px] text-yellow-300 font-bold mb-0.5 animate-pulse">칭호 없음</div>
-                            <h2 id="target-user-nickname" class="text-lg font-black text-white leading-tight">유저 이름</h2>
+                            <h2 id="target-user-nickname" class="text-lg font-black text-white leading-tight truncate">유저 이름</h2>
                             <p class="text-[9px] text-slate-400 font-bold mt-0.5">UID #<span id="target-user-uid">????</span></p>
                         </div>
                     </div>
@@ -1169,11 +1170,11 @@
                                 🔍 스탯
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-1.5">
-                            <div id="target-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">무기</span></div>
-                            <div id="target-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">방어구</span></div>
-                            <div id="target-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800 flex flex-col items-center justify-center relative"><span class="text-[8px] text-slate-500 font-bold">장신구</span></div>
-                            <div id="target-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[8px] text-pink-400 font-bold">파트너</span></div>
+                        <div class="grid grid-cols-2 gap-1 mx-auto max-w-[110px]">
+                            <div id="target-slot-weapon" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">무기</span></div>
+                            <div id="target-slot-armor" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">방어구</span></div>
+                            <div id="target-slot-accessory" class="aspect-square rounded-lg border border-slate-600 bg-slate-800/80 flex flex-col items-center justify-center relative"><span class="text-[7px] text-slate-500 font-bold">장신구</span></div>
+                            <div id="target-slot-partner" class="aspect-square rounded-lg border border-pink-500/30 bg-pink-900/20 flex flex-col items-center justify-center relative"><span class="text-[7px] text-pink-400 font-bold">파트너</span></div>
                         </div>
                     </div>
                 </div>
