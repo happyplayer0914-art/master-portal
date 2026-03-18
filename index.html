@@ -28,7 +28,7 @@
   <script type="module">
         // 1. 코어 및 DB 도구 수입
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, where, addDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, setDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
         // 2. 인증(Auth) 도구 수입
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -54,6 +54,7 @@
         window.addDoc = addDoc;
         window.getDocs = getDocs;
         window.query = query;
+        window.where = where;   // 🌟 [추가됨!] 특정 유저 닉네임 검색용 돋보기!
         window.orderBy = orderBy;
         window.limit = limit;
         window.serverTimestamp = serverTimestamp;
