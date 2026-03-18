@@ -39,7 +39,7 @@ const GameData = {
    'a_e3': { id: 'a_e3', type: 'gear', subType: 'armor', name: '닌자의 수의', emoji: '🥷', img: 'a_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '그림자 일족의 비전이 담긴 옷. 걸치는 순간 바람 그 자체가 된 듯한 착각에 빠진다.' }, 
    'a_e4': { id: 'a_e4', type: 'gear', subType: 'armor', name: '정령의 방패', emoji: '🥷', img: 'a_e4.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.25, eva: 15, spd: 15, flavorText: '자연의 정령들이 감싸고 도는 신비로운 방패. 위험한 순간 스스로 움직여 주인을 보호한다.' }, 
     
-   'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '마나의 귀걸이', emoji: '💎', img: 'ac_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25, def: 10, flavorText: '심연의 마력 결정체로 세공된 귀걸이. 신체의 무한한 잠재력을 일깨워준다.' },
+   'ac_e1': { id: 'ac_e1', type: 'gear', subType: 'accessory', name: '심연의 귀걸이', emoji: '💎', img: 'ac_e1.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.25, hpMult: 1.25, def: 10, flavorText: '심연의 마력 결정체로 세공된 귀걸이. 신체의 무한한 잠재력을 일깨워준다.' },
    'ac_e2': { id: 'ac_e2', type: 'gear', subType: 'accessory', name: '광전사의 뿔피리', emoji: '📯', img: 'ac_e2.png', rarity: 'epic', color: 'text-purple-400', atkMult: 1.45, hpMult: 1.05, spd: 20, flavorText: '부는 순간 이성을 잃고 오직 살육에만 전념하게 만드는 저주받은 유물.' }, 
    'ac_e3': { id: 'ac_e3', type: 'gear', subType: 'accessory', name: '세계수의 잎사귀', emoji: '🍃', img: 'ac_e3.png', rarity: 'epic', color: 'text-purple-400', hpMult: 1.40, vamp: 10, eva: 5, flavorText: '아무리 시간이 지나도 마르지 않는 생명력을 품고 있는 성스러운 잎사귀.' }, 
 
