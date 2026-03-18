@@ -1705,11 +1705,11 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-        // 🌟 2. 상단 이미지 영역 세팅 (호감도 레벨 연동)
+        // 🌟 2. 상단 이미지 영역 세팅 (호감도 스킨 연동 삭제 -> 전신 고정!)
         let imgFile = '';
         if (isPartner) {
-            // 💡 호감도 레벨(affLv)을 넘겨주어, 1~5렙은 SD, 6렙 이상은 Full을 알아서 가져오게 합니다.
-            imgFile = GameSystem.Partner.getDisplayImage(id, affLv);
+            // 💡 [수정됨] 이제 묻지도 따지지도 않고 상세페이지에선 큼직한 전신(img_full)을 띄웁니다!
+            imgFile = item.img_full || item.img_sd;
         } else {
             // 장비의 경우
             imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
@@ -1731,20 +1731,9 @@ const UIManager = {
             bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/bg_zone1.png')`; };
         }
 
-        // 👇 외형 변경 버튼 로직
+        // 👇 [수정됨] 더 이상 안 쓰는 [외형 변경] 버튼은 영원히 숨겨둡니다!
         const skinBtn = document.getElementById('dc-btn-skin');
-        if (isPartner && !isReadOnly) { 
-            skinBtn.classList.remove('hidden');
-            skinBtn.onclick = () => { GameSystem.Partner.cycleSkin(id); };
-            const unlocked = GameSystem.Partner.getUnlockedSkins(id, affLv); // 💡 여기서도 affLv을 전달!
-            if (unlocked.length <= 1) {
-                skinBtn.className = "absolute top-3 left-3 z-30 bg-slate-800/50 text-slate-500 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-md cursor-not-allowed";
-            } else {
-                skinBtn.className = "absolute top-3 left-3 z-30 bg-indigo-600/90 hover:bg-indigo-500 text-white border border-indigo-400 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all active:scale-95 cursor-pointer";
-            }
-        } else {
-            skinBtn.classList.add('hidden'); 
-        }
+        if (skinBtn) skinBtn.classList.add('hidden');
 
         // 3. 화면 분기용 변수
         const partnerSec = document.getElementById('dc-partner-section');
