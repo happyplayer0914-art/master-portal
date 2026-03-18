@@ -3271,8 +3271,37 @@ GameSystem.Profile = {
         } catch(e) {
             console.error("내 프로필 로드 실패:", e);
       }
+ // ... (이 위에는 GameSystem의 원래 코드들이 있음) ...
     }
-}; // 👈 GameSystem 거대 상자 끝! (절대 건드리지 마시오)
+}; // 👈 여기가 GameSystem이 완전히 끝나는 곳! (이 괄호를 지우면 안 돼!)
+
+// =========================================================================
+// 👑 [GM 전용] 이스터에그: 홈 버튼 10번 다다닥! 터치 감지기
+// =========================================================================
+window.gmTapCount = 0;
+window.gmTapTimer = null;
+
+window.triggerGMSecret = function() {
+    window.gmTapCount++;
+    
+    // 1초 안에 다시 안 누르면 횟수 초기화! (진짜 다다닥 눌러야 함)
+    clearTimeout(window.gmTapTimer);
+    window.gmTapTimer = setTimeout(() => {
+        window.gmTapCount = 0;
+    }, 1000); 
+
+    // 딱 10번 채웠을 때!
+    if (window.gmTapCount >= 10) {
+        window.gmTapCount = 0; // 다음을 위해 초기화
+        
+        // 마스터 본인인지 닉네임 철통 보안 검사!
+        if (GameState.nickname === '위대한 길드장' || GameState.nickname === 'GM 마스터') {
+            const modal = document.getElementById('gm-mail-modal');
+            if (modal) modal.classList.replace('hidden', 'flex');
+            if(window.UIManager && window.UIManager.triggerHeavyHaptic) UIManager.triggerHeavyHaptic();
+        }
+    }
+};
 
 // =========================================================================
 // 👑 [GM 전용] 파이어베이스 전체/개인 우편 발송 엔진! (GameSystem 바깥에 위치)
