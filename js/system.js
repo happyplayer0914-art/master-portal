@@ -1377,7 +1377,11 @@ Ranking: {
                     
                     const isMe = (d.nickname === GameState.nickname); 
                     const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                    let prestigeText = d.prestige ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${d.prestige}환생]</span>` : '';
+                        
+                   // 👇 [여기 복구!!] 숫자로 강제 변환해서 0보다 클 때만 띄우도록 아주 튼튼하게 수정!
+                    const pCount = Number(d.prestige) || 0;
+                    let prestigeText = pCount > 0 ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${pCount}환생]</span>` : '';
+                    
                     let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
                     
                     // 🌟 [핵심] 탭에 따라 오른쪽 표시 정보 다르게 처리!
