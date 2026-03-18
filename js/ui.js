@@ -1372,7 +1372,7 @@ const UIManager = {
         this.triggerHaptic();
     },
    // =========================================================================
-    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너) - 완성판
+    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너) - 호감도 진화 복구 완!
     // =========================================================================
     openDetailCard(id, type, isReadOnly = false, customLevel = 0, customAffLv = 1) {
         if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
@@ -1384,6 +1384,9 @@ const UIManager = {
         // 내 인벤토리인지 남의 프로필 관전 모드인지 체크
         const isEquipped = isReadOnly ? true : (isPartner ? (GameState.equippedPartner === id) : [GameState.equippedWeapon, GameState.equippedArmor, GameState.equippedAccessory].includes(id));
         const level = isReadOnly ? customLevel : (isPartner ? (GameState.partnerLevels[id] || 0) : (GameState.itemUpgrades[id] || 0));
+
+        // 💡 [핵심 복구] 호감도 레벨(affLv)을 제일 먼저 알아냅니다!
+        const affLv = isReadOnly ? customAffLv : (GameState.partnerAffectionLevel[id] || 1);
 
         // 1. 공통 정보 세팅 (이름, 등급)
         document.getElementById('dc-name').innerText = item.name;
@@ -1397,13 +1400,11 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-    // 🌟 2. 상단 이미지 영역 세팅 (상세 카드는 무조건 전신 우선!)
+        // 🌟 2. 상단 이미지 영역 세팅 (호감도 레벨 연동)
         let imgFile = '';
         if (isPartner) {
-            // 💡 [핵심] 파트너 상세 카드에서는 호감도 레벨과 상관없이 전신(img_full)을 1순위로 띄웁니다!
-            // (유저가 스킨을 직접 바꿨다면 그걸 존중하고, 없으면 full -> sd 순서로 찾음)
-            const savedSkin = GameState.partnerSkins ? GameState.partnerSkins[id] : null;
-            imgFile = savedSkin || item.img_full || item.img_sd;
+            // 💡 호감도 레벨(affLv)을 넘겨주어, 1~5렙은 SD, 6렙 이상은 Full을 알아서 가져오게 합니다.
+            imgFile = GameSystem.Partner.getDisplayImage(id, affLv);
         } else {
             // 장비의 경우
             imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
@@ -1425,12 +1426,12 @@ const UIManager = {
             bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/bg_zone1.png')`; };
         }
 
-        // 👇 외형 변경 버튼 로직 (기존 유지)
+        // 👇 외형 변경 버튼 로직
         const skinBtn = document.getElementById('dc-btn-skin');
         if (isPartner && !isReadOnly) { 
             skinBtn.classList.remove('hidden');
             skinBtn.onclick = () => { GameSystem.Partner.cycleSkin(id); };
-            const unlocked = GameSystem.Partner.getUnlockedSkins(id);
+            const unlocked = GameSystem.Partner.getUnlockedSkins(id, affLv); // 💡 여기서도 affLv을 전달!
             if (unlocked.length <= 1) {
                 skinBtn.className = "absolute top-3 left-3 z-30 bg-slate-800/50 text-slate-500 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold shadow-md cursor-not-allowed";
             } else {
