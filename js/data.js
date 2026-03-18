@@ -72,12 +72,12 @@ const GameData = {
             flavorText: '"모든 전장은 나의 지휘 아래 통제된다. 꿇어라!"' 
         },
         'mythic_intj_w': { 
-            id: 'mythic_intj_w', name: '금기된 마도서', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '📖', 
+            id: 'mythic_intj_w', name: '금기된 심연의 스태프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '📖', 
             atkMult: 5.0, critRate: 15, spd: 10, mbti: 'INTJ', job: '심연의 대마법사', passive: '천재의 영역', 
-            desc: '[INTJ 신화] 심연의 지식이 담긴 마도서.',
+            desc: '[INTJ 신화] 심연의 지식이 담긴 스태프.',
             img: 'weapon_intj.png',
             img_cutin: 'weapon_intj_cutin.png', 
-            flavorText: '"모든 변수는 이미 내 계산 안에 있다. 체크메이트."' 
+            flavorText: '"존재하면 안되는 힘... 감당할 수 있겠어?"' 
         },
         'mythic_infp_w': { 
             id: 'mythic_infp_w', name: '세계수의 하프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', 
