@@ -463,7 +463,7 @@ const GameData = {
         // 👑 ENTJ: 전장을 지배하는 군주
         'pt_m_entj': { 
             id: 'pt_m_entj', name: '전장의 군주 레온', rarity: 'mythic', emoji: '👑',
-            img_icon: 'partner_entj_icon.png', img_sd: 'partner_entj_sd.png', img_full: 'partner_entj_full.png', img_cutin: 'partner_entj_cutin.png',
+            img_icon: 'partner_entj_icon.png', img_sd: 'partner_entj_sd.png', img_full: 'partner_entj_full.png', img_cutin: 'partner_entj_cutin.png', img_profile: 'partner_entj_profile.png',
             atkMult: 2.50, hpMult: 1.50, critRate: 20, critDmg: 100, spd: 10,
             element: 'fire', skillCooldown: 12000, skillValue: 300, skillDuration: 5000,
             skillName: '제국의 위엄', skillDesc: '12초마다 5초간 마스터의 공격력을 폭발적으로 증가시키고 적에게 강력한 화염 피해',
