@@ -18,11 +18,12 @@ const GameState = {
     partnerAffectionExp: {},    
     partnerAffectionLevel: {},
     equippedPartner: null,   // 🌸 [추가] 현재 내 옆에 서 있는 파트너
-    // 👇 1. [여기에 한 줄 추가!] 마스터가 픽한 파트너 스킨을 기억할 수첩입니다.
-    partnerSkins: {},
+   // 👇 1. 기존의 파트너 수첩을 지우고, 스티커 다이어리를 새로 만듭니다!
+    // partnerSkins: {}, <-- 이거 지우거나 주석 처리!
+    profileStickers: [], // ✨ 신규: 내가 꾸민 스티커들의 위치/크기 정보가 담길 배열!
     // 👇 1. 여기에 우편 수첩 추가!
     claimedMails: [], 
-    // 👆
+
     
     rpgStage: 1, rpgAtk: 10, rpgMaxHp: 100, currentHp: 100,
     
@@ -101,8 +102,9 @@ const GameState = {
       // 👇 [신규 추가]
         this.partnerAffectionExp = this._safeLoad('master_pt_aff_exp', {});
         this.partnerAffectionLevel = this._safeLoad('master_pt_aff_lv', {});
-      // 👇 2. [여기에 한 줄 추가!] 게임 켤 때 수첩 내용 불러오기
-        this.partnerSkins = this._safeLoad('master_partnerSkins', {});
+     // 👇 2. 로드 부분 교체!
+    
+        this.profileStickers = this._safeLoad('master_profile_stickers', []); // ✨ 신규 로드
       
       // 👇 2. 게임 켤 때 수첩 꺼내오기!
         this.claimedMails = this._safeLoad('master_claimed_mails', []);
@@ -177,8 +179,9 @@ const GameState = {
        // 👇 이 부분을 아래 두 줄로 교체! (직통 저장소 추가)
         localStorage.setItem('master_equippedPartner', this._encode(this.equippedPartner || 'none'));
         localStorage.setItem('master_safe_partner', this.equippedPartner || 'none');
-      // 👇 3. [여기에 한 줄 추가!] 게임 끌 때 수첩 내용 저장하기
-        localStorage.setItem('master_partnerSkins', this._encode(this.partnerSkins));
+      // 👇 3. 저장 부분 교체!
+     
+        localStorage.setItem('master_profile_stickers', this._encode(this.profileStickers)); // ✨ 신규 저장
 
       // 👇 3. 게임 끌 때 수첩 저장하기!
         localStorage.setItem('master_claimed_mails', this._encode(this.claimedMails));
