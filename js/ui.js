@@ -1383,8 +1383,9 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-        // 2. 이미지 세팅 (외형 변경 적용)
-        const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img || '');
+      // 2. 이미지 세팅 (외형 변경 적용)
+        // 🌟 [마법의 주문 추가!] 장비일 때 'img_cutin'이 있으면 컷인을 쓰고, 없으면 원래 'img'를 씁니다!
+        const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img_cutin ? item.img_cutin : (item.img || ''));
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
