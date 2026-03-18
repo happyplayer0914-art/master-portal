@@ -1479,11 +1479,17 @@ Ranking: {
             });
         },
 
-        checkAndRender() {
+       checkAndRender() {
             let hasUnread = false;
             if (!GameState.claimedMails) GameState.claimedMails = [];
+            // 🌟 방어 코드: 지운 우편 수첩이 없으면 만들기!
+            if (!GameState.deletedMails) GameState.deletedMails = [];
 
             this.mailList.forEach(mail => {
+                // 🌟 [핵심] 지운 우편 수첩에 있는 ID면 안 읽은 우편 계산에서 아예 빼버리기!
+                if (GameState.deletedMails.includes(mail.id)) return;
+                
+                // 보상을 안 받은(수첩에 없는) 우편이 있으면 빨간 불 켜기!
                 if (!GameState.claimedMails.includes(mail.id)) hasUnread = true;
             });
 
@@ -1652,7 +1658,10 @@ Ranking: {
             if (!GameState.deletedMails.includes(mailId)) {
                 // 1. 로컬(내 폰)에 지웠다고 기록 (전체 우편 가림막 용도)
                 GameState.deletedMails.push(mailId);
-                GameState.save();
+                // 🚨 이 부분을 마스터 게임의 진짜 저장 함수로 바꿔주세요!
+                if (typeof saveGame === 'function') saveGame(); 
+                else if (window.GameSystem && GameSystem.save) GameSystem.save();
+                else GameState.save(); // (원래 있던 거)
                 
                 // 2. 🚨 [신규] 파이어베이스 개인 금고에서 진짜 편지 태워버리기!
                 if (window.db && GameState.uid) {
