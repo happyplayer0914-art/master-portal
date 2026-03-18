@@ -1357,7 +1357,6 @@ Ranking: {
                     else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } 
                     else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
                     
-                    // 인기도 1등은 핑크빛 오라 추가!
                     if(this.currentTab === 'popularity' && i === 0) {
                         bgClass = "bg-gradient-to-r from-pink-900/40 to-slate-900 border border-pink-500/50 shadow-[0_0_15px_rgba(236,72,153,0.2)]";
                     }
@@ -1377,14 +1376,14 @@ Ranking: {
                     
                     const isMe = (d.nickname === GameState.nickname); 
                     const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
-                        
-                   // 👇 [여기 복구!!] 숫자로 강제 변환해서 0보다 클 때만 띄우도록 아주 튼튼하게 수정!
-                    const pCount = Number(d.prestige) || 0;
+                    
+                    // 🚨 [완벽 복구 1] 파이어베이스에 어떤 이름으로 저장되었든 강제로 스캔해서 숫자로 바꿉니다!
+                    const pCount = Number(d.prestige) || Number(d.prestigeCount) || 0;
                     let prestigeText = pCount > 0 ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${pCount}환생]</span>` : '';
                     
                     let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
                     
-                    // 🌟 [핵심] 탭에 따라 오른쪽 표시 정보 다르게 처리!
+                    // 🌟 탭에 따라 오른쪽 표시 정보 다르게 처리!
                     let rightSideHtml = '';
                     if (this.currentTab === 'stage') {
                         rightSideHtml = `
