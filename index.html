@@ -562,9 +562,14 @@
             </div>
         </div>
 
-        <button onclick="GameSystem.Battle.enterDungeon()" class="w-full py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2">
-            <span>🚪</span> 심연으로 전진하기
-        </button>
+        <div class="flex gap-2">
+            <button onclick="GameSystem.Battle.enterDungeon()" class="flex-[2] py-5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2">
+                <span>🚪</span> 심연으로 전진하기
+            </button>
+            <button onclick="GameSystem.Battle.toggleAutoMode()" class="flex-1 py-5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/50 rounded-2xl font-black text-sm active:scale-95 transition-all flex flex-col items-center justify-center gap-1 shadow-lg">
+                <span class="text-xl animate-bounce">🤖</span> 자동 등반
+            </button>
+        </div>
     </main>
 
     <main id="screen-rpg-event" class="screen pt-24 px-5">
