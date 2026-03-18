@@ -118,17 +118,15 @@ const UIManager = {
                 const pt = GameData.partners[pid];
                 if (!pt) return;
                 
-                // 💡 SD 스티커 (기본 제공)
-                if (pt.img_sd) html += this.createDrawerItemHTML(pid, pt, 'sd', pt.img_sd, 'SD 스티커');
+               // 💡 [수정] pt.name을 넣어서 파트너의 진짜 이름이 나오게 바꿨습니다!
+                if (pt.img_sd) html += this.createDrawerItemHTML(pid, pt, 'sd', pt.img_sd, `${pt.name} (SD)`);
                 
-                // 💡 Full(전신) 스티커 (기본 제공 - 호감도 해금 삭제 완료!)
-                if (pt.img_full) html += this.createDrawerItemHTML(pid, pt, 'full', pt.img_full, '전신 스티커');
+                if (pt.img_full) html += this.createDrawerItemHTML(pid, pt, 'full', pt.img_full, `${pt.name} (전신)`);
                 
-                // 💡 신화 등급 전용 GIF 스티커 (얘만 호감도 10렙 조건!)
                 if (pt.rarity === 'mythic' && pt.img_gif) {
                     const affLv = GameState.partnerAffectionLevel[pid] || 1;
                     if (affLv >= 10) {
-                        html += this.createDrawerItemHTML(pid, pt, 'gif', pt.img_gif, '✨라이브 스티커');
+                        html += this.createDrawerItemHTML(pid, pt, 'gif', pt.img_gif, `✨${pt.name} (라이브)`);
                     }
                 }
             });
