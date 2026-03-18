@@ -1465,7 +1465,7 @@ const UIManager = {
             
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
         } 
-     // 🗡️ 장비 상세 카드 렌더링
+        // 🗡️ 장비 상세 카드 렌더링
         else {
             document.getElementById('dc-level-label').innerText = "강화 수치";
             document.getElementById('dc-level').innerText = `+${level}`;
@@ -1473,53 +1473,18 @@ const UIManager = {
             partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
             gearSec.classList.remove('hidden');
 
-            // 🚨 1. 콩알만해진 이미지 구출! (고정 높이 h-56을 줘서 큼직하게 띄웁니다)
-            const imgEl = document.getElementById('dc-image');
-            if (imgEl) imgEl.className = "w-full h-56 object-contain filter drop-shadow-[0_0_15px_rgba(168,85,247,0.4)] z-20 relative transition-transform duration-500 hover:scale-105 my-2";
-
             const upgMult = 1.0 + (level * 0.1);
-            let contentHtml = '';
-
-            // 🌟 2. 웅장한 설명글 (Flavor Text) 추가 (HTML 파일 수정 없이 동적 생성!)
-            if (item.flavorText) {
-                contentHtml += `<div class="w-full text-center mb-4 mt-2 px-2"><span class="italic text-slate-400 text-[11px] font-bold break-keep">""${item.flavorText}""</span></div>`;
-            }
-
-            // 🌟 3. 깔끔한 3칸 그리드 스탯 박스 공장
-            const createStatBox = (value, color, name) => {
-                if (!value) return '';
-                let finalValue = value;
-                if(value > 1 && value < 10) finalValue = `+${Math.round((value - 1) * 100)}%`;
-                else if(value % 1 !== 0) finalValue = `+${value.toFixed(1)}%`;
-                else finalValue = `+${Math.floor(value)}`;
-
-                return `
-                <div class="flex-1 bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 shadow-inner">
-                    <span class="text-[9px] font-black ${color}">${name}</span>
-                    <span class="text-white font-bold text-[12px]">${finalValue}</span>
-                </div>`;
-            };
-
-            let gridHtml = '';
-            gridHtml += createStatBox(item.atkMult ? (item.atkMult * upgMult) : 0, "text-red-400", "공격");
-            gridHtml += createStatBox(item.hpMult ? (item.hpMult * upgMult) : 0, "text-emerald-400", "체력");
-            gridHtml += createStatBox(item.critRate ? (item.critRate * upgMult) : 0, "text-purple-400", "크리");
-            gridHtml += createStatBox(item.critDmg ? (item.critDmg * upgMult) : 0, "text-pink-400", "크리피해");
-            gridHtml += createStatBox(item.def ? (item.def * upgMult) : 0, "text-blue-400", "방어");
-            gridHtml += createStatBox(item.eva ? (item.eva * upgMult) : 0, "text-teal-400", "회피");
-            gridHtml += createStatBox(item.spd ? (item.spd * upgMult) : 0, "text-yellow-400", "공속");
-            gridHtml += createStatBox(item.vamp ? (item.vamp * upgMult) : 0, "text-rose-500", "피흡");
-
-            // 3칸씩 딱딱 맞게 들어가는 그리드 컨테이너 추가
-            contentHtml += `<div class="grid grid-cols-3 gap-2 w-full">${gridHtml}</div>`;
-
-            // 🌟 4. 원래 있던 dc-gear-stats 공간에 통째로 쑤셔넣기!
-            const statsContainer = document.getElementById('dc-gear-stats');
-            if (statsContainer) {
-                statsContainer.innerHTML = contentHtml;
-                // 세로 정렬이 확실하게 되도록 속성 강제 주입!
-                statsContainer.className = "flex flex-col w-full"; 
-            }
+            let statsHtml = '';
+            if (item.atkMult) statsHtml += `<div class="text-[11px] text-red-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
+            if (item.hpMult) statsHtml += `<div class="text-[11px] text-emerald-400 font-bold bg-slate-900/50 px-2 py-1 rounded">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
+            if (item.critRate) statsHtml += `<div class="text-[11px] text-purple-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
+            if (item.critDmg) statsHtml += `<div class="text-[11px] text-pink-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리피해 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
+            if (item.def) statsHtml += `<div class="text-[11px] text-blue-400 font-bold bg-slate-900/50 px-2 py-1 rounded">방어 +${Math.floor(item.def * upgMult)}</div>`;
+            if (item.eva) statsHtml += `<div class="text-[11px] text-teal-400 font-bold bg-slate-900/50 px-2 py-1 rounded">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
+            if (item.spd) statsHtml += `<div class="text-[11px] text-yellow-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
+            if (item.vamp) statsHtml += `<div class="text-[11px] text-rose-500 font-bold bg-slate-900/50 px-2 py-1 rounded">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
+            
+            document.getElementById('dc-gear-stats').innerHTML = statsHtml;
         }
 
         // 🌟 [핵심] 남의 프로필 볼 때와 내 프로필 볼 때 버튼 분기!
@@ -1658,7 +1623,6 @@ const UIManager = {
         drawBg();
     }
 }; // <-- 이게 진짜 UIManager를 닫는 마지막 괄호입니다!
-
 
 
 
