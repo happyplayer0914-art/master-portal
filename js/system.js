@@ -1505,15 +1505,17 @@ Ranking: {
             }
         },
 
-       renderMailList() {
+    renderMailList() {
             const container = document.getElementById('mailbox-list-container');
             if (!container) return;
             container.innerHTML = '';
 
-            // 🚨 방어 코드: 삭제 목록 배열이 없으면 만들어줍니다!
-            if (!GameState.deletedMails) GameState.deletedMails = []; 
-
+            // 🚨 [여기에 딱 추가!!] 화면 그리기 전에 브라우저 강제 저장소에서 수첩 억지로 꺼내오기!
+            const saved = localStorage.getItem('zombie_mail_seal');
+            if (saved) GameState.deletedMails = JSON.parse(saved);
+            if (!GameState.deletedMails) GameState.deletedMails = [];
             // 🌟 삭제 처리된 우편은 리스트에서 아예 빼버리고 렌더링합니다!
+            
             const fullList = this.mailList.filter(mail => !GameState.deletedMails.includes(mail.id));
 
             if (fullList.length === 0) {
@@ -1649,36 +1651,38 @@ Ranking: {
         }, // 👈 [수정됨] 여기서 Mail이 닫히면 안 돼! claimAll만 닫고 콤마(,)로 연결!
 
        // 🌟 [업그레이드] 보상을 받은 우편을 완전 영구 삭제(파이어베이스까지!)
-        async deleteMail(mailId) { // 👈 🚨 여기에 async 가 추가됐어!
+      async deleteMail(mailId) {
             if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
             
-            if (!GameState.deletedMails) GameState.deletedMails = [];
+            // 1. 수첩이 없으면 강제 저장소에서 꺼내오기!
+            if (!GameState.deletedMails || GameState.deletedMails.length === 0) {
+                const saved = localStorage.getItem('zombie_mail_seal');
+                GameState.deletedMails = saved ? JSON.parse(saved) : [];
+            }
             
-            // 삭제 리스트에 등록!
             if (!GameState.deletedMails.includes(mailId)) {
-                // 1. 로컬(내 폰)에 지웠다고 기록 (전체 우편 가림막 용도)
+                // 2. 수첩에 지웠다고 적기
                 GameState.deletedMails.push(mailId);
-                // 🚨 이 부분을 마스터 게임의 진짜 저장 함수로 바꿔주세요!
+                
+                // 🚨 3. [핵심] 브라우저 강제 저장소에 수첩 통째로 봉인!!! (절대 안 날아감)
+                localStorage.setItem('zombie_mail_seal', JSON.stringify(GameState.deletedMails));
+                
+                // (혹시 모르니 기존 세이브도 한번 돌려줌)
                 if (typeof saveGame === 'function') saveGame(); 
                 else if (window.GameSystem && GameSystem.save) GameSystem.save();
-                else GameState.save(); // (원래 있던 거)
+                else if (GameState.save) GameState.save();
                 
-                // 2. 🚨 [신규] 파이어베이스 개인 금고에서 진짜 편지 태워버리기!
+                // 4. 파이어베이스 삭제 시도 (실패하더라도 위에서 수첩에 적었으니 화면에선 영구 삭제됨!)
                 if (window.db && GameState.uid) {
                     try {
-                        // 내 우편함(mailbox)에서 해당 mailId를 가진 문서를 영구 삭제!
                         await window.deleteDoc(window.doc(window.db, "users", GameState.uid, "mailbox", mailId));
-                    } catch(e) {
-                        // 전체(공용) 우편이어서 지울 수 없는 경우엔 조용히 패스!
-                    }
+                    } catch(e) { console.log("서버 삭제 스킵"); }
                 }
                 
                 if (window.UIManager) {
                     UIManager.triggerHaptic();
                     UIManager.showToast("🗑️ 우편을 깔끔하게 삭제했습니다!");
                 }
-                
-                // 화면 즉시 새로고침해서 우편 날려버리기!
                 this.checkAndRender(); 
             }
         }
