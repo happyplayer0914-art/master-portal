@@ -1130,7 +1130,9 @@
         <div class="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-slate-900">
             
             <div id="target-profile-bg" class="absolute inset-0 w-full h-full bg-slate-800 bg-cover bg-center opacity-90 z-0" style="background-image: url('assets/backgrounds/bg_library.png');"></div>
-            <div id="target-profile-partner" class="absolute -right-4 bottom-0 h-[95%] w-[70%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none z-10 transition-all duration-300" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png'); filter: brightness(0) invert(1) opacity(0.2);"></div>
+            
+            <div id="target-sticker-canvas" class="absolute inset-0 w-full h-full z-10 overflow-hidden pointer-events-none"></div>
+
             <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent pointer-events-none z-10"></div>
 
             <div class="relative z-20 w-full h-full p-4 flex flex-col justify-between">
@@ -1193,7 +1195,7 @@
             </button>
         </div>
     </div>
-  </div>
+</div>
 
     <div id="block-manage-modal" class="fixed inset-0 z-[1800] bg-black/95 flex flex-col items-center justify-center opacity-0 pointer-events-none scale-95 transition-all duration-300 px-5">
     <div class="glass-card w-full max-w-sm p-6 relative border-t-4 border-t-slate-500 flex flex-col max-h-[70vh]">
