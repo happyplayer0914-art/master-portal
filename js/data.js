@@ -657,7 +657,8 @@ const GameData = {
         backgrounds: [
             { id: 'bg_guild', name: '길드장의 집무실', desc: '포근하고 아늑한 나의 공간', price: 200, type: 'bg', img: 'bg_guild.png' },
             { id: 'bg_abyss', name: '심연의 옥좌', desc: '마왕이 머물던 서늘한 공간', price: 300, type: 'bg', img: 'bg_abyss.png' },
-            { id: 'bg_ella', name: '엘라 테스트 배경', desc: '엘라 테스트 공간', price: 300, type: 'bg', img: 'bg_ella.png' }
+            { id: 'bg_ella', name: '엘라 테스트 배경', desc: '엘라 테스트 공간', price: 300, type: 'bg', img: 'bg_ella.png' },
+            { id: 'bg_entj', name: 'entj 테스트 배경', desc: 'entj 테스트 공간', price: 300, type: 'bg', img: 'bg_entj.png' }
         ],
         bubbles: [
             { id: 'bb_gold', name: '황금빛 외침', desc: '채팅창의 시선을 독점하세요', price: 150, type: 'bubble', bgClass: 'bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-bold' }
