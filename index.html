@@ -891,64 +891,47 @@
     </div>
 </main>
 
- <main id="screen-profile" class="screen flex relative w-full h-full pt-12 pb-20 overflow-hidden bg-white">
-        <div id="profile-bg" class="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl transform scale-105 pointer-events-none z-0"></div>
+ <main id="screen-profile" class="screen bg-slate-900">
+        <div id="profile-bg" class="fixed inset-0 bg-cover bg-center opacity-40 blur-xl transform scale-110 pointer-events-none z-0"></div>
 
-        <div class="relative z-10 flex h-full w-full">
+        <div class="relative z-10 flex w-full min-h-screen pt-16 pb-24">
             
-            <div class="flex-[3] relative flex items-end justify-center">
-                <div id="profile-partner-image" class="w-full h-[98%] bg-contain bg-bottom bg-no-repeat drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] pointer-events-none transition-all duration-300"></div>
+            <div class="w-[45%] relative flex items-end justify-center shrink-0">
+                <div id="profile-partner-image" class="absolute bottom-0 -left-6 w-[150%] h-[85%] bg-contain bg-bottom bg-no-repeat drop-shadow-[0_0_20px_rgba(0,0,0,0.6)] pointer-events-none transition-all duration-300"></div>
             </div>
 
-            <div class="flex-[2] bg-slate-900/90 border-l-2 border-slate-700 flex flex-col gap-4 p-5 pt-10 relative overflow-y-auto scrollbar-hide shadow-[-15px_0_30px_rgba(0,0,0,0.6)]">
-                
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex flex-col">
-                        <span id="p_rarity_tag" class="text-[10px] font-black px-2 py-0.5 rounded bg-slate-700 text-white mb-1 inline-block w-fit animate-pulse border border-slate-600">랭커</span>
-                        <h1 id="p_name" class="text-2xl font-extrabold text-white tracking-tight leading-tight">플레이어</h1>
-                    </div>
-                    <span id="p_id" class="text-[10px] font-mono text-slate-500 bg-black/40 px-2 py-1 rounded-md mt-1.5">#----</span>
+            <div class="w-[55%] bg-slate-900/90 border-l border-slate-700/50 flex flex-col gap-3 p-3 overflow-y-auto custom-scrollbar shadow-[-10px_0_20px_rgba(0,0,0,0.5)] shrink-0 z-10">
+                <div class="flex flex-col gap-1">
+                    <span id="p_rarity_tag" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-700 text-white w-fit border border-slate-600">모험가</span>
+                    <h1 id="p_name" class="text-xl font-extrabold text-white tracking-tight leading-tight truncate">플레이어</h1>
+                    <span id="p_id" class="text-[9px] font-mono text-slate-500 bg-black/40 px-1.5 py-0.5 rounded w-fit">#----</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 bg-black/30 p-2 rounded-2xl border border-slate-700/50 shadow-inner">
-                    <div class="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700">
-                        <img src="assets/items/c_gold.png" class="h-7 w-7">
-                        <span id="p_gold" class="text-base font-black text-amber-300">0</span>
+                <div class="grid grid-cols-1 gap-1.5 bg-black/30 p-2 rounded-xl border border-slate-700/50 shadow-inner">
+                    <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700">
+                        <span class="text-sm">🪙</span>
+                        <span id="p_gold" class="text-xs font-black text-amber-300 truncate">0</span>
                     </div>
-                    <div class="flex items-center gap-2 bg-slate-800 p-2 rounded-xl border border-slate-700">
-                        <img src="assets/items/c_gem.png" class="h-7 w-7">
-                        <span id="p_gem" class="text-base font-black text-cyan-300">0</span>
-                    </div>
-                </div>
-                
-                <button id="profile-mail-btn" class="flex items-center gap-3 bg-indigo-950/60 border border-indigo-700 p-3 rounded-2xl text-indigo-100 hover:bg-indigo-900 transition-colors w-full group relative active:scale-95 shadow-lg">
-                    <i class="fa-solid fa-envelope text-xl"></i>
-                    <span class="text-xs font-bold">내 우편함</span>
-                    <span class="text-[10px] font-black text-slate-300 ml-auto bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-700 p_mail_count">0</span>
-                    <div class="absolute -top-1.5 -right-1.5 h-4 w-4 bg-red-600 rounded-full border-2 border-slate-900 hidden mail-dot animate-pulse"></div>
-                </button>
-
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 shadow-inner mt-2">
-                    <p class="text-[10px] text-slate-400 mb-2.5 font-bold flex items-center gap-1.5"><i class="fa-solid fa-medal text-cyan-400"></i> 심연의 탑 최고 기록</p>
-                    <div id="profile-highest-record" class="text-2xl font-extrabold text-cyan-400 bg-black/40 p-2.5 rounded-xl text-center tracking-tight shadow-lg border border-cyan-900/50">0층 <span class="text-xs text-slate-400 font-normal">--:--:--</span></div>
-                </div>
-
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 shadow-inner">
-                    <p class="text-[10px] text-slate-400 mb-2.5 font-bold flex items-center gap-1.5"><i class="fa-solid fa-quote-left text-indigo-400"></i> 마스터 한 줄 소개</p>
-                    <textarea id="profile-intro" class="w-full text-xs text-slate-200 bg-black/40 rounded-xl p-3 resize-none border border-slate-600 placeholder:text-slate-600 focus:border-indigo-500 outline-none scrollbar-hide shadow-inner" rows="3" maxlength="30" placeholder="자신을 소개해보세요. (최대 30자)"></textarea>
-                </div>
-
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 shadow-inner flex flex-col gap-2.5">
-                    <p class="text-[10px] text-slate-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-red-400"></i> 장착 장비 & 파트너</p>
-                    <div id="p_equipped_icons" class="grid grid-cols-4 gap-2.5">
-                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-xl p_icon_slot shadow-md" data-slot="wep">⚔️</div>
-                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-xl p_icon_slot shadow-md" data-slot="arm">🛡️</div>
-                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-xl p_icon_slot shadow-md" data-slot="acc">💍</div>
-                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-xl p_icon_slot shadow-md" data-slot="ptr">🐾</div>
+                    <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700">
+                        <span class="text-sm">💎</span>
+                        <span id="p_gem" class="text-xs font-black text-cyan-300 truncate">0</span>
                     </div>
                 </div>
-                
-                <div class="h-10 w-full"></div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 shadow-inner">
+                    <p class="text-[9px] text-slate-400 mb-1.5 font-bold flex items-center gap-1"><i class="fa-solid fa-medal text-cyan-400"></i> 최고 기록</p>
+                    <div id="profile-highest-record" class="text-lg font-extrabold text-cyan-400 bg-black/40 py-1.5 rounded-lg text-center tracking-tight shadow-inner border border-cyan-900/50">0층</div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 shadow-inner flex flex-col gap-2">
+                    <p class="text-[9px] text-slate-400 font-bold flex items-center gap-1"><i class="fa-solid fa-shield-halved text-red-400"></i> 장착 장비</p>
+                    <div id="p_equipped_icons" class="grid grid-cols-2 gap-2">
+                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-center text-lg p_icon_slot shadow-md relative" data-slot="wep">⚔️</div>
+                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-center text-lg p_icon_slot shadow-md relative" data-slot="arm">🛡️</div>
+                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-center text-lg p_icon_slot shadow-md relative" data-slot="acc">💍</div>
+                        <div class="aspect-square bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-center text-lg p_icon_slot shadow-md relative" data-slot="ptr">🐾</div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
