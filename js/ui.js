@@ -1465,7 +1465,7 @@ const UIManager = {
             
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
         } 
-        // 🗡️ 장비 상세 카드 렌더링
+      // 🗡️ 장비 상세 카드 렌더링
         else {
             document.getElementById('dc-level-label').innerText = "강화 수치";
             document.getElementById('dc-level').innerText = `+${level}`;
@@ -1473,18 +1473,58 @@ const UIManager = {
             partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
             gearSec.classList.remove('hidden');
 
+            // 🌟 [마스터 요청 1] 이미지 비율 안 망가지게 높이 살짝 조정!
+            const imgEl = document.getElementById('dc-image');
+            imgEl.className = "w-full h-[35%] object-contain filter drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] z-20 relative transition-transform duration-500 hover:scale-105";
+
+            // 🌟 [마스터 요청 2] 파트너처럼 웅장한 설명글 추가!
+            const flavorEl = document.getElementById('dc-gear-flavor'); // HTML에 이 ID를 가진 p태그가 있어야 합니다!
+            if (flavorEl) {
+                // 데이터에 flavorText가 있으면 띄우고, 없으면 숨김!
+                if (item.flavorText) {
+                    flavorEl.innerHTML = `<span class="italic text-slate-400">""${item.flavorText}""</span>`;
+                    flavorEl.classList.remove('hidden');
+                } else {
+                    flavorEl.classList.add('hidden');
+                }
+            }
+
+            // 🌟 [마스터 요청 3] 파트너처럼 깔끔하게 3칸씩 들어가는 그리드 스탯!
             const upgMult = 1.0 + (level * 0.1);
             let statsHtml = '';
-            if (item.atkMult) statsHtml += `<div class="text-[11px] text-red-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공격 +${Math.round((item.atkMult - 1)*100 * upgMult)}%</div>`;
-            if (item.hpMult) statsHtml += `<div class="text-[11px] text-emerald-400 font-bold bg-slate-900/50 px-2 py-1 rounded">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
-            if (item.critRate) statsHtml += `<div class="text-[11px] text-purple-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
-            if (item.critDmg) statsHtml += `<div class="text-[11px] text-pink-400 font-bold bg-slate-900/50 px-2 py-1 rounded">크리피해 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
-            if (item.def) statsHtml += `<div class="text-[11px] text-blue-400 font-bold bg-slate-900/50 px-2 py-1 rounded">방어 +${Math.floor(item.def * upgMult)}</div>`;
-            if (item.eva) statsHtml += `<div class="text-[11px] text-teal-400 font-bold bg-slate-900/50 px-2 py-1 rounded">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
-            if (item.spd) statsHtml += `<div class="text-[11px] text-yellow-400 font-bold bg-slate-900/50 px-2 py-1 rounded">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
-            if (item.vamp) statsHtml += `<div class="text-[11px] text-rose-500 font-bold bg-slate-900/50 px-2 py-1 rounded">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
-            document.getElementById('dc-gear-stats').innerHTML = statsHtml;
+            // 공용 스탯 박스 생성기 (한 줄에 3개 들어가도록 스타일 조정!)
+            const createStatBox = (value, color, emoji) => {
+                if (!value) return '';
+                let finalValue = value;
+                // Mult 계열 스탯은 %로 변환
+                if(value > 1 && value < 10) finalValue = `${Math.round((value - 1) * 100)}%`;
+                else if(value % 1 !== 0) finalValue = `${value.toFixed(1)}%`;
+                
+                return `
+                <div class="flex-1 bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 flex flex-col items-center justify-center gap-0.5 whitespace-nowrap overflow-hidden">
+                    <span class="text-[9px] font-bold ${color} truncate">${emoji}</span>
+                    <span class="text-white font-black text-[12px] tracking-tight truncate">${finalValue}</span>
+                </div>`;
+            };
+
+            // 스탯들을 3개씩 묶어서 그리기 위한 HTML (HTML에 dc-gear-stats-grid라는 ID를 가진 div가 있어야 합니다!)
+            const gridContainer = document.getElementById('dc-gear-stats-grid');
+            if (gridContainer) {
+                // 스탯 박스들을 쫙쫙 생성!
+                statsHtml += createStatBox(item.atkMult ? (item.atkMult * upgMult) : 0, "text-red-400", "공격");
+                statsHtml += createStatBox(item.hpMult ? (item.hpMult * upgMult) : 0, "text-emerald-400", "체력");
+                statsHtml += createStatBox(item.critRate ? (item.critRate * upgMult) : 0, "text-purple-400", "크리");
+                statsHtml += createStatBox(item.critDmg ? (item.critDmg * upgMult) : 0, "text-pink-400", "크피해");
+                statsHtml += createStatBox(item.def ? (item.def * upgMult) : 0, "text-blue-400", "방어");
+                statsHtml += createStatBox(item.eva ? (item.eva * upgMult) : 0, "text-teal-400", "회피");
+                statsHtml += createStatBox(item.spd ? (item.spd * upgMult) : 0, "text-yellow-400", "공속");
+                statsHtml += createStatBox(item.vamp ? (item.vamp * upgMult) : 0, "text-rose-500", "피흡");
+
+                // 3칸 그리드 컨테이너에 쏙!
+                gridContainer.innerHTML = statsHtml;
+                gridContainer.className = "grid grid-cols-3 gap-2 mt-4 px-1"; // Tailwind로 3칸 그리드 적용!
+            }
         }
 
         // 🌟 [핵심] 남의 프로필 볼 때와 내 프로필 볼 때 버튼 분기!
