@@ -486,12 +486,16 @@ const UIManager = {
                         bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
                     }
                     
-                    // 🌸 [신규 추가] 타 유저 파트너 전신 일러스트 렌더링!
+                  // 🌸 [신규 추가] 타 유저 파트너 전신 일러스트 렌더링!
                     const targetPtImgEl = document.getElementById('target-profile-partner');
                     if (targetPtImgEl) {
                         if (data.equipment && data.equipment.partner && window.GameData && GameData.partners && GameData.partners[data.equipment.partner]) {
                             const pt = GameData.partners[data.equipment.partner];
-                            targetPtImgEl.style.backgroundImage = `url('assets/partners/${pt.img_full}')`;
+                            
+                            // 👇 [경로 분리 완료!] 남의 프로필을 관전할 때도 똑같이 프로필 전용 이미지를 띄워줍니다!
+                            const imgFile = pt.img_profile || pt.img_full || pt.img_sd;
+                            targetPtImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
+                            
                             targetPtImgEl.style.filter = "none"; 
                             targetPtImgEl.style.opacity = "1";
                             targetPtImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
@@ -848,19 +852,19 @@ const UIManager = {
             }
         }
 
-    // 🌸 장착한 파트너의 아름다운 자태 렌더링!
+ // 🌸 장착한 파트너의 아름다운 자태 렌더링!
         const ptImgEl = document.getElementById('profile-partner-image');
         if (ptImgEl) {
             if (GameState.equippedPartner && window.GameData && GameData.partners && GameData.partners[GameState.equippedPartner]) {
                 const pt = GameData.partners[GameState.equippedPartner];
                 
-                // 👇 [여기 수정!!] 무조건 img_full을 쓰는 게 아니라, 진화 단계에 맞는 이미지를 가져옵니다!
-                const imgFile = GameSystem.Partner.getDisplayImage(GameState.equippedPartner);
+                // 👇 [경로 분리 완료!] 무조건 프로필 전용(img_profile)을 1순위로 씁니다. 없으면 full -> sd 순으로 땜빵!
+                const imgFile = pt.img_profile || pt.img_full || pt.img_sd;
                 ptImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
                 
                 ptImgEl.style.filter = "none"; 
                 ptImgEl.style.opacity = "1";
-                // 🌟 [핵심] 예시 사진처럼 전신이 웅장하게 보이도록 크기와 위치(오른쪽) 완벽 조정!
+                // 🌟 예시 사진처럼 전신이 웅장하게 보이도록 크기와 위치 완벽 조정!
                 ptImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
             } else {
                 // 장착 안 했을 때 (실루엣)
