@@ -3315,7 +3315,7 @@ window.triggerGMSecret = function() {
 };
 
 // =========================================================================
-// 👑 [GM 전용] 파이어베이스 전체/개인 우편 발송 엔진! 
+// 👑 [GM 전용] 다중 아이템 연발 사격 지원! 파이어베이스 통합 우편 발송 엔진!
 // =========================================================================
 window.sendGMMail = async function() {
     const targetType = document.getElementById('gm-target-type').value;
@@ -3325,43 +3325,58 @@ window.sendGMMail = async function() {
     const content = document.getElementById('gm-content').value;
     const gold = parseInt(document.getElementById('gm-gold').value) || 0;
     const gem = parseInt(document.getElementById('gm-gem').value) || 0;
-    const item = document.getElementById('gm-item').value;
-    const partner = document.getElementById('gm-partner').value;
-    const cosmetic = document.getElementById('gm-cosmetic').value; // 🌟 치장품 추가!
+    
+    // 🌟 쉼표(,)로 구분된 아이템들을 배열(리스트)로 쪼개기! 빈칸은 자동으로 무시됨!
+    const items = document.getElementById('gm-item').value.split(',').map(s => s.trim()).filter(s => s);
+    const partners = document.getElementById('gm-partner').value.split(',').map(s => s.trim()).filter(s => s);
+    const cosmetics = document.getElementById('gm-cosmetic').value.split(',').map(s => s.trim()).filter(s => s);
 
     // 🚨 필수 입력값 검사
     if (!title) return UIManager.showToast("🚨 제목은 필수로 입력해야 합니다!");
     if (targetType === 'personal' && !targetNickname) return UIManager.showToast("🚨 받을 유저의 닉네임을 입력하세요!");
 
-    // 💌 우편물 포장 (공통)
-    const mailData = {
-        title: title,
-        content: content,
-        gold: gold,
-        gem: gem,
-        timestamp: new Date(),
-        isPersonal: targetType === 'personal'
-    };
-    if (item) mailData.item = item.trim();
-    if (partner) mailData.partner = partner.trim();
-    if (cosmetic) mailData.cosmetic = cosmetic.trim(); // 🌟 치장품 포장!
+    // 발송해야 할 총 우편 개수 계산 (장비 3개면 3번 발송!)
+    const maxMails = Math.max(1, items.length, partners.length, cosmetics.length);
 
     try {
-        if (targetType === 'global') {
-            await window.addDoc(window.collection(window.db, "mails"), mailData);
-            UIManager.showToast("🚀 [GM] 전체 우편(mails) 발송 완료!!");
-        } else {
+        let targetUid = null;
+
+        // 개인 우편이면 먼저 유저가 존재하는지 한 번만 검색해서 확인!
+        if (targetType === 'personal') {
             const usersRef = window.collection(window.db, "users");
             const q = window.query(usersRef, window.where("nickname", "==", targetNickname));
             const querySnapshot = await window.getDocs(q);
 
             if (querySnapshot.empty) return UIManager.showToast("🚨 해당 닉네임의 유저를 찾을 수 없습니다!");
-
-            const targetUid = querySnapshot.docs[0].id;
-            await window.addDoc(window.collection(window.db, "users", targetUid, "mailbox"), mailData);
-            UIManager.showToast(`✨ [GM] '${targetNickname}'님에게 개인 우편 발송 완료!!`);
+            targetUid = querySnapshot.docs[0].id;
         }
 
+        // 🔫 계산된 개수만큼 연발 사격 시작!!
+        for (let i = 0; i < maxMails; i++) {
+            const mailData = {
+                // 첫 우편은 원본 제목, 두 번째부터는 (추가 보상) 꼬리표 붙임!
+                title: i === 0 ? title : `${title} (추가 보상 ${i})`,
+                content: i === 0 ? content : "우편함 공간 부족으로 분할 발송된 보상입니다.",
+                gold: i === 0 ? gold : 0, // 골드/젬은 첫 우편에만 몰아주기!
+                gem: i === 0 ? gem : 0,
+                timestamp: new Date(),
+                isPersonal: targetType === 'personal'
+            };
+
+            // i번째 보상이 존재하면 포장 박스에 넣기!
+            if (items[i]) mailData.item = items[i];
+            if (partners[i]) mailData.partner = partners[i];
+            if (cosmetics[i]) mailData.cosmetic = cosmetics[i];
+
+            // 타겟에 맞춰 파이어베이스에 발사!
+            if (targetType === 'global') {
+                await window.addDoc(window.collection(window.db, "mails"), mailData);
+            } else {
+                await window.addDoc(window.collection(window.db, "users", targetUid, "mailbox"), mailData);
+            }
+        }
+
+        UIManager.showToast(maxMails > 1 ? `🚀 [GM] 우편 ${maxMails}연발 사격 완료!!` : "🚀 [GM] 우편 발송 완료!!");
         if (window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
         
         // 🧹 보낸 후 창 닫고 입력창 깔끔하게 초기화
@@ -3372,7 +3387,7 @@ window.sendGMMail = async function() {
         document.getElementById('gm-gem').value = '';
         document.getElementById('gm-item').value = '';
         document.getElementById('gm-partner').value = '';
-        document.getElementById('gm-cosmetic').value = ''; // 🌟 치장품 초기화!
+        document.getElementById('gm-cosmetic').value = '';
         document.getElementById('gm-target-nickname').value = '';
         
     } catch (e) {
