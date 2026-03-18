@@ -209,25 +209,7 @@ const UIManager = {
         }, 1000);
     },
 
-    // 🌟 [최종 진화] 재화 표시 시스템 (문자 강제 숫자 변환 + 에러 방어!)
-    updateCurrencyUI() {
-        // 💡 [핵심 방어막] 데이터가 글자로 오든 빈칸으로 오든 무조건 숫자로 강제 멱살잡이!
-        let g = Number(GameState.gold) || 0;
-        let m = Number(GameState.gem) || 0;
-
-        const formatBigNumber = (num) => {
-            if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
-            if (num >= 10000) return (num / 10000).toFixed(1) + '만';
-            return num.toLocaleString();
-        };
-
-        const goldEl = document.getElementById('gold-display');
-        const gemEl = document.getElementById('gem-display');
-        
-        if (goldEl) goldEl.innerText = formatBigNumber(g);
-        if (gemEl) gemEl.innerText = formatBigNumber(m);
-    },
-    
+   
     triggerHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(40); },
     triggerHeavyHaptic() { if(window.navigator && window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]); },
     showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); },
