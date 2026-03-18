@@ -791,79 +791,66 @@ const UIManager = {
             }
         }
     }, // <-- updateRpgLobbyUI 끝나는 괄호
-  // =========================================================================
-    // 🌟 [개편] 내 정보 화면 (프로필) UI 통합 렌더링 엔진 - 완성판
+ // =========================================================================
+    // 🌟 [개편] 내 정보 화면 (프로필) UI 통합 렌더링 엔진 - 에러 수정 완료!
     // =========================================================================
     updateProfileUI() {
         if (!GameState || !GameData) return;
 
-        // 0. 배경 세팅 (모바일용 다이내믹 블러 유지)
+        // 0. 배경 세팅
         const bgEl = document.getElementById('profile-bg');
         if (bgEl && GameState.equippedPartner) {
             const pt = GameData.partners[GameState.equippedPartner];
             if (pt) {
-                // 아까 수정한 그 경로 분리 로직 그대로 사용!
                 let imgFile = GameSystem.Partner.getDisplayImage(GameState.equippedPartner);
                 if (imgFile === pt.img_full && pt.img_profile) imgFile = pt.img_profile;
-                
                 bgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
             }
         }
 
         // 1. 기본 프로필 정보
-        document.getElementById('p_name').innerText = GameState.playerName;
-        document.getElementById('p_id').innerText = GameState.playerId;
+        document.getElementById('p_name').innerText = GameState.nickname;
+        document.getElementById('p_id').innerText = GameState.uid || "0000";
         document.getElementById('p_gold').innerText = GameState.gold.toLocaleString();
         document.getElementById('p_gem').innerText = GameState.gem.toLocaleString();
         
-        // 랭크 태그 디자인 세팅 (신화 등급 파트너 유무로 결정)
+        // 랭크 태그 디자인 세팅
         const hasMythicPartner = Object.keys(GameState.partnerLevels).some(id => GameData.partners[id] && GameData.partners[id].rarity === 'mythic');
         const rarityEl = document.getElementById('p_rarity_tag');
         if (hasMythicPartner) {
             rarityEl.innerText = "심연의 지배자";
-            rarityEl.className = "text-[9px] font-black px-2 py-0.5 rounded animate-pulse bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white mb-1 inline-block w-fit border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)]";
+            rarityEl.className = "text-[9px] font-black px-1.5 py-0.5 rounded animate-pulse bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white mb-1 inline-block w-fit border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)]";
         } else {
             rarityEl.innerText = "모험가";
-            rarityEl.className = "text-[10px] font-black px-2 py-0.5 rounded bg-slate-700 text-white mb-1 inline-block w-fit border border-slate-600";
+            rarityEl.className = "text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-700 text-white mb-1 inline-block w-fit border border-slate-600";
         }
 
-        // 🌸 장착한 파트너의 아름다운 자태 렌더링! (왼쪽 영역)
+        // 🌸 장착한 파트너의 렌더링!
         const ptImgEl = document.getElementById('profile-partner-image');
         if (ptImgEl) {
             if (GameState.equippedPartner && GameData.partners[GameState.equippedPartner]) {
                 const pt = GameData.partners[GameState.equippedPartner];
-                
                 let imgFile = GameSystem.Partner.getDisplayImage(GameState.equippedPartner);
                 if (imgFile === pt.img_full && pt.img_profile) imgFile = pt.img_profile;
                 
                 ptImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
                 ptImgEl.style.filter = "none"; ptImgEl.style.opacity = "1";
             } else {
-                // 장착 안 했을 때 (실루엣)
                 ptImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
                 ptImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)"; ptImgEl.style.opacity = "0.5";
             }
         }
 
-        // 2. 최고 기록 로딩 (정갈한 박스)
-        const highestFloor = GameState.highestFloor || 0;
-        const highestTime = GameState.highestTimeFormatted || "00:00:00";
+        // 2. 최고 기록 로딩
         const recordEl = document.getElementById('profile-highest-record');
         if (recordEl) {
-            if(highestFloor > 0) {
-                recordEl.innerHTML = `${highestFloor}층 <span class="text-sm text-slate-300 font-bold ml-1">${highestTime}</span>`;
-            } else {
-                recordEl.innerHTML = `기록 없음`;
-            }
+            const pCount = GameState.prestigeCount || 0;
+            const prestigeText = pCount > 0 ? `<span class="text-[10px] text-purple-400 font-black mr-1">[${pCount}환생]</span>` : "";
+            const stage = Math.max(GameState.maxStage || 1, GameState.rpgStage || 1);
+            recordEl.innerHTML = `${prestigeText}${stage}F`;
         }
 
-        // 3. 한 줄 소개 (textarea)
-        const introInput = document.getElementById('profile-intro');
-        if (introInput) {
-            introInput.value = GameState.playerIntro || '';
-        }
-
-        // 💡 4. 장착 장비 & 파트너 아이콘 그리드 렌더링 (요청 핵심!)
+        // 3. 장착 장비 & 파트너 아이콘 그리드 렌더링
         const iconGridEl = document.getElementById('p_equipped_icons');
         if (iconGridEl) {
             const slots = {
@@ -873,16 +860,13 @@ const UIManager = {
                 'ptr': GameState.equippedPartner
             };
 
-            // 그리드 안의 4개 슬롯을 순회하며 이미지/이모지 채우기
             iconGridEl.querySelectorAll('.p_icon_slot').forEach(slotEl => {
                 const slotType = slotEl.dataset.slot;
                 const itemId = slots[slotType];
                 
-                // 슬롯 비우기 (초기화)
                 slotEl.innerHTML = ''; 
-                slotEl.className = "aspect-square bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-lg p_icon_slot shadow-inner active:scale-95 transition-all cursor-pointer";
+                slotEl.className = "aspect-square bg-slate-900 border rounded-lg flex flex-col items-center justify-center text-lg p_icon_slot shadow-md relative active:scale-95 transition-all cursor-pointer";
                 
-                // 슬롯별 기본 이모지 설정 (데이터 없을 때)
                 let fallbackEmoji = '⚔️';
                 if(slotType === 'arm') fallbackEmoji = '🛡️';
                 else if(slotType === 'acc') fallbackEmoji = '💍';
@@ -892,33 +876,32 @@ const UIManager = {
                     const isPartner = (slotType === 'ptr');
                     const item = isPartner ? GameData.partners[itemId] : GameData.items[itemId];
                     if (item) {
-                        // 아이템/파트너 등급 색상 적용
-                        let rColor = 'border-slate-600';
-                        if (item.rarity === 'mythic') rColor = 'border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]';
-                        else if (item.rarity === 'legendary') rColor = 'border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.2)]';
-                        else if (item.rarity === 'epic') rColor = 'border-purple-500';
-                        else if (item.rarity === 'rare') rColor = 'border-blue-400';
-                        slotEl.classList.add(rColor);
-
-                        // 이미지 우선, 없으면 이모지
-                        const imgPath = isPartner ? 'partners' : 'items';
-                        const img = isPartner ? item.img_sd : item.img; // 장비는 img 사용
+                        // 🚨 [에러 해결!] 띄어쓰기가 있는 클래스들은 배열로 쪼개서 전개 연산자(...)로 넣어줍니다.
+                        let rClasses = ['border-slate-600'];
+                        if (item.rarity === 'mythic') rClasses = ['border-red-500', 'shadow-[0_0_10px_rgba(239,68,68,0.3)]'];
+                        else if (item.rarity === 'legendary') rClasses = ['border-yellow-400', 'shadow-[0_0_10px_rgba(250,204,21,0.2)]'];
+                        else if (item.rarity === 'epic') rClasses = ['border-purple-500'];
+                        else if (item.rarity === 'rare') rClasses = ['border-blue-400'];
                         
-                        if (img && !img.includes('assets/')) { // 경로가 제대로 파일명만 있는지 확인
-                            slotEl.innerHTML = `<img src="assets/${imgPath}/${img}" class="h-[90%] w-[90%] object-contain rounded-md">`;
+                        slotEl.classList.add(...rClasses);
+
+                        const imgPath = isPartner ? 'partners' : 'items';
+                        const img = isPartner ? item.img_sd : item.img; 
+                        
+                        if (img && !img.includes('assets/')) {
+                            slotEl.innerHTML = `
+                                <img src="assets/${imgPath}/${img}" class="h-[70%] w-[70%] object-contain drop-shadow-md">
+                                <div class="absolute -top-1 -right-1 bg-slate-900 border border-slate-500 rounded-full w-4 h-4 flex items-center justify-center text-[8px] shadow-md z-10">🔍</div>
+                            `;
                         } else {
-                            slotEl.innerHTML = `<span class="text-3xl">${item.emoji || fallbackEmoji}</span>`;
+                            slotEl.innerHTML = `<span class="text-2xl drop-shadow-md">${item.emoji || fallbackEmoji}</span>`;
                         }
 
-                        // 클릭 시 상세 카드 오픈 (내 정보 창이라 isReadOnly=false로 설정)
                         slotEl.onclick = () => { UIManager.openDetailCard(itemId, isPartner ? 'partner' : 'gear'); };
-                    } else {
-                        // 데이터 오류 시 기본 이모지
-                        slotEl.innerHTML = `<span class="text-3xl opacity-30">${fallbackEmoji}</span>`;
                     }
                 } else {
-                    // 장착 안 했을 때 기본 이모지 (희미하게)
-                    slotEl.innerHTML = `<span class="text-3xl opacity-30">${fallbackEmoji}</span>`;
+                    slotEl.classList.add('border-slate-700');
+                    slotEl.innerHTML = `<span class="text-2xl opacity-30">${fallbackEmoji}</span>`;
                 }
             });
         }
