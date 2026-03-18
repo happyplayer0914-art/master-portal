@@ -1397,18 +1397,26 @@ const UIManager = {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-        // 🌟 [절대 건드리지 않음!] 2. 상단 이미지 영역 세팅 (외형 변경 적용)
+      // 🌟 2. 상단 이미지 영역 세팅 (외형 변경 적용)
         const imgFile = isPartner ? GameSystem.Partner.getDisplayImage(id) : (item.img_cutin ? item.img_cutin : (item.img || ''));
         const folder = isPartner ? 'partners' : 'items';
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
-        const bgImg = isPartner ? 'card_bg_partner.png' : 'card_bg_gear.png';
-        const fallbackBg = isPartner ? 'bg_library.png' : 'bg_zone1.png';
+        // 🌟 [새로운 마법!] 빈 공간을 영롱하게 채우는 '다이내믹 블러 백드롭'
         const bgEl = document.getElementById('dc-bg');
-        bgEl.style.backgroundImage = `url('assets/backgrounds/${bgImg}')`;
-        bgEl.style.filter = "none";
-        bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/${fallbackBg}')`; };
+        if (isPartner) {
+            // 파트너 일러스트 자체를 뒷배경으로 깔고, 흐리게(blur) 뭉갠 뒤 어둡게(brightness) 누르기
+            bgEl.style.backgroundImage = `url('assets/${folder}/${imgFile}')`;
+            bgEl.style.filter = "blur(16px) brightness(0.35)"; 
+            bgEl.style.transform = "scale(1.15)"; // 블러 처리 시 테두리 하얗게 비는 것 방지
+        } else {
+            // 장비는 기존의 멋진 대장간/유적 배경 유지
+            bgEl.style.backgroundImage = `url('assets/backgrounds/card_bg_gear.png')`;
+            bgEl.style.filter = "none";
+            bgEl.style.transform = "none";
+        }
 
+        // 👇 외형 변경 버튼 로직 (안전하게 유지!)
         const skinBtn = document.getElementById('dc-btn-skin');
         if (isPartner && !isReadOnly) { 
             skinBtn.classList.remove('hidden');
