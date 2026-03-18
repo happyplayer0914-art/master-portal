@@ -1465,7 +1465,7 @@ const UIManager = {
             
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
         } 
-      // 🗡️ 장비 상세 카드 렌더링
+     // 🗡️ 장비 상세 카드 렌더링
         else {
             document.getElementById('dc-level-label').innerText = "강화 수치";
             document.getElementById('dc-level').innerText = `+${level}`;
@@ -1473,57 +1473,52 @@ const UIManager = {
             partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
             gearSec.classList.remove('hidden');
 
-            // 🌟 [마스터 요청 1] 이미지 비율 안 망가지게 높이 살짝 조정!
+            // 🚨 1. 콩알만해진 이미지 구출! (고정 높이 h-56을 줘서 큼직하게 띄웁니다)
             const imgEl = document.getElementById('dc-image');
-            imgEl.className = "w-full h-[35%] object-contain filter drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] z-20 relative transition-transform duration-500 hover:scale-105";
+            if (imgEl) imgEl.className = "w-full h-56 object-contain filter drop-shadow-[0_0_15px_rgba(168,85,247,0.4)] z-20 relative transition-transform duration-500 hover:scale-105 my-2";
 
-            // 🌟 [마스터 요청 2] 파트너처럼 웅장한 설명글 추가!
-            const flavorEl = document.getElementById('dc-gear-flavor'); // HTML에 이 ID를 가진 p태그가 있어야 합니다!
-            if (flavorEl) {
-                // 데이터에 flavorText가 있으면 띄우고, 없으면 숨김!
-                if (item.flavorText) {
-                    flavorEl.innerHTML = `<span class="italic text-slate-400">""${item.flavorText}""</span>`;
-                    flavorEl.classList.remove('hidden');
-                } else {
-                    flavorEl.classList.add('hidden');
-                }
+            const upgMult = 1.0 + (level * 0.1);
+            let contentHtml = '';
+
+            // 🌟 2. 웅장한 설명글 (Flavor Text) 추가 (HTML 파일 수정 없이 동적 생성!)
+            if (item.flavorText) {
+                contentHtml += `<div class="w-full text-center mb-4 mt-2 px-2"><span class="italic text-slate-400 text-[11px] font-bold break-keep">""${item.flavorText}""</span></div>`;
             }
 
-            // 🌟 [마스터 요청 3] 파트너처럼 깔끔하게 3칸씩 들어가는 그리드 스탯!
-            const upgMult = 1.0 + (level * 0.1);
-            let statsHtml = '';
-            
-            // 공용 스탯 박스 생성기 (한 줄에 3개 들어가도록 스타일 조정!)
-            const createStatBox = (value, color, emoji) => {
+            // 🌟 3. 깔끔한 3칸 그리드 스탯 박스 공장
+            const createStatBox = (value, color, name) => {
                 if (!value) return '';
                 let finalValue = value;
-                // Mult 계열 스탯은 %로 변환
-                if(value > 1 && value < 10) finalValue = `${Math.round((value - 1) * 100)}%`;
-                else if(value % 1 !== 0) finalValue = `${value.toFixed(1)}%`;
-                
+                if(value > 1 && value < 10) finalValue = `+${Math.round((value - 1) * 100)}%`;
+                else if(value % 1 !== 0) finalValue = `+${value.toFixed(1)}%`;
+                else finalValue = `+${Math.floor(value)}`;
+
                 return `
-                <div class="flex-1 bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 flex flex-col items-center justify-center gap-0.5 whitespace-nowrap overflow-hidden">
-                    <span class="text-[9px] font-bold ${color} truncate">${emoji}</span>
-                    <span class="text-white font-black text-[12px] tracking-tight truncate">${finalValue}</span>
+                <div class="flex-1 bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 shadow-inner">
+                    <span class="text-[9px] font-black ${color}">${name}</span>
+                    <span class="text-white font-bold text-[12px]">${finalValue}</span>
                 </div>`;
             };
 
-            // 스탯들을 3개씩 묶어서 그리기 위한 HTML (HTML에 dc-gear-stats-grid라는 ID를 가진 div가 있어야 합니다!)
-            const gridContainer = document.getElementById('dc-gear-stats-grid');
-            if (gridContainer) {
-                // 스탯 박스들을 쫙쫙 생성!
-                statsHtml += createStatBox(item.atkMult ? (item.atkMult * upgMult) : 0, "text-red-400", "공격");
-                statsHtml += createStatBox(item.hpMult ? (item.hpMult * upgMult) : 0, "text-emerald-400", "체력");
-                statsHtml += createStatBox(item.critRate ? (item.critRate * upgMult) : 0, "text-purple-400", "크리");
-                statsHtml += createStatBox(item.critDmg ? (item.critDmg * upgMult) : 0, "text-pink-400", "크피해");
-                statsHtml += createStatBox(item.def ? (item.def * upgMult) : 0, "text-blue-400", "방어");
-                statsHtml += createStatBox(item.eva ? (item.eva * upgMult) : 0, "text-teal-400", "회피");
-                statsHtml += createStatBox(item.spd ? (item.spd * upgMult) : 0, "text-yellow-400", "공속");
-                statsHtml += createStatBox(item.vamp ? (item.vamp * upgMult) : 0, "text-rose-500", "피흡");
+            let gridHtml = '';
+            gridHtml += createStatBox(item.atkMult ? (item.atkMult * upgMult) : 0, "text-red-400", "공격");
+            gridHtml += createStatBox(item.hpMult ? (item.hpMult * upgMult) : 0, "text-emerald-400", "체력");
+            gridHtml += createStatBox(item.critRate ? (item.critRate * upgMult) : 0, "text-purple-400", "크리");
+            gridHtml += createStatBox(item.critDmg ? (item.critDmg * upgMult) : 0, "text-pink-400", "크리피해");
+            gridHtml += createStatBox(item.def ? (item.def * upgMult) : 0, "text-blue-400", "방어");
+            gridHtml += createStatBox(item.eva ? (item.eva * upgMult) : 0, "text-teal-400", "회피");
+            gridHtml += createStatBox(item.spd ? (item.spd * upgMult) : 0, "text-yellow-400", "공속");
+            gridHtml += createStatBox(item.vamp ? (item.vamp * upgMult) : 0, "text-rose-500", "피흡");
 
-                // 3칸 그리드 컨테이너에 쏙!
-                gridContainer.innerHTML = statsHtml;
-                gridContainer.className = "grid grid-cols-3 gap-2 mt-4 px-1"; // Tailwind로 3칸 그리드 적용!
+            // 3칸씩 딱딱 맞게 들어가는 그리드 컨테이너 추가
+            contentHtml += `<div class="grid grid-cols-3 gap-2 w-full">${gridHtml}</div>`;
+
+            // 🌟 4. 원래 있던 dc-gear-stats 공간에 통째로 쑤셔넣기!
+            const statsContainer = document.getElementById('dc-gear-stats');
+            if (statsContainer) {
+                statsContainer.innerHTML = contentHtml;
+                // 세로 정렬이 확실하게 되도록 속성 강제 주입!
+                statsContainer.className = "flex flex-col w-full"; 
             }
         }
 
