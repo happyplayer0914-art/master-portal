@@ -2478,6 +2478,8 @@ Ranking: {
                 UIManager.showToast("🛑 자동 등반 모드가 종료되었습니다.");
                 const btn = document.getElementById('btn-attack');
                 if (btn) {
+                    btn.disabled = false; // 💡 [추가됨] 언제 눌렀든 무조건 버튼 잠금 해제!
+                    btn.classList.remove('opacity-50'); // 💡 [추가됨] 흐려진 버튼 원상복구!
                     btn.innerHTML = "⚔️ 공격 (TAP!)";
                     btn.classList.remove('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
                 }
@@ -2873,17 +2875,30 @@ Ranking: {
                 btn.disabled = true; btn.classList.add('opacity-50');
                 let timeLeft = ATTACK_COOLDOWN;
                 
+                // 🚨 [수정 완료] 수동 모드일 때만 버튼을 잠급니다! 
+                // (자동 모드일 땐 잠그지 않아서 언제든 탭해서 끌 수 있습니다!)
+                if (!this.isAutoMode) {
+                    btn.disabled = true; 
+                    btn.classList.add('opacity-50');
+                }
+                
                 const cooldownTimer = setInterval(() => { 
                     timeLeft -= 100; 
                     if (timeLeft <= 0 || this.monsterCurrentHp <= 0) { 
                         clearInterval(cooldownTimer); 
                         if (GameState.isBattling && this.monsterCurrentHp > 0 && GameState.currentHp > 0) { 
-                            btn.disabled = false; btn.classList.remove('opacity-50'); 
-                            // 오토 모드가 아닐 때만 글씨를 텍스트로 되돌림
-                            if (!this.isAutoMode) btn.innerHTML = "⚔️ 공격 (TAP!)"; 
+                            // 💡 오토 모드가 아닐 때만 글씨를 원래대로 되돌림
+                            if (!this.isAutoMode) {
+                                btn.disabled = false; 
+                                btn.classList.remove('opacity-50'); 
+                                btn.innerHTML = "⚔️ 공격 (TAP!)"; 
+                            }
                         } 
                     } else { 
-                        if (!this.isAutoMode) btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; 
+                        // 💡 오토 모드가 아닐 때만 초시계(⏳) 렌더링
+                        if (!this.isAutoMode) {
+                            btn.innerHTML = `⏳ ${ (timeLeft/1000).toFixed(1) }s`; 
+                        }
                     } 
                 }, 100);
             }
