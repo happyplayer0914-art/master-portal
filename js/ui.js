@@ -3,6 +3,337 @@
 // ========================================================================
 const UIManager = {
 
+    // UIManager 객체 안에 추가하세요!
+    
+    // 💡 [호출 연결용] index.html의 버튼이 이 함수를 부릅니다!
+    openStickerMode() {
+        this.StickerEngine.openMode();
+    },
+
+    // =========================================================================
+    // 🎨 [신규 코어] 프로필 다이어리 꾸미기 (스티커 터치 & 드래그 엔진)
+    // =========================================================================
+    StickerEngine: {
+        activeStickers: [],
+        selectedUid: null,
+        maxStickers: 5,
+        isEditMode: false,
+
+        init() {
+            // 로딩 시 저장된 스티커 정보 불러오기
+            if (!GameState.profileStickers) GameState.profileStickers = [];
+            this.activeStickers = JSON.parse(JSON.stringify(GameState.profileStickers));
+            this.refreshCanvas();
+        },
+
+        openMode() {
+            this.isEditMode = true;
+            
+            // 도화지 터치 활성화 (편집 모드에서만!)
+            const canvas = document.getElementById('profile-sticker-canvas');
+            if (canvas) canvas.classList.remove('pointer-events-none');
+            
+            // 상단 저장 버튼 바 표시
+            const controls = document.getElementById('sticker-edit-controls');
+            if (controls) {
+                controls.classList.remove('opacity-0', 'pointer-events-none');
+                controls.classList.add('opacity-100', 'pointer-events-auto');
+            }
+            
+            this.refreshCanvas();
+            UIManager.showToast("🎨 꾸미기 모드 시작! 스티커를 움직여보세요.");
+        },
+
+        saveAndClose() {
+            this.isEditMode = false;
+            this.selectedUid = null;
+
+            // 도화지 터치 비활성화 (평소엔 통과시켜야 됨)
+            const canvas = document.getElementById('profile-sticker-canvas');
+            if (canvas) canvas.classList.add('pointer-events-none');
+            
+            // 상단 컨트롤 바 숨기기
+            const controls = document.getElementById('sticker-edit-controls');
+            if (controls) {
+                controls.classList.remove('opacity-100', 'pointer-events-auto');
+                controls.classList.add('opacity-0', 'pointer-events-none');
+            }
+            
+            // GameState에 결과 굽기
+            GameState.profileStickers = JSON.parse(JSON.stringify(this.activeStickers));
+            GameState.save();
+            
+            // 서버 연동
+            if (window.GameSystem && GameSystem.Profile) GameSystem.Profile.syncToServer();
+            
+            this.refreshCanvas();
+            UIManager.showToast("✅ 나만의 프로필이 저장되었습니다!");
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+            UIManager.triggerHeavyHaptic();
+        },
+
+        openDrawer() {
+            if (this.activeStickers.length >= this.maxStickers) {
+                UIManager.triggerHaptic();
+                return UIManager.showToast(`🚨 스티커는 최대 ${this.maxStickers}개까지만 붙일 수 있어요!`);
+            }
+            
+            const modal = document.getElementById('sticker-drawer-modal');
+            const content = document.getElementById('sticker-drawer-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('translate-y-full');
+            
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            this.renderDrawerList();
+        },
+
+        closeDrawer() {
+            const modal = document.getElementById('sticker-drawer-modal');
+            const content = document.getElementById('sticker-drawer-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 300);
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+        },
+
+        renderDrawerList() {
+            const container = document.getElementById('sticker-list-container');
+            container.innerHTML = '';
+            
+            // 파트너 중복 제거 후 리스트 뽑기
+            const uniquePartners = [...new Set(GameState.ownedPartners || [])];
+            
+            if (uniquePartners.length === 0) {
+                container.innerHTML = '<div class="col-span-3 sm:col-span-4 text-center text-slate-500 py-10 text-xs font-bold">보유한 파트너가 없습니다.</div>';
+                return;
+            }
+
+            let html = '';
+            uniquePartners.forEach(pid => {
+                const pt = GameData.partners[pid];
+                if (!pt) return;
+                
+                // 💡 SD 스티커 (기본 제공)
+                if (pt.img_sd) html += this.createDrawerItemHTML(pid, pt, 'sd', pt.img_sd, 'SD 스티커');
+                
+                // 💡 Full(전신) 스티커 (기본 제공 - 호감도 해금 삭제 완료!)
+                if (pt.img_full) html += this.createDrawerItemHTML(pid, pt, 'full', pt.img_full, '전신 스티커');
+                
+                // 💡 신화 등급 전용 GIF 스티커 (얘만 호감도 10렙 조건!)
+                if (pt.rarity === 'mythic' && pt.img_gif) {
+                    const affLv = GameState.partnerAffectionLevel[pid] || 1;
+                    if (affLv >= 10) {
+                        html += this.createDrawerItemHTML(pid, pt, 'gif', pt.img_gif, '✨라이브 스티커');
+                    }
+                }
+            });
+            container.innerHTML = html;
+        },
+
+        createDrawerItemHTML(pid, pt, type, imgFile, label) {
+            let rarityBorder = "border-slate-600";
+            if (pt.rarity === 'mythic') rarityBorder = "border-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.3)]";
+            else if (pt.rarity === 'legendary') rarityBorder = "border-yellow-500/50";
+
+            return `
+                <div onclick="UIManager.StickerEngine.addSticker('${pid}', '${type}', '${imgFile}')" class="bg-slate-800 border ${rarityBorder} rounded-xl p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-700 transition-all active:scale-95 h-28 relative overflow-hidden group">
+                    <img src="assets/partners/${imgFile}" class="w-[80%] h-[70%] object-contain mb-1 filter drop-shadow-md group-hover:scale-110 transition-transform">
+                    <span class="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded-full absolute bottom-2 tracking-tighter">${label}</span>
+                </div>
+            `;
+        },
+
+        addSticker(pid, type, imgFile) {
+            this.closeDrawer();
+            
+            const newSticker = {
+                uid: 'stk_' + Date.now() + Math.floor(Math.random() * 1000),
+                id: pid,
+                type: type,
+                imgFile: imgFile,
+                x: 50, // 화면 정중앙 (50%)
+                y: 50,
+                scale: 1.0,
+                flip: false
+            };
+            
+            this.activeStickers.push(newSticker);
+            this.selectedUid = newSticker.uid;
+            this.refreshCanvas();
+            
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+            UIManager.triggerHaptic();
+        },
+
+        removeSticker(uid) {
+            this.activeStickers = this.activeStickers.filter(s => s.uid !== uid);
+            this.selectedUid = null;
+            this.refreshCanvas();
+            if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.hit_player();
+            UIManager.triggerHaptic();
+        },
+
+        toggleFlip(uid) {
+            const stk = this.activeStickers.find(s => s.uid === uid);
+            if (stk) {
+                stk.flip = !stk.flip;
+                this.refreshCanvas();
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            }
+        },
+
+        // 🎨 캔버스 그리기 함수
+        refreshCanvas() {
+            const canvas = document.getElementById('profile-sticker-canvas');
+            if (!canvas) return;
+            canvas.innerHTML = '';
+
+            this.activeStickers.forEach(stk => {
+                const el = document.createElement('div');
+                // 편집 모드일 때만 touch-none을 줘서 스크롤 대신 드래그가 먹히게 함
+                el.className = `absolute inline-block origin-center select-none ${this.isEditMode ? 'pointer-events-auto touch-none' : 'pointer-events-none'}`;
+                
+                el.style.left = `${stk.x}%`;
+                el.style.top = `${stk.y}%`;
+                el.style.transform = `translate(-50%, -50%) scale(${stk.scale})`;
+                
+                const isSelected = this.isEditMode && this.selectedUid === stk.uid;
+                
+                // 스티커 이미지 (플립 방향 적용)
+                let contentHtml = `<img src="assets/partners/${stk.imgFile}" draggable="false" class="w-32 h-32 sm:w-40 sm:h-40 object-contain filter drop-shadow-2xl pointer-events-none ${stk.flip ? '-scale-x-100' : ''}">`;
+                
+                if (this.isEditMode) {
+                    const borderClass = isSelected ? 'border-2 border-dashed border-indigo-400 bg-indigo-500/20' : 'border-2 border-transparent hover:border-white/30';
+                    
+                    let controlsHtml = '';
+                    if (isSelected) {
+                        // X 삭제 버튼, ⇄ 좌우반전 버튼, ↘ 크기조절 버튼
+                        controlsHtml = `
+                            <div class="absolute -top-3 -right-3 bg-rose-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-black shadow-lg cursor-pointer z-50 border-2 border-white" onmousedown="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();" ontouchstart="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();">&times;</div>
+                            <div class="absolute -bottom-3 -left-3 bg-blue-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white" onmousedown="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();" ontouchstart="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();">⇄</div>
+                            <div class="absolute -bottom-3 -right-3 bg-emerald-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white resize-handle" data-uid="${stk.uid}">⤡</div>
+                        `;
+                    }
+
+                    el.innerHTML = `
+                        <div class="relative ${borderClass} p-2 rounded-xl transition-colors drag-handle cursor-move" data-uid="${stk.uid}">
+                            ${controlsHtml}
+                            ${contentHtml}
+                        </div>
+                    `;
+                } else {
+                    el.innerHTML = contentHtml;
+                }
+
+                canvas.appendChild(el);
+            });
+
+            if (this.isEditMode) this.attachTouchEvents();
+        },
+
+        // 🖐️ 터치 & 드래그 핵심 엔진!
+        attachTouchEvents() {
+            const canvas = document.getElementById('profile-sticker-canvas');
+            if (!canvas) return;
+
+            let isDragging = false;
+            let isResizing = false;
+            let currentUid = null;
+            let startX, startY;
+            let initialX, initialY, initialScale;
+            const engine = this;
+
+            const getEventCoords = (e) => {
+                if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                return { x: e.clientX, y: e.clientY };
+            };
+
+            const onStart = (e) => {
+                const resizeHandle = e.target.closest('.resize-handle');
+                const dragHandle = e.target.closest('.drag-handle');
+
+                if (resizeHandle) {
+                    isResizing = true;
+                    currentUid = resizeHandle.getAttribute('data-uid');
+                } else if (dragHandle) {
+                    isDragging = true;
+                    currentUid = dragHandle.getAttribute('data-uid');
+                    engine.selectedUid = currentUid; 
+                    engine.refreshCanvas(); 
+                } else {
+                    // 빈 공간 누르면 선택 해제
+                    engine.selectedUid = null;
+                    engine.refreshCanvas();
+                    return;
+                }
+
+                const coords = getEventCoords(e);
+                startX = coords.x;
+                startY = coords.y;
+
+                const stk = engine.activeStickers.find(s => s.uid === currentUid);
+                if (stk) {
+                    initialX = stk.x;
+                    initialY = stk.y;
+                    initialScale = stk.scale;
+                }
+                
+                e.stopPropagation();
+            };
+
+            const onMove = (e) => {
+                if (!isDragging && !isResizing) return;
+                if (!currentUid) return;
+
+                const coords = getEventCoords(e);
+                const dx = coords.x - startX;
+                const dy = coords.y - startY;
+                const stk = engine.activeStickers.find(s => s.uid === currentUid);
+                if (!stk) return;
+
+                const rect = canvas.getBoundingClientRect();
+
+                if (isDragging) {
+                    // 픽셀 이동 거리를 도화지 퍼센트(%)로 변환하여 저장
+                    const dxPercent = (dx / rect.width) * 100;
+                    const dyPercent = (dy / rect.height) * 100;
+                    stk.x = Math.max(-20, Math.min(120, initialX + dxPercent));
+                    stk.y = Math.max(-20, Math.min(120, initialY + dyPercent));
+                } else if (isResizing) {
+                    // 우측 하단으로 드래그할수록 커짐
+                    const dist = (dx + dy) / 2; 
+                    const scaleFactor = dist / 150; // 민감도 조절
+                    stk.scale = Math.max(0.4, Math.min(3.0, initialScale + scaleFactor));
+                }
+
+                // 부드러운 움직임을 위해 전체 새로고침 대신 DOM 직접 제어
+                const dragEl = document.querySelector(`.drag-handle[data-uid="${currentUid}"]`);
+                if(dragEl && dragEl.parentElement) {
+                    dragEl.parentElement.style.left = `${stk.x}%`;
+                    dragEl.parentElement.style.top = `${stk.y}%`;
+                    dragEl.parentElement.style.transform = `translate(-50%, -50%) scale(${stk.scale})`;
+                }
+                
+                if (e.cancelable) e.preventDefault(); // 화면 스크롤 방지
+            };
+
+            const onEnd = () => {
+                isDragging = false;
+                isResizing = false;
+                currentUid = null;
+            };
+
+            // 중복 방지를 위해 캔버스 초기화
+            canvas.onmousedown = onStart;
+            canvas.ontouchstart = onStart;
+            
+            // 화면 밖으로 손가락이 나가도 유지되도록 window에 부착
+            window.onmousemove = onMove;
+            window.ontouchmove = onMove;
+            window.onmouseup = onEnd;
+            window.ontouchend = onEnd;
+        }
+    },
+
     // ui.js의 UIManager 안에 추가!
     
     openMailboxModal() {
@@ -127,6 +458,8 @@ const UIManager = {
 // 🌟 [진짜 최종] 문법 오류 박멸! 무조건 화면 즉시 렌더링 엔진!
     init() { 
         this.initBackground(); 
+        // 🚨 [여기 추가!] 스티커 엔진 셋업!
+        if (this.StickerEngine) this.StickerEngine.init();
 
         // 🚨 1. 게임 켜지자마자 기다리지 않고 무조건 1번 강제 렌더링!
         if (typeof GameState !== 'undefined') {
