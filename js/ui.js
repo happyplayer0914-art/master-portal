@@ -814,8 +814,10 @@ const UIManager = {
                     document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
                     document.getElementById('target-user-likes').innerText = data.likes || 0;
                     
-                    const prestigeText = data.prestige > 0 ? `[${data.prestige}환생] ` : "";
-                    document.getElementById('target-user-stage').innerText = `${prestigeText}${data.highestStage || stage}F`;
+                   // 👇 [여기 복구!!] 상대방의 환생 횟수를 찾아 텍스트로 만들어줍니다.
+            const targetPCount = Number(data.prestige) || 0;
+            const prestigeText = targetPCount > 0 ? `[${targetPCount}환생] ` : "";
+            document.getElementById('target-user-stage').innerText = `${prestigeText}${data.highestStage || stage}F`;
 
                   // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
                     const bgEl = document.getElementById('target-profile-bg');
@@ -1172,11 +1174,11 @@ const UIManager = {
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
-        // 👑 최고 기록 (환생 + 층수 통합!)
+     // 👑 최고 기록 (환생 + 층수 통합!) 복구 완료!
         if(recordEl) {
-            // 💡 구버전(prestige) 데이터 호환까지 완벽하게 잡아냅니다!
-            const pCount = GameState.prestigeCount || GameState.prestige || 0;
-            const prestigeText = pCount > 0 ? `[${pCount}환생] ` : "";
+            // 💡 [여기 복구!!] 구버전/신버전 변수명을 모두 스캔해서 숫자로 바꿉니다.
+            const myPCount = Number(GameState.prestigeCount) || Number(GameState.prestige) || 0;
+            const prestigeText = myPCount > 0 ? `[${myPCount}환생] ` : "";
             recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
         }
 
