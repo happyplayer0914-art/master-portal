@@ -803,22 +803,21 @@ const UIManager = {
                 const userRef = window.doc(window.db, "users", nickname);
                 const docSnap = await window.getDoc(userRef);
                 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // 🌟 상대방의 이름과 스탯을 임시로 기억해 둡니다! (상세 스탯 창 띄울 때 씀)
-                    window.currentTargetStats = data.totalStats || null;
-                    window.currentTargetName = nickname;
-                    
-                    // 텍스트 정보 덮어씌우기
-                    document.getElementById('target-user-uid').innerText = data.uid || "0000";
-                    document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
-                    document.getElementById('target-user-likes').innerText = data.likes || 0;
-                    
-                   // 👇 [여기 복구!!] 상대방의 환생 횟수를 찾아 텍스트로 만들어줍니다.
-            const targetPCount = Number(data.prestige) || 0;
+               if (docSnap.exists()) {
+            const data = docSnap.data();
+            window.currentTargetStats = data.totalStats || null;
+            window.currentTargetName = nickname;
+            
+            document.getElementById('target-user-uid').innerText = data.uid || "0000";
+            document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
+            document.getElementById('target-user-likes').innerText = data.likes || 0;
+            
+            // 🚨 [완벽 복구 2] 상대방의 환생 횟수 텍스트 렌더링!
+            const targetPCount = Number(data.prestige) || Number(data.prestigeCount) || 0;
             const prestigeText = targetPCount > 0 ? `[${targetPCount}환생] ` : "";
-            document.getElementById('target-user-stage').innerText = `${prestigeText}${data.highestStage || stage}F`;
-
+            const displayStage = data.highestStage || stage || 1;
+            document.getElementById('target-user-stage').innerText = `${prestigeText}${displayStage}F`;
+                   
                   // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
                     const bgEl = document.getElementById('target-profile-bg');
                     if (data.bgSkin && data.bgSkin !== 'none' && data.bgSkin !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.backgrounds) {
@@ -1174,9 +1173,9 @@ const UIManager = {
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
         }
 
-     // 👑 최고 기록 (환생 + 층수 통합!) 복구 완료!
+    // 👑 최고 기록 (환생 + 층수 통합!)
         if(recordEl) {
-            // 💡 [여기 복구!!] 구버전/신버전 변수명을 모두 스캔해서 숫자로 바꿉니다.
+            // 🚨 [완벽 복구 3] 내 환생 횟수도 무조건 숫자로 강제 변환해서 띄웁니다!
             const myPCount = Number(GameState.prestigeCount) || Number(GameState.prestige) || 0;
             const prestigeText = myPCount > 0 ? `[${myPCount}환생] ` : "";
             recordEl.innerText = `${prestigeText}${Math.max(GameState.maxStage || 1, GameState.rpgStage || 1)}F`;
