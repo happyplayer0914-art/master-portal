@@ -3221,6 +3221,8 @@ GameSystem.Profile = {
                 highestStage: Math.max(GameState.maxStage || 1, GameState.rpgStage || 1),
                 prestige: GameState.prestigeCount || 0,
                 bgSkin: GameState.equippedBg || 'none', 
+                    // 👇 [여기에 딱 한 줄 추가!!] 내 스티커 정보를 서버로 보냅니다!
+                profileStickers: GameState.profileStickers || [],
                 
                 profile: GameState.equippedProfile || 'none',  
                 skin: GameState.equippedSkin || 'none',
