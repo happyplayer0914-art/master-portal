@@ -839,34 +839,7 @@ const UIManager = {
                 bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`; // 기본 배경
             }
         }
-
-// 🌸 장착한 파트너의 아름다운 자태 렌더링!
-        const ptImgEl = document.getElementById('profile-partner-image');
-        if (ptImgEl) {
-            if (GameState.equippedPartner && window.GameData && GameData.partners && GameData.partners[GameState.equippedPartner]) {
-                const pt = GameData.partners[GameState.equippedPartner];
-                
-                // 👇 [복구 완료!] 기존의 스킨 변경 시스템(SD <-> Full)을 그대로 가져옵니다.
-                let imgFile = GameSystem.Partner.getDisplayImage(GameState.equippedPartner);
-                
-                // 🌟 [핵심 마법] 만약 현재 출력할 스킨이 '전신(img_full)'인데, '프로필 전용(img_profile)'이 있다면 그걸로 슬쩍 바꿔치기!
-                if (imgFile === pt.img_full && pt.img_profile) {
-                    imgFile = pt.img_profile;
-                }
-                
-                ptImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
-                ptImgEl.style.filter = "none"; 
-                ptImgEl.style.opacity = "1";
-                ptImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
-            } else {
-                // 장착 안 했을 때 (실루엣)
-                ptImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
-                ptImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)";
-                ptImgEl.style.opacity = "0.5";
-                ptImgEl.className = "absolute -right-8 bottom-0 h-[90%] w-[65%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
-            }
-        }
-        
+    
         this.updateProfileEquipmentSlots();
         
         // 🚨 덮어씌우기 주범이었던 syncToServer() 삭제 완료!
