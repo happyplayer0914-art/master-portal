@@ -818,32 +818,29 @@ const UIManager = {
                         bgEl.style.backgroundImage = `url('assets/backgrounds/bg_library.png')`;
                     }
                     
-               // 🌸 [신규 추가] 타 유저 파트너 전신 일러스트 렌더링!
-                    const targetPtImgEl = document.getElementById('target-profile-partner');
-                    if (targetPtImgEl) {
-                        if (data.equipment && data.equipment.partner && window.GameData && GameData.partners && GameData.partners[data.equipment.partner]) {
-                            const pt = GameData.partners[data.equipment.partner];
-                            
-                            // 타 유저의 파트너 돌파 레벨 확인
-                            const ptLevel = data.partnerLevels ? (data.partnerLevels[data.equipment.partner] || 0) : 0;
-                            
-                            // 👇 레벨이 낮을 땐 SD, 6렙 이상이면 프로필 이미지(없으면 전신) 적용!
-                            let imgFile = pt.img_sd;
-                            if (ptLevel >= 6) {
-                                imgFile = pt.img_profile || pt.img_full || pt.img_sd;
-                            }
+               // 🎨 [신규] 타 유저의 스티커 정보를 불러와서 캔버스에 렌더링!
+            const targetCanvas = document.getElementById('target-sticker-canvas');
+            if (targetCanvas) {
+                targetCanvas.innerHTML = ''; // 초기화
+                
+                if (data.profileStickers && data.profileStickers.length > 0) {
+                    data.profileStickers.forEach(stk => {
+                        const el = document.createElement('div');
+                        // 남의 프로필이니까 무조건 터치 금지(pointer-events-none)
+                        el.className = 'absolute inline-block origin-center pointer-events-none z-10';
+                        
+                        el.style.left = `${stk.x}%`;
+                        el.style.top = `${stk.y}%`;
+                        // 회전, 크기 완벽 복제!
+                        el.style.transform = `translate(-50%, -50%) rotate(${stk.rotation || 0}deg) scale(${stk.scale})`;
 
-                            targetPtImgEl.style.backgroundImage = `url('assets/partners/${imgFile}')`;
-                            targetPtImgEl.style.filter = "none"; 
-                            targetPtImgEl.style.opacity = "1";
-                            targetPtImgEl.className = "absolute -right-2 bottom-0 h-[95%] w-[80%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
-                        } else {
-                            targetPtImgEl.style.backgroundImage = `url('https://cdn-icons-png.flaticon.com/512/3242/3242257.png')`;
-                            targetPtImgEl.style.filter = "brightness(0) invert(1) opacity(0.2)";
-                            targetPtImgEl.style.opacity = "0.5";
-                            targetPtImgEl.className = "absolute -right-8 bottom-0 h-[90%] w-[65%] bg-contain bg-bottom bg-no-repeat drop-shadow-2xl pointer-events-none transition-all duration-300";
-                        }
-                    }
+                        el.innerHTML = `<img src="assets/partners/${stk.imgFile}" class="w-32 h-32 sm:w-40 sm:h-40 object-contain filter drop-shadow-2xl ${stk.flip ? '-scale-x-100' : ''}">`;
+                        
+                        targetCanvas.appendChild(el);
+                    });
+                }
+            }
+            // 👆👆👆 교체 끝!! 👆👆👆
                     
          // 상대방 장비 & 파트너 렌더링 엔진
                     const renderTargetSlot = (type, itemId, level) => {
