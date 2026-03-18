@@ -1417,6 +1417,27 @@
             <button onclick="document.getElementById('gm-mail-modal').classList.replace('flex', 'hidden')" class="text-slate-500 text-sm font-bold underline mt-1 hover:text-slate-300">닫기</button>
         </div>
     </div>
+<div id="sticker-drawer-modal" class="fixed inset-0 z-[2000] bg-black/80 flex flex-col justify-end opacity-0 pointer-events-none transition-all duration-300">
+    <div id="sticker-drawer-content" class="bg-slate-900 w-full max-w-[480px] mx-auto rounded-t-2xl border-t-2 border-indigo-500 p-4 h-[60vh] flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.8)] translate-y-full transition-transform duration-300">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-white font-black text-lg flex items-center gap-2">🎨 스티커 보관함</h3>
+            <button onclick="UIManager.StickerEngine.closeDrawer()" class="text-slate-400 hover:text-white text-3xl font-light leading-none">&times;</button>
+        </div>
+        <div class="bg-slate-800/80 rounded-lg p-2 mb-3 border border-slate-700">
+            <p class="text-[10px] text-slate-300 font-bold text-center tracking-tight">배치할 스티커를 선택하세요. (최대 5개)</p>
+        </div>
+        
+        <div id="sticker-list-container" class="flex-1 overflow-y-auto grid grid-cols-3 sm:grid-cols-4 gap-2 custom-scrollbar content-start pb-5">
+        </div>
+    </div>
+</div>
+
+<div id="sticker-edit-controls" class="fixed top-0 left-1/2 transform -translate-x-1/2 z-[2000] w-full max-w-[480px] p-3 flex justify-between items-center bg-slate-900/95 backdrop-blur-md border-b border-indigo-500 opacity-0 pointer-events-none transition-opacity shadow-lg">
+    <button onclick="UIManager.StickerEngine.openDrawer()" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl text-[11px] shadow-inner border border-slate-600 active:scale-95 flex items-center gap-1.5">➕ 스티커</button>
+    <div class="text-indigo-300 font-black text-sm animate-pulse tracking-widest">꾸미기 모드</div>
+    <button onclick="UIManager.StickerEngine.saveAndClose()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black rounded-xl text-[11px] shadow-[0_0_15px_rgba(52,211,153,0.4)] active:scale-95 flex items-center gap-1.5 border border-emerald-400">✅ 저장</button>
+</div>
+    
 </body>
 </html>
 
