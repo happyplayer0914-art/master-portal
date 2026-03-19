@@ -1349,11 +1349,13 @@
                 <i class="fa-solid fa-shirt"></i> 외형 변경
             </button>
             
-            <img id="dc-image" src="" class="absolute inset-0 w-full h-full object-contain drop-shadow-2xl pointer-events-none transition-all duration-300 p-2">
-            <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent z-10"></div>
-            
-            <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end z-20">
-                <div>
+          <div id="dc-image-frame" class="relative w-full h-[320px] rounded-t-2xl overflow-hidden border-b border-white/10">
+    <div id="dc-background-banner" class="absolute inset-0 w-full h-full object-cover opacity-70 blur-[10px] scale-110"></div>
+    
+    <img id="dc-image" src="" class="absolute inset-0 w-full h-full object-contain drop-shadow-2xl z-10 pointer-events-none p-4">
+    
+    <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent z-10"></div>
+</div>
                     <div id="dc-rarity" class="text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block">등급</div>
                     <h2 id="dc-name" class="text-xl font-black text-white drop-shadow-md tracking-tight">아이템 이름</h2>
                 </div>
