@@ -1726,36 +1726,38 @@ const UIManager = {
         document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
         
         // =====================================================================
-        // ✨ [신규 추가] 등급(Rarity)에 따른 상세페이지 테두리 & 네온사인 오라 효과!
+        // ✨ [수정 완료] 등급(Rarity)에 따른 상세페이지 테두리 & 빛무리 효과!
         // =====================================================================
         // 이미지를 감싸고 있는 부모 div(프레임)를 선택합니다.
         const imageFrame = document.getElementById('dc-image').parentElement;
         
-        // 1. 기존에 묻어있던 등급 테두리 색상과 펄스 효과를 싹 지워줍니다 (초기화)
-        imageFrame.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'animate-pulse');
+        // 1. 기존 클래스 싹 초기화 (animate-pulse도 확실히 지워줍니다)
+        imageFrame.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'animate-pulse', 'rounded-t-2xl', 'rounded-2xl');
         
-        // 2. 테두리 두께(border-2)가 없다면 강제로 넣어줍니다.
+        // 2. 테두리 두께 유지 & 🚨[1번 문제 해결] 상단 모서리 라운드(둥글게) 추가!
         if (!imageFrame.classList.contains('border-2') && !imageFrame.classList.contains('border')) {
             imageFrame.classList.add('border-2');
         }
+        imageFrame.classList.add('rounded-t-2xl'); // 모달창 곡률에 맞춰 모서리를 예쁘게 깎아줍니다.
 
         // 3. 아이템의 등급(rarity)에 맞춰 색상과 화려한 그림자(빛무리)를 입힙니다!
         if (item.rarity === 'rare') {
             imageFrame.classList.add('border-blue-400');
-            imageFrame.style.boxShadow = '0 0 20px rgba(96, 165, 250, 0.4)'; // 파란빛 오라
+            imageFrame.style.boxShadow = '0 0 20px rgba(96, 165, 250, 0.4)';
         } else if (item.rarity === 'epic') {
             imageFrame.classList.add('border-purple-500');
-            imageFrame.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)'; // 보랏빛 오라
+            imageFrame.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
         } else if (item.rarity === 'legendary') {
             imageFrame.classList.add('border-yellow-400');
-            imageFrame.style.boxShadow = '0 0 30px rgba(250, 204, 21, 0.6)'; // 황금빛 오라
+            imageFrame.style.boxShadow = '0 0 30px rgba(250, 204, 21, 0.6)';
         } else if (item.rarity === 'mythic') {
-            imageFrame.classList.add('border-pink-500', 'animate-pulse'); // 신화는 테두리가 숨쉬듯 반짝입니다!
-            imageFrame.style.boxShadow = '0 0 40px rgba(236, 72, 153, 0.7)'; // 강렬한 핑크빛 오라
+            // 🚨[2번 문제 해결] animate-pulse 삭제! 이제 그림이 깜빡거리지 않습니다.
+            imageFrame.classList.add('border-pink-500'); 
+            imageFrame.style.boxShadow = '0 0 40px rgba(236, 72, 153, 0.7)'; // 빛무리 오라는 그대로 유지!
         } else {
             // 일반(Common) 등급
             imageFrame.classList.add('border-slate-500');
-            imageFrame.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)'; // 평범한 그림자
+            imageFrame.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)';
         }
         // =====================================================================
         
