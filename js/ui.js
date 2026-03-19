@@ -602,44 +602,88 @@ const UIManager = {
         document.getElementById('tab-shop').className = t === 'shop' ? "py-2 bg-slate-700 text-white font-bold rounded-lg text-sm border border-slate-500" : "py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-sm border border-slate-700";
     },
     
-   switchInvTab(t) {
-        AudioEngine.sfx.click(); this.triggerHaptic();
+// =====================================================================
+    // 🌸 [진짜 최종 통합] 인벤토리 탭 전환 & UI 스타일 완벽 제어
+    // =====================================================================
+    switchInvTab(t) {
+        // 1. 소리 & 진동 (기존 코드 유지)
+        if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click(); 
+        if(this.triggerHaptic) this.triggerHaptic();
         
-        const btnGear = document.getElementById('inv-tab-gear');
-        const btnCosmetics = document.getElementById('inv-tab-cosmetics');
+        // 2. [스타일 통일] 버튼 활성화/비활성화 Tailwind 클래스 정의 (CSS 파일 필요 없음!)
+        // 💡 17번 사진의 장비(스탯) 버튼 스타일을 그대로 따왔습니다.
+        const activeClasses = "flex-1 py-2.5 bg-slate-900 border border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)] text-white font-bold rounded-xl text-xs whitespace-nowrap animate-pulse";
+        const inactiveClasses = "flex-1 py-2.5 bg-slate-800 border border-slate-700 text-slate-400 font-bold rounded-xl text-xs hover:bg-slate-700 hover:text-white transition-colors whitespace-nowrap";
+        const forgeActiveClasses = "flex-1 py-2.5 bg-slate-900 border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)] text-white font-bold rounded-xl text-xs whitespace-nowrap animate-pulse";
+        const forgeInactiveClasses = "flex-1 py-2.5 bg-slate-800 border border-slate-700 text-purple-400 font-bold rounded-xl text-xs hover:bg-slate-700 hover:text-white transition-colors whitespace-nowrap";
+
+        // 3. 버튼 엘리먼트 가져오기 (HTML IDs 확인 필수!)
+        // 🚨 HTML에 이 ID들이 꼭 있어야 작동합니다! (tab-gear, tab-partner, tab-cosmetics, tab-forge)
+        const btnGear = document.getElementById('tab-gear'); 
+        const btnPartner = document.getElementById('tab-partner'); // 🌸 파트너 버튼 추가!
+        const btnCosmetics = document.getElementById('tab-cosmetics');
+        const btnForge = document.getElementById('tab-forge'); // 🔨 대장간 버튼 추가!
+
+        // 4. [핵심 로직] 모든 버튼의 스타일을 초기화하고, 선택된 탭만 깜빡이게(animate-pulse) 만듭니다!
+        if(btnGear) btnGear.className = (t === 'gear') ? activeClasses : inactiveClasses;
+        if(btnPartner) btnPartner.className = (t === 'partner') ? activeClasses : inactiveClasses;
+        if(btnCosmetics) btnCosmetics.className = (t === 'cosmetics') ? activeClasses : inactiveClasses;
+        
+        // 대장간은 색이 좀 다르니까 따로 처리! (기존의 무조건 깜빡임 제거 완료!)
+        if(btnForge) btnForge.className = (t === 'forge') ? forgeActiveClasses : forgeInactiveClasses;
+
+
+        // 5. 패널 엘리먼트 가져오기
         const panelGear = document.getElementById('inv-panel-gear');
         const panelCosmetics = document.getElementById('inv-panel-cosmetics');
-        const panelPartner = document.getElementById('inv-panel-partner'); // 🌸 파트너 패널!
+        const panelPartner = document.getElementById('inv-panel-partner'); 
+        const panelForge = document.getElementById('inv-panel-forge'); // 🔨 대장간 패널 추가!
         const emptyState = document.getElementById('inv-empty-state');
         
-        if(btnGear && btnCosmetics) {
-            btnGear.className = t === 'gear' 
-                ? "flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors whitespace-nowrap" 
-                : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
-                
-            btnCosmetics.className = t === 'cosmetics' 
-                ? "flex-1 py-2 bg-slate-700 text-white font-bold rounded-lg text-xs border border-slate-500 transition-colors whitespace-nowrap" 
-                : "flex-1 py-2 bg-slate-800 text-slate-400 font-bold rounded-lg text-xs border border-slate-700 transition-colors whitespace-nowrap";
-        }
-
-        // 1. 모든 패널 싹 다 숨기기
+        // 6. 모든 패널 싹 다 숨기기 (초기화)
         if(panelGear) panelGear.classList.add('hidden');
         if(panelCosmetics) panelCosmetics.classList.add('hidden');
         if(panelPartner) panelPartner.classList.add('hidden');
+        if(panelForge) panelForge.classList.add('hidden'); // 🔨 대장간 숨기기
         if(emptyState) emptyState.classList.add('hidden');
 
-        // 2. 누른 탭에 맞는 패널만 열고 내용물 그리기!
+        // 7. 누른 탭에 맞는 패널만 열고 내용물 그리기!
         if (t === 'gear') {
             if(panelGear) panelGear.classList.remove('hidden');
-            this.renderInventory();
+            if(this.renderInventory) this.renderInventory();
         } else if (t === 'cosmetics') {
             if(panelCosmetics) panelCosmetics.classList.remove('hidden');
             if(this.renderCosmeticsShop) this.renderCosmeticsShop();
         } else if (t === 'partner') {
             if(panelPartner) panelPartner.classList.remove('hidden');
             if(this.renderPartnerInventory) this.renderPartnerInventory();
+        } else if (t === 'forge') {
+            // 🔨 대장간 패널 열기 로직 추가
+            if(panelForge) panelForge.classList.remove('hidden');
+            if(this.renderForge) this.renderForge(); 
         }
     },
+    // 인벤토리 탭 UI 업데이트 함수
+updateTabUI(activeTabName) {
+    const tabButtons = {
+        'equipment': document.getElementById('tab-equipment'), // 장비(스탯) 버튼
+        'partner': document.getElementById('tab-partner'),     // 파트너 버튼
+        'forge': document.getElementById('tab-forge'),         // 대장간 버튼
+        'cosmetics': document.getElementById('tab-cosmetics')   // 테두리/배경 버튼
+    };
+
+    // 1. 모든 버튼에서 '활성화 스타일'과 '깜빡임 애니메이션' 제거 (초기화)
+    for (const tab in tabButtons) {
+        if (tabButtons[tab]) {
+            tabButtons[tab].classList.remove('active-tab', 'animate-pulse');
+        }
+    }
+
+    // 2. 현재 활성화된 탭 버튼에만 '활성화 스타일'과 '깜빡임 애니메이션' 추가!
+    if (tabButtons[activeTabName]) {
+        tabButtons[activeTabName].classList.add('active-tab', 'animate-pulse');
+    }
+},
     
   // 🌟 [최종 진화] 재화 표시 시스템 (문자 강제 숫자 변환 + 에러 방어!)
     updateCurrencyUI() {
@@ -1713,17 +1757,20 @@ const UIManager = {
 
        // 🌟 2. 상단 이미지 영역 세팅 (상세페이지용)
         let imgFile = '';
+        // (이전 답변의 등급별 이미지 로직은 그대로 유지!)
         if (isPartner) {
-            // 💡 [수정 완료] 신화 등급의 화려한 배경(cutin)이 있으면 무조건 1순위! 없으면 full, 그것도 없으면 sd!
             imgFile = item.img_cutin || item.img_full || item.img_sd;
         } else {
-            // 장비의 경우
             imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
         }
 
-      // ... (기존) 이미지 경로 세팅 코드 ...
         const folder = isPartner ? 'partners' : 'items';
-        document.getElementById('dc-image').src = `assets/${folder}/${imgFile}`;
+        const imgEl = document.getElementById('dc-image');
+        imgEl.src = `assets/${folder}/${imgFile}`;
+
+        // 🚨 [여기를 수정!!] 기존의 object-contain을 object-cover로 변경합니다!
+        // 이렇게 하면 마스터님이 그리신 4:3 이미지가 프레임에 꽉 차게 렌더링되어 여백이 사라집니다!
+        imgEl.style.objectFit = 'cover';
         
         // =====================================================================
         // ✨ [수정 완료] 등급(Rarity)에 따른 상세페이지 테두리 & 빛무리 효과!
