@@ -275,46 +275,7 @@ const GameData = {
     // - 신화: img_sd, img_full, img_cutin, img_gif 4개 사용!
     // =========================================================================
     partners: {
-        // 🔥 1. 화염 (Fire)
-        'pt_r1': { 
-            id: 'pt_r1', name: '견습 마법사 엘라', rarity: 'rare', emoji: '🪄',
-            img_sd: 'partner_ella_sd.png', img_full: 'partner_ella_full.png',
-            atkMult: 1.10, hpMult: 1.05, element: 'fire', skillCooldown: 500, skillValue: 15,
-            skillName: '화염 퐁퐁', skillDesc: '0.5초마다 적에게 마스터 공격력의 15% 화염 지속 피해', flavorText: '"길드장님! 제 뜨거운 불꽃을 보여드릴게요!"'
-        },
         
-        // 🌬️ 2. 바람 (Air)
-        'pt_e1': { 
-            id: 'pt_e1', name: '숲의 엘프 리아', rarity: 'epic', emoji: '🏹',
-            img_sd: 'partner_lia_sd.png', img_full: 'partner_lia_full.png',
-            atkMult: 1.20, spd: 10, eva: 5, element: 'air', skillCooldown: 3000, skillValue: 100,
-            skillName: '바람의 환영', skillDesc: '3초마다 마스터의 공격을 그대로 1회 더 입힘 (분신 타격)', flavorText: '"바람처럼 빠르고 날카롭게 베어낼게요."'
-        },
-
-        // ❄️ 3. 빙결 (Ice)
-        'pt_e2': { 
-            id: 'pt_e2', name: '서리마녀 실비아', rarity: 'epic', emoji: '❄️',
-            img_sd: 'partner_silvia_sd.png', img_full: 'partner_silvia_full.png',
-            atkMult: 1.15, hpMult: 1.15, eva: 10, element: 'ice', skillCooldown: 6000, skillValue: 50, skillDuration: 1500,
-            skillName: '혹한의 감옥', skillDesc: '6초마다 적에게 50% 피해를 주고 1.5초간 공격 정지(빙결)', flavorText: '"얼어붙은 시간 속에서 조용히 잠드렴..."'
-        },
-        
-        // 🪨 4. 대지 (Earth)
-        'pt_l1': { 
-            id: 'pt_l1', name: '성기사단장 아이리스', rarity: 'legendary', emoji: '🛡️',
-            img_sd: 'partner_iris_sd.png', img_full: 'partner_iris_full.png',
-            atkMult: 1.30, hpMult: 1.40, def: 15, element: 'earth', skillCooldown: 8000, skillValue: 20,
-            skillName: '대지의 방벽', skillDesc: '8초마다 마스터 최대 체력의 20%만큼 든든한 보호막 생성', flavorText: '"제 방패가 깨지기 전까진 마스터에게 흠집도 낼 수 없습니다."'
-        },
-
-        // ⚡ 5. 번개 (Lightning)
-        'pt_l2': { 
-            id: 'pt_l2', name: '천둥의 성녀 클레어', rarity: 'legendary', emoji: '⚡',
-            img_sd: 'partner_claire_sd.png', img_full: 'partner_claire_full.png',
-            atkMult: 1.25, hpMult: 1.25, critRate: 15, spd: 15, element: 'lightning', skillCooldown: 10000, skillValue: 40, skillDuration: 4000,
-            skillName: '뇌명의 축복', skillDesc: '10초마다 4초 동안 마스터의 크리티컬 확률 40% 대폭 상승', flavorText: '"벼락이여, 마스터의 검에 치명적인 힘을 깃드소서!"'
-        },
-  
         // 🟦 [RARE] 희귀 등급
         'pt_r_fire': { 
             id: 'pt_r_fire', name: '횃불 코볼트', rarity: 'rare', emoji: '🐾',
@@ -458,7 +419,7 @@ const GameData = {
             skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프', flavorText: '"제 노래가 바람을 타고 당신의 검 끝에 닿기를..."'
         },
         'pt_m_intp': { 
-            id: 'pt_m_intp', name: '연금술사 호엔하임', rarity: 'mythic', emoji: '🧪',
+            id: 'pt_m_intp', name: '연금술사 루미아', rarity: 'mythic', emoji: '🧪',
             img_sd: 'partner_intp_sd.png', img_full: 'partner_intp_full.png', img_cutin: 'partner_intp_cutin.png', img_detail: 'partner_intp_detail.png', img_gif: 'partner_intp_live.gif',
             atkMult: 2.30, hpMult: 1.50, critRate: 20, def: 20, eva: 15, element: 'lightning', skillCooldown: 11000, skillValue: 400, skillDuration: 0,
             skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해', flavorText: '"모든 물질은 분해되고 재조립되지. 너도 예외는 아니야."'
