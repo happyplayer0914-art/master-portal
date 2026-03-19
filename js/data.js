@@ -108,12 +108,12 @@ const GameData = {
             flavorText: '"원칙과 규율에 따라, 다가오는 모든 위협을 차단한다."' 
         },
         'mythic_isfp_w': { 
-            id: 'mythic_isfp_w', name: '숲의 숨결 플루트', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🎵', 
+            id: 'mythic_isfp_a', name: '바람의 숨결 류트', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🎵', 
             atkMult: 2.5, eva: 35, spd: 25, mbti: 'ISFP', job: '바람의 음유시인', passive: '정령의 속삭임', 
             desc: '[ISFP 신화] 바람처럼 유려한 정령의 몸놀림.',
-            img: 'weapon_isfp.png',
-            img_cutin: 'weapon_isfp_cutin.png', 
-            flavorText: '"자유로운 바람의 노래가 부디 내 검 끝에 머물기를..."' 
+            img: 'acc_isfp.png',
+            img_cutin: 'acc_isfp_cutin.png', 
+            flavorText: '전설 속 바람의 정령과 교감했던 아름다운 음유시인의 유품. 하얀 날개 장식은 단순한 세공이 아닌, 악기에 깃든 정령의 형상이라고 전해진다.' 
         },
         'mythic_intp_a': { 
             id: 'mythic_intp_a', name: '현자의 돌', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🔮', 
@@ -452,7 +452,7 @@ const GameData = {
             skillName: '처단과 심판', skillDesc: '10초마다 적에게 방어력을 무시하는 일격을 날리고 3초간 기절시킴', flavorText: '"원칙과 규율에 따라, 심연의 존재를 처단한다."'
         },
         'pt_m_isfp': { 
-            id: 'pt_m_isfp', name: '음유시인 아리엘', rarity: 'mythic', emoji: '🎵',
+            id: 'pt_m_isfp', name: '바람의 음유시인 아리엘', rarity: 'mythic', emoji: '🎵',
             img_sd: 'partner_isfp_sd.png', img_full: 'partner_isfp_full.png', img_cutin: 'partner_isfp_cutin.png', img_detail: 'partner_isfp_detail.png', img_gif: 'partner_isfp_live.gif',
             atkMult: 1.60, hpMult: 1.80, eva: 35, spd: 20, def: 10, element: 'air', skillCooldown: 9000, skillValue: 30, skillDuration: 4000,
             skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프', flavorText: '"제 노래가 바람을 타고 당신의 검 끝에 닿기를..."'
@@ -559,7 +559,7 @@ const GameData = {
             { id: 'bg_estp', name: '무법자의 아지트', desc: '폭풍 전야의 거친 용병 술집', price: 500, type: 'bg', img: 'bg_estp.png' },
             { id: 'bg_isfj', name: '별의 성소', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
             { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
-            { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 하프 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
+            { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 류트 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
             { id: 'bg_intp', name: '연금술 공방', desc: '수많은 플라스크가 끓고 있는 방', price: 500, type: 'bg', img: 'bg_intp.png' },
             { id: 'bg_istp', name: '어둠의 뒷골목', desc: '은밀한 의뢰가 오가는 암살자의 거리', price: 500, type: 'bg', img: 'bg_istp.png' },
             { id: 'bg_esfp', name: '환희의 대무대', desc: '화려한 조명이 쏟아지는 축제의 장', price: 500, type: 'bg', img: 'bg_esfp.png' },
