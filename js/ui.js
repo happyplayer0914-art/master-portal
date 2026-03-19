@@ -185,12 +185,28 @@ const UIManager = {
             UIManager.triggerHaptic();
         },
 
-        toggleFlip(uid) {
+       toggleFlip(uid) {
             const stk = this.activeStickers.find(s => s.uid === uid);
             if (stk) {
                 stk.flip = !stk.flip;
                 this.refreshCanvas();
                 if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
+            }
+        },
+
+        // 🌟 [신규 코어] 수평 꽉 잡아주는 엔진! (크기는 보존)
+        resetRotation(uid) {
+            const stk = this.activeStickers.find(s => s.uid === uid);
+            if (stk) {
+                // 회전 각도만 0으로 초기화! (크기(scale)와 위치(x, y)는 건드리지 않음)
+                stk.rotation = 0;
+                
+                // 화면 즉시 갱신
+                this.refreshCanvas();
+                
+                // 경쾌한 클릭음과 진동으로 사용자에게 피드백!
+                if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.equip();
+                if(window.UIManager && UIManager.triggerHaptic) UIManager.triggerHaptic();
             }
         },
 
@@ -218,13 +234,25 @@ const UIManager = {
                 if (this.isEditMode) {
                     const borderClass = isSelected ? 'border-2 border-dashed border-indigo-400 bg-indigo-500/20' : 'border-2 border-transparent hover:border-white/30';
                     
-                    let controlsHtml = '';
+                  let controlsHtml = '';
                     if (isSelected) {
-                        // 🚨 [터치 버그 수정] onmousedown, ontouchstart 등 복잡한 걸 싹 빼고 단순 onclick으로 통합! 모바일 이중 클릭 방어 완료.
+                        // 🚨 [터치 버그 수정 및 수평 버튼 추가]
                         controlsHtml = `
+                            <!-- 우측 상단: 삭제 버튼 (X) -->
                             <div class="absolute -top-3 -right-3 bg-rose-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-black shadow-lg cursor-pointer z-50 border-2 border-white" onclick="UIManager.StickerEngine.removeSticker('${stk.uid}'); event.stopPropagation();">&times;</div>
+                            
+                            <!-- 좌측 하단: 좌우 반전 버튼 (⇄) -->
                             <div class="absolute -bottom-3 -left-3 bg-blue-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white" onclick="UIManager.StickerEngine.toggleFlip('${stk.uid}'); event.stopPropagation();">⇄</div>
+                            
+                            <!-- 우측 하단: 크기 조절/회전 버튼 (⤡) -->
                             <div class="absolute -bottom-3 -right-3 bg-emerald-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg cursor-pointer z-50 border-2 border-white resize-handle" data-uid="${stk.uid}">⤡</div>
+
+                            <!-- 🌟 신규! 좌측 상단: 수평 맞춤 버튼 (⟲) -->
+                            <div class="absolute -top-3 -left-3 bg-[#D4AF37] text-white rounded-full w-7 h-7 flex items-center justify-center text-[10px] font-black shadow-lg cursor-pointer z-50 border-2 border-white group" onclick="UIManager.StickerEngine.resetRotation('${stk.uid}'); event.stopPropagation();">
+                                ⟲
+                                <!-- 호버 시 나타나는 툴팁 -->
+                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-slate-900/80 text-white text-[9px] px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap pointer-events-none transition-opacity">수평</span>
+                            </div>
                         `;
                     }
 
