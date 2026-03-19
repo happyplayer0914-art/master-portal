@@ -169,7 +169,7 @@ const GameData = {
             desc: '[ESFJ 신화] 어둠을 몰아내는 여명의 빛.',
             img: 'armor_esfj.png',
             img_cutin: 'armor_esfj_cutin.png', 
-            flavorText: '"어둠이 짙을수록, 다가올 여명은 더욱 찬란하게 빛나는 법입니다."' 
+            flavorText: '찬란한 여명의 빛을 발산하여 어둠으로 부터 지켜준다.' 
         },
         'mythic_enfj_w': { 
             id: 'mythic_enfj_w', name: '태양의 지휘봉', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪄', 
@@ -455,7 +455,7 @@ const GameData = {
             skillName: '전군 총공세', skillDesc: '15초마다 6초 동안 마스터의 모든 스탯(공/방/속)을 대폭 상승시킴', flavorText: '"진형을 유지하라! 나를 따르는 자에게 영광이 있을 것이다!"'
         },
         'pt_m_esfj': { 
-            id: 'pt_m_esfj', name: '성기사단장 솔라', rarity: 'mythic', emoji: '🔰',
+            id: 'pt_m_esfj', name: '여명의 성기사단장 솔라', rarity: 'mythic', emoji: '🔰',
             img_sd: 'partner_esfj_sd.png', img_full: 'partner_esfj_full.png', img_cutin: 'partner_esfj_cutin.png', img_detail: 'partner_esfj_detail.png', img_gif: 'partner_esfj_live.gif',
             atkMult: 1.40, hpMult: 2.80, def: 35, vamp: 20, eva: 10, element: 'light', skillCooldown: 11000, skillValue: 30, skillDuration: 4000,
             skillName: '여명의 구원', skillDesc: '11초마다 마스터의 체력을 즉시 회복하고 4초간 받는 피해 감소', flavorText: '"어둠이 짙을수록 여명은 더욱 찬란하게 빛나는 법입니다."'
@@ -528,7 +528,7 @@ const GameData = {
             { id: 'bg_enfp', name: '신비의 크레이터', desc: '미지의 광물이 빛나는 혜성 추락지', price: 500, type: 'bg', img: 'bg_enfp.png' },
             { id: 'bg_entp', name: '차원 침공', desc: '차원 침공으로 파괴 되어가는 세계', price: 500, type: 'bg', img: 'bg_entp.png' },
             { id: 'bg_estj', name: '강철의 사령부', desc: '대륙을 호령하는 철통같은 통제실', price: 500, type: 'bg', img: 'bg_estj.png' },
-            { id: 'bg_esfj', name: '여명의 대성당', desc: '찬란한 아침 햇살이 축복하는 성당', price: 500, type: 'bg', img: 'bg_esfj.png' },
+            { id: 'bg_esfj', name: '여명의 부름', desc: '몰려드는 어둠의 군단을 막을 누군가를 부르는 제단', price: 500, type: 'bg', img: 'bg_esfj.png' },
             { id: 'bg_enfj', name: '태양의 신전', desc: '군중의 찬가가 울려 퍼지는 웅장한 곳', price: 500, type: 'bg', img: 'bg_enfj.png' },
             { id: 'bg_infj', name: '별의 관측소', desc: '운명의 궤적을 엿보는 신비한 천문대', price: 500, type: 'bg', img: 'bg_infj.png' }
         ],
