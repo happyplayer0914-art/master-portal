@@ -1732,7 +1732,7 @@ updateTabUI(activeTabName) {
         this.triggerHaptic();
     },
    // =========================================================================
-    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너) - 호감도 진화 복구 완!
+    // 🌟 [개편] 통합 상세 정보 카드 오픈 엔진 (장비 & 파트너) - 명품 테두리 적용 완!
     // =========================================================================
     openDetailCard(id, type, isReadOnly = false, customLevel = 0, customAffLv = 1) {
         if(window.AudioEngine && AudioEngine.sfx) AudioEngine.sfx.click();
@@ -1762,7 +1762,6 @@ updateTabUI(activeTabName) {
 
        // 🌟 2. 상단 이미지 영역 세팅 (상세페이지용)
         let imgFile = '';
-        // (이전 답변의 등급별 이미지 로직은 그대로 유지!)
         if (isPartner) {
             imgFile = item.img_cutin || item.img_full || item.img_sd;
         } else {
@@ -1773,43 +1772,45 @@ updateTabUI(activeTabName) {
         const imgEl = document.getElementById('dc-image');
         imgEl.src = `assets/${folder}/${imgFile}`;
 
-        // 🚨 [여기를 수정!!] 기존의 object-contain을 object-cover로 변경합니다!
-        // 이렇게 하면 마스터님이 그리신 4:3 이미지가 프레임에 꽉 차게 렌더링되어 여백이 사라집니다!
-        imgEl.style.objectFit = 'cover';
+        // 🚨 [수정 완료] 완벽한 핏을 유지하기 위해 억지로 자르는 cover 대신 contain으로 복구!
+        imgEl.style.objectFit = 'contain';
         
         // =====================================================================
-        // ✨ [수정 완료] 등급(Rarity)에 따른 상세페이지 테두리 & 빛무리 효과!
+        // ✨ [진짜 최종 수정] 테두리를 그림 상자가 아닌 '모달창 전체'에 두르기!
         // =====================================================================
-        // 이미지를 감싸고 있는 부모 div(프레임)를 선택합니다.
+        // 1. 기존 그림 상자(imageFrame)에 있던 불필요한 테두리들은 싹 다 지워줍니다.
         const imageFrame = document.getElementById('dc-image').parentElement;
-        
-        // 1. 기존 클래스 싹 초기화 (animate-pulse도 확실히 지워줍니다)
-        imageFrame.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'animate-pulse', 'rounded-t-2xl', 'rounded-2xl');
-        
-        // 2. 테두리 두께 유지 & 🚨[1번 문제 해결] 상단 모서리 라운드(둥글게) 추가!
-        if (!imageFrame.classList.contains('border-2') && !imageFrame.classList.contains('border')) {
-            imageFrame.classList.add('border-2');
-        }
-        imageFrame.classList.add('rounded-t-2xl'); // 모달창 곡률에 맞춰 모서리를 예쁘게 깎아줍니다.
+        imageFrame.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'animate-pulse', 'border-2', 'border');
+        imageFrame.style.boxShadow = 'none';
 
-        // 3. 아이템의 등급(rarity)에 맞춰 색상과 화려한 그림자(빛무리)를 입힙니다!
-        if (item.rarity === 'rare') {
-            imageFrame.classList.add('border-blue-400');
-            imageFrame.style.boxShadow = '0 0 20px rgba(96, 165, 250, 0.4)';
-        } else if (item.rarity === 'epic') {
-            imageFrame.classList.add('border-purple-500');
-            imageFrame.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
-        } else if (item.rarity === 'legendary') {
-            imageFrame.classList.add('border-yellow-400');
-            imageFrame.style.boxShadow = '0 0 30px rgba(250, 204, 21, 0.6)';
-        } else if (item.rarity === 'mythic') {
-            // 🚨[2번 문제 해결] animate-pulse 삭제! 이제 그림이 깜빡거리지 않습니다.
-            imageFrame.classList.add('border-pink-500'); 
-            imageFrame.style.boxShadow = '0 0 40px rgba(236, 72, 153, 0.7)'; // 빛무리 오라는 그대로 유지!
-        } else {
-            // 일반(Common) 등급
-            imageFrame.classList.add('border-slate-500');
-            imageFrame.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)';
+        // 2. 모달창 전체(실제 카드 껍데기)를 찾습니다.
+        const modal = document.getElementById('detail-card-modal');
+        const mainCardElement = modal ? modal.firstElementChild : null;
+
+        if (mainCardElement) {
+            // 기존 테두리 흔적 싹 초기화
+            mainCardElement.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'border-2', 'border');
+            
+            // 모달창 4면에 든든한 테두리 두께 장착!
+            mainCardElement.classList.add('border-2');
+
+            // 3. 아이템의 등급(rarity)에 맞춰 색상과 화려한 전체 그림자(빛무리)를 입힙니다!
+            if (item.rarity === 'rare') {
+                mainCardElement.classList.add('border-blue-400');
+                mainCardElement.style.boxShadow = '0 0 20px rgba(96, 165, 250, 0.4)';
+            } else if (item.rarity === 'epic') {
+                mainCardElement.classList.add('border-purple-500');
+                mainCardElement.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
+            } else if (item.rarity === 'legendary') {
+                mainCardElement.classList.add('border-yellow-400');
+                mainCardElement.style.boxShadow = '0 0 30px rgba(250, 204, 21, 0.6)';
+            } else if (item.rarity === 'mythic') {
+                mainCardElement.classList.add('border-pink-500'); 
+                mainCardElement.style.boxShadow = '0 0 40px rgba(236, 72, 153, 0.7)'; // 영롱한 핑크빛 오라!
+            } else {
+                mainCardElement.classList.add('border-slate-500');
+                mainCardElement.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)';
+            }
         }
         // =====================================================================
         
@@ -1826,7 +1827,7 @@ updateTabUI(activeTabName) {
             bgEl.onerror = function() { this.style.backgroundImage = `url('assets/backgrounds/bg_zone1.png')`; };
         }
 
-        // 👇 [수정됨] 더 이상 안 쓰는 [외형 변경] 버튼은 영원히 숨겨둡니다!
+        // 👇 더 이상 안 쓰는 [외형 변경] 버튼은 영원히 숨겨둡니다!
         const skinBtn = document.getElementById('dc-btn-skin');
         if (skinBtn) skinBtn.classList.add('hidden');
 
@@ -1876,12 +1877,11 @@ updateTabUI(activeTabName) {
             if (item.hpMult) pStatsHtml += `<div class="${statBoxClass} text-emerald-400">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
             if (item.critRate) pStatsHtml += `<div class="${statBoxClass} text-purple-400">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
             if (item.critDmg) pStatsHtml += `<div class="${statBoxClass} text-pink-400">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
-            if (item.def) pStatsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`; // 🚨 방어력에 % 추가 완료!
+            if (item.def) pStatsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`;
             if (item.eva) pStatsHtml += `<div class="${statBoxClass} text-teal-400">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
             if (item.spd) pStatsHtml += `<div class="${statBoxClass} text-yellow-400">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
             if (item.vamp) pStatsHtml += `<div class="${statBoxClass} text-rose-500">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
-            // 💡 [요청 3] 한 줄당 최대 4개씩 깔끔하게 정렬!
             document.getElementById('dc-partner-stats').className = "grid grid-cols-3 sm:grid-cols-4 gap-1.5 border-t border-slate-700 pt-3 mt-1 w-full";
             document.getElementById('dc-partner-stats').innerHTML = pStatsHtml;
         } 
@@ -1892,7 +1892,6 @@ updateTabUI(activeTabName) {
             
             partnerSec.classList.add('hidden'); partnerSec.classList.remove('flex');
             
-            // 💡 [요청 2] 장비 카드 껍데기를 파트너와 동일하게 투명화!
             gearSec.className = "flex-col gap-3 flex"; 
 
             const upgMult = 1.0 + (level * 0.1);
@@ -1902,12 +1901,11 @@ updateTabUI(activeTabName) {
             if (item.hpMult) statsHtml += `<div class="${statBoxClass} text-emerald-400">체력 +${Math.round((item.hpMult - 1)*100 * upgMult)}%</div>`;
             if (item.critRate) statsHtml += `<div class="${statBoxClass} text-purple-400">크리 +${(item.critRate * upgMult).toFixed(1)}%</div>`;
             if (item.critDmg) statsHtml += `<div class="${statBoxClass} text-pink-400">크피 +${(item.critDmg * upgMult).toFixed(1)}%</div>`;
-            if (item.def) statsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`; // 🚨 방어력에 % 추가 완료!
+            if (item.def) statsHtml += `<div class="${statBoxClass} text-blue-400">방어 +${Math.floor(item.def * upgMult)}%</div>`;
             if (item.eva) statsHtml += `<div class="${statBoxClass} text-teal-400">회피 +${(item.eva * upgMult).toFixed(1)}%</div>`;
             if (item.spd) statsHtml += `<div class="${statBoxClass} text-yellow-400">공속 +${(item.spd * upgMult).toFixed(1)}%</div>`;
             if (item.vamp) statsHtml += `<div class="${statBoxClass} text-rose-500">피흡 +${(item.vamp * upgMult).toFixed(1)}%</div>`;
             
-            // 💡 [요청 2 & 3] 이미지 훼손 없이 flavorText 띄우고, 깔끔한 스탯 블록 렌더링!
             const commentText = item.flavorText || item.desc || "전설 속의 장비입니다.";
             
             gearSec.innerHTML = `
