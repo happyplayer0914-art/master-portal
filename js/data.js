@@ -155,12 +155,12 @@ const GameData = {
             img_cutin: 'weapon_entp_cutin.png', 
             flavorText: '차원을 붕괴시킬 정도의 강력한 힘을 가지고 있다.' 
         },
-        'mythic_estj_w': { 
-            id: 'mythic_estj_w', name: '지배자의 군기', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🚩', 
+        'mythic_estj_a': { 
+            id: 'mythic_estj_a', name: '지배자의 군기', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🚩', 
             atkMult: 3.8, def: 30, hpMult: 2.0, mbti: 'ESTJ', job: '강철의 총사령관', passive: '일제 사격', 
             desc: '[ESTJ 신화] 승리를 이끄는 압도적인 지휘력.',
-            img: 'weapon_estj.png',
-            img_cutin: 'weapon_estj_cutin.png', 
+            img: 'acc_estj.png',
+            img_cutin: 'acc_estj_cutin.png', 
             flavorText: '군기를 소유한 자의 명령은 절대 거절할 수 없다' 
         },
         'mythic_esfj_ar': { 
