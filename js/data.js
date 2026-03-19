@@ -97,7 +97,7 @@ const GameData = {
             desc: '[ISFJ 신화] 아군을 지키는 절대적인 수호.',
             img: 'a_isfj.png',
             img_cutin: 'a_isfj_cutin.png', 
-            flavorText: '별의 선택을 받은 자만이 그 실체를 확인할 수 있고 전해지는 무기. 별의 힘으로 모두를 수호한다.' 
+            flavorText: '별의 선택을 받은 자만이 그 실체를 확인할 수 있다고 전해지는 무기. 별의 힘으로 모두를 수호한다.' 
         },
         'mythic_istj_ar': { 
             id: 'mythic_istj_ar', name: '서약의 대방패', type: 'gear', subType: 'armor', rarity: 'mythic', emoji: '🛡️', 
