@@ -1426,12 +1426,17 @@ updateTabUI(activeTabName) {
             pGear.innerHTML += groupedCards.accessory.join('');
         }
         
-        const isGearTab = !document.getElementById('inv-tab-gear').classList.contains('text-slate-400');
-        if (isGearTab && !hasGear) {
-            emptyState.classList.remove('hidden');
-        } else {
-            emptyState.classList.add('hidden');
-        }
+       // 🚨 [수정 완료] 옛날 이름(inv-tab-gear)을 새 이름(tab-gear)으로 바꾸고 안전장치 추가!
+            const gearTabBtn = document.getElementById('tab-gear');
+            const isGearTab = gearTabBtn ? !gearTabBtn.classList.contains('text-slate-400') : false;
+            
+            if (emptyState) {
+                if (isGearTab && !hasGear) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                }
+            }
         
        // 내 정보 상단 전투력/생존력 업데이트 (태그가 삭제되었으므로 안전장치 추가!)
         const stats = GameState.getTotalStats(); 
