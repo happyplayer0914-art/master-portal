@@ -91,8 +91,8 @@ const GameData = {
             img_cutin: 'weapon_estp_cutin.png', 
             flavorText: '"하하하! 누가 날 막겠다고? 폭풍처럼 싹 다 쓸어버려 주마!"' 
         },
-        'mythic_isfj_a': { 
-            id: 'mythic_isfj_a', name: '별빛 성역의 랜스', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🏆', 
+        'mythic_isfj_w': { 
+            id: 'mythic_isfj_w', name: '별빛 성역의 랜스', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🏆', 
             hpMult: 4.0, def: 15, vamp: 15, mbti: 'ISFJ', job: '성소를 지키는 가디언', passive: '불굴의 수호진', 
             desc: '[ISFJ 신화] 아군을 지키는 절대적인 수호.',
             img: 'a_isfj.png',
@@ -107,7 +107,7 @@ const GameData = {
             img_cutin: 'armor_istj_cutin.png', 
             flavorText: '"원칙과 규율에 따라, 다가오는 모든 위협을 차단한다."' 
         },
-        'mythic_isfp_w': { 
+        'mythic_isfp_a': { 
             id: 'mythic_isfp_a', name: '바람의 숨결 류트', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🎵', 
             atkMult: 2.5, eva: 35, spd: 25, mbti: 'ISFP', job: '바람의 음유시인', passive: '정령의 속삭임', 
             desc: '[ISFP 신화] 바람처럼 유려한 정령의 몸놀림.',
