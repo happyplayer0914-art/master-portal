@@ -121,7 +121,7 @@ const GameData = {
             desc: '[INTP 신화] 우주의 진리가 담긴 궁극의 돌.',
             img: 'acc_intp.png',
             img_cutin: 'acc_intp_cutin.png', 
-            flavorText: '"진리는 늘 단순한 법. 철저하게 분해해서 다시 증명해 주지."' 
+            flavorText: '우주의 진리가 담겼다 전해지는 궁극의 돌. 보기만 해도 정신이 파괴된다.' 
         },
         'mythic_istp_w': { 
             id: 'mythic_istp_w', name: '흑요석 단검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🗡️', 
@@ -419,7 +419,7 @@ const GameData = {
             skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프', flavorText: '"제 노래가 바람을 타고 당신의 검 끝에 닿기를..."'
         },
         'pt_m_intp': { 
-            id: 'pt_m_intp', name: '연금술사 루미아', rarity: 'mythic', emoji: '🧪',
+            id: 'pt_m_intp', name: '미궁의 연금술사 루미아', rarity: 'mythic', emoji: '🧪',
             img_sd: 'partner_intp_sd.png', img_full: 'partner_intp_full.png', img_cutin: 'partner_intp_cutin.png', img_detail: 'partner_intp_detail.png', img_gif: 'partner_intp_live.gif',
             atkMult: 2.30, hpMult: 1.50, critRate: 20, def: 20, eva: 15, element: 'lightning', skillCooldown: 11000, skillValue: 400, skillDuration: 0,
             skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해', flavorText: '"모든 물질은 분해되고 재조립되지. 너도 예외는 아니야."'
@@ -521,7 +521,7 @@ const GameData = {
             { id: 'bg_isfj', name: '별의 성소', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
             { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
             { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 류트 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
-            { id: 'bg_intp', name: '연금술 공방', desc: '수많은 플라스크가 끓고 있는 방', price: 500, type: 'bg', img: 'bg_intp.png' },
+            { id: 'bg_intp', name: '미궁 속 숨겨진 방', desc: '미궁 속 어딘가 루미아의 숨겨진 방.', price: 500, type: 'bg', img: 'bg_intp.png' },
             { id: 'bg_istp', name: '어둠의 뒷골목', desc: '은밀한 의뢰가 오가는 암살자의 거리', price: 500, type: 'bg', img: 'bg_istp.png' },
             { id: 'bg_esfp', name: '환희의 대무대', desc: '화려한 조명이 쏟아지는 축제의 장', price: 500, type: 'bg', img: 'bg_esfp.png' },
             { id: 'bg_enfp', name: '신비의 크레이터', desc: '미지의 광물이 빛나는 혜성 추락지', price: 500, type: 'bg', img: 'bg_enfp.png' },
