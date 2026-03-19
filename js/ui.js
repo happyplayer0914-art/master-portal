@@ -1948,10 +1948,11 @@ updateTabUI(activeTabName) {
             }
         }
 
-        const modal = document.getElementById('detail-card-modal');
-        if (modal) {
-            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+     // 🚨 [수정] 위에서 이미 'modal'을 선언했으니, 여기서는 'dcModal'이라는 새 이름표를 씁니다!
+        const dcModal = document.getElementById('detail-card-modal');
+        if (dcModal) {
+            dcModal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            dcModal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
         }
     },
     // 👈 ui.js 끝나는 마지막 괄호입니다!
