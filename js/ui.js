@@ -1760,39 +1760,56 @@ updateTabUI(activeTabName) {
         rarityEl.innerText = rName; 
         rarityEl.className = `text-[10px] font-black px-2 py-0.5 rounded shadow-md mb-1 inline-block ${rColor}`;
 
-      // 🌟 상단 이미지 영역 세팅 (상세페이지용)
-        const imgEl = document.getElementById('dc-image');
-        const bgBannerEl = document.getElementById('dc-background-banner'); // 🚨 배경 배너 가져오기
-        
-        let imgFile = isPartner ? (item.img_cutin || item.img_full || item.img_sd) : (item.img_cutin || item.img || '');
-        const folder = isPartner ? 'partners' : 'items';
-        imgEl.src = `assets/${folder}/${imgFile}`;
-        
-        // 🖼️ 원본 이미지는 절대 안 잘리게!
-        imgEl.style.objectFit = 'contain'; 
-
-        // =====================================================================
-        // ✨ [신규 추가] 신화 테마 배경 배너 연출!
-        // =====================================================================
-        if (item.rarity === 'mythic') {
-            // 마스터님이 그리신 배경 배너 이미지가 있다고 가정합니다!
-            // 예: assets/banners/banner_meltina.png, assets/banners/banner_leon.png
-            if (isPartner) {
-                // 🌸 파트너 전용 배경 배너 (멜리나, 레온 등)
-                // item.id가 'meltina', 'leon' 등이라고 가정합니다.
-                bgBannerEl.style.backgroundImage = `url('assets/banners/banner_${item.id}.png')`;
-                bgBannerEl.style.backgroundSize = 'cover';
-                bgBannerEl.style.backgroundPosition = 'center';
-            } else {
-                // ⚔️ 무기/장비 전용 배경 배너 (공통으로 사용 가능)
-                bgBannerEl.style.backgroundImage = `url('assets/banners/banner_weapon.png')`;
-                bgBannerEl.style.backgroundSize = 'cover';
-                bgBannerEl.style.backgroundPosition = 'center';
-            }
-            bgBannerEl.classList.remove('hidden'); // 배경 보이기
+       // 🌟 2. 상단 이미지 영역 세팅 (상세페이지용)
+        let imgFile = '';
+        // (이전 답변의 등급별 이미지 로직은 그대로 유지!)
+        if (isPartner) {
+            imgFile = item.img_cutin || item.img_full || item.img_sd;
         } else {
-            // 신화가 아닐 때는 배경 배너 숨기기
-            bgBannerEl.classList.add('hidden');
+            imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
+        }
+
+        const folder = isPartner ? 'partners' : 'items';
+        const imgEl = document.getElementById('dc-image');
+        imgEl.src = `assets/${folder}/${imgFile}`;
+
+        // 🚨 [여기를 수정!!] 기존의 object-contain을 object-cover로 변경합니다!
+        // 이렇게 하면 마스터님이 그리신 4:3 이미지가 프레임에 꽉 차게 렌더링되어 여백이 사라집니다!
+        imgEl.style.objectFit = 'cover';
+        
+        // =====================================================================
+        // ✨ [수정 완료] 등급(Rarity)에 따른 상세페이지 테두리 & 빛무리 효과!
+        // =====================================================================
+        // 이미지를 감싸고 있는 부모 div(프레임)를 선택합니다.
+        const imageFrame = document.getElementById('dc-image').parentElement;
+        
+        // 1. 기존 클래스 싹 초기화 (animate-pulse도 확실히 지워줍니다)
+        imageFrame.classList.remove('border-slate-500', 'border-blue-400', 'border-purple-500', 'border-yellow-400', 'border-pink-500', 'animate-pulse', 'rounded-t-2xl', 'rounded-2xl');
+        
+        // 2. 테두리 두께 유지 & 🚨[1번 문제 해결] 상단 모서리 라운드(둥글게) 추가!
+        if (!imageFrame.classList.contains('border-2') && !imageFrame.classList.contains('border')) {
+            imageFrame.classList.add('border-2');
+        }
+        imageFrame.classList.add('rounded-t-2xl'); // 모달창 곡률에 맞춰 모서리를 예쁘게 깎아줍니다.
+
+        // 3. 아이템의 등급(rarity)에 맞춰 색상과 화려한 그림자(빛무리)를 입힙니다!
+        if (item.rarity === 'rare') {
+            imageFrame.classList.add('border-blue-400');
+            imageFrame.style.boxShadow = '0 0 20px rgba(96, 165, 250, 0.4)';
+        } else if (item.rarity === 'epic') {
+            imageFrame.classList.add('border-purple-500');
+            imageFrame.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
+        } else if (item.rarity === 'legendary') {
+            imageFrame.classList.add('border-yellow-400');
+            imageFrame.style.boxShadow = '0 0 30px rgba(250, 204, 21, 0.6)';
+        } else if (item.rarity === 'mythic') {
+            // 🚨[2번 문제 해결] animate-pulse 삭제! 이제 그림이 깜빡거리지 않습니다.
+            imageFrame.classList.add('border-pink-500'); 
+            imageFrame.style.boxShadow = '0 0 40px rgba(236, 72, 153, 0.7)'; // 빛무리 오라는 그대로 유지!
+        } else {
+            // 일반(Common) 등급
+            imageFrame.classList.add('border-slate-500');
+            imageFrame.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)';
         }
         // =====================================================================
         
@@ -2042,7 +2059,6 @@ updateTabUI(activeTabName) {
         drawBg();
     }
 }; // <-- 이게 진짜 UIManager를 닫는 마지막 괄호입니다!
-
 
 
 
