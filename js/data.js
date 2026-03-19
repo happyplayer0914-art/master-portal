@@ -161,7 +161,7 @@ const GameData = {
             desc: '[ESTJ 신화] 승리를 이끄는 압도적인 지휘력.',
             img: 'weapon_estj.png',
             img_cutin: 'weapon_estj_cutin.png', 
-            flavorText: '"진형을 유지하라! 나를 따르는 자에게 압도적인 승리가 있을 것이다!"' 
+            flavorText: '군기를 소유한 자의 명령은 절대 거절할 수 없다' 
         },
         'mythic_esfj_ar': { 
             id: 'mythic_esfj_ar', name: '여명의 방패', type: 'gear', subType: 'armor', rarity: 'mythic', emoji: '🔰', 
@@ -452,7 +452,7 @@ const GameData = {
             id: 'pt_m_estj', name: '총사령관 빅토리아', rarity: 'mythic', emoji: '🚩',
             img_sd: 'partner_estj_sd.png', img_full: 'partner_estj_full.png', img_cutin: 'partner_estj_cutin.png', img_detail: 'partner_estj_detail.png', img_gif: 'partner_estj_live.gif',
             atkMult: 2.10, hpMult: 2.40, def: 30, spd: 10, critRate: 10, element: 'fire', skillCooldown: 15000, skillValue: 30, skillDuration: 6000,
-            skillName: '전군 총공세', skillDesc: '15초마다 6초 동안 마스터의 모든 스탯(공/방/속)을 대폭 상승시킴', flavorText: '"진형을 유지하라! 나를 따르는 자에게 영광이 있을 것이다!"'
+            skillName: '전군 총공세', skillDesc: '15초마다 6초 동안 마스터의 모든 스탯(공/방/속)을 대폭 상승시킴', flavorText: '나의 명령은 절대적이다.'
         },
         'pt_m_esfj': { 
             id: 'pt_m_esfj', name: '여명의 성기사단장 솔라', rarity: 'mythic', emoji: '🔰',
@@ -527,7 +527,7 @@ const GameData = {
             { id: 'bg_esfp', name: '환희의 대무대', desc: '화려한 조명이 쏟아지는 축제의 장', price: 500, type: 'bg', img: 'bg_esfp.png' },
             { id: 'bg_enfp', name: '신비의 크레이터', desc: '미지의 광물이 빛나는 혜성 추락지', price: 500, type: 'bg', img: 'bg_enfp.png' },
             { id: 'bg_entp', name: '차원 침공', desc: '차원 침공으로 파괴 되어가는 세계', price: 500, type: 'bg', img: 'bg_entp.png' },
-            { id: 'bg_estj', name: '강철의 사령부', desc: '대륙을 호령하는 철통같은 통제실', price: 500, type: 'bg', img: 'bg_estj.png' },
+            { id: 'bg_estj', name: '황혼의 잿더미: 요새의 최후', desc: '한 지배자에게 멸망한 요새', price: 500, type: 'bg', img: 'bg_estj.png' },
             { id: 'bg_esfj', name: '여명의 부름', desc: '몰려드는 어둠의 군단을 막을 누군가를 부르는 제단', price: 500, type: 'bg', img: 'bg_esfj.png' },
             { id: 'bg_enfj', name: '태양의 신전', desc: '군중의 찬가가 울려 퍼지는 웅장한 곳', price: 500, type: 'bg', img: 'bg_enfj.png' },
             { id: 'bg_infj', name: '별의 관측소', desc: '운명의 궤적을 엿보는 신비한 천문대', price: 500, type: 'bg', img: 'bg_infj.png' }
