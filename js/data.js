@@ -76,12 +76,12 @@ const GameData = {
             flavorText: '"깊은 심연의 공포를 형상화한 금단의 스태프. 마법의 정수를 끊임없이 갈구한다..."' 
         },
         'mythic_infp_w': { 
-            id: 'mythic_infp_w', name: '세계수의 하프', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', 
-            atkMult: 3.0, hpMult: 3.0, vamp: 20, mbti: 'INFP', job: '달빛의 은둔술사', passive: '요정의 축복', 
+            id: 'mythic_infp_w', name: '월광의 눈물', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', 
+            atkMult: 3.0, hpMult: 3.0, vamp: 20, mbti: 'INFP', job: '달빛의 은둔술사', passive: '달빛의 축복', 
             desc: '[INFP 신화] 상처를 치유하는 달빛의 선율.',
             img: 'weapon_infp.png',
             img_cutin: 'weapon_infp_cutin.png', 
-            flavorText: '"당신의 깊은 상처는 이 선율이 부드럽게 보듬어 줄 거예요."' 
+            flavorText: '"달의 힘을 품은 스태프. 만물을 치유하는 힘을 가지고 있다."' 
         },
         'mythic_estp_w': { 
             id: 'mythic_estp_w', name: '전신의 쌍도끼', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
@@ -428,7 +428,7 @@ const GameData = {
             skillName: '절대 영도', skillDesc: '10초마다 적에게 500%의 마법 피해를 입히고 2초간 꽁꽁 얼려버림(행동 불가)', flavorText: '"모든 변수는 이미 내 계산 안에 있어. 끝내지."'
         },
         'pt_m_infp': { 
-            id: 'pt_m_infp', name: '은둔술사 루나', rarity: 'mythic', emoji: '🌿',
+            id: 'pt_m_infp', name: '달빛의 은둔술사 루나', rarity: 'mythic', emoji: '🌿',
             img_sd: 'partner_infp_sd.png', img_full: 'partner_infp_full.png', img_cutin: 'partner_infp_cutin.png', img_detail: 'partner_infp_detail.png', img_gif: 'partner_infp_live.gif',
             atkMult: 1.50, hpMult: 2.50, vamp: 25, eva: 15, def: 15, element: 'light', skillCooldown: 8000, skillValue: 40, skillDuration: 4000,
             skillName: '달빛의 축복', skillDesc: '8초마다 4초간 마스터의 피흡 능력을 극대화하고 적의 명중률 감소', flavorText: '"당신의 상처는 부드러운 달빛이 보듬어 줄 거예요."'
@@ -555,7 +555,7 @@ const GameData = {
             // 🌟 MBTI 16종 전용 테마 배경
             { id: 'bg_entj', name: '전장의 군령', desc: '군주의 위엄이 느껴지는 전장', price: 500, type: 'bg', img: 'bg_entj.png' },
             { id: 'bg_intj', name: '심연의 연구소', desc: '대마법사 멜리나의 은밀한 실험실', price: 500, type: 'bg', img: 'bg_intj.png' },
-            { id: 'bg_infp', name: '세계수의 안식처', desc: '따스한 달빛이 비추는 요정의 숲', price: 500, type: 'bg', img: 'bg_infp.png' },
+            { id: 'bg_infp', name: '달의 안식처', desc: '따스한 달빛이 비추는 숨겨진 안식처', price: 500, type: 'bg', img: 'bg_infp.png' },
             { id: 'bg_estp', name: '무법자의 아지트', desc: '폭풍 전야의 거친 용병 술집', price: 500, type: 'bg', img: 'bg_estp.png' },
             { id: 'bg_isfj', name: '성스러운 제단', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
             { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
