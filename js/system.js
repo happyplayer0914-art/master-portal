@@ -2471,18 +2471,23 @@ Ranking: {
             }
         },
 
-        // 🤖 [신규 추가] 자동 등반 강제 정지
+       // 🤖 자동 등반 강제 정지
         stopAutoMode() {
             if (this.isAutoMode) {
                 this.isAutoMode = false;
                 UIManager.showToast("🛑 자동 등반 모드가 종료되었습니다.");
-                const btn = document.getElementById('btn-attack');
-                if (btn) {
-                    btn.disabled = false; // 💡 [추가됨] 언제 눌렀든 무조건 버튼 잠금 해제!
-                    btn.classList.remove('opacity-50'); // 💡 [추가됨] 흐려진 버튼 원상복구!
-                    btn.innerHTML = "⚔️ 공격 (TAP!)";
-                    btn.classList.remove('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                
+                const btnAtk = document.getElementById('btn-attack');
+                const btnStop = document.getElementById('btn-stop-auto');
+                
+                // 공격 버튼 원상 복구
+                if (btnAtk) {
+                    btnAtk.disabled = false;
+                    btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
+                    btnAtk.classList.remove('opacity-50', 'animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
                 }
+                // 정지 버튼 숨기기
+                if (btnStop) btnStop.classList.add('hidden');
             }
         },
 
@@ -2664,16 +2669,23 @@ Ranking: {
                 }
             });
         
-           // 버튼 UI 오토 모드에 맞게 세팅
+         // 버튼 UI 오토 모드에 맞게 세팅
             const btnAtk = document.getElementById('btn-attack');
+            const btnStop = document.getElementById('btn-stop-auto');
+            
             if (btnAtk) {
-                btnAtk.disabled = false; 
                 if (this.isAutoMode) {
-                    btnAtk.innerHTML = "🤖 자동 전투 중... (터치 시 정지)";
-                    btnAtk.classList.add('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                    // 오토 중에는 공격 버튼 잠그고 정지 버튼 표시!
+                    btnAtk.disabled = true; 
+                    btnAtk.innerHTML = "🤖 자동 전투 진행 중...";
+                    btnAtk.classList.add('opacity-50', 'animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                    if (btnStop) btnStop.classList.remove('hidden');
                 } else {
+                    // 수동 중에는 공격 버튼 풀고 정지 버튼 숨기기!
+                    btnAtk.disabled = false; 
                     btnAtk.innerHTML = "⚔️ 공격 (TAP!)";
-                    btnAtk.classList.remove('animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                    btnAtk.classList.remove('opacity-50', 'animate-pulse', 'border-indigo-500', 'text-indigo-300', 'bg-indigo-900/40');
+                    if (btnStop) btnStop.classList.add('hidden');
                 }
             }
             
@@ -2826,20 +2838,15 @@ Ranking: {
             this.addLog("✨ 물약 사용! 체력 회복!", "text-emerald-400");
         },
 
-        // 👇 [교체] playerAttack (수동 개입 시 오토 꺼짐)
-        // 주의: 파라미터에 isAuto = false 가 들어갑니다!
-        playerAttack(isAuto = false) {
+    // 👇 파라미터(isAuto) 지우고 원래대로 깔끔하게 복구!
+        playerAttack() {
             if(!GameState.isBattling || this.monsterCurrentHp <= 0 || GameState.currentHp <= 0) return;
             
-            // 🛑 [핵심] 오토 모드인데 유저가 화면(공격 버튼)을 직접 클릭했다? 바로 오토 강제 종료!
-            if (!isAuto && this.isAutoMode) {
-                this.stopAutoMode();
-                return;
-            }
+            // 🚨 아까 추가했던 오토 모드 강제 종료 로직(if (!isAuto && this.isAutoMode) { ... })은 싹 지워주세요!!
 
             const stats = GameState.getTotalStats(); 
             let spdBonus = Math.min(stats.spd, 60); 
-            const ATTACK_COOLDOWN = 1000 * (1 - (spdBonus / 100)); 
+            const ATTACK_COOLDOWN = 1000 * (1 - (spdBonus / 100));
 
             const now = Date.now();
             if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
