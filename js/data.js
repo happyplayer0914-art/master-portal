@@ -153,7 +153,7 @@ const GameData = {
             desc: '[ENTP 신화] 차원을 찢어발기는 혼돈의 포격.',
             img: 'weapon_entp.png',
             img_cutin: 'weapon_entp_cutin.png', 
-            flavorText: '"이게 터질지 안 터질지는 나도 몰라! 일단 쏘고 생각하자고!"' 
+            flavorText: '차원을 붕괴시킬 정도의 강력한 힘을 가지고 있다.' 
         },
         'mythic_estj_w': { 
             id: 'mythic_estj_w', name: '지배자의 군기', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🚩', 
@@ -443,10 +443,10 @@ const GameData = {
             skillName: '별똥별 러시', skillDesc: '9초마다 혜성처럼 돌진하여 적에게 피해를 주고 3초간 감전', flavorText: '"새로운 세상이 저기에 있어! 빨리 가보자, 마스터!"'
         },
         'pt_m_entp': { 
-            id: 'pt_m_entp', name: '마도공학자 징크스', rarity: 'mythic', emoji: '⚙️',
+            id: 'pt_m_entp', name: '천재 마도공학자 세리아', rarity: 'mythic', emoji: '⚙️',
             img_sd: 'partner_entp_sd.png', img_full: 'partner_entp_full.png', img_cutin: 'partner_entp_cutin.png', img_detail: 'partner_entp_detail.png', img_gif: 'partner_entp_live.gif',
             atkMult: 3.20, hpMult: 1.20, critRate: 15, critDmg: 250, spd: 15, element: 'lightning', skillCooldown: 13000, skillValue: 600, skillDuration: 0,
-            skillName: '하이퍼 레이저', skillDesc: '13초마다 오버클럭된 차원 파괴포를 발사해 전장을 싹쓸이함', flavorText: '"이게 터질지 안 터질지는 나도 몰라! 일단 쏴보고 생각하자고!"'
+            skillName: '하이퍼 레이저', skillDesc: '13초마다 오버클럭된 차원 파괴포를 발사해 전장을 붕괴시킨다', flavorText: '거기! 비켜!비켜! 휩쓸려도 난 몰라!'
         },
         'pt_m_estj': { 
             id: 'pt_m_estj', name: '총사령관 빅토리아', rarity: 'mythic', emoji: '🚩',
@@ -512,6 +512,7 @@ const GameData = {
             { id: 'bg_guild', name: '길드장의 집무실', desc: '포근하고 아늑한 나의 공간', price: 200, type: 'bg', img: 'bg_guild.png' },
             { id: 'bg_abyss', name: '심연의 옥좌', desc: '마왕이 머물던 서늘한 공간', price: 300, type: 'bg', img: 'bg_abyss.png' },
             { id: 'bg_goldroom', name: '도둑 너구리의 보물창고', desc: '열심히 훔친 보물들이 가득하다.', price: 300, type: 'bg', img: 'bg_goldroom.png' },
+            { id: 'bg_arkforge', name: '천재공학자의 공방', desc: '수 많은 위험한 무기가 탄생하는 곳이다.', price: 300, type: 'bg', img: 'bg_arkforge.png' },
             
             // 🌟 MBTI 16종 전용 테마 배경
             { id: 'bg_entj', name: '전장의 군령', desc: '군주의 위엄이 느껴지는 전장', price: 500, type: 'bg', img: 'bg_entj.png' },
@@ -525,7 +526,7 @@ const GameData = {
             { id: 'bg_istp', name: '어둠의 뒷골목', desc: '은밀한 의뢰가 오가는 암살자의 거리', price: 500, type: 'bg', img: 'bg_istp.png' },
             { id: 'bg_esfp', name: '환희의 대무대', desc: '화려한 조명이 쏟아지는 축제의 장', price: 500, type: 'bg', img: 'bg_esfp.png' },
             { id: 'bg_enfp', name: '신비의 크레이터', desc: '미지의 광물이 빛나는 혜성 추락지', price: 500, type: 'bg', img: 'bg_enfp.png' },
-            { id: 'bg_entp', name: '마도 공학소', desc: '쉴 새 없이 돌아가는 혼돈의 톱니바퀴', price: 500, type: 'bg', img: 'bg_entp.png' },
+            { id: 'bg_entp', name: '차원 침공', desc: '차원 침공으로 파괴 되어가는 세계', price: 500, type: 'bg', img: 'bg_entp.png' },
             { id: 'bg_estj', name: '강철의 사령부', desc: '대륙을 호령하는 철통같은 통제실', price: 500, type: 'bg', img: 'bg_estj.png' },
             { id: 'bg_esfj', name: '여명의 대성당', desc: '찬란한 아침 햇살이 축복하는 성당', price: 500, type: 'bg', img: 'bg_esfj.png' },
             { id: 'bg_enfj', name: '태양의 신전', desc: '군중의 찬가가 울려 퍼지는 웅장한 곳', price: 500, type: 'bg', img: 'bg_enfj.png' },
