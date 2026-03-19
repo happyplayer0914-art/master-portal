@@ -336,10 +336,10 @@ const GameData = {
 
         // 🟨 [LEGENDARY] 전설 등급 (img_cutin 삭제 완료)
         'pt_l_fire': { 
-            id: 'pt_l_fire', name: '염룡의 새끼', rarity: 'legendary', emoji: '🐉',
-            img_sd: 'partner_babydragon_sd.png', img_full: 'partner_babydragon_full.png',
+            id: 'pt_l_fire', name: '염룡', rarity: 'legendary', emoji: '🐉',
+            img_sd: 'partner_firedragon_sd.png', img_full: 'partner_firedragon_full.png',
             atkMult: 1.45, hpMult: 1.30, critRate: 15, vamp: 5, element: 'fire', skillCooldown: 3000, skillValue: 50,
-            skillName: '용의 브레스', skillDesc: '3초마다 입에서 불을 뿜어 마스터 공격력의 50% 강력한 화염 피해를 입힙니다.', flavorText: '"캬아악! (아직 작지만 제법 용의 태가 난다)"'
+            skillName: '용의 브레스', skillDesc: '3초마다 입에서 불을 뿜어 마스터 공격력의 50% 강력한 화염 피해를 입힙니다.', flavorText: '"화르륵... (일대가 불타오른다...)"'
         },
         'pt_l_earth': { 
             id: 'pt_l_earth', name: '고대 유적의 수호자', rarity: 'legendary', emoji: '🗿',
