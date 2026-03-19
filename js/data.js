@@ -92,12 +92,12 @@ const GameData = {
             flavorText: '"하하하! 누가 날 막겠다고? 폭풍처럼 싹 다 쓸어버려 주마!"' 
         },
         'mythic_isfj_a': { 
-            id: 'mythic_isfj_a', name: '여신의 성배', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🏆', 
+            id: 'mythic_isfj_a', name: '별빛 성역의 랜스', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🏆', 
             hpMult: 4.0, def: 15, vamp: 15, mbti: 'ISFJ', job: '성소를 지키는 가디언', passive: '불굴의 수호진', 
             desc: '[ISFJ 신화] 아군을 지키는 절대적인 수호.',
-            img: 'acc_isfj.png',
-            img_cutin: 'acc_isfj_cutin.png', 
-            flavorText: '"걱정 마십시오. 제 목숨을 바쳐서라도 당신을 끝까지 지켜내겠습니다."' 
+            img: 'a_isfj.png',
+            img_cutin: 'a_isfj_cutin.png', 
+            flavorText: '별의 선택을 받은 자만이 그 실체를 확인할 수 있고 전해지는 무기. 별의 힘으로 모두를 수호한다.' 
         },
         'mythic_istj_ar': { 
             id: 'mythic_istj_ar', name: '서약의 대방패', type: 'gear', subType: 'armor', rarity: 'mythic', emoji: '🛡️', 
@@ -440,10 +440,10 @@ const GameData = {
             skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해', flavorText: '"하하하! 누가 날 막겠다고? 바람처럼 쓸어버려 주마!"'
         },
         'pt_m_isfj': { 
-            id: 'pt_m_isfj', name: '가디언 미카엘', rarity: 'mythic', emoji: '🛡️',
+            id: 'pt_m_isfj', name: '별의 수호자 미카엘', rarity: 'mythic', emoji: '🛡️',
             img_sd: 'partner_isfj_sd.png', img_full: 'partner_isfj_full.png', img_cutin: 'partner_isfj_cutin.png', img_detail: 'partner_isfj_detail.png', img_gif: 'partner_isfj_live.gif',
             atkMult: 1.30, hpMult: 3.00, def: 40, vamp: 15, eva: 5, element: 'earth', skillCooldown: 12000, skillValue: 50, skillDuration: 6000,
-            skillName: '절대 수호진', skillDesc: '12초마다 마스터 최대 체력의 50%만큼 무적에 가까운 쉴드 생성', flavorText: '"걱정 마십시오. 제 목숨을 바쳐서라도 성소와 당신을 지키겠습니다."'
+            skillName: '절대 수호진', skillDesc: '12초마다 마스터 최대 체력의 50%만큼 무적에 가까운 쉴드 생성', flavorText: '제 목숨을 바쳐서라도 성소와 당신을 지키겠습니다.'
         },
         'pt_m_istj': { 
             id: 'pt_m_istj', name: '기사단장 발터', rarity: 'mythic', emoji: '⚔️',
@@ -557,7 +557,7 @@ const GameData = {
             { id: 'bg_intj', name: '심연의 연구소', desc: '대마법사 멜리나의 은밀한 실험실', price: 500, type: 'bg', img: 'bg_intj.png' },
             { id: 'bg_infp', name: '달의 안식처', desc: '따스한 달빛이 비추는 숨겨진 안식처', price: 500, type: 'bg', img: 'bg_infp.png' },
             { id: 'bg_estp', name: '무법자의 아지트', desc: '폭풍 전야의 거친 용병 술집', price: 500, type: 'bg', img: 'bg_estp.png' },
-            { id: 'bg_isfj', name: '성스러운 제단', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
+            { id: 'bg_isfj', name: '별의 성소', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
             { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
             { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 하프 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
             { id: 'bg_intp', name: '연금술 공방', desc: '수많은 플라스크가 끓고 있는 방', price: 500, type: 'bg', img: 'bg_intp.png' },
