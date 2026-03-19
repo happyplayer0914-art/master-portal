@@ -511,7 +511,7 @@ const GameData = {
             // 기본/특수 배경
             { id: 'bg_guild', name: '길드장의 집무실', desc: '포근하고 아늑한 나의 공간', price: 200, type: 'bg', img: 'bg_guild.png' },
             { id: 'bg_abyss', name: '심연의 옥좌', desc: '마왕이 머물던 서늘한 공간', price: 300, type: 'bg', img: 'bg_abyss.png' },
-            { id: 'bg_ella', name: '초보 마법사의 방', desc: '엘라가 마법을 연습하던 공간', price: 300, type: 'bg', img: 'bg_ella.png' },
+            { id: 'bg_goldroom', name: '도둑 너구리의 보물창고', desc: '열심히 훔친 보물들이 가득하다.', price: 300, type: 'bg', img: 'bg_goldroom.png' },
             
             // 🌟 MBTI 16종 전용 테마 배경
             { id: 'bg_entj', name: '전장의 군령', desc: '군주의 위엄이 느껴지는 전장', price: 500, type: 'bg', img: 'bg_entj.png' },
