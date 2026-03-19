@@ -1762,17 +1762,18 @@ updateTabUI(activeTabName) {
 
        // 🌟 2. 상단 이미지 영역 세팅 (상세페이지용)
         let imgFile = '';
+        
         if (isPartner) {
-            imgFile = item.img_cutin || item.img_full || item.img_sd;
+            // 🚨 [경로 뚫기 완!] 'img_detail'을 제일 먼저 찾고, 없으면 cutin -> full -> sd 순으로 찾습니다!
+            imgFile = item.img_detail || item.img_cutin || item.img_full || item.img_sd;
         } else {
-            imgFile = item.img_cutin ? item.img_cutin : (item.img || '');
+            // 장비도 혹시 모르니 똑같이 뚫어둡니다.
+            imgFile = item.img_detail || item.img_cutin || item.img || '';
         }
 
         const folder = isPartner ? 'partners' : 'items';
         const imgEl = document.getElementById('dc-image');
         imgEl.src = `assets/${folder}/${imgFile}`;
-
-        // 🚨 [수정 완료] 완벽한 핏을 유지하기 위해 억지로 자르는 cover 대신 contain으로 복구!
         imgEl.style.objectFit = 'contain';
         
         // =====================================================================
