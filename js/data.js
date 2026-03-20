@@ -84,12 +84,12 @@ const GameData = {
             flavorText: '"달의 힘을 품은 스태프. 만물을 치유하는 힘을 가지고 있다."' 
         },
         'mythic_estp_w': { 
-            id: 'mythic_estp_w', name: '전신의 쌍도끼', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
+            id: 'mythic_estp_w', name: '뇌신의 숨결', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
             atkMult: 3.5, spd: 45, critDmg: 150, mbti: 'ESTP', job: '폭풍의 무법자', passive: '아드레날린 폭주', 
             desc: '[ESTP 신화] 멈추지 않는 폭풍의 연격.',
             img: 'weapon_estp.png',
             img_cutin: 'weapon_estp_cutin.png', 
-            flavorText: '"하하하! 누가 날 막겠다고? 폭풍처럼 싹 다 쓸어버려 주마!"' 
+            flavorText: '뇌신의 숨결이 깃든 권총. 번개를 맞으면 진정한 모습으로 바뀐다.' 
         },
         'mythic_isfj_w': { 
             id: 'mythic_isfj_w', name: '별빛 성역의 랜스', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🏆', 
@@ -395,10 +395,10 @@ const GameData = {
             skillName: '달빛의 축복', skillDesc: '8초마다 4초간 마스터의 피흡 능력을 극대화하고 적의 명중률 감소', flavorText: '"당신의 상처는 부드러운 달빛이 보듬어 줄 거예요."'
         },
         'pt_m_estp': { 
-            id: 'pt_m_estp', name: '폭풍의 무법자 잭', rarity: 'mythic', emoji: '🌪️',
+            id: 'pt_m_estp', name: '폭풍의 무법자 제인', rarity: 'mythic', emoji: '🌪️',
             img_sd: 'partner_estp_sd.png', img_full: 'partner_estp_full.png', img_cutin: 'partner_estp_cutin.png', img_detail: 'partner_estp_detail.png', img_gif: 'partner_estp_live.gif',
             atkMult: 2.20, hpMult: 1.30, critRate: 25, critDmg: 150, spd: 30, element: 'air', skillCooldown: 6000, skillValue: 200, skillDuration: 0,
-            skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해', flavorText: '"하하하! 누가 날 막겠다고? 바람처럼 쓸어버려 주마!"'
+            skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해', flavorText: '"하하하! 누가 날 막겠다고? 번개처럼 쓸어버려 주마!"'
         },
         'pt_m_isfj': { 
             id: 'pt_m_isfj', name: '별의 수호자 미카엘', rarity: 'mythic', emoji: '🛡️',
