@@ -3438,7 +3438,7 @@ GameSystem.Profile = {
             console.error("내 프로필 로드 실패:", e);
       }
  // ... (이 위에는 GameSystem의 원래 코드들이 있음) ...
-    }
+    },
       // 🌟 [신규 코어] 내 점수를 기준으로 현재 몇 위인지 실시간으로 계산해 주는 엔진!
     async getUserRanks(prestige, stage, likes) {
         if (!window.db) return { tower: '-', pop: '-' };
