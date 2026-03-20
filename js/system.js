@@ -1381,7 +1381,7 @@ Ranking: {
                     const pCount = Number(d.prestige) || Number(d.prestigeCount) || 0;
                     let prestigeText = pCount > 0 ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${pCount}환생]</span>` : '';
                     
-                    let titleHtml = d.title ? `<div class="text-[8px] sm:text-[9px] text-red-400 font-black mb-0.5 animate-pulse drop-shadow-md">${d.title}</div>` : '';
+                   let titleHtml = d.title ? `<div class="px-1.5 py-0.5 rounded bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[8px] sm:text-[9px] mb-1 drop-shadow-md inline-block w-max">${d.title}</div>` : '';
                     
                     // 🌟 탭에 따라 오른쪽 표시 정보 다르게 처리!
                     let rightSideHtml = '';
@@ -3040,6 +3040,8 @@ Ranking: {
                     // 🌟 [핵심 추가!!] 환생을 대비해 영구적인 최고 층수(최고 기록)를 매 층마다 갱신해서 기억해 둡니다!
                 GameState.maxStage = Math.max(GameState.maxStage || 1, GameState.rpgStage);
                     GameState.save();
+                    // 👇 [추가됨] 전투가 끝나서 최고 기록이 갱신되면 타 유저가 보는 내 프로필(users)도 즉시 동기화!
+                if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.syncToServer) GameSystem.Profile.syncToServer();
                 
                 if(GameSystem.Quest) {
                     GameSystem.Quest.update('daily', 'd1', 1);
@@ -3437,6 +3439,30 @@ GameSystem.Profile = {
       }
  // ... (이 위에는 GameSystem의 원래 코드들이 있음) ...
     }
+      // 🌟 [신규 코어] 내 점수를 기준으로 현재 몇 위인지 실시간으로 계산해 주는 엔진!
+    async getUserRanks(prestige, stage, likes) {
+        if (!window.db) return { tower: '-', pop: '-' };
+        try {
+            // 1. 인기도 랭킹 (나보다 하트 많은 사람 수 + 1)
+            const popQ = window.query(window.collection(window.db, "users"), window.where("likes", ">", likes || 0));
+            const popSnap = await window.getDocs(popQ);
+            const popRank = popSnap.size + 1;
+
+            // 2. 시련의 탑 랭킹 (나보다 환생 높은 사람 + 환생은 같은데 층수 높은 사람 + 1)
+            const presQ = window.query(window.collection(window.db, "rankings"), window.where("prestige", ">", prestige || 0));
+            const presSnap = await window.getDocs(presQ);
+            let towerRank = presSnap.size;
+
+            const stageQ = window.query(window.collection(window.db, "rankings"), window.where("prestige", "==", prestige || 0), window.where("stage", ">", stage || 1));
+            const stageSnap = await window.getDocs(stageQ);
+            towerRank += stageSnap.size + 1;
+
+            return { tower: towerRank, pop: popRank };
+        } catch(e) {
+            console.error("랭킹 산출 실패:", e);
+            return { tower: '-', pop: '-' };
+        }
+    }  
 }; // 👈 여기가 GameSystem이 완전히 끝나는 곳! (이 괄호를 지우면 안 돼!)
 
 // =========================================================================
