@@ -84,12 +84,12 @@ const GameData = {
             flavorText: '"달의 힘을 품은 스태프. 만물을 치유하는 힘을 가지고 있다."' 
         },
         'mythic_estp_w': { 
-            id: 'mythic_estp_w', name: '뇌신의 숨결', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
+            id: 'mythic_estp_w', name: '뇌성의 숨결', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
             atkMult: 3.5, spd: 45, critDmg: 150, mbti: 'ESTP', job: '폭풍의 무법자', passive: '아드레날린 폭주', 
             desc: '[ESTP 신화] 멈추지 않는 폭풍의 연격.',
             img: 'weapon_estp.png',
             img_cutin: 'weapon_estp_cutin.png', 
-            flavorText: '뇌신의 숨결이 깃든 권총. 번개를 맞으면 진정한 모습으로 바뀐다.' 
+            flavorText: '뇌성의 숨결이 깃든 권총. 번개를 맞으면 진정한 모습으로 바뀐다.' 
         },
         'mythic_isfj_w': { 
             id: 'mythic_isfj_w', name: '별빛 성역의 랜스', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🏆', 
