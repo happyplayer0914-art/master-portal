@@ -1347,27 +1347,47 @@ updateTabUI(activeTabName) {
     },
     
   applyAvatarSkin() {
-        const skinId = GameState.equippedSkin;
-        let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; 
+        const skinId = GameState.equippedSkin; // 테두리 ID
+        const profileId = GameState.equippedProfile; // 프로필 ID
         
+        let borderClass = 'bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600'; 
+        let borderImgHtml = ''; // 🌟 테두리 이미지용 HTML
+        
+        // 1. 테두리(Border) 확인
         if (skinId && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
             const borderItem = GameData.cosmetics.borders.find(b => b.id === skinId);
-            if (borderItem) borderClass = `bg-slate-800 ${borderItem.cssClass}`; 
+            if (borderItem) {
+                if (borderItem.img) {
+                    // 이미지가 있으면 CSS 테두리 대신 덮어씌울 이미지 태그 준비
+                    borderClass = 'bg-slate-800'; 
+                    borderImgHtml = `<img src="assets/cosmetics/${borderItem.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none" onerror="this.style.display='none';">`;
+                } else {
+                    borderClass = `bg-slate-800 ${borderItem.cssClass}`; 
+                }
+            }
         }
 
-        const profileId = GameState.equippedProfile;
-        let innerIcon = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0); 
+        // 2. 프로필(Profile) 확인
+        let innerHtml = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0); 
         
         if (profileId && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
             const profileItem = GameData.cosmetics.profiles.find(p => p.id === profileId);
-            if (profileItem) innerIcon = profileItem.icon;
+            if (profileItem) {
+                if (profileItem.img) {
+                    // 이미지가 있으면 글자 이모지 대신 이미지 태그로 교체!
+                    innerHtml = `<img src="assets/cosmetics/${profileItem.img}" class="w-full h-full object-cover rounded-full z-10" onerror="this.style.display='none';">`;
+                } else {
+                    innerHtml = `<span class="z-10 relative">${profileItem.icon}</span>`;
+                }
+            }
         }
 
-        // 🚨 [핵심 방어막] 내 정보창의 메인 프사(#profile-big-icon)는 절대로 건드리지 마!
+        // 3. 모든 아바타 요소에 적용! (내 정보창 메인 프사는 제외)
         const avatars = document.querySelectorAll('.master-avatar:not(#profile-big-icon):not(#target-user-avatar)');
         avatars.forEach(a => {
-            a.className = `master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all w-10 h-10 text-xl ${borderClass}`;
-            a.innerHTML = innerIcon; 
+            a.className = `master-avatar rounded-full flex-shrink-0 flex items-center justify-center font-black text-white transition-all w-10 h-10 text-xl relative ${borderClass}`;
+            // 🌟 프로필 이미지(또는 텍스트) + 테두리 이미지를 겹쳐서 렌더링!
+            a.innerHTML = innerHtml + borderImgHtml; 
         });
         
         if (document.getElementById('screen-profile').classList.contains('active')) {
