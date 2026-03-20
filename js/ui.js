@@ -1283,19 +1283,37 @@ updateTabUI(activeTabName) {
             }
         }
 
-        let iconStr = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
+      // 🌟 [수정] 아바타 & 테두리 이미지 적용 (내 정보창 메인 프사)
+        let innerHtml = GameState.nickname === "위대한 길드장" ? "M" : GameState.nickname.charAt(0);
+        
         if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
             const pfItem = GameData.cosmetics.profiles.find(x => x.id === GameState.equippedProfile);
-            if (pfItem) iconStr = pfItem.icon;
+            if (pfItem) {
+                if (pfItem.img) {
+                    innerHtml = `<img src="assets/cosmetics/${pfItem.img}" class="w-full h-full object-cover rounded-full z-10" onerror="this.style.display='none';">`;
+                } else {
+                    innerHtml = `<span class="z-10 relative">${pfItem.icon}</span>`;
+                }
+            }
         }
+
         if(avatarEl) {
-            avatarEl.innerHTML = iconStr;
             let skinClass = "bg-slate-700 border border-slate-600";
+            let borderImgHtml = '';
+            
             if(GameState.equippedSkin && GameState.equippedSkin !== 'none' && GameState.equippedSkin !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                 const bItem = GameData.cosmetics.borders.find(x => x.id === GameState.equippedSkin);
-                if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
+                if(bItem) {
+                    if (bItem.img) {
+                        skinClass = "bg-slate-800";
+                        borderImgHtml = `<img src="assets/cosmetics/${bItem.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none" onerror="this.style.display='none';">`;
+                    } else {
+                        skinClass = `bg-slate-800 ${bItem.cssClass}`; 
+                    }
+                }
             }
             avatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass}`;
+            avatarEl.innerHTML = innerHtml + borderImgHtml;
         }
 
     // 👑 최고 기록 (환생 + 층수 통합!)
@@ -1703,32 +1721,44 @@ updateTabUI(activeTabName) {
                 }
             }
 
-          // 🌟 [미리보기 대격변] 텍스트 이모티콘을 버리고 실제 이미지를 렌더링합니다!
+       // 🌟 [미리보기 대격변] 텍스트 이모티콘을 버리고 실제 이미지를 렌더링합니다!
             let finalIconHtml = item.iconHtml;
             if (!finalIconHtml) {
                 if(item.type === 'border') {
-                    // 1. 테두리: '현재 내가 끼고 있는 프로필 아이콘'에 테두리를 직접 씌워서 보여줌!
-                    let displayIcon = myIcon;
+                    // 1. 테두리: '현재 내가 끼고 있는 프로필' 위에 테두리를 씌워서 보여줌!
+                    let displayHtml = `<span class="z-10 relative">${myIcon}</span>`;
                     if (GameState.equippedProfile && GameState.equippedProfile !== 'none' && GameState.equippedProfile !== 'default') {
                         const pfItem = GameData.cosmetics.profiles?.find(p => p.id === GameState.equippedProfile);
-                        if (pfItem) displayIcon = pfItem.icon;
+                        if (pfItem) {
+                            if (pfItem.img) displayHtml = `<img src="assets/cosmetics/${pfItem.img}" class="w-full h-full object-cover rounded-full z-10">`;
+                            else displayHtml = `<span class="z-10 relative">${pfItem.icon}</span>`;
+                        }
                     }
-                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xl font-black text-white flex-shrink-0 ${item.cssClass}">${displayIcon}</div>`;
+                    
+                    if (item.img) {
+                        finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xl font-black text-white flex-shrink-0 relative">${displayHtml}<img src="assets/cosmetics/${item.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none"></div>`;
+                    } else {
+                        finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xl font-black text-white flex-shrink-0 ${item.cssClass}">${displayHtml}</div>`;
+                    }
                 
                 } else if (item.type === 'bg') {
-                    // 2. 배경화면: 진짜 맵 이미지를 축소해서 액자(썸네일)처럼 보여줌!
+                    // 2. 배경화면
                     finalIconHtml = `<div class="w-10 h-10 rounded-lg border border-slate-500 shadow-inner flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/backgrounds/${item.img}')"></div>`;
                 
                 } else if (item.type === 'bubble') {
-                    // 3. 말풍선: 황금빛 등 실제 그라데이션/색상이 들어간 미니 말풍선을 그려줌!
+                    // 3. 말풍선
                     finalIconHtml = `<div class="w-10 h-10 rounded-lg flex items-center justify-center bg-slate-800/50 border border-slate-600 flex-shrink-0"><div class="${item.bgClass} text-[7px] px-1.5 py-1 rounded-xl rounded-tr-sm shadow-sm">미리보기</div></div>`;
                 
                 } else if (item.type === 'profile') {
-                    // 4. 프로필: 해골, 고양이 등 진짜 아이콘 렌더링!
-                    finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner flex-shrink-0">${item.icon}</div>`;
+                    // 4. 프로필: 이미지 렌더링 지원!
+                    if (item.img) {
+                        finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner flex-shrink-0 relative"><img src="assets/cosmetics/${item.img}" class="w-full h-full object-cover rounded-full z-10"></div>`;
+                    } else {
+                        finalIconHtml = `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-2xl border border-slate-500 shadow-inner flex-shrink-0"><span class="z-10 relative">${item.icon}</span></div>`;
+                    }
                 
                 } else if (item.type === 'title') {
-                    // 5. 칭호: 미니 붉은색 뱃지로 직업 이름(MBTI)을 예쁘게 표시!
+                    // 5. 칭호
                     finalIconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-800/50 flex items-center justify-center border border-slate-600 flex-shrink-0"><div class="px-1 py-0.5 rounded bg-red-900/40 border border-red-500/50 text-red-400 text-[6px] font-black uppercase drop-shadow-md tracking-wider">${item.reqMbti}</div></div>`;
                 }
             }
