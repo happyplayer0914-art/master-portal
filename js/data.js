@@ -124,12 +124,12 @@ const GameData = {
             flavorText: '우주의 진리가 담겼다 전해지는 궁극의 돌. 보기만 해도 정신이 파괴된다.' 
         },
         'mythic_istp_w': { 
-            id: 'mythic_istp_w', name: '흑요석 단검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🗡️', 
+            id: 'mythic_istp_w', name: '심연의 비수', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🗡️', 
             atkMult: 3.0, critRate: 35, critDmg: 300, mbti: 'ISTP', job: '그림자의 암살자', passive: '치명적 포착', 
             desc: '[ISTP 신화] 단 한 번의 틈을 노리는 그림자.',
             img: 'weapon_istp.png',
             img_cutin: 'weapon_istp_cutin.png', 
-            flavorText: '"소리 없이 다가가, 확실하고 깔끔하게 끝낸다."' 
+            flavorText: '세상 만물을 베고 사용자의 영혼을 갉아먹는 금지된 무기.' 
         },
         'mythic_esfp_w': { 
             id: 'mythic_esfp_w', name: '환희의 쌍검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '⚔️', 
@@ -425,10 +425,10 @@ const GameData = {
             skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해', flavorText: '"모든 물질은 분해되고 재조립되지. 너도 예외는 아니야."'
         },
         'pt_m_istp': { 
-            id: 'pt_m_istp', name: '그림자 섀도우', rarity: 'mythic', emoji: '🥷',
+            id: 'pt_m_istp', name: '침묵의 심판자 니브', rarity: 'mythic', emoji: '🥷',
             img_sd: 'partner_istp_sd.png', img_full: 'partner_istp_full.png', img_cutin: 'partner_istp_cutin.png', img_detail: 'partner_istp_detail.png', img_gif: 'partner_istp_live.gif',
             atkMult: 2.80, hpMult: 1.10, critRate: 35, critDmg: 200, spd: 25, element: 'air', skillCooldown: 7000, skillValue: 300, skillDuration: 0,
-            skillName: '치명적 포착', skillDesc: '7초마다 그림자 속에서 나타나 적의 급소를 찌르는 강력한 일격', flavorText: '"소리 없이 다가가, 확실하게 끝낸다."'
+            skillName: '침묵의 심판', skillDesc: '7초마다 그림자 속에서 나타나 적의 급소를 찌르는 강력한 일격', flavorText: '내 모습을 본 녀석은 니가 처음이야...'
         },
         'pt_m_esfp': { 
             id: 'pt_m_esfp', name: '무희 카르멘', rarity: 'mythic', emoji: '💃',
