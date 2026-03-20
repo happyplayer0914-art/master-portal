@@ -518,7 +518,7 @@ const GameData = {
             { id: 'bg_entj', name: '전장의 군령', desc: '군주의 위엄이 느껴지는 전장', price: 500, type: 'bg', img: 'bg_entj.png' },
             { id: 'bg_intj', name: '심연의 연구소', desc: '대마법사 멜리나의 은밀한 실험실', price: 500, type: 'bg', img: 'bg_intj.png' },
             { id: 'bg_infp', name: '달의 안식처', desc: '따스한 달빛이 비추는 숨겨진 안식처', price: 500, type: 'bg', img: 'bg_infp.png' },
-            { id: 'bg_estp', name: '무법자의 아지트', desc: '폭풍 전야의 거친 용병 술집', price: 500, type: 'bg', img: 'bg_estp.png' },
+            { id: 'bg_estp', name: '뇌신의 심판', desc: '마족 요새가 뇌신의 심판을 받고있다.', price: 500, type: 'bg', img: 'bg_estp.png' },
             { id: 'bg_isfj', name: '별의 성소', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
             { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
             { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 류트 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
