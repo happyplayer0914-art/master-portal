@@ -845,50 +845,79 @@ updateTabUI(activeTabName) {
 
     
     // 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
-    async openUserProfile(nickname, icon, title, stage, skinClass) {
+   async openUserProfile(nickname, icon, title, stage, skinClass) {
         
         if (nickname === GameState.nickname) return;
         window.currentTargetUser = nickname;
 
-        // 1. 기본 껍데기 세팅 (빠르게 먼저 띄움)
         document.getElementById('target-user-nickname').innerText = nickname;
-        document.getElementById('target-user-title').innerHTML = title && title !== 'undefined' && title !== '' ? title : "✨ 칭호 없음 ✨";
+        
+        // 🌟 1. 타 유저 칭호 디자인 통일
+        const titleEl = document.getElementById('target-user-title');
+        if (titleEl) {
+            titleEl.innerHTML = title && title !== 'undefined' && title !== '' ? title : "✨ 칭호 없음 ✨";
+            if (title && title !== 'undefined' && title !== '') {
+                titleEl.className = "px-2 py-1 rounded-md bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-1.5 drop-shadow-md inline-block w-max";
+            } else {
+                titleEl.className = "text-[9px] text-yellow-300 font-bold mb-1 w-max";
+            }
+        }
+
         document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
         document.getElementById('target-user-avatar').innerHTML = icon;
         document.getElementById('target-user-avatar').className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass.replace('bg-slate-700', 'bg-slate-800')}`;
         
-        // 로딩용 임시 텍스트
         document.getElementById('target-user-uid').innerText = "로딩중...";
         document.getElementById('target-user-status').innerText = "서버에서 정보를 불러오는 중입니다...";
         document.getElementById('target-user-likes').innerText = "0";
 
-        // 창 열기
+        // 🌟 2. 타 유저 랭킹 배지 틀 만들기
+        let rankBox = document.getElementById('target-profile-rank-box');
+        const uidEl = document.getElementById('target-user-uid');
+        if (!rankBox && uidEl && uidEl.parentElement) {
+            rankBox = document.createElement('div');
+            rankBox.id = 'target-profile-rank-box';
+            rankBox.className = 'flex gap-1.5 mt-0.5 mb-1.5';
+            uidEl.parentElement.parentNode.insertBefore(rankBox, uidEl.parentElement);
+        }
+        
+        if (rankBox) {
+            rankBox.innerHTML = `<span class="bg-indigo-900/60 border border-indigo-500/50 text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold">🏆 탑: 산출중..</span>
+                                 <span class="bg-pink-900/60 border border-pink-500/50 text-pink-300 px-1.5 py-0.5 rounded text-[9px] font-bold">💖 인기: 산출중..</span>`;
+        }
+
         const modal = document.getElementById('user-profile-modal');
         if (modal) {
             modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
             modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
         }
 
-        // 🌟 2. 파이어베이스에서 진짜 데이터 땡겨와서 덮어씌우기!
         if (window.db) {
             try {
                 const userRef = window.doc(window.db, "users", nickname);
                 const docSnap = await window.getDoc(userRef);
                 
-               if (docSnap.exists()) {
-            const data = docSnap.data();
-            window.currentTargetStats = data.totalStats || null;
-            window.currentTargetName = nickname;
-            
-            document.getElementById('target-user-uid').innerText = data.uid || "0000";
-            document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
-            document.getElementById('target-user-likes').innerText = data.likes || 0;
-            
-            // 🚨 [완벽 복구 2] 상대방의 환생 횟수 텍스트 렌더링!
-            const targetPCount = Number(data.prestige) || Number(data.prestigeCount) || 0;
-            const prestigeText = targetPCount > 0 ? `[${targetPCount}환생] ` : "";
-            const displayStage = data.highestStage || stage || 1;
-            document.getElementById('target-user-stage').innerText = `${prestigeText}${displayStage}F`;
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.currentTargetStats = data.totalStats || null;
+                    window.currentTargetName = nickname;
+                    
+                    document.getElementById('target-user-uid').innerText = data.uid || "0000";
+                    document.getElementById('target-user-status').innerText = data.statusMessage || "작성된 소개가 없습니다.";
+                    document.getElementById('target-user-likes').innerText = data.likes || 0;
+                    
+                    const targetPCount = Number(data.prestige) || Number(data.prestigeCount) || 0;
+                    const prestigeText = targetPCount > 0 ? `[${targetPCount}환생] ` : "";
+                    const displayStage = data.highestStage || stage || 1;
+                    document.getElementById('target-user-stage').innerText = `${prestigeText}${displayStage}F`;
+
+                    // 🌟 3. 서버 데이터 기반 타 유저 실제 랭킹 꽂아주기!
+                    if (rankBox && window.GameSystem && GameSystem.Profile && GameSystem.Profile.getUserRanks) {
+                        GameSystem.Profile.getUserRanks(targetPCount, displayStage, data.likes || 0).then(ranks => {
+                            rankBox.innerHTML = `<span class="bg-indigo-900/60 border border-indigo-500/50 text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm">🏆 탑: ${ranks.tower}위</span>
+                                                 <span class="bg-pink-900/60 border border-pink-500/50 text-pink-300 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm">💖 인기: ${ranks.pop}위</span>`;
+                        });
+                    }
                    
                   // 상대방이 설정한 배경 스킨(bgSkin) 씌워주기
                     const bgEl = document.getElementById('target-profile-bg');
@@ -1202,7 +1231,7 @@ updateTabUI(activeTabName) {
         }
     }, // <-- updateRpgLobbyUI 끝나는 괄호
   // 🌟 [전면 개편] 내 정보(프로필) UI 업데이트
-    updateProfileUI() {
+   updateProfileUI() {
         const avatarEl = document.getElementById('profile-big-icon');
         const nicknameEl = document.getElementById('profile-nickname-display');
         const titleEl = document.getElementById('profile-job-title');
@@ -1210,23 +1239,47 @@ updateTabUI(activeTabName) {
         const recordEl = document.getElementById('profile-highest-record');
         const statusEl = document.getElementById('profile-status-msg');
         const likesEl = document.getElementById('profile-likes-display');
-        const bgEl = document.getElementById('profile-bg-image'); // 배경 엘리먼트
+        const bgEl = document.getElementById('profile-bg-image'); 
 
         if(nicknameEl) nicknameEl.innerText = GameState.nickname;
 
-        if (!GameState.uid) {
-            GameState.uid = Math.floor(1000 + Math.random() * 9000).toString();
-            GameState.save();
-        }
+        if (!GameState.uid) { GameState.uid = Math.floor(1000 + Math.random() * 9000).toString(); GameState.save(); }
         if(uidEl) uidEl.innerText = GameState.uid;
 
-      if(titleEl) {
+        // 🌟 1. 칭호 디자인 통일
+        if(titleEl) {
             if(GameState.equippedTitle && GameState.equippedTitle !== 'none' && GameState.equippedTitle !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.titles) {
                 const tItem = GameData.cosmetics.titles.find(x => x.id === GameState.equippedTitle);
-                // 💡 [수정 완료] 칭호 이름 뒤에 [MBTI]를 항상 붙여서 출력하도록 변경!
                 titleEl.innerHTML = tItem ? `✨ ${tItem.name} [${tItem.reqMbti}] ✨` : "✨ 칭호 없음 ✨";
+                titleEl.className = "px-2 py-1 rounded-md bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-1.5 drop-shadow-md inline-block w-max";
             } else {
                 titleEl.innerHTML = "✨ 칭호 없음 ✨";
+                titleEl.className = "text-[9px] text-yellow-300 font-bold mb-1 w-max"; 
+            }
+        }
+
+        // 🌟 2. 닉네임 밑에 랭킹 배지 실시간 부착!
+        let rankBox = document.getElementById('my-profile-rank-box');
+        if (!rankBox && uidEl && uidEl.parentElement) {
+            rankBox = document.createElement('div');
+            rankBox.id = 'my-profile-rank-box';
+            rankBox.className = 'flex gap-1.5 mt-0.5 mb-1.5';
+            uidEl.parentElement.parentNode.insertBefore(rankBox, uidEl.parentElement); // UID 바로 위에 삽입
+        }
+        
+        if (rankBox) {
+            rankBox.innerHTML = `<span class="bg-indigo-900/60 border border-indigo-500/50 text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold">🏆 탑: 산출중..</span>
+                                 <span class="bg-pink-900/60 border border-pink-500/50 text-pink-300 px-1.5 py-0.5 rounded text-[9px] font-bold">💖 인기: 산출중..</span>`;
+            
+            if (window.GameSystem && GameSystem.Profile && GameSystem.Profile.getUserRanks) {
+                const myPrestige = Number(GameState.prestigeCount) || Number(GameState.prestige) || 0;
+                const myStage = Math.max(GameState.maxStage || 1, GameState.rpgStage || 1);
+                const myLikes = GameState.likes || 0;
+                
+                GameSystem.Profile.getUserRanks(myPrestige, myStage, myLikes).then(ranks => {
+                    rankBox.innerHTML = `<span class="bg-indigo-900/60 border border-indigo-500/50 text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm">🏆 탑: ${ranks.tower}위</span>
+                                         <span class="bg-pink-900/60 border border-pink-500/50 text-pink-300 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm">💖 인기: ${ranks.pop}위</span>`;
+                });
             }
         }
 
