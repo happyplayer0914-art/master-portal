@@ -2027,10 +2027,10 @@ updateTabUI(activeTabName) {
             if (!container || !track) return;
 
             // 💡 각 배너마다 자기만의 번호표, 타이머, 터치 센서를 가진 '독립된 개체(state)'로 만듭니다!
-            const state = {
-                container, track, dots: dotsContainer ? dotsContainer.children : null,
-                currentIndex: 0, totalSlides: 3, intervalId: null,
-                startX: 0, endX: 0, isDragging: false,
+         const state = {
+            container, track, dots: dotsContainer ? dotsContainer.children : null,
+            currentIndex: 0, totalSlides: track.children.length, intervalId: null, // 👈 여기를 3 대신 track.children.length 로 변경!
+            startX: 0, endX: 0, isDragging: false,
 
                 updateUI() {
                     this.track.style.transform = `translateX(-${this.currentIndex * 100}%)`;
