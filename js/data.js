@@ -498,12 +498,12 @@ const GameData = {
         ],
         // 👇 profiles 배열을 borders 바로 위나 아래에 쏙 끼워 넣어줘!
         profiles: [
-            { id: 'pf_cat', name: '검은 고양이', desc: '어둠 속에서 빛나는 눈동자', price: 100, type: 'profile', icon: '🐱' },
+            { id: 'pf_cat', name: '검은 고양이', desc: '어둠 속에서 빛나는 눈동자', price: 100, type: 'profile', icon: '🐱', img: 'profile_cat.png' },
             { id: 'pf_skull', name: '해골 군주', desc: '죽음을 뛰어넘은 자', price: 150, type: 'profile', icon: '💀' },
             { id: 'pf_alien', name: '외계 생명체', desc: '우주에서 온 미지의 존재', price: 200, type: 'profile', icon: '👽' }
         ],
         borders: [
-            { id: 'bd_fire', name: '지옥불 테두리', desc: '프로필을 불태우는 화염', price: 100, type: 'border', cssClass: 'ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]' },
+            { id: 'bd_fire', name: '지옥불 테두리', desc: '프로필을 불태우는 화염', price: 100, type: 'border', cssClass: 'ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]', img: 'border_fire.png' },
             { id: 'bd_ice', name: '서리꽃 테두리', desc: '얼어붙은 냉기의 오라', price: 100, type: 'border', cssClass: 'ring-2 ring-cyan-300 shadow-[0_0_15px_rgba(103,232,249,0.8)]' },
             { id: 'bd_king', name: '마왕의 관', desc: '절대적인 힘의 상징', price: 300, type: 'border', cssClass: 'ring-2 ring-purple-600 shadow-[0_0_20px_rgba(147,51,234,0.9)] animate-pulse' }
         ],
