@@ -2029,7 +2029,7 @@ updateTabUI(activeTabName) {
             // 💡 각 배너마다 자기만의 번호표, 타이머, 터치 센서를 가진 '독립된 개체(state)'로 만듭니다!
             const state = {
                 container, track, dots: dotsContainer ? dotsContainer.children : null,
-                currentIndex: 0, totalSlides: 3, intervalId: null,
+                currentIndex: 0, totalSlides: 16, intervalId: null,
                 startX: 0, endX: 0, isDragging: false,
 
                 updateUI() {
