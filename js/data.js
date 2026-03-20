@@ -100,12 +100,12 @@ const GameData = {
             flavorText: '별의 선택을 받은 자만이 그 실체를 확인할 수 있다고 전해지는 무기. 별의 힘으로 모두를 수호한다.' 
         },
         'mythic_istj_ar': { 
-            id: 'mythic_istj_ar', name: '서약의 대방패', type: 'gear', subType: 'armor', rarity: 'mythic', emoji: '🛡️', 
+            id: 'mythic_istj_ar', name: '서약의 방패', type: 'gear', subType: 'armor', rarity: 'mythic', emoji: '🛡️', 
             hpMult: 3.5, def: 30, eva: 5, mbti: 'ISTJ', job: '철의 규율 기사단장', passive: '절대 방벽', 
             desc: '[ISTJ 신화] 어떤 공격도 뚫지 못하는 철의 방벽.',
             img: 'armor_istj.png',
             img_cutin: 'armor_istj_cutin.png', 
-            flavorText: '"원칙과 규율에 따라, 다가오는 모든 위협을 차단한다."' 
+            flavorText: '서약을 맺은 대상을 영원히 수호하는 방패. 한 번 맺으면 죽을 때 까지 벗어날 수 없다.' 
         },
         'mythic_isfp_a': { 
             id: 'mythic_isfp_a', name: '바람의 숨결 류트', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🎵', 
@@ -407,10 +407,10 @@ const GameData = {
             skillName: '절대 수호진', skillDesc: '12초마다 마스터 최대 체력의 50%만큼 무적에 가까운 쉴드 생성', flavorText: '제 목숨을 바쳐서라도 성소와 당신을 지키겠습니다.'
         },
         'pt_m_istj': { 
-            id: 'pt_m_istj', name: '기사단장 발터', rarity: 'mythic', emoji: '⚔️',
+            id: 'pt_m_istj', name: '철의 규율 기사단장 아리아', rarity: 'mythic', emoji: '⚔️',
             img_sd: 'partner_istj_sd.png', img_full: 'partner_istj_full.png', img_cutin: 'partner_istj_cutin.png', img_detail: 'partner_istj_detail.png', img_gif: 'partner_istj_live.gif',
             atkMult: 1.80, hpMult: 2.20, def: 35, critRate: 15, spd: 5, element: 'earth', skillCooldown: 10000, skillValue: 250, skillDuration: 3000,
-            skillName: '처단과 심판', skillDesc: '10초마다 적에게 방어력을 무시하는 일격을 날리고 3초간 기절시킴', flavorText: '"원칙과 규율에 따라, 심연의 존재를 처단한다."'
+            skillName: '처단과 심판', skillDesc: '10초마다 적에게 방어력을 무시하는 일격을 날리고 3초간 기절시킴', flavorText: '원칙과 규율에 따라, 심연의 존재를 처단한다.'
         },
         'pt_m_isfp': { 
             id: 'pt_m_isfp', name: '바람의 음유시인 아리엘', rarity: 'mythic', emoji: '🎵',
@@ -520,7 +520,7 @@ const GameData = {
             { id: 'bg_infp', name: '달의 안식처', desc: '따스한 달빛이 비추는 숨겨진 안식처', price: 500, type: 'bg', img: 'bg_infp.png' },
             { id: 'bg_estp', name: '뇌신의 심판', desc: '마족 요새가 뇌신의 심판을 받고있다.', price: 500, type: 'bg', img: 'bg_estp.png' },
             { id: 'bg_isfj', name: '별의 성소', desc: '신성한 빛이 스며드는 수호의 성소', price: 500, type: 'bg', img: 'bg_isfj.png' },
-            { id: 'bg_istj', name: '기사단 훈련장', desc: '규율과 철퇴가 부딪히는 연병장', price: 500, type: 'bg', img: 'bg_istj.png' },
+            { id: 'bg_istj', name: '서약의 장소', desc: '원칙과 규율 그리고 서약을 맺는 장소', price: 500, type: 'bg', img: 'bg_istj.png' },
             { id: 'bg_isfp', name: '바람결 언덕', desc: '은은한 류트 소리가 들리는 평원', price: 500, type: 'bg', img: 'bg_isfp.png' },
             { id: 'bg_intp', name: '미궁 속 숨겨진 방', desc: '미궁 속 어딘가 루미아의 숨겨진 방.', price: 500, type: 'bg', img: 'bg_intp.png' },
             { id: 'bg_istp', name: '어둠의 뒷골목', desc: '은밀한 의뢰가 오가는 암살자의 거리', price: 500, type: 'bg', img: 'bg_istp.png' },
