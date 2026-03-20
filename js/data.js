@@ -73,7 +73,7 @@ const GameData = {
             desc: '[INTJ 신화] 심연의 지식이 담긴 스태프.',
             img: 'weapon_intj.png',
             img_cutin: 'weapon_intj_cutin.png', 
-            flavorText: '"깊은 심연의 공포를 형상화한 금단의 스태프. 마법의 정수를 끊임없이 갈구한다..."' 
+            flavorText: '깊은 심연의 공포를 형상화한 금단의 스태프. 마법의 정수를 끊임없이 갈구한다...' 
         },
         'mythic_infp_w': { 
             id: 'mythic_infp_w', name: '월광의 눈물', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🌿', 
@@ -81,7 +81,7 @@ const GameData = {
             desc: '[INFP 신화] 상처를 치유하는 달빛의 선율.',
             img: 'weapon_infp.png',
             img_cutin: 'weapon_infp_cutin.png', 
-            flavorText: '"달의 힘을 품은 스태프. 만물을 치유하는 힘을 가지고 있다."' 
+            flavorText: '달의 힘을 품은 스태프. 만물을 치유하는 힘을 가지고 있다.' 
         },
         'mythic_estp_w': { 
             id: 'mythic_estp_w', name: '뇌성의 숨결', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪓', 
@@ -113,7 +113,7 @@ const GameData = {
             desc: '[ISFP 신화] 바람처럼 유려한 정령의 몸놀림.',
             img: 'acc_isfp.png',
             img_cutin: 'acc_isfp_cutin.png', 
-            flavorText: '전설 속 바람의 정령과 교감했던 아름다운 음유시인의 유품. 하얀 날개 장식은 단순한 세공이 아닌, 악기에 깃든 정령의 형상이라고 전해진다.' 
+            flavorText: '전설 속 바람의 정령과 교감했던 아름다운 음유시인의 유품. 하얀 날개는 악기에 깃든 정령의 형상이라고 전해진다.' 
         },
         'mythic_intp_a': { 
             id: 'mythic_intp_a', name: '현자의 돌', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🔮', 
@@ -121,7 +121,7 @@ const GameData = {
             desc: '[INTP 신화] 우주의 진리가 담긴 궁극의 돌.',
             img: 'acc_intp.png',
             img_cutin: 'acc_intp_cutin.png', 
-            flavorText: '우주의 진리가 담겼다 전해지는 궁극의 돌. 보기만 해도 정신이 파괴된다.' 
+            flavorText: '우주의 진리가 담겼다고 전해지는 궁극의 돌. 보기만 해도 정신이 파괴된다.' 
         },
         'mythic_istp_w': { 
             id: 'mythic_istp_w', name: '심연의 비수', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🗡️', 
@@ -132,20 +132,20 @@ const GameData = {
             flavorText: '세상 만물을 베고 사용자의 영혼을 갉아먹는 금지된 무기.' 
         },
         'mythic_esfp_w': { 
-            id: 'mythic_esfp_w', name: '환희의 쌍검', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '⚔️', 
+            id: 'mythic_esfp_w', name: '삼라만상의 궤적', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '⚔️', 
             atkMult: 3.2, eva: 25, spd: 35, mbti: 'ESFP', job: '환희의 무희', passive: '스포트라이트', 
             desc: '[ESFP 신화] 전장을 무대로 만드는 화려한 검무.',
             img: 'weapon_esfp.png',
             img_cutin: 'weapon_esfp_cutin.png', 
-            flavorText: '"이 전장은 나의 스테이지야! 다들 나만 보라고~!"' 
+            flavorText: '삼라만상을 이루는 존재의 궤적이 담긴 검.' 
         },
         'mythic_enfp_a': { 
-            id: 'mythic_enfp_a', name: '별빛 나침반', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🧭', 
+            id: 'mythic_enfp_a', name: '혜성의 나침반', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🧭', 
             hpMult: 2.5, eva: 20, spd: 20, mbti: 'ENFP', job: '혜성의 탐험가', passive: '무한한 영감', 
             desc: '[ENFP 신화] 미지의 세계로 인도하는 나침반.',
             img: 'acc_enfp.png',
             img_cutin: 'acc_enfp_cutin.png', 
-            flavorText: '"저 너머에 무엇이 우릴 기다리고 있을까? 빨리 가보자, 마스터!"' 
+            flavorText: '우주의 물질로 만들어진 나침반. 혜성을 끌어들이는 힘을 가지고 있다.' 
         },
         'mythic_entp_w': { 
             id: 'mythic_entp_w', name: '차원 파괴포', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '☄️', 
@@ -171,13 +171,13 @@ const GameData = {
             img_cutin: 'armor_esfj_cutin.png', 
             flavorText: '찬란한 여명의 빛을 발산하여 어둠으로 부터 지켜준다.' 
         },
-        'mythic_enfj_w': { 
-            id: 'mythic_enfj_w', name: '태양의 지휘봉', type: 'gear', subType: 'weapon', rarity: 'mythic', emoji: '🪄', 
+        'mythic_enfj_a': { 
+            id: 'mythic_enfj_a', name: '태양의 지휘봉', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🪄', 
             atkMult: 3.5, hpMult: 2.5, spd: 20, mbti: 'ENFJ', job: '태양의 선지자', passive: '군중의 찬가', 
             desc: '[ENFJ 신화] 전군을 고양시키는 태양의 인도자.',
-            img: 'weapon_enfj.png',
-            img_cutin: 'weapon_enfj_cutin.png', 
-            flavorText: '"모두가 하나 된 마음으로 흔들림 없이 나아갈 때, 태양은 응답할 것입니다."' 
+            img: 'acc_enfj.png',
+            img_cutin: 'acc_enfj_cutin.png', 
+            flavorText: '태양의 힘을 가득 머금은 지휘봉. 주변의 발산하는 빛은 모두를 고양시킨다.' 
         },
         'mythic_infj_a': { 
             id: 'mythic_infj_a', name: '운명의 수정구', type: 'gear', subType: 'accessory', rarity: 'mythic', emoji: '🔮', 
@@ -185,7 +185,7 @@ const GameData = {
             desc: '[INFJ 신화] 모든 공격을 꿰뚫어 보는 예지의 눈.',
             img: 'acc_infj.png',
             img_cutin: 'acc_infj_cutin.png', 
-            flavorText: '"별들은 이미 이 전투의 결말을 모두 알고 있답니다."' 
+            flavorText: '별들이 미래를 보여준다고 전해지는 수정구. 운명일까.. 아님 별들의 장난일까..' 
         },
         },// 👈👈👈 [바로 이거!!!] 아이템 가방(items)을 닫아주는 마법의 괄호 추가!
     monsters: {
@@ -281,7 +281,7 @@ const GameData = {
             id: 'pt_r_fire', name: '횃불 코볼트', rarity: 'rare', emoji: '🐾',
             img_sd: 'partner_kobold_sd.png', img_full: 'partner_kobold_full.png',
             atkMult: 1.15, hpMult: 1.10, element: 'fire', skillCooldown: 1000, skillValue: 20,
-            skillName: '불티 던지기', skillDesc: '1초마다 횃불을 던져 공격력의 20% 화염 피해를 줍니다.', flavorText: '"앗 뜨거! 조심해, 털 탄다구!"'
+            skillName: '불티 던지기', skillDesc: '1초마다 횃불을 던져 공격력의 20% 화염 피해를 줍니다.', flavorText: '"앗 뜨거! 조심해!"'
         },
         'pt_r_earth': { 
             id: 'pt_r_earth', name: '꼬마 바위 골렘', rarity: 'rare', emoji: '🪨',
@@ -380,25 +380,25 @@ const GameData = {
             id: 'pt_m_entj', name: '전장의 군주 레온', rarity: 'mythic', emoji: '👑',
             img_sd: 'partner_entj_sd.png', img_full: 'partner_entj_full.png', img_cutin: 'partner_entj_cutin.png', img_detail: 'partner_entj_detail.png', img_gif: 'partner_entj_live.gif',
             atkMult: 2.50, hpMult: 1.50, critRate: 20, critDmg: 100, spd: 10, element: 'fire', skillCooldown: 12000, skillValue: 300, skillDuration: 5000,
-            skillName: '제국의 위엄', skillDesc: '12초마다 5초간 마스터의 공격력을 폭발적으로 증가시키고 적에게 강력한 화염 피해', flavorText: '"나의 깃발 아래, 패배란 존재하지 않는다. 전군 돌격!"'
+            skillName: '제국의 위엄', skillDesc: '12초마다 5초간 마스터의 공격력을 폭발적으로 증가시키고 적에게 강력한 화염 피해', flavorText: '나의 심판 아래, 패배란 존재하지 않는다!"'
         },
         'pt_m_intj': { 
             id: 'pt_m_intj', name: '심연의 대마법사 멜리나', rarity: 'mythic', emoji: '📖',
             img_sd: 'partner_intj_sd.png', img_full: 'partner_intj_full.png', img_cutin: 'partner_intj_cutin.png', img_detail: 'partner_intj_detail.png', img_gif: 'partner_intj_live.gif',
             atkMult: 3.00, hpMult: 1.20, critRate: 15, def: 20, eva: 10, element: 'ice', skillCooldown: 10000, skillValue: 500, skillDuration: 2000,
-            skillName: '절대 영도', skillDesc: '10초마다 적에게 500%의 마법 피해를 입히고 2초간 꽁꽁 얼려버림(행동 불가)', flavorText: '"모든 변수는 이미 내 계산 안에 있어. 끝내지."'
+            skillName: '절대 영도', skillDesc: '10초마다 적에게 500%의 마법 피해를 입히고 2초간 꽁꽁 얼려버림(행동 불가)', flavorText: '모든 변수는 이미 내 계산 안에 있어. 끝내지.'
         },
         'pt_m_infp': { 
             id: 'pt_m_infp', name: '달빛의 은둔술사 루나', rarity: 'mythic', emoji: '🌿',
             img_sd: 'partner_infp_sd.png', img_full: 'partner_infp_full.png', img_cutin: 'partner_infp_cutin.png', img_detail: 'partner_infp_detail.png', img_gif: 'partner_infp_live.gif',
             atkMult: 1.50, hpMult: 2.50, vamp: 25, eva: 15, def: 15, element: 'light', skillCooldown: 8000, skillValue: 40, skillDuration: 4000,
-            skillName: '달빛의 축복', skillDesc: '8초마다 4초간 마스터의 피흡 능력을 극대화하고 적의 명중률 감소', flavorText: '"당신의 상처는 부드러운 달빛이 보듬어 줄 거예요."'
+            skillName: '달빛의 축복', skillDesc: '8초마다 4초간 마스터의 피흡 능력을 극대화하고 적의 명중률 감소', flavorText: '당신의 상처는 부드러운 달빛이 보듬어 줄 거예요.'
         },
         'pt_m_estp': { 
             id: 'pt_m_estp', name: '폭풍의 무법자 제인', rarity: 'mythic', emoji: '🌪️',
             img_sd: 'partner_estp_sd.png', img_full: 'partner_estp_full.png', img_cutin: 'partner_estp_cutin.png', img_detail: 'partner_estp_detail.png', img_gif: 'partner_estp_live.gif',
             atkMult: 2.20, hpMult: 1.30, critRate: 25, critDmg: 150, spd: 30, element: 'air', skillCooldown: 6000, skillValue: 200, skillDuration: 0,
-            skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해', flavorText: '"하하하! 누가 날 막겠다고? 번개처럼 쓸어버려 주마!"'
+            skillName: '광란의 춤', skillDesc: '6초마다 폭풍처럼 빠른 3연격으로 적에게 200%의 추가 피해', flavorText: '하하하! 누가 날 막겠다고? 번개처럼 쓸어버려 주마!'
         },
         'pt_m_isfj': { 
             id: 'pt_m_isfj', name: '별의 수호자 미카엘', rarity: 'mythic', emoji: '🛡️',
@@ -416,13 +416,13 @@ const GameData = {
             id: 'pt_m_isfp', name: '바람의 음유시인 아리엘', rarity: 'mythic', emoji: '🎵',
             img_sd: 'partner_isfp_sd.png', img_full: 'partner_isfp_full.png', img_cutin: 'partner_isfp_cutin.png', img_detail: 'partner_isfp_detail.png', img_gif: 'partner_isfp_live.gif',
             atkMult: 1.60, hpMult: 1.80, eva: 35, spd: 20, def: 10, element: 'air', skillCooldown: 9000, skillValue: 30, skillDuration: 4000,
-            skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프', flavorText: '"제 노래가 바람을 타고 당신의 검 끝에 닿기를..."'
+            skillName: '산들바람 소나타', skillDesc: '9초마다 4초 동안 적의 공격을 높은 확률로 흘려보내는 회피 버프', flavorText: '제 노래가 바람을 타고 당신의 검 끝에 닿기를...'
         },
         'pt_m_intp': { 
             id: 'pt_m_intp', name: '미궁의 연금술사 루미아', rarity: 'mythic', emoji: '🧪',
             img_sd: 'partner_intp_sd.png', img_full: 'partner_intp_full.png', img_cutin: 'partner_intp_cutin.png', img_detail: 'partner_intp_detail.png', img_gif: 'partner_intp_live.gif',
             atkMult: 2.30, hpMult: 1.50, critRate: 20, def: 20, eva: 15, element: 'lightning', skillCooldown: 11000, skillValue: 400, skillDuration: 0,
-            skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해', flavorText: '"모든 물질은 분해되고 재조립되지. 너도 예외는 아니야."'
+            skillName: '현자의 폭발', skillDesc: '11초마다 불안정한 마나를 압축해 적에게 400%의 벼락 피해', flavorText: '모든 물질은 분해되고 재조립되지. 너도 예외는 아니야.'
         },
         'pt_m_istp': { 
             id: 'pt_m_istp', name: '침묵의 심판자 니브', rarity: 'mythic', emoji: '🥷',
@@ -431,16 +431,16 @@ const GameData = {
             skillName: '침묵의 심판', skillDesc: '7초마다 그림자 속에서 나타나 적의 급소를 찌르는 강력한 일격', flavorText: '내 모습을 본 녀석은 니가 처음이야...'
         },
         'pt_m_esfp': { 
-            id: 'pt_m_esfp', name: '무희 카르멘', rarity: 'mythic', emoji: '💃',
+            id: 'pt_m_esfp', name: '환희의 무희 카르멘', rarity: 'mythic', emoji: '💃',
             img_sd: 'partner_esfp_sd.png', img_full: 'partner_esfp_full.png', img_cutin: 'partner_esfp_cutin.png', img_detail: 'partner_esfp_detail.png', img_gif: 'partner_esfp_live.gif',
             atkMult: 1.90, hpMult: 1.60, eva: 25, spd: 35, critRate: 15, element: 'fire', skillCooldown: 8000, skillValue: 20, skillDuration: 5000,
-            skillName: '매혹의 불꽃무', skillDesc: '8초마다 5초간 화려한 춤으로 적을 현혹하여 공격력을 20% 감소시킴', flavorText: '"이 전장은 나의 스테이지야! 다들 나만 보라고~!"'
+            skillName: '매혹의 불꽃무', skillDesc: '8초마다 5초간 화려한 춤으로 적을 현혹하여 공격력을 20% 감소시킴', flavorText: '내가 있는 곳이 곧! 나의 스테이지야! 다들 나만 보라고~!'
         },
         'pt_m_enfp': { 
-            id: 'pt_m_enfp', name: '탐험가 핀', rarity: 'mythic', emoji: '🧭',
+            id: 'pt_m_enfp', name: '혜성의 탐험가 핀', rarity: 'mythic', emoji: '🧭',
             img_sd: 'partner_enfp_sd.png', img_full: 'partner_enfp_full.png', img_cutin: 'partner_enfp_cutin.png', img_detail: 'partner_enfp_detail.png', img_gif: 'partner_enfp_live.gif',
             atkMult: 1.70, hpMult: 1.90, spd: 40, eva: 20, vamp: 10, element: 'lightning', skillCooldown: 9000, skillValue: 150, skillDuration: 3000,
-            skillName: '별똥별 러시', skillDesc: '9초마다 혜성처럼 돌진하여 적에게 피해를 주고 3초간 감전', flavorText: '"새로운 세상이 저기에 있어! 빨리 가보자, 마스터!"'
+            skillName: '별똥별 러시', skillDesc: '9초마다 혜성처럼 돌진하여 적에게 피해를 주고 3초간 감전', flavorText: '새로운 세상이 저기에 있어! 빨리 가보자, 마스터!'
         },
         'pt_m_entp': { 
             id: 'pt_m_entp', name: '천재 마도공학자 세리아', rarity: 'mythic', emoji: '⚙️',
@@ -449,28 +449,28 @@ const GameData = {
             skillName: '하이퍼 레이저', skillDesc: '13초마다 오버클럭된 차원 파괴포를 발사해 전장을 붕괴시킨다', flavorText: '거기! 비켜!비켜! 휩쓸려도 난 몰라!'
         },
         'pt_m_estj': { 
-            id: 'pt_m_estj', name: '총사령관 빅토리아', rarity: 'mythic', emoji: '🚩',
+            id: 'pt_m_estj', name: '강철의 총사령관 빅토리아', rarity: 'mythic', emoji: '🚩',
             img_sd: 'partner_estj_sd.png', img_full: 'partner_estj_full.png', img_cutin: 'partner_estj_cutin.png', img_detail: 'partner_estj_detail.png', img_gif: 'partner_estj_live.gif',
             atkMult: 2.10, hpMult: 2.40, def: 30, spd: 10, critRate: 10, element: 'fire', skillCooldown: 15000, skillValue: 30, skillDuration: 6000,
             skillName: '전군 총공세', skillDesc: '15초마다 6초 동안 마스터의 모든 스탯(공/방/속)을 대폭 상승시킴', flavorText: '나의 명령은 절대적이다.'
         },
         'pt_m_esfj': { 
-            id: 'pt_m_esfj', name: '여명의 성기사단장 솔라', rarity: 'mythic', emoji: '🔰',
+            id: 'pt_m_esfj', name: '여명의 성기사단장 세나', rarity: 'mythic', emoji: '🔰',
             img_sd: 'partner_esfj_sd.png', img_full: 'partner_esfj_full.png', img_cutin: 'partner_esfj_cutin.png', img_detail: 'partner_esfj_detail.png', img_gif: 'partner_esfj_live.gif',
             atkMult: 1.40, hpMult: 2.80, def: 35, vamp: 20, eva: 10, element: 'light', skillCooldown: 11000, skillValue: 30, skillDuration: 4000,
-            skillName: '여명의 구원', skillDesc: '11초마다 마스터의 체력을 즉시 회복하고 4초간 받는 피해 감소', flavorText: '"어둠이 짙을수록 여명은 더욱 찬란하게 빛나는 법입니다."'
+            skillName: '여명의 구원', skillDesc: '11초마다 마스터의 체력을 즉시 회복하고 4초간 받는 피해 감소', flavorText: '어둠이 짙을수록 여명은 더욱 찬란하게 빛나는 법입니다.'
         },
         'pt_m_enfj': { 
-            id: 'pt_m_enfj', name: '선지자 아폴로', rarity: 'mythic', emoji: '☀️',
+            id: 'pt_m_enfj', name: '태양의 선지자 소라', rarity: 'mythic', emoji: '☀️',
             img_sd: 'partner_enfj_sd.png', img_full: 'partner_enfj_full.png', img_cutin: 'partner_enfj_cutin.png', img_detail: 'partner_enfj_detail.png', img_gif: 'partner_enfj_live.gif',
             atkMult: 1.80, hpMult: 2.20, critRate: 20, vamp: 15, spd: 15, element: 'fire', skillCooldown: 10000, skillValue: 40, skillDuration: 5000,
-            skillName: '태양의 찬가', skillDesc: '10초마다 5초간 적을 불태워 지속 피해를 입히고 마스터의 속도를 고양시킴', flavorText: '"모든가 하나 된 마음으로 노래할 때, 태양은 응답할 것입니다."'
+            skillName: '태양의 찬가', skillDesc: '10초마다 5초간 적을 불태워 지속 피해를 입히고 마스터의 속도를 고양시킴', flavorText: '모두가 하나 된 마음으로 노래할 때, 태양은 응답할 것입니다.'
         },
         'pt_m_infj': { 
-            id: 'pt_m_infj', name: '예언자 스텔라', rarity: 'mythic', emoji: '🌌',
+            id: 'pt_m_infj', name: '별들의 예언자 스텔라', rarity: 'mythic', emoji: '🌌',
             img_sd: 'partner_infj_sd.png', img_full: 'partner_infj_full.png', img_cutin: 'partner_infj_cutin.png', img_detail: 'partner_infj_detail.png', img_gif: 'partner_infj_live.gif',
             atkMult: 2.00, hpMult: 1.80, eva: 40, def: 15, critDmg: 80, element: 'light', skillCooldown: 14000, skillValue: 100, skillDuration: 3000,
-            skillName: '운명의 궤적', skillDesc: '14초마다 3초간 마스터의 회피율을 극한으로 끌어올려 공격을 흘려보냄', flavorText: '"별들은 이미 이 전투의 결말을 알고 있답니다."'
+            skillName: '운명의 궤적', skillDesc: '14초마다 3초간 마스터의 회피율을 극한으로 끌어올려 공격을 흘려보냄', flavorText: '별들은 이미 이 전투의 결말을 알고 있답니다.'
         }
     }, // <-- 여기까지가 partners 닫는 괄호입니다!
 
@@ -530,7 +530,7 @@ const GameData = {
             { id: 'bg_estj', name: '황혼의 잿더미: 요새의 최후', desc: '한 지배자에게 멸망한 요새', price: 500, type: 'bg', img: 'bg_estj.png' },
             { id: 'bg_esfj', name: '여명의 부름', desc: '몰려드는 어둠의 군단을 막을 누군가를 부르는 제단', price: 500, type: 'bg', img: 'bg_esfj.png' },
             { id: 'bg_enfj', name: '태양의 신전', desc: '군중의 찬가가 울려 퍼지는 웅장한 곳', price: 500, type: 'bg', img: 'bg_enfj.png' },
-            { id: 'bg_infj', name: '별의 관측소', desc: '운명의 궤적을 엿보는 신비한 천문대', price: 500, type: 'bg', img: 'bg_infj.png' }
+            { id: 'bg_infj', name: '별의 관측소', desc: '운명의 궤적을 엿보는 신비한 장소', price: 500, type: 'bg', img: 'bg_infj.png' }
         ],
         bubbles: [
             { id: 'bb_gold', name: '황금빛 외침', desc: '채팅창의 시선을 독점하세요', price: 150, type: 'bubble', bgClass: 'bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-bold' }
