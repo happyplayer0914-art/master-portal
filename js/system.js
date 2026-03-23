@@ -1412,7 +1412,7 @@ Ranking: {
                             <div class="flex items-center gap-2 flex-1 min-w-0">
                                 <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? (this.currentTab === 'popularity' && i === 0 ? 'text-pink-400' : 'text-yellow-400') : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
                                 
-                                <div onclick="UIManager.openUserProfile('${d.nickname}', '${safeProfile}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0 relative z-10">${avatarFullHtml}</div>
+                                <div onclick="UIManager.openUserProfile('${d.nickname}', '${safeProfile}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${borderClass} shrink-0 relative z-10">${avatarFullHtml}</div>
                                 
                                 <div class="rank-marquee-box flex-1 min-w-0">
                                     <div class="rank-marquee-text">
@@ -1956,7 +1956,7 @@ Ranking: {
                 } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${safeProfile}', '${msg.titleShort || ''}', '', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${avatarFullHtml}</div>
+                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${safeProfile}', '${msg.titleShort || ''}', '', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${borderClass}">${avatarFullHtml}</div>
                             
                             <div class="flex flex-col items-start max-w-[75%]">
                                 <div class="flex items-center gap-1.5 mb-0.5">
