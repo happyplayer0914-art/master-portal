@@ -45,11 +45,15 @@ const UIManager = {
         let items = [];
         let ownedCount = 0;
 
-        // 2. 데이터 불러오기 및 정렬 (신화 등급이 맨 앞에 오도록!)
+        // 2. 데이터 불러오기 및 정렬 (🌟 뻑남 방지: 안전 장치 추가!)
         if (type === 'partner') {
-            items = Object.values(window.GameData?.partners || {}).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || a.name.localeCompare(b.name));
+            items = Object.values(window.GameData?.partners || {})
+                .filter(p => p && p.id) // 아이디가 없는 찌꺼기 데이터 필터링
+                .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         } else {
-            items = Object.values(window.GameData?.items || {}).filter(i => i.type === type).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || a.name.localeCompare(b.name));
+            items = Object.values(window.GameData?.items || {})
+                .filter(i => i && i.id && i.type === type) // 아이템 타입이 정확히 일치하는 정상 데이터만!
+                .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         }
 
         const totalCount = items.length;
@@ -59,14 +63,16 @@ const UIManager = {
             let isOwned = false;
             let clickAction = '';
             
-            // 보유 여부 체크
+            // 보유 여부 체크 및 🌟 알맞은 상세창 함수(openDetailCard)로 연결!
             if (type === 'partner') {
                 isOwned = GameState.ownedPartners.includes(item.id);
-                // 보유시 상세창 열기, 미보유시 잠김 알림
-                clickAction = isOwned ? `onclick="UIManager.showPartnerDetails('${item.id}')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
+                // 파트너 탭에서 클릭 시:
+                clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'partner')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
             } else {
-                isOwned = GameState.inventory.includes(item.id) || GameState.equipped[item.type] === item.id;
-                clickAction = isOwned ? `onclick="UIManager.showItemDetails('${item.id}')"` : `onclick="alert('아직 획득하지 못한 장비입니다.\\n[???]')"`;
+                // 장착 중인 장비도 보유한 것으로 체크!
+                isOwned = GameState.inventory.includes(item.id) || (GameState.equipped && GameState.equipped[item.type] === item.id);
+                // 장비 탭에서 클릭 시:
+                clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'gear')"` : `onclick="alert('아직 획득하지 못한 장비입니다.\\n[???]')"`;
             }
 
             if (isOwned) ownedCount++;
@@ -78,9 +84,9 @@ const UIManager = {
                             item.rarity === 'rare' ? 'bg-gradient-to-br from-blue-900 to-cyan-900 border-blue-500' :
                             'bg-slate-700 border-slate-500';
 
-            // 🌟 꿀잼 포인트: 미보유 항목은 흑백 실루엣 처리!
+            // 흑백 실루엣 처리
             const filterClass = isOwned ? '' : 'grayscale-[100%] opacity-30 contrast-50 brightness-50';
-            const displayName = isOwned ? item.name : '???';
+            const displayName = isOwned ? (item.name || '이름 없음') : '???';
 
             // 아이콘 or 이미지 세팅
             let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || '❔'}</div>`;
