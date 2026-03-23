@@ -25,7 +25,8 @@ const UIManager = {
         content.classList.add('scale-95');
     },
 
-   renderCollection(type) {
+  renderCollection(type) {
+        // 1. 탭 버튼 색상 변경
         ['partner', 'weapon', 'armor', 'accessory'].forEach(t => {
             const btn = document.getElementById(`collection-tab-${t}`);
             if(!btn) return;
@@ -44,7 +45,7 @@ const UIManager = {
         let items = [];
         let ownedCount = 0;
 
-        // 🌟 [절대 무적] 데이터가 배열이든 객체든 ID를 완벽하게 유지하며 빼옵니다!
+        // 🌟 [핵심 수정 1] 장비는 type이 아닌 'subType'으로 걸러내야 합니다!
         if (type === 'partner') {
             const raw = window.GameData?.partners || {};
             const arr = Array.isArray(raw) ? raw : Object.keys(raw).map(k => ({ id: raw[k].id || k, ...raw[k] }));
@@ -52,7 +53,8 @@ const UIManager = {
         } else {
             const raw = window.GameData?.items || {};
             const arr = Array.isArray(raw) ? raw : Object.keys(raw).map(k => ({ id: raw[k].id || k, ...raw[k] }));
-            items = arr.filter(i => i && i.id && i.type === type).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
+            // 👉 i.type === type 에서 i.subType === type 으로 변경 완료!
+            items = arr.filter(i => i && i.id && i.subType === type).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         }
 
         const totalCount = items.length;
@@ -61,11 +63,12 @@ const UIManager = {
             let isOwned = false;
             let clickAction = '';
             
+            // 🌟 장착 중인 장비 체크 로직도 subType으로 변경 완료!
             if (type === 'partner') {
                 isOwned = GameState.ownedPartners.includes(item.id);
                 clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'partner')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
             } else {
-                isOwned = GameState.inventory.includes(item.id) || (GameState.equipped && GameState.equipped[item.type] === item.id);
+                isOwned = GameState.inventory.includes(item.id) || (GameState.equipped && GameState.equipped[item.subType] === item.id);
                 clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'gear')"` : `onclick="alert('아직 획득하지 못한 장비입니다.\\n[???]')"`;
             }
 
@@ -80,10 +83,10 @@ const UIManager = {
             const filterClass = isOwned ? '' : 'grayscale-[100%] opacity-30 contrast-50 brightness-50';
             const displayName = isOwned ? (item.name || '이름 없음') : '???';
 
-            // 이미지 찾기 (마스터님이 어떤 이름으로 쓰셨든 다 걸려들게 세팅!)
-            const imgSrc = item.img || item.sdImg || item.sd_img || item.image || item.iconImg || item.partnerImg;
+            // 🌟 [핵심 수정 2] 마스터님의 데이터에 맞춰 img_sd 와 emoji 를 완벽 지원!
+            const imgSrc = item.img || item.img_sd || item.sdImg || item.image || item.iconImg || item.partnerImg;
             
-            let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || '❔'}</div>`;
+            let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || item.emoji || '❔'}</div>`;
             if (imgSrc) {
                 const folder = type === 'partner' ? 'partners' : 'items';
                 iconHtml = `<img src="assets/${folder}/${imgSrc}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-1 drop-shadow-md" onerror="this.style.display='none';">`;
