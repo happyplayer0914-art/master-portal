@@ -3,7 +3,104 @@
 // ========================================================================
 const UIManager = {
 
-    // UIManager 객체 안에 추가하세요!
+   // ==========================================
+    // 📖 [신규] 도감(Encyclopedia) 시스템 엔진
+    // ==========================================
+    openCollectionModal() {
+        const modal = document.getElementById('collection-modal');
+        const content = document.getElementById('collection-modal-content');
+        if(!modal || !content) return;
+        
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        content.classList.remove('scale-95');
+        this.renderCollection('partner'); // 열릴 때 기본으로 파트너 탭 보여주기
+    },
+
+    closeCollectionModal() {
+        const modal = document.getElementById('collection-modal');
+        const content = document.getElementById('collection-modal-content');
+        if(!modal || !content) return;
+
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        content.classList.add('scale-95');
+    },
+
+    renderCollection(type) {
+        // 1. 탭 버튼 색상 변경 (활성화/비활성화)
+        ['partner', 'weapon', 'armor', 'accessory'].forEach(t => {
+            const btn = document.getElementById(`collection-tab-${t}`);
+            if(!btn) return;
+            if (t === type) {
+                btn.className = "flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs sm:text-sm transition-colors shadow-md";
+            } else {
+                btn.className = "flex-1 py-2 rounded-lg bg-slate-700 text-slate-400 font-bold text-xs sm:text-sm transition-colors hover:bg-slate-600";
+            }
+        });
+
+        const grid = document.getElementById('collection-grid');
+        if(!grid) return;
+        grid.innerHTML = '';
+
+        const rarityRank = { mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+        let items = [];
+        let ownedCount = 0;
+
+        // 2. 데이터 불러오기 및 정렬 (신화 등급이 맨 앞에 오도록!)
+        if (type === 'partner') {
+            items = Object.values(window.GameData?.partners || {}).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || a.name.localeCompare(b.name));
+        } else {
+            items = Object.values(window.GameData?.items || {}).filter(i => i.type === type).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || a.name.localeCompare(b.name));
+        }
+
+        const totalCount = items.length;
+
+        // 3. 도감 그리드 그리기
+        items.forEach(item => {
+            let isOwned = false;
+            let clickAction = '';
+            
+            // 보유 여부 체크
+            if (type === 'partner') {
+                isOwned = GameState.ownedPartners.includes(item.id);
+                // 보유시 상세창 열기, 미보유시 잠김 알림
+                clickAction = isOwned ? `onclick="UIManager.showPartnerDetails('${item.id}')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
+            } else {
+                isOwned = GameState.inventory.includes(item.id) || GameState.equipped[item.type] === item.id;
+                clickAction = isOwned ? `onclick="UIManager.showItemDetails('${item.id}')"` : `onclick="alert('아직 획득하지 못한 장비입니다.\\n[???]')"`;
+            }
+
+            if (isOwned) ownedCount++;
+
+            // 등급별 배경색
+            const bgClass = item.rarity === 'mythic' ? 'bg-gradient-to-br from-purple-900 to-red-900 border-red-500' :
+                            item.rarity === 'legendary' ? 'bg-gradient-to-br from-yellow-900 to-amber-900 border-yellow-500' :
+                            item.rarity === 'epic' ? 'bg-gradient-to-br from-purple-900 to-indigo-900 border-purple-500' :
+                            item.rarity === 'rare' ? 'bg-gradient-to-br from-blue-900 to-cyan-900 border-blue-500' :
+                            'bg-slate-700 border-slate-500';
+
+            // 🌟 꿀잼 포인트: 미보유 항목은 흑백 실루엣 처리!
+            const filterClass = isOwned ? '' : 'grayscale-[100%] opacity-30 contrast-50 brightness-50';
+            const displayName = isOwned ? item.name : '???';
+
+            // 아이콘 or 이미지 세팅
+            let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || '❔'}</div>`;
+            if (item.img) {
+                iconHtml = `<img src="assets/${type === 'partner' ? 'partners' : 'items'}/${item.img}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-1 drop-shadow-md" onerror="this.style.display='none';">`;
+            }
+
+            grid.innerHTML += `
+                <div ${clickAction} class="relative w-full aspect-square rounded-xl border-2 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden ${bgClass} ${filterClass}">
+                    ${iconHtml}
+                    <div class="text-[8px] sm:text-[9px] font-black text-white text-center w-full px-1 truncate drop-shadow-md">${displayName}</div>
+                    ${isOwned ? '<div class="absolute -top-1 -right-1 bg-green-500 text-white text-[7px] sm:text-[8px] px-1.5 py-0.5 rounded-full font-bold shadow-md">보유</div>' : ''}
+                </div>
+            `;
+        });
+
+        // 4. 수집률 텍스트 업데이트
+        const percent = totalCount === 0 ? 0 : Math.floor((ownedCount / totalCount) * 100);
+        document.getElementById('collection-progress').innerText = `수집률: ${percent}% (${ownedCount} / ${totalCount})`;
+    },
     
     // 💡 [호출 연결용] index.html의 버튼이 이 함수를 부릅니다!
     openStickerMode() {
