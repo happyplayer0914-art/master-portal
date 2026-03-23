@@ -844,15 +844,14 @@ updateTabUI(activeTabName) {
     },
 
     
-    // 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
-   async openUserProfile(nickname, icon, title, stage, skinClass) {
+// 👤 [완성판] 타 유저 팝업창 열기 (파이어베이스 실시간 연동!)
+    async openUserProfile(nickname, profileId, title, stage, skinId) {
         
         if (nickname === GameState.nickname) return;
         window.currentTargetUser = nickname;
 
         document.getElementById('target-user-nickname').innerText = nickname;
         
-        // 🌟 1. 타 유저 칭호 디자인 통일
         const titleEl = document.getElementById('target-user-title');
         if (titleEl) {
             titleEl.innerHTML = title && title !== 'undefined' && title !== '' ? title : "✨ 칭호 없음 ✨";
@@ -864,14 +863,39 @@ updateTabUI(activeTabName) {
         }
 
         document.getElementById('target-user-stage').innerText = stage && stage !== 'undefined' ? `${stage}F` : "알 수 없음";
-        document.getElementById('target-user-avatar').innerHTML = icon;
-        document.getElementById('target-user-avatar').className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${skinClass.replace('bg-slate-700', 'bg-slate-800')}`;
+
+        // 🌟 1. 타 유저 프로필 팝업창 아바타 렌더링!
+        let avatarHtml = nickname === "위대한 길드장" ? "M" : nickname.charAt(0);
+        if (profileId && profileId !== 'none' && profileId !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
+            const pfItem = GameData.cosmetics.profiles.find(x => x.id === profileId);
+            if (pfItem) {
+                if (pfItem.img) avatarHtml = `<img src="assets/cosmetics/${pfItem.img}" class="w-full h-full object-cover rounded-full z-10" onerror="this.style.display='none';">`;
+                else avatarHtml = `<span class="z-10 relative">${pfItem.icon}</span>`;
+            }
+        }
+
+        let borderClass = "bg-slate-800 border border-slate-600";
+        let borderImgHtml = '';
+        if (skinId && skinId !== 'none' && skinId !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
+            const bItem = GameData.cosmetics.borders.find(x => x.id === skinId);
+            if (bItem) {
+                if (bItem.img) {
+                    borderImgHtml = `<img src="assets/cosmetics/${bItem.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none" onerror="this.style.display='none';">`;
+                } else {
+                    borderClass = `bg-slate-800 ${bItem.cssClass}`;
+                }
+            }
+        }
+
+        const targetAvatarEl = document.getElementById('target-user-avatar');
+        targetAvatarEl.className = `master-avatar w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 relative ${borderClass}`;
+        targetAvatarEl.innerHTML = avatarHtml + borderImgHtml;
         
         document.getElementById('target-user-uid').innerText = "로딩중...";
         document.getElementById('target-user-status').innerText = "서버에서 정보를 불러오는 중입니다...";
         document.getElementById('target-user-likes').innerText = "0";
 
-        // 🌟 2. 타 유저 랭킹 배지 틀 만들기
+        // 타 유저 랭킹 배지 틀 만들기
         let rankBox = document.getElementById('target-profile-rank-box');
         const uidEl = document.getElementById('target-user-uid');
         if (!rankBox && uidEl && uidEl.parentElement) {
@@ -880,7 +904,6 @@ updateTabUI(activeTabName) {
             rankBox.className = 'flex gap-1.5 mt-0.5 mb-1.5';
             uidEl.parentElement.parentNode.insertBefore(rankBox, uidEl.parentElement);
         }
-        
         if (rankBox) {
             rankBox.innerHTML = `<span class="bg-indigo-900/60 border border-indigo-500/50 text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold">🏆 탑: 산출중..</span>
                                  <span class="bg-pink-900/60 border border-pink-500/50 text-pink-300 px-1.5 py-0.5 rounded text-[9px] font-bold">💖 인기: 산출중..</span>`;
