@@ -1352,27 +1352,37 @@ Ranking: {
                 list.innerHTML = '';
                 
                 uniqueTop10.forEach((d, i) => {
-                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
-                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } 
-                    else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } 
-                    else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
-                    
-                    if(this.currentTab === 'popularity' && i === 0) {
-                        bgClass = "bg-gradient-to-r from-pink-900/40 to-slate-900 border border-pink-500/50 shadow-[0_0_15px_rgba(236,72,153,0.2)]";
-                    }
-                    
-                    let skinClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
+             // --- 🌟 교체 시작: 랭킹 리스트 아바타 이미지 렌더링 ---
+                    let borderClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
+                    let borderImgHtml = '';
                     let sId = d.skin;
                     if(sId && sId !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                         const bItem = GameData.cosmetics.borders.find(x => x.id === sId);
-                        if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`; 
+                        if(bItem) {
+                            if (bItem.img) {
+                                borderClass = "bg-slate-800";
+                                borderImgHtml = `<img src="assets/cosmetics/${bItem.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none" onerror="this.style.display='none';">`;
+                            } else {
+                                borderClass = `bg-slate-800 ${bItem.cssClass}`;
+                            }
+                        }
                     }
                     
                     let innerIcon = d.nickname.charAt(0);
                     if (d.profile && d.profile !== 'none' && d.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
                         const pfItem = GameData.cosmetics.profiles.find(x => x.id === d.profile);
-                        if (pfItem) innerIcon = pfItem.icon;
+                        if (pfItem) {
+                            if (pfItem.img) {
+                                innerIcon = `<img src="assets/cosmetics/${pfItem.img}" class="w-full h-full object-cover rounded-full z-10" onerror="this.style.display='none';">`;
+                            } else {
+                                innerIcon = `<span class="z-10 relative">${pfItem.icon}</span>`;
+                            }
+                        }
                     }
+                    const avatarFullHtml = innerIcon + borderImgHtml;
+                    const safeProfile = d.profile || 'none';
+                    const safeSkin = d.skin || 'none';
+                    // --- 🌟 교체 끝 ---
                     
                     const isMe = (d.nickname === GameState.nickname); 
                     const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
@@ -1402,7 +1412,7 @@ Ranking: {
                             <div class="flex items-center gap-2 flex-1 min-w-0">
                                 <div class="w-10 sm:w-11 text-center font-black ${i < 3 ? (this.currentTab === 'popularity' && i === 0 ? 'text-pink-400' : 'text-yellow-400') : 'text-slate-500'} shrink-0 whitespace-nowrap text-[13px] sm:text-sm tracking-tighter">${rankIcon}</div>
                                 
-                                <div onclick="UIManager.openUserProfile('${d.nickname}', '${innerIcon}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${skinClass.replace(/'/g, "\\'")}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0 relative z-10">${innerIcon}</div>
+                                <div onclick="UIManager.openUserProfile('${d.nickname}', '${safeProfile}', '${(d.title || '').replace(/'/g, "\\'")}', '${d.stage}', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm text-white shadow-md ${skinClass} shrink-0 relative z-10">${avatarFullHtml}</div>
                                 
                                 <div class="rank-marquee-box flex-1 min-w-0">
                                     <div class="rank-marquee-text">
@@ -1894,17 +1904,36 @@ Ranking: {
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
-                let skinClass = "bg-slate-700 border border-slate-600"; 
+               // --- 🌟 교체 시작: 채팅창 아바타 이미지 렌더링 ---
+                let borderClass = "bg-slate-700 border border-slate-600"; 
+                let borderImgHtml = '';
                 if(msg.skin && msg.skin !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
                     const bItem = GameData.cosmetics.borders.find(x => x.id === msg.skin);
-                    if(bItem) skinClass = `bg-slate-800 ${bItem.cssClass}`;
+                    if(bItem) {
+                        if(bItem.img) {
+                            borderClass = "bg-slate-800";
+                            borderImgHtml = `<img src="assets/cosmetics/${bItem.img}" class="absolute inset-0 w-full h-full object-cover scale-125 z-20 pointer-events-none" onerror="this.style.display='none';">`;
+                        } else {
+                            borderClass = `bg-slate-800 ${bItem.cssClass}`;
+                        }
+                    }
                 }
 
                 let innerIcon = msg.nickname.charAt(0);
                 if (msg.profile && msg.profile !== 'none' && msg.profile !== 'default' && window.GameData && GameData.cosmetics && GameData.cosmetics.profiles) {
                     const pfItem = GameData.cosmetics.profiles.find(x => x.id === msg.profile);
-                    if (pfItem) innerIcon = pfItem.icon;
+                    if (pfItem) {
+                        if (pfItem.img) {
+                            innerIcon = `<img src="assets/cosmetics/${pfItem.img}" class="w-full h-full object-cover rounded-full z-10" onerror="this.style.display='none';">`;
+                        } else {
+                            innerIcon = `<span class="z-10 relative">${pfItem.icon}</span>`;
+                        }
+                    }
                 }
+                const avatarFullHtml = innerIcon + borderImgHtml;
+                const safeProfile = msg.profile || 'none';
+                const safeSkin = msg.skin || 'none';
+                // --- 🌟 교체 끝 ---
            
                 let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; 
                 if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
@@ -1927,7 +1956,7 @@ Ranking: {
                 } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${innerIcon}', '${msg.titleShort || ''}', '', '${skinClass.replace(/'/g, "\\'")}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${innerIcon}</div>
+                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${safeProfile}', '${msg.titleShort || ''}', '', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${skinClass}">${avatarFullHtml}</div>
                             
                             <div class="flex flex-col items-start max-w-[75%]">
                                 <div class="flex items-center gap-1.5 mb-0.5">
