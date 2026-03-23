@@ -25,8 +25,7 @@ const UIManager = {
         content.classList.add('scale-95');
     },
 
-    renderCollection(type) {
-        // 1. 탭 버튼 색상 변경 (활성화/비활성화)
+   renderCollection(type) {
         ['partner', 'weapon', 'armor', 'accessory'].forEach(t => {
             const btn = document.getElementById(`collection-tab-${t}`);
             if(!btn) return;
@@ -45,26 +44,23 @@ const UIManager = {
         let items = [];
         let ownedCount = 0;
 
-        // 🌟 [수정] 데이터 안전 불러오기: Key 값을 강제로 id로 꽂아 넣어서 절대 증발하지 않게 만듭니다!
+        // 🌟 [절대 무적] 데이터가 배열이든 객체든 ID를 완벽하게 유지하며 빼옵니다!
         if (type === 'partner') {
             const raw = window.GameData?.partners || {};
-            items = Object.keys(raw).map(k => ({ id: k, ...raw[k] }))
-                .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
+            const arr = Array.isArray(raw) ? raw : Object.keys(raw).map(k => ({ id: raw[k].id || k, ...raw[k] }));
+            items = arr.filter(p => p && p.id).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         } else {
             const raw = window.GameData?.items || {};
-            items = Object.keys(raw).map(k => ({ id: k, ...raw[k] }))
-                .filter(i => i.type === type)
-                .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
+            const arr = Array.isArray(raw) ? raw : Object.keys(raw).map(k => ({ id: raw[k].id || k, ...raw[k] }));
+            items = arr.filter(i => i && i.id && i.type === type).sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         }
 
         const totalCount = items.length;
 
-        // 3. 도감 그리드 그리기
         items.forEach(item => {
             let isOwned = false;
             let clickAction = '';
             
-            // 보유 여부 체크
             if (type === 'partner') {
                 isOwned = GameState.ownedPartners.includes(item.id);
                 clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'partner')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
@@ -75,19 +71,17 @@ const UIManager = {
 
             if (isOwned) ownedCount++;
 
-            // 등급별 배경색
             const bgClass = item.rarity === 'mythic' ? 'bg-gradient-to-br from-purple-900 to-red-900 border-red-500' :
                             item.rarity === 'legendary' ? 'bg-gradient-to-br from-yellow-900 to-amber-900 border-yellow-500' :
                             item.rarity === 'epic' ? 'bg-gradient-to-br from-purple-900 to-indigo-900 border-purple-500' :
                             item.rarity === 'rare' ? 'bg-gradient-to-br from-blue-900 to-cyan-900 border-blue-500' :
                             'bg-slate-700 border-slate-500';
 
-            // 흑백 실루엣 처리
             const filterClass = isOwned ? '' : 'grayscale-[100%] opacity-30 contrast-50 brightness-50';
             const displayName = isOwned ? (item.name || '이름 없음') : '???';
 
-            // 🌟 [수정] 융통성 끝판왕: img, sdImg, sd_img, image 중 뭐가 걸리든 다 찾아냅니다!
-            const imgSrc = item.img || item.sdImg || item.sd_img || item.image || item.iconImg;
+            // 이미지 찾기 (마스터님이 어떤 이름으로 쓰셨든 다 걸려들게 세팅!)
+            const imgSrc = item.img || item.sdImg || item.sd_img || item.image || item.iconImg || item.partnerImg;
             
             let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || '❔'}</div>`;
             if (imgSrc) {
@@ -104,7 +98,6 @@ const UIManager = {
             `;
         });
 
-        // 4. 수집률 텍스트 업데이트
         const percent = totalCount === 0 ? 0 : Math.floor((ownedCount / totalCount) * 100);
         document.getElementById('collection-progress').innerText = `수집률: ${percent}% (${ownedCount} / ${totalCount})`;
     },
