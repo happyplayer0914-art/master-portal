@@ -45,14 +45,15 @@ const UIManager = {
         let items = [];
         let ownedCount = 0;
 
-        // 2. 데이터 불러오기 및 정렬 (🌟 뻑남 방지: 안전 장치 추가!)
+        // 🌟 [수정] 데이터 안전 불러오기: Key 값을 강제로 id로 꽂아 넣어서 절대 증발하지 않게 만듭니다!
         if (type === 'partner') {
-            items = Object.values(window.GameData?.partners || {})
-                .filter(p => p && p.id) // 아이디가 없는 찌꺼기 데이터 필터링
+            const raw = window.GameData?.partners || {};
+            items = Object.keys(raw).map(k => ({ id: k, ...raw[k] }))
                 .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         } else {
-            items = Object.values(window.GameData?.items || {})
-                .filter(i => i && i.id && i.type === type) // 아이템 타입이 정확히 일치하는 정상 데이터만!
+            const raw = window.GameData?.items || {};
+            items = Object.keys(raw).map(k => ({ id: k, ...raw[k] }))
+                .filter(i => i.type === type)
                 .sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0) || (a.name || '').localeCompare(b.name || ''));
         }
 
@@ -63,15 +64,12 @@ const UIManager = {
             let isOwned = false;
             let clickAction = '';
             
-            // 보유 여부 체크 및 🌟 알맞은 상세창 함수(openDetailCard)로 연결!
+            // 보유 여부 체크
             if (type === 'partner') {
                 isOwned = GameState.ownedPartners.includes(item.id);
-                // 파트너 탭에서 클릭 시:
                 clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'partner')"` : `onclick="alert('아직 획득하지 못한 파트너입니다.\\n[???]')"`;
             } else {
-                // 장착 중인 장비도 보유한 것으로 체크!
                 isOwned = GameState.inventory.includes(item.id) || (GameState.equipped && GameState.equipped[item.type] === item.id);
-                // 장비 탭에서 클릭 시:
                 clickAction = isOwned ? `onclick="UIManager.openDetailCard('${item.id}', 'gear')"` : `onclick="alert('아직 획득하지 못한 장비입니다.\\n[???]')"`;
             }
 
@@ -88,10 +86,13 @@ const UIManager = {
             const filterClass = isOwned ? '' : 'grayscale-[100%] opacity-30 contrast-50 brightness-50';
             const displayName = isOwned ? (item.name || '이름 없음') : '???';
 
-            // 아이콘 or 이미지 세팅
+            // 🌟 [수정] 융통성 끝판왕: img, sdImg, sd_img, image 중 뭐가 걸리든 다 찾아냅니다!
+            const imgSrc = item.img || item.sdImg || item.sd_img || item.image || item.iconImg;
+            
             let iconHtml = `<div class="text-2xl sm:text-3xl mb-1">${item.icon || '❔'}</div>`;
-            if (item.img) {
-                iconHtml = `<img src="assets/${type === 'partner' ? 'partners' : 'items'}/${item.img}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-1 drop-shadow-md" onerror="this.style.display='none';">`;
+            if (imgSrc) {
+                const folder = type === 'partner' ? 'partners' : 'items';
+                iconHtml = `<img src="assets/${folder}/${imgSrc}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-1 drop-shadow-md" onerror="this.style.display='none';">`;
             }
 
             grid.innerHTML += `
