@@ -1498,14 +1498,38 @@ updateTabUI(activeTabName) {
         pGear.innerHTML = ''; 
         let hasGear = false;
         
-        const counts = {}; 
+       const counts = {}; 
         GameState.inventory.forEach(i => counts[i] = (counts[i] || 0) + 1);
 
         const groupedCards = { weapon: [], armor: [], accessory: [] };
 
-        for(const [id, count] of Object.entries(counts)) {
+        // 🌟 [신규 장착] 등급 ➔ 강화 레벨 ➔ 이름 순서로 자동 정렬해 주는 스마트 엔진!
+        const rarityRank = { mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+        
+        const sortedIds = Object.keys(counts).sort((a, b) => {
+            const itemA = GameData.items[a];
+            const itemB = GameData.items[b];
+            if (!itemA || !itemB) return 0;
+            
+            // 1순위: 등급(희귀도) 높은 순
+            const rankA = rarityRank[itemA.rarity] || 0;
+            const rankB = rarityRank[itemB.rarity] || 0;
+            if (rankA !== rankB) return rankB - rankA;
+            
+            // 2순위: 등급이 같으면 강화 레벨 높은 순
+            const levelA = GameState.itemUpgrades[a] || 0;
+            const levelB = GameState.itemUpgrades[b] || 0;
+            if (levelA !== levelB) return levelB - levelA;
+            
+           // 3순위: 다 똑같으면 이름 가나다순
+            return itemA.name.localeCompare(itemB.name);
+        });
+
+        // 💡 기존의 for...of 반복문 대신 정렬된 배열(sortedIds)로 반복문 실행!
+        sortedIds.forEach(id => {
+            const count = counts[id];
             const item = GameData.items[id]; 
-            if(!item || item.type === 'skin') continue; 
+            if(!item || item.type === 'skin') return;
             
             let isEquipped = false;
             if (item.subType === 'weapon' && GameState.equippedWeapon === id) isEquipped = true;
@@ -1552,7 +1576,7 @@ updateTabUI(activeTabName) {
             
             groupedCards[item.subType].push(card);
             hasGear = true; 
-        }
+        });
 
         // 장비 분류 렌더링
         if (groupedCards.weapon.length > 0) {
@@ -1606,8 +1630,27 @@ updateTabUI(activeTabName) {
 
         let html = '';
         
-        // 👇 2. 중복을 합친 고유 ID 목록으로 반복문 돌리기!
-        Object.keys(counts).forEach(id => {
+        // 🌟 [신규 장착] 파트너도 등급 ➔ 돌파 레벨 ➔ 이름 순서로 쫙! 정렬합니다.
+        const rarityRank = { mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+        
+        const sortedIds = Object.keys(counts).sort((a, b) => {
+            const ptA = GameData.partners[a];
+            const ptB = GameData.partners[b];
+            if (!ptA || !ptB) return 0;
+            
+            const rankA = rarityRank[ptA.rarity] || 0;
+            const rankB = rarityRank[ptB.rarity] || 0;
+            if (rankA !== rankB) return rankB - rankA;
+            
+            const levelA = GameState.partnerLevels[a] || 0;
+            const levelB = GameState.partnerLevels[b] || 0;
+            if (levelA !== levelB) return levelB - levelA;
+            
+            return ptA.name.localeCompare(ptB.name);
+        });
+
+        // 👇 2. 정렬된 고유 ID 목록으로 반복문 돌리기!
+        sortedIds.forEach(id => {
             const pt = GameData.partners[id];
             if(!pt) return;
             
