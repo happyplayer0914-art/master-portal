@@ -999,6 +999,13 @@
                 </div>
             </div>
         </div>
+     <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700 shadow-xl mb-4">
+            <h3 class="text-indigo-400 font-black mb-2 text-sm flex items-center gap-2">📖 마스터 도감</h3>
+            <p class="text-xs text-slate-400 mb-3">지금까지 수집한 모든 장비와 미소녀 파트너를 확인하세요.</p>
+            <button onclick="UIManager.openCollectionModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm">
+                내 수집 현황 보기
+            </button>
+        </div>
  
     <div class="px-4 mb-6">
     <div id="my-profile-card" class="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-slate-500 shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-slate-900">
@@ -1534,6 +1541,31 @@
         </div>
     </div>
 </div>
+    <div id="collection-modal" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-sm p-4">
+        <div class="bg-slate-800 rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col border-2 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] overflow-hidden transform scale-95 transition-transform duration-300" id="collection-modal-content">
+            
+            <div class="bg-slate-900 p-4 flex justify-between items-center border-b border-slate-700 shrink-0">
+                <h2 class="text-lg font-black text-white flex items-center gap-2">📖 마스터 도감</h2>
+                <button onclick="UIManager.closeCollectionModal()" class="text-slate-400 hover:text-white transition-colors text-3xl font-black leading-none">&times;</button>
+            </div>
+            
+            <div class="flex p-2 bg-slate-800 gap-1 sm:gap-2 shrink-0">
+                <button onclick="UIManager.renderCollection('partner')" id="collection-tab-partner" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs sm:text-sm transition-colors">파트너</button>
+                <button onclick="UIManager.renderCollection('weapon')" id="collection-tab-weapon" class="flex-1 py-2 rounded-lg bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition-colors">무기</button>
+                <button onclick="UIManager.renderCollection('armor')" id="collection-tab-armor" class="flex-1 py-2 rounded-lg bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition-colors">방어구</button>
+                <button onclick="UIManager.renderCollection('accessory')" id="collection-tab-accessory" class="flex-1 py-2 rounded-lg bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition-colors">장신구</button>
+            </div>
+            
+            <div class="px-4 py-2 bg-slate-900 text-xs font-bold text-indigo-300 text-right border-y border-slate-700 shrink-0" id="collection-progress">
+                수집률: 0% (0 / 0)
+            </div>
+            
+            <div class="p-4 overflow-y-auto flex-1 custom-scrollbar bg-slate-900/50">
+                <div id="collection-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
+                    </div>
+            </div>
+        </div>
+    </div>
 
 <div id="sticker-edit-controls" class="fixed top-0 left-1/2 transform -translate-x-1/2 z-[2000] w-full max-w-[480px] p-3 flex justify-between items-center bg-slate-900/95 backdrop-blur-md border-b border-indigo-500 opacity-0 pointer-events-none transition-opacity shadow-lg">
     <button onclick="UIManager.StickerEngine.openDrawer()" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-xl text-[11px] shadow-inner border border-slate-600 active:scale-95 flex items-center gap-1.5">➕ 스티커</button>
