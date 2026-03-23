@@ -1351,8 +1351,16 @@ Ranking: {
                 
                 list.innerHTML = '';
                 
-                uniqueTop10.forEach((d, i) => {
-             // --- 🌟 교체 시작: 랭킹 리스트 아바타 이미지 렌더링 ---
+              uniqueTop10.forEach((d, i) => {
+                    let rankIcon = `${i + 1}위`; let bgClass = "bg-slate-900";
+                    if(i === 0) { rankIcon = "🥇 1위"; bgClass = "bg-gradient-to-r from-yellow-900/40 to-slate-900 border border-yellow-500/30"; } 
+                    else if(i === 1) { rankIcon = "🥈 2위"; bgClass = "bg-slate-800 border border-slate-400/30"; } 
+                    else if(i === 2) { rankIcon = "🥉 3위"; bgClass = "bg-orange-950/30 border border-orange-700/30"; }
+                    
+                    if(this.currentTab === 'popularity' && i === 0) {
+                        bgClass = "bg-gradient-to-r from-pink-900/40 to-slate-900 border border-pink-500/50 shadow-[0_0_15px_rgba(236,72,153,0.2)]";
+                    }
+                    
                     let borderClass = "bg-gradient-to-tr from-slate-600 to-slate-400 border border-slate-600"; 
                     let borderImgHtml = '';
                     let sId = d.skin;
@@ -1382,18 +1390,15 @@ Ranking: {
                     const avatarFullHtml = innerIcon + borderImgHtml;
                     const safeProfile = d.profile || 'none';
                     const safeSkin = d.skin || 'none';
-                    // --- 🌟 교체 끝 ---
                     
                     const isMe = (d.nickname === GameState.nickname); 
                     const myHighlight = isMe ? "border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-transparent";
                     
-                    // 🚨 [완벽 복구 1] 파이어베이스에 어떤 이름으로 저장되었든 강제로 스캔해서 숫자로 바꿉니다!
                     const pCount = Number(d.prestige) || Number(d.prestigeCount) || 0;
                     let prestigeText = pCount > 0 ? `<span class="text-[9px] sm:text-[10px] text-purple-400 font-black mr-1 whitespace-nowrap">[${pCount}환생]</span>` : '';
                     
-                   let titleHtml = d.title ? `<div class="px-1.5 py-0.5 rounded bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[8px] sm:text-[9px] mb-1 drop-shadow-md inline-block w-max">${d.title}</div>` : '';
+                    let titleHtml = d.title ? `<div class="px-1.5 py-0.5 rounded bg-red-900/40 border border-red-500/50 text-red-400 font-black text-[8px] sm:text-[9px] mb-1 drop-shadow-md inline-block w-max">${d.title}</div>` : '';
                     
-                    // 🌟 탭에 따라 오른쪽 표시 정보 다르게 처리!
                     let rightSideHtml = '';
                     if (this.currentTab === 'stage') {
                         rightSideHtml = `
@@ -1897,14 +1902,13 @@ Ranking: {
             if (!chatList) return;
             chatList.innerHTML = `<div class="text-center text-slate-500 text-xs py-2 border-b border-slate-700/50 mb-2">매너 채팅 부탁드립니다! ✨</div>`;
             
-            messages.forEach(msg => {
+           messages.forEach(msg => {
                 if (GameState.blockedUsers && GameState.blockedUsers.includes(msg.nickname)) return;
 
                 const isMe = (msg.nickname === GameState.nickname);
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'}) : '';
                 let titleHtml = msg.titleShort ? `<span class="text-[9px] text-red-400 font-bold drop-shadow-md">${msg.titleShort}</span>` : '';
                 
-               // --- 🌟 교체 시작: 채팅창 아바타 이미지 렌더링 ---
                 let borderClass = "bg-slate-700 border border-slate-600"; 
                 let borderImgHtml = '';
                 if(msg.skin && msg.skin !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.borders) {
@@ -1933,8 +1937,7 @@ Ranking: {
                 const avatarFullHtml = innerIcon + borderImgHtml;
                 const safeProfile = msg.profile || 'none';
                 const safeSkin = msg.skin || 'none';
-                // --- 🌟 교체 끝 ---
-           
+
                 let bubbleClass = isMe ? "bg-indigo-600 text-white" : "bg-slate-700 text-white"; 
                 if(msg.bubble && msg.bubble !== 'none' && window.GameData && GameData.cosmetics && GameData.cosmetics.bubbles) {
                     const bubItem = GameData.cosmetics.bubbles.find(x => x.id === msg.bubble);
@@ -1956,7 +1959,7 @@ Ranking: {
                 } else {
                     chatList.innerHTML += `
                         <div class="flex justify-start mb-2 gap-2">
-                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${safeProfile}', '${msg.titleShort || ''}', '', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 ${borderClass}">${avatarFullHtml}</div>
+                            <div onclick="UIManager.openUserProfile('${msg.nickname}', '${safeProfile}', '${msg.titleShort || ''}', '', '${safeSkin}')" class="master-avatar cursor-pointer hover:scale-110 transition-transform w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0 border border-slate-600 relative ${borderClass}">${avatarFullHtml}</div>
                             
                             <div class="flex flex-col items-start max-w-[75%]">
                                 <div class="flex items-center gap-1.5 mb-0.5">
